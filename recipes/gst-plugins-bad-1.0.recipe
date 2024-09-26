@@ -9,7 +9,7 @@ class Recipe(custom.GStreamer):
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['ext/sctp/usrsctp/LICENSE.md']}]
     else:
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['subprojects/gst-plugins-bad/ext/sctp/usrsctp/LICENSE.md']}]
-    tarball_checksum = '3029bfd7265314d609dc8eab503675a344ea46e8274fd73ab34566c8442dc847'
+    tarball_checksum = '35ad70de3d7cbca3089f33bb77c45750daad2ae93d79827fdbb469fa8aba84eb'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'gpl': 'enabled',
@@ -252,6 +252,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstopusparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstpcapparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstpnm%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsttranscode%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrfbsrc%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsiren%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming%(mext)s',
@@ -291,6 +292,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstsiren.a', '%(libdir)s/gstreamer-1.0/libgstsiren.la',
              '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming.a', '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming.la',
              '%(libdir)s/gstreamer-1.0/libgstsubenc.a', '%(libdir)s/gstreamer-1.0/libgstsubenc.la',
+             '%(libdir)s/gstreamer-1.0/libgsttranscode.a', '%(libdir)s/gstreamer-1.0/libgsttranscode.la',
              '%(libdir)s/gstreamer-1.0/libgstvideoparsersbad.a', '%(libdir)s/gstreamer-1.0/libgstvideoparsersbad.la',
              '%(libdir)s/gstreamer-1.0/libgsty4mdec.a', '%(libdir)s/gstreamer-1.0/libgsty4mdec.la',
              '%(libdir)s/gstreamer-1.0/libgstjpegformat.a', '%(libdir)s/gstreamer-1.0/libgstjpegformat.la',

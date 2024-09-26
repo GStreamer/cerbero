@@ -414,9 +414,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         Make all .pc files relocatable by setting `prefix` relative to
         ${pcfiledir}
         '''
-        if self.config.platform == Platform.LINUX:
-            return
-
         for f in self.files_list_by_category(self.DEVEL_CAT):
             if not f.endswith('.pc'):
                 continue
@@ -994,6 +991,19 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         if self.is_empty():
             return []
         return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
+
+    # The two following steps are not wrapped by the metaclass
+    # because they are not part of the default set.
+    # This prevents getattr() from yielding over to the proxy recipe
+    # (which will only handle arm64 due to alphabetical sorting).
+
+    def code_sign(self):
+        for _arch, recipe in self._recipes.items():
+            recipe.code_sign()
+
+    def relocate_osx_libraries(self):
+        for _arch, recipe in self._recipes.items():
+            recipe.relocate_osx_libraries()
 
     async def merge(self):
         arch_inputs = {}

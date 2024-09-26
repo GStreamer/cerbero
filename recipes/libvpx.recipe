@@ -7,15 +7,14 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.13.1'
+    version = 'v1.14.1'
     stype = SourceType.TARBALL
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
-    tarball_checksum = '00dae80465567272abd077f59355f95ac91d7809a2d3006f9ace2637dd429d14'
+    tarball_checksum = '901747254d80a7937c933d03bd7c5d41e8e6c883e0665fadcb172542167c7977'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
 
     btype = BuildType.MESON
-    library_type = LibraryType.STATIC
     meson_options = {
         'size_limit': '16384x16384',
         'unit_tests': 'disabled',
@@ -31,8 +30,6 @@ class Recipe(recipe.Recipe):
     }
 
     patches = [
-        'libvpx/0001-Fix-implicit-argument-conversion-on-UWP.patch',
-        'libvpx/0002-vp9_diamond_search_sad_neon-use-DECLARE_ALIGNED.patch',
         'libvpx/0003-Add-Meson-build.patch',
     ]
 
@@ -44,14 +41,11 @@ class Recipe(recipe.Recipe):
             # make sure the linker uses the correct stdlib when building with
             # 10.13 which makes the usage of libstdc++ a hard error.
             self.append_env('LDFLAGS', '-stdlib=libc++')
-        if self.config.target_platform == Platform.DARWIN:
-            self.library_type = LibraryType.SHARED
-        elif self.config.target_platform == Platform.IOS:
+
+        if self.config.target_platform in (Platform.IOS, Platform.ANDROID, Platform.WINDOWS):
             self.library_type = LibraryType.STATIC
-        elif self.config.target_platform == Platform.WINDOWS:
-            self.library_type = LibraryType.STATIC
-        elif self.config.target_platform == Platform.ANDROID:
-            self.library_type = LibraryType.STATIC
+
+        if self.config.target_platform == Platform.ANDROID:
             # See https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/71
             self.meson_options['cpu_features_path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
 

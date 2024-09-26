@@ -4,94 +4,6 @@ Date: Tue, 18 Apr 2023 22:16:49 -0300
 Subject: [PATCH] Add Meson build
 
 For more information, please see https://github.com/dragonCodecs/libvpx/tree/old-meson
----
- LICENSE.meson.md                            |   51 +
- README.meson.md                             |   98 +
- examples/meson.build                        |  452 +++++
- examples/samples.dox.in                     |   14 +
- meson.build                                 | 1900 +++++++++++++++++++
- meson/arm_neon.h                            |   17 +
- meson/capture_build_options.py              |   18 +
- meson/check_test_data.py                    |   45 +
- meson/gen_def.py                            |  100 +
- meson/generate_component_dox.py             |   25 +
- meson/generate_doxy.py                      |   28 +
- meson/generate_doxyfile.py                  |   44 +
- meson/parse_options.py                      |  171 ++
- meson/parse_sources.py                      |  219 +++
- meson/patch-configure.diff                  |   60 +
- meson/stdinout_wrapper.py                   |   19 +
- meson/transform_config.py                   |   53 +
- meson/transform_config_asm.py               |   37 +
- meson/vpx_config.c                          |   10 +
- meson_options.txt                           |   49 +
- subprojects/.gitignore                      |    3 +
- subprojects/nasm-mac.wrap                   |    9 +
- subprojects/nasm-win.wrap                   |    9 +
- subprojects/packagefiles/nasm/meson.build   |   13 +
- subprojects/packagefiles/nasm/patch_nasm.py |   15 +
- subprojects/packagefiles/perl/meson.build   |    8 +
- subprojects/perl-win.wrap                   |   10 +
- test/meson.build                            | 1593 ++++++++++++++++
- third_party/googletest/meson.build          |   33 +
- third_party/libwebm/meson.build             |   52 +
- third_party/libyuv/meson.build              |   49 +
- third_party/meson.build                     |    9 +
- tools/meson.build                           |   67 +
- tools/tools.dox.in                          |    5 +
- vp8/meson.build                             |  554 ++++++
- vp9/meson.build                             |  595 ++++++
- vpx/meson.build                             |  136 ++
- vpx_dsp/arm/meson.build                     |   12 +
- vpx_dsp/meson.build                         | 1206 ++++++++++++
- vpx_mem/meson.build                         |   41 +
- vpx_ports/meson.build                       |  157 ++
- vpx_scale/meson.build                       |   71 +
- vpx_util/meson.build                        |   61 +
- 43 files changed, 8118 insertions(+)
- create mode 100644 LICENSE.meson.md
- create mode 100644 README.meson.md
- create mode 100644 examples/meson.build
- create mode 100644 examples/samples.dox.in
- create mode 100644 meson.build
- create mode 100644 meson/arm_neon.h
- create mode 100644 meson/capture_build_options.py
- create mode 100644 meson/check_test_data.py
- create mode 100755 meson/gen_def.py
- create mode 100644 meson/generate_component_dox.py
- create mode 100644 meson/generate_doxy.py
- create mode 100644 meson/generate_doxyfile.py
- create mode 100644 meson/parse_options.py
- create mode 100644 meson/parse_sources.py
- create mode 100644 meson/patch-configure.diff
- create mode 100644 meson/stdinout_wrapper.py
- create mode 100644 meson/transform_config.py
- create mode 100644 meson/transform_config_asm.py
- create mode 100644 meson/vpx_config.c
- create mode 100644 meson_options.txt
- create mode 100644 subprojects/.gitignore
- create mode 100644 subprojects/nasm-mac.wrap
- create mode 100644 subprojects/nasm-win.wrap
- create mode 100644 subprojects/packagefiles/nasm/meson.build
- create mode 100644 subprojects/packagefiles/nasm/patch_nasm.py
- create mode 100644 subprojects/packagefiles/perl/meson.build
- create mode 100644 subprojects/perl-win.wrap
- create mode 100644 test/meson.build
- create mode 100644 third_party/googletest/meson.build
- create mode 100644 third_party/libwebm/meson.build
- create mode 100644 third_party/libyuv/meson.build
- create mode 100644 third_party/meson.build
- create mode 100644 tools/meson.build
- create mode 100644 tools/tools.dox.in
- create mode 100644 vp8/meson.build
- create mode 100644 vp9/meson.build
- create mode 100644 vpx/meson.build
- create mode 100644 vpx_dsp/arm/meson.build
- create mode 100644 vpx_dsp/meson.build
- create mode 100644 vpx_mem/meson.build
- create mode 100644 vpx_ports/meson.build
- create mode 100644 vpx_scale/meson.build
- create mode 100644 vpx_util/meson.build
 
 diff --git a/LICENSE.meson.md b/LICENSE.meson.md
 new file mode 100644
@@ -8478,12 +8390,6 @@ From: "L. E. Segovia" <amy@amyspark.me>
 Date: Tue, 18 Apr 2023 22:59:00 -0300
 Subject: [PATCH] Add GitLab CI
 
----
- .gitlab-ci.yml             | 335 +++++++++++++++++++++++++++++++++++++
- ci/vs-arm64-cross-file.txt |  14 ++
- 2 files changed, 349 insertions(+)
- create mode 100644 .gitlab-ci.yml
- create mode 100644 ci/vs-arm64-cross-file.txt
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 new file mode 100644
@@ -8856,11 +8762,6 @@ Date: Wed, 17 May 2023 20:08:48 -0300
 Subject: [PATCH] meson: Protect build system handled features with combo
  choices
 
----
- meson.build            | 34 +++++++++++++--------------
- meson/parse_options.py | 29 ++++++++++++++++++++---
- meson_options.txt      | 52 +++++++++++++++++++++---------------------
- 3 files changed, 68 insertions(+), 47 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 78578a1f5..a2eeacf17 100644
@@ -9080,9 +8981,6 @@ Date: Tue, 4 Jul 2023 22:05:03 -0300
 Subject: [PATCH] meson: Fix dependency override's library name
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/4>
----
- meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index a2eeacf17..29a14dc86 100644
@@ -9107,10 +9005,6 @@ Date: Wed, 5 Jul 2023 14:16:50 -0300
 Subject: [PATCH] meson: Port thumb to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- build/make/thumb.py | 52 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 52 insertions(+)
- create mode 100755 build/make/thumb.py
 
 diff --git a/build/make/thumb.py b/build/make/thumb.py
 new file mode 100755
@@ -9180,11 +9074,6 @@ Date: Wed, 5 Jul 2023 14:15:44 -0300
 Subject: [PATCH] meson: Port ads2armasm_ms to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- build/make/ads2armasm_ms.py | 33 +++++++++++++++++++++++++++++++++
- meson.build                 |  2 +-
- 2 files changed, 34 insertions(+), 1 deletion(-)
- create mode 100755 build/make/ads2armasm_ms.py
 
 diff --git a/build/make/ads2armasm_ms.py b/build/make/ads2armasm_ms.py
 new file mode 100755
@@ -9248,11 +9137,6 @@ Date: Wed, 5 Jul 2023 14:15:55 -0300
 Subject: [PATCH] meson: Port ads2gas_apple to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- build/make/ads2gas_apple.py | 98 +++++++++++++++++++++++++++++++++++++
- meson.build                 |  2 +-
- 2 files changed, 99 insertions(+), 1 deletion(-)
- create mode 100755 build/make/ads2gas_apple.py
 
 diff --git a/build/make/ads2gas_apple.py b/build/make/ads2gas_apple.py
 new file mode 100755
@@ -9381,11 +9265,6 @@ Date: Wed, 5 Jul 2023 14:16:44 -0300
 Subject: [PATCH] meson: Port ads2gas to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- build/make/ads2gas.py | 140 ++++++++++++++++++++++++++++++++++++++++++
- meson.build           |   2 +-
- 2 files changed, 141 insertions(+), 1 deletion(-)
- create mode 100755 build/make/ads2gas.py
 
 diff --git a/build/make/ads2gas.py b/build/make/ads2gas.py
 new file mode 100755
@@ -9556,19 +9435,6 @@ Date: Fri, 7 Jul 2023 22:10:48 -0300
 Subject: [PATCH] meson: Port rtcd.pl to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- build/make/rtcd.py           |  436 +++++++++
- meson.build                  |   14 +-
- vp8/common/rtcd_defs.py      |  248 +++++
- vp9/common/vp9_rtcd_defs.py  |  214 +++++
- vpx_dsp/vpx_dsp_rtcd_defs.py | 1655 ++++++++++++++++++++++++++++++++++
- vpx_scale/vpx_scale_rtcd.py  |   45 +
- 6 files changed, 2605 insertions(+), 7 deletions(-)
- create mode 100755 build/make/rtcd.py
- create mode 100755 vp8/common/rtcd_defs.py
- create mode 100755 vp9/common/vp9_rtcd_defs.py
- create mode 100755 vpx_dsp/vpx_dsp_rtcd_defs.py
- create mode 100755 vpx_scale/vpx_scale_rtcd.py
 
 diff --git a/build/make/rtcd.py b/build/make/rtcd.py
 new file mode 100755
@@ -12277,18 +12143,6 @@ Subject: [PATCH] Remove Perl as a dependency
 Fixes #1
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- .gitlab-ci.yml                            |  7 ++-----
- meson.build                               | 10 +---------
- subprojects/packagefiles/perl/meson.build |  8 --------
- subprojects/perl-win.wrap                 | 10 ----------
- vp8/meson.build                           |  2 +-
- vp9/meson.build                           |  2 +-
- vpx_dsp/meson.build                       |  2 +-
- vpx_scale/meson.build                     |  2 +-
- 8 files changed, 7 insertions(+), 36 deletions(-)
- delete mode 100644 subprojects/packagefiles/perl/meson.build
- delete mode 100644 subprojects/perl-win.wrap
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 251278731..872c5dfaf 100644
@@ -12456,13 +12310,6 @@ Date: Sat, 8 Jul 2023 19:39:55 +0000
 Subject: [PATCH] meson: Add test for rtcd generation parity
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
----
- meson.build           | 34 +++++++++++++++++++++++++++++++---
- vp8/meson.build       |  8 +++-----
- vp9/meson.build       |  9 ++++-----
- vpx_dsp/meson.build   |  8 +++-----
- vpx_scale/meson.build |  8 +++-----
- 5 files changed, 44 insertions(+), 23 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 9d7a8a9a2..2d64b1184 100644
@@ -12620,30 +12467,6 @@ Date: Tue, 18 Jul 2023 10:57:25 -0300
 Subject: [PATCH] Backport NASM to GStreamer's manual execution and install
 
 Closes !3
----
- meson.build                                 | 60 ++++++++++------
- subprojects/.gitignore                      |  2 -
- subprojects/nasm-mac.wrap                   |  9 ---
- subprojects/nasm-win.wrap                   |  9 ---
- subprojects/nasm/.gitignore                 |  2 +
- subprojects/nasm/download-binary.py         | 76 +++++++++++++++++++++
- subprojects/nasm/meson.build                | 41 +++++++++++
- subprojects/nasm/patch_nasm.py              | 15 ++++
- subprojects/packagefiles/nasm/meson.build   | 13 ----
- subprojects/packagefiles/nasm/patch_nasm.py | 15 ----
- vp8/meson.build                             | 38 ++++++++---
- vp9/meson.build                             | 38 ++++++++---
- vpx_dsp/meson.build                         | 18 +++--
- vpx_ports/meson.build                       | 22 +++---
- 14 files changed, 256 insertions(+), 102 deletions(-)
- delete mode 100644 subprojects/nasm-mac.wrap
- delete mode 100644 subprojects/nasm-win.wrap
- create mode 100644 subprojects/nasm/.gitignore
- create mode 100755 subprojects/nasm/download-binary.py
- create mode 100644 subprojects/nasm/meson.build
- create mode 100755 subprojects/nasm/patch_nasm.py
- delete mode 100644 subprojects/packagefiles/nasm/meson.build
- delete mode 100644 subprojects/packagefiles/nasm/patch_nasm.py
 
 diff --git a/meson.build b/meson.build
 index 2d64b1184..4f9cde607 100644
@@ -13212,9 +13035,6 @@ Subject: [PATCH] meson: Work around Meson bug when using @SOURCE_DIR@ in a
  subproject
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/7>
----
- meson.build | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 4f9cde607..5365af788 100644
@@ -13248,11 +13068,6 @@ Subject: [PATCH] meson: Fix several typos discovered when testing for Cerbero
  integration
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/8>
----
- meson.build         |  4 ++--
- vp9/meson.build     |  4 ++--
- vpx_dsp/meson.build | 12 ++++++------
- 3 files changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 5365af788..111c44cee 100644
@@ -13364,9 +13179,6 @@ See:
 https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/8>
----
- meson.build | 8 ++++++++
- 1 file changed, 8 insertions(+)
 
 diff --git a/meson.build b/meson.build
 index 111c44cee..a237c3edf 100644
@@ -13397,9 +13209,6 @@ Date: Sun, 30 Jul 2023 16:03:48 +0100
 Subject: [PATCH] ci: bump macos and ios images
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/9>
----
- .gitlab-ci.yml | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 872c5dfaf..c4f27d483 100644
@@ -13431,9 +13240,6 @@ Date: Fri, 4 Aug 2023 23:09:33 +0000
 Subject: [PATCH] meson: Implement header installation
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- meson.build | 35 +++++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
 
 diff --git a/meson.build b/meson.build
 index a237c3edf..d34c07045 100644
@@ -13491,14 +13297,6 @@ Date: Fri, 4 Aug 2023 21:35:07 -0300
 Subject: [PATCH] meson: Fix internal flags not superseding toolchain's
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- examples/meson.build               |  30 +++++++
- meson.build                        | 131 ++++++++++++++---------------
- third_party/googletest/meson.build |   5 +-
- third_party/libwebm/meson.build    |   5 +-
- third_party/libyuv/meson.build     |   3 +-
- tools/meson.build                  |   3 +-
- 6 files changed, 104 insertions(+), 73 deletions(-)
 
 diff --git a/examples/meson.build b/examples/meson.build
 index 9c3df73ab..9b511686e 100644
@@ -14048,9 +13846,6 @@ Date: Fri, 4 Aug 2023 21:48:05 -0300
 Subject: [PATCH] meson: Fix another typo discovered by Cerbero's
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- vpx_dsp/meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/vpx_dsp/meson.build b/vpx_dsp/meson.build
 index 04ec4b5d7..d8c83297c 100644
@@ -14080,11 +13875,6 @@ Content-Transfer-Encoding: 8bit
 With credits to Tim-Philipp Müller for the cpu-features lookup.
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- .gitlab-ci.yml    |  3 ++-
- meson.build       | 40 +++++++++++++++++++++++++++++++++++++++-
- meson_options.txt |  5 +++++
- 3 files changed, 46 insertions(+), 2 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index c4f27d483..11fc1536a 100644
@@ -14199,9 +13989,6 @@ Date: Sat, 5 Aug 2023 00:12:48 -0300
 Subject: [PATCH] meson: Fix missing PIC detection
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- meson.build | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 3105f67f2..2dd5730ca 100644
@@ -14234,9 +14021,6 @@ Date: Sat, 5 Aug 2023 00:10:23 -0300
 Subject: [PATCH] meson: Fix iOS Simulator build
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
----
- meson.build | 49 +++++++++++++++++++++++++++----------------------
- 1 file changed, 27 insertions(+), 22 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 2dd5730ca..3a72512cf 100644
@@ -14355,9 +14139,6 @@ Date: Mon, 7 Aug 2023 19:58:03 -0300
 Subject: [PATCH] meson: Allow introspection on feature flags
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/11>
----
- meson.build | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 3a72512cf..f177428f7 100644
@@ -14399,9 +14180,6 @@ Date: Thu, 10 Aug 2023 22:59:26 -0300
 Subject: [PATCH] ci: Update Android jobs to R22b
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/12>
----
- .gitlab-ci.yml | 13 ++++++-------
- 1 file changed, 6 insertions(+), 7 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 11fc1536a..54145dc9f 100644
@@ -14454,10 +14232,6 @@ This is yet another instance of Meson calling Ninja from the root
 project's build directory, which mucks with the output of custom_target.
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/14>
----
- meson.build                | 1 +
- meson/generate_doxyfile.py | 3 ++-
- 2 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index f177428f7..33618f9c7 100644
@@ -14505,9 +14279,6 @@ Subject: [PATCH] meson: Fix pthreads detection failure not disabling
 See gstreamer/gstreamer#2905
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/13>
----
- meson.build | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 33618f9c7..8ae4f7dee 100644
@@ -14547,28 +14318,6 @@ running the script through the Python executable.
 See gstreamer/cerbero#450
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/15>
----
- meson/capture_build_options.py  | 0
- meson/check_test_data.py        | 0
- meson/generate_component_dox.py | 0
- meson/generate_doxy.py          | 0
- meson/generate_doxyfile.py      | 0
- meson/parse_options.py          | 0
- meson/parse_sources.py          | 0
- meson/stdinout_wrapper.py       | 0
- meson/transform_config.py       | 0
- meson/transform_config_asm.py   | 0
- 10 files changed, 0 insertions(+), 0 deletions(-)
- mode change 100644 => 100755 meson/capture_build_options.py
- mode change 100644 => 100755 meson/check_test_data.py
- mode change 100644 => 100755 meson/generate_component_dox.py
- mode change 100644 => 100755 meson/generate_doxy.py
- mode change 100644 => 100755 meson/generate_doxyfile.py
- mode change 100644 => 100755 meson/parse_options.py
- mode change 100644 => 100755 meson/parse_sources.py
- mode change 100644 => 100755 meson/stdinout_wrapper.py
- mode change 100644 => 100755 meson/transform_config.py
- mode change 100644 => 100755 meson/transform_config_asm.py
 
 diff --git a/meson/capture_build_options.py b/meson/capture_build_options.py
 old mode 100644
@@ -14615,9 +14364,6 @@ should also produce a valid executable.
 See gstreamer/cerbero#450
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/16>
----
- meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 8ae4f7dee..79ebb514c 100644
@@ -14641,9 +14387,6 @@ From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
 Date: Mon, 9 Oct 2023 18:43:36 +0100
 Subject: [PATCH] meson: update to 1.13.1
 
----
- meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 79ebb514c..09b9859f1 100644
@@ -14672,9 +14415,6 @@ Aesthetic change
 Fixes #3
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/19>
----
- build/make/ads2gas.py | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/build/make/ads2gas.py b/build/make/ads2gas.py
 index c8025a971..0574135dd 100755
@@ -14756,6 +14496,2499 @@ index 1df26ca88..765d032b8 100644
  	endif
  
  	# Unline the original, we do can test cflags here :)
+-- 
+2.44.0.windows.1
+
+
+From a334f583d65a4b416c8557b2242ca110994503a2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 10 Jul 2024 12:36:17 -0300
+Subject: [PATCH] meson: Prohibit shared libraries outside of Linux and Darwin
+ platforms
+
+Windows in particular needs special consideration because of `__declspec(dllimport)` being absent from the data exports.
+
+diff --git a/meson.build b/meson.build
+index 765d032b8..7366c61a7 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1563,6 +1563,14 @@ vpx_config_c = configure_file(
+ 
+ # libs.mk
+ 
++if features.get('shared', false) and not ['linux', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os)
++	if features.enabled('gnu', false)
++		warn('Shared libraries are only supported on ELF; assuming this is OK')
++	else
++		error('Shared libraries are only supported on ELF, OS/2, and Darwin for now')
++	endif
++endif
++
+ rtcd_exe = find_program('build/make/rtcd.py', required: true)
+ 
+ extra_libs += c.find_library('m', required: false)
+@@ -1820,33 +1828,18 @@ foreach i: codec_arch_libs
+ 	objs += i.extract_all_objects(recursive: true)
+ endforeach
+ 
+-if features.get('static', false) and features.get('shared', false)
+-	libvpx = both_libraries(
+-		'vpx',
+-		codec_srcs,
+-		c_args: project_c_args,
+-		link_args: project_c_link_args + link_args,
+-		extra_files: codec_headers,
+-		dependencies: extra_libs,
+-		objects: objs,
+-		version: soversion,
+-		vs_module_defs: vpx_def,
+-		install: features.get('install_libs'),
+-	)
+-else
+-	libvpx = library(
+-		'vpx',
+-		codec_srcs,
+-		c_args: project_c_args,
+-		link_args: project_c_link_args + link_args,
+-		extra_files: codec_headers,
+-		dependencies: extra_libs,
+-		objects: objs,
+-		version: soversion,
+-		vs_module_defs: vpx_def,
+-		install: features.get('install_libs'),
+-	)
+-endif
++libvpx = library(
++	'vpx',
++	codec_srcs,
++	c_args: project_c_args,
++	link_args: project_c_link_args + link_args,
++	extra_files: codec_headers,
++	dependencies: extra_libs,
++	objects: objs,
++	version: soversion,
++	vs_module_defs: vpx_def,
++	install: features.get('install_libs'),
++)
+ 
+ headers = files(
+ 	'vpx/vpx_codec.h',
+-- 
+2.44.0.windows.1
+
+
+From 1fdc1f7de86ccf1b165fd10305c905745e326fe7 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 10 Jul 2024 12:42:38 -0300
+Subject: [PATCH] meson: Fix typo in the tiny_ssim executable clause
+
+Using combos as booleans is not valid, the features hash was intended here.
+
+diff --git a/tools/meson.build b/tools/meson.build
+index 47c9ee831..7e6f16360 100644
+--- a/tools/meson.build
++++ b/tools/meson.build
+@@ -28,7 +28,7 @@ tiny_ssim = executable(
+ 	link_args: project_c_link_args + link_args,
+ 	extra_files: tiny_ssim_headers,
+ 	dependencies: libvpx_dep,
+-	install: get_option('install_bins'),
++	install: features.get('install_bins', false),
+ )
+ 
+ tools_subpages = {
+-- 
+2.44.0.windows.1
+
+
+From eecbef0754c7b36bb55c6b0ec1aca0717bc69ea9 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Sat, 20 Jul 2024 21:07:28 +0000
+Subject: [PATCH] ci: Switch Apple jobs to the Arm64 runner
+
+Fixes #2
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/22>
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+index 54145dc9f..cc7c27de1 100644
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@ -198,6 +198,9 @@ vs2019 arm64 cross:
+ 
+ .build darwin:
+   stage: 'build'
++  image: "registry.freedesktop.org/gstreamer/gstreamer/macos-arm64/14-sonoma:2023-10-25.0"
++  tags:
++    - gst-mac-arm
+   artifacts:
+     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
+     expire_in: '5 days'
+@@ -215,35 +218,35 @@ vs2019 arm64 cross:
+     - pip3 install --upgrade pip
+     # Make sure meson is up to date
+     - pip3 install -U meson
+-    # Need to install certificates for python
+-    - pip3 install --upgrade certifi
+-    # Another way to install certificates
+-    - open /Applications/Python\ 3.8/Install\ Certificates.command
+     # Get ninja
+     - pip3 install -U ninja
+   script:
+-    # HACK to sneak Nasm and Perl under Meson's nose.
+-    - export PATH="$(pwd)/subprojects/nasm-2.16.01:$PATH"
+-    - CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} && export REQUESTS_CA_BUNDLE=${CERT_PATH} && meson setup mesonbuild
++    - meson setup mesonbuild
+     - meson compile -C mesonbuild
+     - meson test -C mesonbuild
+ 
++macOS arm64:
++  extends: '.build darwin'
++
+ macOS x86_64:
+   extends: '.build darwin'
+-  stage: 'build'
+-  tags:
+-    - gst-macos-13
++  script:
++    # HACK to sneak Nasm and Perl under Meson's nose.
++    - export PATH="$(pwd)/subprojects/nasm-2.16.01:$PATH"
++    - meson setup mesonbuild
++    - meson compile -C mesonbuild
++    - meson test -C mesonbuild
+ 
+ iOS arm64 cross:
+   extends: '.build darwin'
+-  stage: 'build'
+-  tags:
+-    - gst-ios-16
++  # Same-architecture cross-builds are broken on 1.4.1
++  # 1.5.0 was meant to fix this, but instead broke detection wholesale
++  # Once 1.5.1 is out, try restoring `system = 'darwin'`
+   script:
+     - |
+       cat > ios-cross-file.txt <<EOF
+       [host_machine]
+-      system = 'darwin'
++      system = 'ios'
+       cpu_family = 'aarch64'
+       cpu = 'aarch64'
+       endian = 'little'
+@@ -262,7 +265,7 @@ iOS arm64 cross:
+       strip     = '$(xcrun --find --sdk iphoneos strip)'
+       pkgconfig = 'false'
+       EOF
+-    - CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} && export REQUESTS_CA_BUNDLE=${CERT_PATH} && meson setup mesonbuild --cross-file=ios-cross-file.txt
++    - meson setup mesonbuild --cross-file=ios-cross-file.txt
+     - meson compile -C mesonbuild
+     - meson test -C mesonbuild
+ 
+-- 
+2.44.0.windows.1
+
+
+From 38847a0321bcb1d04ff09ccd410f0d6288b92c39 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 10 Jul 2024 18:53:54 -0300
+Subject: [PATCH] meson: Update to 1.14.1
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/21>
+
+diff --git a/build/make/rtcd.py b/build/make/rtcd.py
+index 3d4121c57..cdff3dcc1 100755
+--- a/build/make/rtcd.py
++++ b/build/make/rtcd.py
+@@ -422,7 +422,7 @@ if __name__ == '__main__':
+         ALL_ARCHS = filter(*qw('neon_asm neon'))
+         arm()
+     elif opts['arch'] == 'armv8' or opts['arch'] == 'arm64':
+-        ALL_ARCHS = filter(*qw('neon'))
++        ALL_ARCHS = filter(*qw('neon neon_dotprod neon_i8mm sve'))
+         REQUIRES = filter(*qw('neon'))
+         require(*REQUIRES)
+         arm()
+diff --git a/examples/meson.build b/examples/meson.build
+index 9b511686e..09e5fab2c 100644
+--- a/examples/meson.build
++++ b/examples/meson.build
+@@ -232,6 +232,8 @@ if features.get('decoders', false)
+ 	vpxdec = executable(
+ 		'vpxdec',
+ 		vpxdec_srcs,
++		c_args: project_c_args,
++		link_args: project_c_link_args,
+ 		extra_files: vpxdec_headers,
+ 		dependencies: vpxdec_deps,
+ 		install: features.get('install_bins', false),
+diff --git a/meson.build b/meson.build
+index 7366c61a7..198165e61 100644
+--- a/meson.build
++++ b/meson.build
+@@ -4,13 +4,11 @@
+ project(
+ 	'libvpx',
+ 	'c', 'cpp',
+-	version: '1.13.1',
++	version: '1.14.1',
+ 	default_options: [
+-		# Enforce c89 for c files. Don't be too strict about it though. Allow
+-		# gnu extensions like "//" for comments.
+-		'c_std=gnu89',
+-		# Uncomment when Meson can handle this one for MSVC.
+-		# 'cpp_std=gnu++11',
++		# Enforce C99 for C files. Allow GNU extensions.
++		'c_std=c11', # Because MSVC
++		'cpp_std=c++11',
+ 		'warning_level=2',
+ 		'default_library=static',
+ 		'buildtype=debugoptimized',
+@@ -85,6 +83,10 @@ features.set('spatial_resampling', true)
+ features.set('multithread', true)
+ features.set('os_support', true)
+ features.set('temporal_denoising', true)
++
++if get_option('b_pie') and not get_option('b_staticpic')
++	error('PIC is required when building position independent executables')
++endif
+ features.set('pic', get_option('b_staticpic'))
+ 
+ CODECS = [
+@@ -101,6 +103,7 @@ CODEC_FAMILIES = [
+ 
+ ARCH_LIST = [
+ 	'arm',
++	'aarch64',
+ 	'mips',
+ 	'x86',
+ 	'x86_64',
+@@ -108,6 +111,13 @@ ARCH_LIST = [
+ 	'loongarch',
+ ]
+ 
++ARCH_EXT_LIST_AARCH64 = [
++	'neon',
++	'neon_dotprod',
++	'neon_i8mm',
++	'sve',
++]
++
+ ARCH_EXT_LIST_X86 = [
+ 	'mmx',
+ 	'sse',
+@@ -127,9 +137,8 @@ ARCH_EXT_LIST_LOONGSON = [
+ ]
+ 
+ ARCH_EXT_LIST = [
+-	'neon',
+-	'neon_asm',
+-
++	'neon_asm'
++] + ARCH_EXT_LIST_AARCH64 + [
+ 	'mips32',
+ 	'dspr2',
+ 	'msa',
+@@ -199,7 +208,6 @@ CONFIG_LIST = [
+ 	'multi_res_encoding',
+ 	'temporal_denoising',
+ 	'vp9_temporal_denoising',
+-	'consistent_recode',
+ 	'coefficient_range_checking',
+ 	'vp9_highbitdepth',
+ 	'better_hw_compatibility',
+@@ -265,7 +273,6 @@ CMDLINE_SELECT = [
+ 	'multi_res_encoding',
+ 	'temporal_denoising',
+ 	'vp9_temporal_denoising',
+-	'consistent_recode',
+ 	'coefficient_range_checking',
+ 	'better_hw_compatibility',
+ 	'vp9_highbitdepth',
+@@ -525,6 +532,11 @@ c = meson.get_compiler('c')
+ cpp = meson.get_compiler('cpp')
+ asm = meson.get_compiler('c') # asm == GCC
+ 
++# Since MSVC does not support C99, but the official configure expects it,
++# the Meson default takes C11. This sets the GNU extensions back online.
++add_project_arguments(c.get_supported_arguments('-std=gnu11'), language: 'c')
++add_project_arguments(cpp.get_supported_arguments('-std=gnu++11'), language: 'cpp')
++
+ tgt_isa = host_machine.cpu_family()
+ tgt_os = host_machine.system()
+ tgt_cc = c.get_id()
+@@ -612,7 +624,10 @@ endif
+ features.set(tgt_cc, true)
+ 
+ # Enable the architecture family
+-if tgt_isa.startswith('arm')
++if tgt_isa == 'arm64'
++	features.set('arm', true)
++	features.set('aarch64', true)
++elif tgt_isa.startswith('arm')
+ 	features.set('arm', true)
+ elif tgt_isa.startswith('mips')
+ 	features.set('mips', true)
+@@ -637,7 +652,7 @@ if tgt_os == 'solaris'
+ endif
+ 
+ if tgt_isa.startswith('arm')
+-	feature = 'neon'
++	feature = 'runtime_cpu_detect'
+ 	if features.get(feature, true)
+ 		if not features.has(feature)
+ 			message('\tenabling @0@'.format(feature))
+@@ -646,6 +661,13 @@ if tgt_isa.startswith('arm')
+ 	endif
+ 
+ 	if tgt_isa == 'armv7'
++		feature = 'neon'
++		if features.get(feature, true)
++			if not features.has(feature)
++				message('\tenabling @0@'.format(feature))
++			endif
++			features.set(feature, true)
++		endif
+ 		# Only enable neon_asm when neon is also enabled.
+ 		if features.get('neon', false)
+ 			feature = 'neon_asm'
+@@ -772,6 +794,93 @@ if tgt_isa.startswith('arm')
+ 	elif tgt_os == 'linux'
+ 		features.set('linux', true)
+ 	endif
++	if tgt_isa == 'arm64'
++		aarch64_arch_flag_neon = 'arch=armv8-a'
++		aarch64_arch_flag_neon_dotprod = 'arch=armv8.2-a+dotprod'
++		aarch64_arch_flag_neon_i8mm = 'arch=armv8.2-a+dotprod+i8mm'
++		aarch64_arch_flag_sve = 'arch=armv8.2-a+dotprod+i8mm+sve'
++
++		# Unline the original, we do can test cflags here :)
++		disable_exts = false
++		foreach feature : ARCH_EXT_LIST_AARCH64
++			if disable_exts
++				rtcd_options += ['--disable', feature]
++				if not features.get(feature, false) # ! enabled
++					if not features.has(feature) # disabled
++						message('\tdisabling @0@'.format(feature))
++					endif
++					features.set(feature, false)
++				endif
++			else
++				# Check the compiler supports the -march flag for the extension.
++				# This needs to happen after toolchain/OS inspection so we handle
++				# $CROSS etc correctly when checking for flags, else these will
++				# always fail.
++				flag = get_variable('aarch64_arch_flag_@0@'.format(feature))
++				if c.has_argument('-m@0@'.format(flag))
++					if features.get(feature, true)
++						if not features.has(feature)
++							message('\tenabling @0@'.format(feature))
++						endif
++						features.set(feature, true)
++					endif
++				else
++					rtcd_options += ['--disable', feature]
++					if not features.get(feature, false) # ! enabled
++						if not features.has(feature) # disabled
++							message('\tdisabling @0@'.format(feature))
++						endif
++						features.set(feature, false)
++					endif
++				endif
++				if not features.get(feature, false)
++					# Disable higher order extensions to simplify dependencies.
++					disable_exts = true
++					rtcd_options += ['--disable', feature]
++					if not features.get(feature, false) # ! enabled
++						if not features.has(feature) # disabled
++							message('\tdisabling @0@'.format(feature))
++						endif
++						features.set(feature, false)
++					endif
++				endif
++			endif
++		endforeach
++		if features.get('sve', false)
++			supports_armv8_etc = c.compiles('''
++				#ifndef __ARM_NEON_SVE_BRIDGE
++				#error 1
++				#endif
++				#include <arm_sve.h>
++				#include <arm_neon_sve_bridge.h>
++				''',
++				name: 'supports Armv8.2-a, dotprod, i8mm, and SVE',
++				args: '-march=armv8.2-a+dotprod+i8mm+sve'
++			)
++			if supports_armv8_etc
++				# Check whether the compiler can compile SVE functions that require
++				# backup/restore of SVE registers according to AAPCS. Clang for Windows
++				# used to fail this, see
++				# https://github.com/llvm/llvm-project/issues/80009.
++				supports_armv8_etc = c.compiles('''
++					#include <arm_sve.h>
++					void other(void);
++					svfloat32_t func(svfloat32_t a) {
++						other();
++						return a;
++					}
++					''',
++					name: 'has usable arm_sve.h',
++					args: '-march=armv8.2-a+dotprod+i8mm+sve'
++				)
++			endif
++			if not supports_armv8_etc
++				warning('disabling SVE: arm_neon_sve_bridge.h not supported by compiler')
++				features.set('sve', false)
++				rtcd_options += ['--disable', 'sve']
++			endif
++		endif
++	endif
+ elif tgt_isa.startswith('mips')
+ 	tune_cflags = '-mtune=@0@'
+ 
+@@ -1223,7 +1332,6 @@ endif
+ 
+ if features.get('gcc', false)
+ 	gcc_flags = [
+-		'-Wdeclaration-after-statement',
+ 		'-Wdisabled-optimization',
+ 		'-Wextra-semi',
+ 		'-Wextra-semi-stmt',
+@@ -1237,8 +1345,9 @@ if features.get('gcc', false)
+ 		'-Wimplicit-function-declaration',
+ 		'-Wmissing-declarations',
+ 		'-Wmissing-prototypes',
++		'-Wshadow',
+ 		'-Wuninitialized',
+-		'-Wunreachable-code-loop-increment',
++		'-Wunreachable-code-aggressive',
+ 		'-Wunused',
+ 	]
+ 
+@@ -1270,12 +1379,14 @@ if features.get('gcc', false)
+ 		'-Wc++14-extensions',
+ 		'-Wc++17-extensions',
+ 		'-Wc++20-extensions',
++		'-Wnon-virtual-dtor',
+ 	)
+-	# disable some warnings specific to libyuv.
++	# disable some warnings specific to libyuv / libwebm.
+ 	libyuv_cpp_args += cpp.get_supported_arguments(
+ 		'-Wno-missing-declarations',
+ 		'-Wno-missing-prototypes',
+ 		'-Wno-pass-failed',
++		'-Wno-shadow',
+ 		'-Wno-unused-parameter',
+ 	)
+ endif
+@@ -1361,7 +1472,6 @@ if tgt_cc == 'msvs'
+ elif tgt_os == 'android'
+ 	enable_features = ['libyuv']
+ 	if cpp.has_argument('-std=gnu++11')
+-		project_cpp_args += '-std=gnu++11'
+ 		enable_features += ['webm_io']
+ 	endif
+ 	foreach feature: enable_features
+@@ -1380,7 +1490,6 @@ elif tgt_os == 'darwin'
+ elif tgt_os == 'iphonesimulator'
+ 	enable_features = ['libyuv']
+ 	if cpp.has_argument('-std=gnu++11')
+-		project_cpp_args += '-std=gnu++11'
+ 		enable_features += ['webm_io']
+ 	endif
+ 	foreach feature: enable_features
+@@ -1397,7 +1506,6 @@ elif target_machine.system() == 'windows'
+ 	# would be disabled for the same reason.
+ 	enable_features = []
+ 	if cpp.has_argument('-std=gnu++11')
+-		project_cpp_args += '-std=gnu++11'
+ 		enable_features += ['unit_tests', 'webm_io']
+ 	endif
+ 	if cpp.compiles('int z;')
+@@ -1414,7 +1522,6 @@ elif target_machine.system() == 'windows'
+ else
+ 	enable_features = []
+ 	if cpp.has_argument('-std=gnu++11')
+-		project_cpp_args += '-std=gnu++11'
+ 		if features.get('pthread_h', false)
+ 			enable_features += ['unit_tests']
+ 		endif
+@@ -1553,7 +1660,7 @@ else
+ endif
+ 
+ vpx_config_data = configuration_data()
+-vpx_config_data.set_quoted('CONFIGURE_ARGS', configure_args)
++vpx_config_data.set_quoted('CONFIGURE_ARGS', configure_args.replace('\\', '\\\\'))
+ 
+ vpx_config_c = configure_file(
+ 	input: 'meson/vpx_config.c',
+@@ -1564,7 +1671,7 @@ vpx_config_c = configure_file(
+ # libs.mk
+ 
+ if features.get('shared', false) and not ['linux', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os)
+-	if features.enabled('gnu', false)
++	if features.get('gcc', false) # Looks like a typo on upstream
+ 		warn('Shared libraries are only supported on ELF; assuming this is OK')
+ 	else
+ 		error('Shared libraries are only supported on ELF, OS/2, and Darwin for now')
+@@ -1611,6 +1718,11 @@ else
+ 		'avx2': ['-mavx2'],
+ 		'avx512': ['-mavx512f', '-mavx512cd', '-mavx512bw', '-mavx512dq', '-mavx512vl'],
+ 
++		# AARCH64
++		'neon_dotprod': ['-march=armv8.2-a+dotprod'],
++		'neon_i8mm': ['-march=armv8.2-a+dotprod+i8mm'],
++		'sve': ['-march=armv8.2-a+dotprod+i8mm+sve'],
++
+ 		# POWER
+ 		'vsx' : ['-maltivec', '-mvsx'],
+ 
+@@ -1809,7 +1921,7 @@ else
+ 	link_args += ['-Wl,--version-script,@0@'.format(meson.current_build_dir() / vpx_def_name)]
+ endif
+ 
+-soversion = '8.0.0'
++soversion = '9.0.1'
+ 
+ foreach arch, srcs : codec_arch_srcs
+ 	codec_arch_libs += static_library(
+diff --git a/meson/parse_sources.py b/meson/parse_sources.py
+index 5693aaddd..3b38eb2a5 100755
+--- a/meson/parse_sources.py
++++ b/meson/parse_sources.py
+@@ -80,8 +80,10 @@ def make_to_meson(target: str, paths: list[str]):
+ 				else:
+ 					continue
+ 
+-				if not source_type or not component or not label:
++				if not component:
+ 					raise RuntimeError('Unspecified input file data was found')
++				elif not source_type:
++					print(f'Skipping {ofiles}')
+ 
+ 				accumulate = ofiles.endswith('\\')
+ 				ofiles = ofiles.strip('\\')
+@@ -99,7 +101,7 @@ def make_to_meson(target: str, paths: list[str]):
+ 					component_sources[label] = component_sources.setdefault(label, list()) + accum + ifiles
+ 					accum = []
+ 
+-			if not label:
++			if not label and accum:
+ 				raise RuntimeError('Unspecified component type')
+ 
+ 			# Makefiles can end with '\' and this is just a porting script ;)
+@@ -145,7 +147,7 @@ def make_to_meson(target: str, paths: list[str]):
+ 					print ('Warning: skipping %s' % source)
+ 					continue
+ 				f.write(f"\t'{source}',\n")
+-			f.write('{file_closing}\n\n')
++			f.write(f'{file_closing}\n\n')
+ 
+ 			f.write(f'{component}_{source_type}optional_sources = {{\n')
+ 			for label in sorted (component_sources):
+diff --git a/test/meson.build b/test/meson.build
+index 26a55d980..0c7319619 100644
+--- a/test/meson.build
++++ b/test/meson.build
+@@ -7,10 +7,10 @@
+ 
+ libvpx_test_sources = files(
+ 	'bench.cc',
++	'init_vpx_test.cc',
+ 	'test_libvpx.cc',
+-	'../md5_utils.c', # MANUAL
+-	'../y4minput.c', # MANUAL
+ 	'test_vectors.cc',
++	'vpx_image_test.cc',
+ 	'decode_test_driver.cc',
+ 	# 'decode_perf_test.cc', # MANUAL
+ 	# 'encode_perf_test.cc', # MANUAL
+@@ -41,10 +41,6 @@ libvpx_test_optional_sources = {
+ 	),
+ 	'encoders' : files(
+ 		'altref_test.cc',
+-		'aq_segment_test.cc',
+-		'alt_ref_aq_segment_test.cc',
+-		'vp8_datarate_test.cc',
+-		'vp9_datarate_test.cc',
+ 		'encode_api_test.cc',
+ 		'error_resilience_test.cc',
+ 		'realtime_test.cc',
+@@ -74,6 +70,7 @@ libvpx_test_optional_sources = {
+ 		'config_test.cc',
+ 		'cq_test.cc',
+ 		'keyframe_test.cc',
++		'vp8_datarate_test.cc',
+ 		# 'quantize_test.cc', # MANUAL
+ 		# 'set_roi.cc', # MANUAL
+ 		# 'variance_test.cc', # MANUAL
+@@ -91,6 +88,8 @@ libvpx_test_optional_sources = {
+ 	'vp9_encoder' : files(
+ 		'active_map_refresh_test.cc',
+ 		'active_map_test.cc',
++		'alt_ref_aq_segment_test.cc',
++		'aq_segment_test.cc',
+ 		'borders_test.cc',
+ 		'cpu_speed_test.cc',
+ 		'frame_size_tests.cc',
+@@ -104,6 +103,7 @@ libvpx_test_optional_sources = {
+ 		'svc_test.cc',
+ 		'svc_end_to_end_test.cc',
+ 		'timestamp_test.cc',
++		'vp9_datarate_test.cc',
+ 		'vp9_ext_ratectrl_test.cc',
+ 		# 'avg_test.cc', # MANUAL
+ 		# 'comp_avg_pred_test.cc', # MANUAL
+@@ -143,6 +143,7 @@ simple_encode_test_optional_sources = {
+ 
+ test_intra_pred_speed_sources = files(
+ 	# 'test_intra_pred_speed.cc', # MANUAL
++	'init_vpx_test.cc',
+ )
+ 
+ test_intra_pred_speed_optional_sources = {
+@@ -173,6 +174,7 @@ libvpx_test_headers_sources = files(
+ 	'codec_factory.h',
+ 	'md5_helper.h',
+ 	'register_state_check.h',
++	'init_vpx_test.h',
+ 	'test_vectors.h',
+ 	'util.h',
+ 	'video_source.h',
+@@ -210,6 +212,13 @@ libwebm_parser_headers_sources = files(
+ libwebm_parser_headers_optional_sources = {
+ }
+ 
++test_intra_pred_speed_headers_sources = files(
++	'init_vpx_test.h',
++)
++
++test_intra_pred_speed_headers_optional_sources = {
++}
++
+ rc_interface_test_headers_sources = files(
+ 	# 'decode_test_driver.h', # MANUAL
+ 	# 'codec_factory.h', # MANUAL
+@@ -1095,6 +1104,7 @@ libvpx_test_data_data_optional_sources = {
+ 		'screendata.y4m',
+ 		'niklas_640_480_30.yuv',
+ 		'bus_352x288_420_f20_b8.yuv',
++		'crowd_run_360p_10_150f.y4m',
+ 		'niklas_1280_720_30.yuv',
+ 		'desktop_640_360_30.yuv',
+ 		'kirland_640_480_30.yuv',
+@@ -1107,6 +1117,9 @@ libvpx_test_data_data_optional_sources = {
+ 	],
+ }
+ 
++#### --- END GENERATED --- ####
++
++
+ if features.get('webm_io', false) # MANUAL
+ 	libvpx_test_optional_sources += {
+ 		'decoders' : libvpx_test_optional_sources['decoders'] + files(
+@@ -1432,8 +1445,6 @@ if features.get('encode_perf_tests', false)
+ 	}
+ endif
+ 
+-#### --- END GENERATED --- ####
+-
+ optional_sources = get_variable('libvpx_test_optional_sources', {})
+ foreach comp_name, comp_sources : optional_sources
+ 	if features.get(comp_name, false)
+diff --git a/third_party/libyuv/meson.build b/third_party/libyuv/meson.build
+index 78af1b775..f9d07f901 100644
+--- a/third_party/libyuv/meson.build
++++ b/third_party/libyuv/meson.build
+@@ -2,6 +2,7 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
+ libyuv_includes = files(
++	'include/libyuv/basic_types.h',
+ 	'include/libyuv/convert.h',
+ 	'include/libyuv/convert_argb.h',
+ 	'include/libyuv/convert_from.h',
+diff --git a/vp8/common/rtcd_defs.py b/vp8/common/rtcd_defs.py
+index 4edaea4cd..0af078974 100755
+--- a/vp8/common/rtcd_defs.py
++++ b/vp8/common/rtcd_defs.py
+@@ -130,12 +130,6 @@ specialize(*qw('vp8_copy_mem8x4 mmx neon dspr2 msa mmi'))
+ #
+ if vpx_config("CONFIG_POSTPROC") == "yes":
+ 
+-    add_proto(*qw('void vp8_blend_mb_inner'), "unsigned char *y, unsigned char *u, unsigned char *v, int y_1, int u_1, int v_1, int alpha, int stride")
+-
+-    add_proto(*qw('void vp8_blend_mb_outer'), "unsigned char *y, unsigned char *u, unsigned char *v, int y_1, int u_1, int v_1, int alpha, int stride")
+-
+-    add_proto(*qw('void vp8_blend_b'), "unsigned char *y, unsigned char *u, unsigned char *v, int y_1, int u_1, int v_1, int alpha, int stride")
+-
+     add_proto(*qw('void vp8_filter_by_weight16x16'), "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight")
+     specialize(*qw('vp8_filter_by_weight16x16 sse2 msa'))
+ 
+@@ -220,14 +214,14 @@ if vpx_config("CONFIG_VP8_ENCODER") == "yes":
+     #
+     add_proto(*qw('int vp8_refining_search_sad'), "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, int error_per_bit, int search_range, struct variance_vtable *fn_ptr, int *mvcost[2], union int_mv *center_mv")
+     specialize(*qw('vp8_refining_search_sad sse2 msa'))
+-    vp8_refining_search_sad_sse2='vp8_refining_search_sadx4';
+-    vp8_refining_search_sad_msa='vp8_refining_search_sadx4';
++    vp8_refining_search_sad_sse2='vp8_refining_search_sadx4'
++    vp8_refining_search_sad_msa='vp8_refining_search_sadx4'
+ 
+     add_proto(*qw('int vp8_diamond_search_sad'), "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, int *mvcost[2], union int_mv *center_mv")
+     specialize(*qw('vp8_diamond_search_sad sse2 msa lsx'))
+-    vp8_diamond_search_sad_sse2='vp8_diamond_search_sadx4';
+-    vp8_diamond_search_sad_msa='vp8_diamond_search_sadx4';
+-    vp8_diamond_search_sad_lsx='vp8_diamond_search_sadx4';
++    vp8_diamond_search_sad_sse2='vp8_diamond_search_sadx4'
++    vp8_diamond_search_sad_msa='vp8_diamond_search_sadx4'
++    vp8_diamond_search_sad_lsx='vp8_diamond_search_sadx4'
+ 
+     #
+     # Alt-ref Noise Reduction (ARNR)
+diff --git a/vp8/meson.build b/vp8/meson.build
+index 647460ae4..a9790e613 100644
+--- a/vp8/meson.build
++++ b/vp8/meson.build
+@@ -327,6 +327,9 @@ vp8_dx_headers_optional_sources = {
+ 	),
+ }
+ 
++vp8_common_asm_sources = files(
++)
++
+ vp8_common_asm_optional_sources = {
+ 	'mmx' : files(
+ 		'common/x86/dequantize_mmx.asm',
+@@ -348,6 +351,9 @@ vp8_common_asm_optional_sources = {
+ 	),
+ }
+ 
++vp8_cx_asm_sources = files(
++)
++
+ if features.get('postproc', false) # MANUAL
+ 	vp8_common_asm_optional_sources += {
+ 		'sse2': vp8_common_asm_optional_sources['sse2'] + files(
+diff --git a/vp9/common/vp9_rtcd_defs.py b/vp9/common/vp9_rtcd_defs.py
+index 41fdd120b..ad65ae649 100755
+--- a/vp9/common/vp9_rtcd_defs.py
++++ b/vp9/common/vp9_rtcd_defs.py
+@@ -27,7 +27,9 @@ struct macroblockd;
+ 
+ /* Encoder forward decls */
+ struct macroblock;
+-struct vp9_variance_vtable;
++struct macroblock_plane;
++struct vp9_sad_table;
++struct ScanOrder;
+ struct search_site_config;
+ struct mv;
+ union int_mv;
+@@ -121,24 +123,21 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+     add_proto(*qw('int64_t vp9_block_error'), "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz")
+ 
+     add_proto(*qw('int64_t vp9_block_error_fp'), "const tran_low_t *coeff, const tran_low_t *dqcoeff, int block_size")
++    specialize(*qw('vp9_block_error_fp neon avx2 sse2'))
+ 
+-    add_proto(*qw('void vp9_quantize_fp'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++    add_proto(*qw('void vp9_quantize_fp'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+     specialize(*qw('vp9_quantize_fp neon sse2 ssse3 avx2 vsx'))
+ 
+-    add_proto(*qw('void vp9_quantize_fp_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++    add_proto(*qw('void vp9_quantize_fp_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+     specialize(*qw('vp9_quantize_fp_32x32 neon ssse3 avx2 vsx'))
+ 
+     if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+-        specialize(*qw('vp9_block_error avx2 sse2'))
+-
+-        specialize(*qw('vp9_block_error_fp avx2 sse2'))
++        specialize(*qw('vp9_block_error neon avx2 sse2'))
+ 
+         add_proto(*qw('int64_t vp9_highbd_block_error'), "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz, int bd")
+-        specialize(*qw('vp9_highbd_block_error sse2'))
++        specialize(*qw('vp9_highbd_block_error neon sse2'))
+     else:
+-        specialize(*qw('vp9_block_error avx2 msa sse2'))
+-
+-        specialize(*qw('vp9_block_error_fp neon avx2 sse2'))
++        specialize(*qw('vp9_block_error neon avx2 msa sse2'))
+ 
+     # fdct functions
+ 
+@@ -166,15 +165,15 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+     #
+     # Motion search
+     #
+-    add_proto(*qw('int vp9_diamond_search_sad'), "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv")
+-    specialize(*qw('vp9_diamond_search_sad avx neon'))
++    add_proto(*qw('int vp9_diamond_search_sad'), "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, uint32_t start_mv_sad, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_sad_table *sad_fn_ptr, const struct mv *center_mv")
++    specialize(*qw('vp9_diamond_search_sad neon'))
+ 
+     #
+     # Apply temporal filter
+     #
+     if vpx_config("CONFIG_REALTIME_ONLY") != "yes":
+         add_proto(*qw('void vp9_apply_temporal_filter'), "const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre, int y_pre_stride, const uint8_t *u_src, const uint8_t *v_src, int uv_src_stride, const uint8_t *u_pre, const uint8_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height, int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32, uint32_t *y_accumulator, uint16_t *y_count, uint32_t *u_accumulator, uint16_t *u_count, uint32_t *v_accumulator, uint16_t *v_count")
+-        specialize(*qw('vp9_apply_temporal_filter sse4_1'))
++        specialize(*qw('vp9_apply_temporal_filter sse4_1 neon'))
+ 
+         if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+             add_proto(*qw('void vp9_highbd_apply_temporal_filter'), "const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre, int y_pre_stride, const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride, const uint16_t *u_pre, const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height, int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32, uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count")
+@@ -184,10 +183,10 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+     if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+         # ENCODEMB INVOKE
+ 
+-        add_proto(*qw('void vp9_highbd_quantize_fp'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++        add_proto(*qw('void vp9_highbd_quantize_fp'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+         specialize(*qw('vp9_highbd_quantize_fp avx2 neon'))
+ 
+-        add_proto(*qw('void vp9_highbd_quantize_fp_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan" )
++        add_proto(*qw('void vp9_highbd_quantize_fp_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+         specialize(*qw('vp9_highbd_quantize_fp_32x32 avx2 neon'))
+ 
+         # fdct functions
+@@ -195,8 +194,10 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+         specialize(*qw('vp9_highbd_fht4x4 neon'))
+ 
+         add_proto(*qw('void vp9_highbd_fht8x8'), "const int16_t *input, tran_low_t *output, int stride, int tx_type")
++        specialize(*qw('vp9_highbd_fht8x8 neon'))
+ 
+         add_proto(*qw('void vp9_highbd_fht16x16'), "const int16_t *input, tran_low_t *output, int stride, int tx_type")
++        specialize(*qw('vp9_highbd_fht16x16 neon'))
+ 
+         add_proto(*qw('void vp9_highbd_fwht4x4'), "const int16_t *input, tran_low_t *output, int stride")
+ 
+@@ -211,4 +212,3 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+     specialize(*qw('vp9_scale_and_extend_frame neon ssse3'))
+ 
+ # end encoder functions
+-
+diff --git a/vp9/meson.build b/vp9/meson.build
+index 7b7619575..e9314966c 100644
+--- a/vp9/meson.build
++++ b/vp9/meson.build
+@@ -67,42 +67,6 @@ vp9_common_optional_sources = {
+ 	),
+ }
+ 
+-if not features.get('vp9_highbitdepth', false) # MANUAL
+-	vp9_common_optional_sources += {
+-		'msa': vp9_common_optional_sources['msa'] + files(
+-			'common/mips/msa/vp9_idct4x4_msa.c',
+-			'common/mips/msa/vp9_idct8x8_msa.c',
+-			'common/mips/msa/vp9_idct16x16_msa.c',
+-		),
+-		'dspr2': vp9_common_optional_sources['dspr2'] + files(
+-			'common/mips/dspr2/vp9_itrans4_dspr2.c',
+-			'common/mips/dspr2/vp9_itrans8_dspr2.c',
+-			'common/mips/dspr2/vp9_itrans16_dspr2.c'
+-		)
+-	}
+-else
+-	vp9_common_optional_sources += {
+-		'neon': vp9_common_optional_sources['neon'] + files(
+-			'common/arm/neon/vp9_highbd_iht4x4_add_neon.c',
+-			'common/arm/neon/vp9_highbd_iht8x8_add_neon.c',
+-			'common/arm/neon/vp9_highbd_iht16x16_add_neon.c'
+-		),
+-		'sse4_1': vp9_common_optional_sources['sse4_1'] + files(
+-			'common/x86/vp9_highbd_iht4x4_add_sse4.c',
+-			'common/x86/vp9_highbd_iht8x8_add_sse4.c',
+-			'common/x86/vp9_highbd_iht16x16_add_sse4.c'
+-		)
+-	}
+-endif
+-
+-if features.get('vp9_postproc', false) # MANUAL
+-	vp9_common_optional_sources += {
+-		'msa': vp9_common_optional_sources['msa'] + files(
+-			'common/mips/msa/vp9_mfqe_msa.c'
+-		)
+-	}
+-endif
+-
+ vp9_cx_sources = files(
+ 	'vp9_cx_iface.c',
+ 	'encoder/vp9_bitstream.c',
+@@ -142,13 +106,11 @@ vp9_cx_sources = files(
+ 	'encoder/vp9_noise_estimate.c',
+ 	'encoder/vp9_ext_ratectrl.c',
+ 	# 'encoder/vp9_temporal_filter.c', # MANUAL
++	'encoder/vp9_tpl_model.c',
+ 	# 'encoder/vp9_mbgraph.c', # MANUAL
+ )
+ 
+ vp9_cx_optional_sources = {
+-	'avx' : files(
+-		'encoder/x86/vp9_diamond_search_sad_avx.c'
+-	),
+ 	'avx2' : files(
+ 		'encoder/x86/vp9_quantize_avx2.c',
+ 		'encoder/x86/vp9_error_avx2.c'
+@@ -164,12 +126,15 @@ vp9_cx_optional_sources = {
+ 		# 'encoder/mips/msa/vp9_fdct16x16_msa.c' # MANUAL
+ 	),
+ 	'neon' : files(
++		# 'encoder/arm/neon/vp9_temporal_filter_neon.c', # MANUAL
+ 		'encoder/arm/neon/vp9_diamond_search_sad_neon.c',
++		# 'encoder/arm/neon/vp9_highbd_temporal_filter_neon.c', # MANUAL
+ 		'encoder/arm/neon/vp9_dct_neon.c',
+ 		# 'encoder/arm/neon/vp9_denoiser_neon.c', # MANUAL
+ 		# 'encoder/arm/neon/vp9_error_neon.c', # MANUAL
+ 		'encoder/arm/neon/vp9_frame_scale_neon.c',
+-		'encoder/arm/neon/vp9_quantize_neon.c'
++		'encoder/arm/neon/vp9_quantize_neon.c',
++		# 'encoder/arm/neon/vp9_highbd_error_neon.c', # MANUAL
+ 	),
+ 	'non_greedy_mv' : files(
+ 		'encoder/vp9_non_greedy_mv.c'
+@@ -260,6 +225,7 @@ vp9_cx_headers_sources = files(
+ 	'encoder/vp9_encodemv.h',
+ 	'encoder/vp9_extend.h',
+ 	'encoder/vp9_firstpass.h',
++	'encoder/vp9_firstpass_stats.h',
+ 	'encoder/vp9_job_queue.h',
+ 	'encoder/vp9_lookahead.h',
+ 	'encoder/vp9_mcomp.h',
+@@ -288,6 +254,7 @@ vp9_cx_headers_sources = files(
+ 	'encoder/vp9_noise_estimate.h',
+ 	'encoder/vp9_ext_ratectrl.h',
+ 	'encoder/vp9_temporal_filter.h',
++	'encoder/vp9_tpl_model.h',
+ 	'encoder/vp9_mbgraph.h',
+ )
+ 
+@@ -299,27 +266,20 @@ vp9_cx_headers_optional_sources = {
+ 	'msa' : files(
+ 		# 'encoder/mips/msa/vp9_fdct_msa.h' # MANUAL
+ 	),
++	'neon' : files(
++		# 'encoder/vp9_temporal_filter_constants.h' # MANUAL
++	),
+ 	'non_greedy_mv' : files(
+ 		'encoder/vp9_non_greedy_mv.h'
+ 	),
+ 	'sse4_1' : files(
+-		# 'encoder/x86/temporal_filter_constants.h' # MANUAL
++		# 'encoder/vp9_temporal_filter_constants.h' # MANUAL
+ 	),
+ 	'vp9_temporal_denoising' : files(
+ 		'encoder/vp9_denoiser.h'
+ 	),
+ }
+ 
+-vp9_cx_remove_headers_optional_sources = {
+-	'realtime_only' : files(
+-		'encoder/x86/temporal_filter_constants.h',
+-		'encoder/vp9_alt_ref_aq.h',
+-		'encoder/vp9_aq_variance.h',
+-		'encoder/vp9_aq_360.h',
+-		'encoder/vp9_aq_complexity.h'
+-	),
+-}
+-
+ vp9_dx_headers_sources = files(
+ 	'vp9_dx_iface.h',
+ 	'decoder/vp9_decodeframe.h',
+@@ -333,12 +293,27 @@ vp9_dx_headers_sources = files(
+ vp9_dx_headers_optional_sources = {
+ }
+ 
++vp9_common_asm_sources = files(
++)
++
+ vp9_common_asm_optional_sources = {
+ 	'sse2' : files(
+ 		# 'common/x86/vp9_mfqe_sse2.asm' # MANUAL
+ 	),
+ }
+ 
++vp9_cx_asm_sources = files(
++		)
++
++vp9_cx_asm_optional_sources = {
++	'sse2' : files(
++		'encoder/x86/vp9_dct_sse2.asm',
++		'encoder/x86/vp9_error_sse2.asm'
++	),
++}
++
++#### --- END GENERATED --- ####
++
+ if features.get('vp9_postproc', false) # MANUAL
+ 	vp9_common_asm_optional_sources += {
+ 		'sse2': vp9_common_asm_optional_sources['sse2'] + files(
+@@ -347,12 +322,41 @@ if features.get('vp9_postproc', false) # MANUAL
+ 	}
+ endif
+ 
+-vp9_cx_asm_optional_sources = {
+-	'sse2' : files(
+-		'encoder/x86/vp9_dct_sse2.asm',
+-		'encoder/x86/vp9_error_sse2.asm'
+-	),
+-}
++if not features.get('vp9_highbitdepth', false) # MANUAL
++	vp9_common_optional_sources += {
++		'msa': vp9_common_optional_sources['msa'] + files(
++			'common/mips/msa/vp9_idct4x4_msa.c',
++			'common/mips/msa/vp9_idct8x8_msa.c',
++			'common/mips/msa/vp9_idct16x16_msa.c',
++		),
++		'dspr2': vp9_common_optional_sources['dspr2'] + files(
++			'common/mips/dspr2/vp9_itrans4_dspr2.c',
++			'common/mips/dspr2/vp9_itrans8_dspr2.c',
++			'common/mips/dspr2/vp9_itrans16_dspr2.c'
++		)
++	}
++else
++	vp9_common_optional_sources += {
++		'neon': vp9_common_optional_sources['neon'] + files(
++			'common/arm/neon/vp9_highbd_iht4x4_add_neon.c',
++			'common/arm/neon/vp9_highbd_iht8x8_add_neon.c',
++			'common/arm/neon/vp9_highbd_iht16x16_add_neon.c'
++		),
++		'sse4_1': vp9_common_optional_sources['sse4_1'] + files(
++			'common/x86/vp9_highbd_iht4x4_add_sse4.c',
++			'common/x86/vp9_highbd_iht8x8_add_sse4.c',
++			'common/x86/vp9_highbd_iht16x16_add_sse4.c'
++		)
++	}
++endif
++
++if features.get('vp9_postproc', false) # MANUAL
++	vp9_common_optional_sources += {
++		'msa': vp9_common_optional_sources['msa'] + files(
++			'common/mips/msa/vp9_mfqe_msa.c'
++		)
++	}
++endif
+ 
+ if features.get('vp9_temporal_denoising', false)
+ 	vp9_cx_optional_sources += {
+@@ -370,6 +374,9 @@ if features.get('vp9_highbitdepth', false)
+ 		'sse2' : vp9_cx_optional_sources['sse2'] + files(
+ 			'encoder/x86/vp9_highbd_block_error_intrin_sse2.c',
+ 		),
++		'neon': vp9_cx_optional_sources['neon'] + files(
++			'encoder/arm/neon/vp9_highbd_error_neon.c',
++		),
+ 	}
+ else
+ 	vp9_cx_optional_sources += {
+@@ -412,11 +419,17 @@ if not features.get('realtime_only', false)
+ 		'sse4_1' : vp9_cx_optional_sources['sse4_1'] + files(
+ 			'encoder/x86/temporal_filter_sse4.c',
+ 		),
++		'neon' : vp9_cx_optional_sources['neon'] + files(
++			'encoder/arm/neon/vp9_temporal_filter_neon.c',
++		),
+ 	}
+ 
+ 	vp9_cx_headers_optional_sources += {
+ 		'sse4_1' : vp9_cx_headers_optional_sources['sse4_1'] + files(
+-			'encoder/x86/temporal_filter_constants.h'
++			'encoder/vp9_temporal_filter_constants.h'
++		),
++		'neon' : vp9_cx_headers_optional_sources['neon'] + files(
++			'encoder/vp9_temporal_filter_constants.h',
+ 		),
+ 	}
+ 
+@@ -425,12 +438,13 @@ if not features.get('realtime_only', false)
+ 			'sse4_1' : vp9_cx_optional_sources['sse4_1'] + files(
+ 				'encoder/x86/highbd_temporal_filter_sse4.c',
+ 			),
++			'neon' : vp9_cx_optional_sources['neon'] + files(
++				'encoder/arm/neon/vp9_highbd_temporal_filter_neon.c',
++			),
+ 		}
+ 	endif
+ endif
+ 
+-#### --- END GENERATED --- ####
+-
+ codec_srcs += vp9_common_sources
+ optional_sources = get_variable('vp9_common_optional_sources', {})
+ foreach comp_name, comp_sources : optional_sources
+diff --git a/vpx/meson.build b/vpx/meson.build
+index 08f178d14..854e49f75 100644
+--- a/vpx/meson.build
++++ b/vpx/meson.build
+@@ -10,14 +10,15 @@ api_sources = files(
+ 	'src/vpx_encoder.c',
+ 	'src/vpx_codec.c',
+ 	'src/vpx_image.c',
++	'src/vpx_tpl.c',
+ )
+ 
+ api_optional_sources = {
+ }
+ 
+ api_headers_sources = files(
+-	'vpx_decoder.h',
+-	'vpx_encoder.h',
++	# 'vpx_decoder.h', # MANUAL
++	# 'vpx_encoder.h', # MANUAL
+ 	'internal/vpx_codec_internal.h',
+ 	'internal/vpx_ratectrl_rtc.h',
+ 	'vpx_codec.h',
+@@ -25,9 +26,17 @@ api_headers_sources = files(
+ 	'vpx_image.h',
+ 	'vpx_integer.h',
+ 	'vpx_ext_ratectrl.h',
++	'vpx_tpl.h',
+ )
+ 
+ api_headers_optional_sources = {
++	'decoders': files( # MANUAL
++		'vpx_tpl.h',
++		'vpx_decoder.h',
++	),
++	'encoders': files( # MANUAL
++		'vpx_encoder.h',
++	),
+ 	'vp8_decoder' : files(
+ 		'vp8.h',
+ 		'vp8dx.h'
+@@ -45,6 +54,7 @@ api_doc_headers_sources = files(
+ 	'vpx_ext_ratectrl.h',
+ 	'vpx_frame_buffer.h',
+ 	'vpx_image.h',
++	'vpx_tpl.h',
+ )
+ 
+ api_doc_headers_optional_sources = {
+diff --git a/vpx_dsp/meson.build b/vpx_dsp/meson.build
+index d8c83297c..c25458a7c 100644
+--- a/vpx_dsp/meson.build
++++ b/vpx_dsp/meson.build
+@@ -212,6 +212,8 @@ dsp_optional_sources = {
+ 		# 'arm/intrapred_neon_asm.asm', # MANUAL
+ 		# 'arm/save_reg_neon.asm' # MANUAL
+ 	),
++	'neon_dotprod' : files(), # MANUAL
++	'neon_i8mm' : files(), # MANUAL
+ 	'sse2' : files(
+ 		# 'x86/highbd_intrapred_intrin_sse2.c', # MANUAL
+ 		# 'x86/post_proc_sse2.c', # MANUAL
+@@ -385,6 +387,7 @@ if features.get('encoders', false) # MANUAL
+ 		'bitwriter.c',
+ 		'bitwriter_buffer.c',
+ 		'psnr.c',
++		'sse.c',
+ 	)
+ 
+ 	dsp_headers_sources += files(
+@@ -399,6 +402,18 @@ if features.get('encoders', false) # MANUAL
+ 			'psnrhvs.c',
+ 			'fastssim.c'
+ 		),
++		'neon' : dsp_optional_sources['neon'] + files(
++			'arm/sse_neon.c',
++		),
++		'neon_dotprod' : dsp_optional_sources['neon_dotprod'] + files(
++			'arm/sse_neon_dotprod.c',
++		),
++		'sse4_1' : dsp_optional_sources['sse4_1'] + files(
++			'x86/sse_sse4.c',
++		),
++		'avx2' : dsp_optional_sources['avx2'] + files(
++			'x86/sse_avx2.c',
++		),
+ 	}
+ 
+ 	dsp_headers_optional_sources += {
+@@ -684,6 +699,16 @@ if features.get('vp9', false) # MANUAL
+ 			# loop filters
+ 			'arm/loopfilter_neon.c',
+ 		)
++		dsp_optional_sources += {
++			'neon_dotprod' : dsp_optional_sources['neon_dotprod'] + files(
++				'arm/vpx_convolve8_neon_dotprod.c',
++				'arm/vpx_convolve_neon_dotprod.c',
++			),
++			'neon_i8mm' : dsp_optional_sources['neon_i8mm'] + files(
++				'arm/vpx_convolve8_neon_i8mm.c',
++				'arm/vpx_convolve_neon_i8mm.c',
++			)
++		}
+ 	endif
+ endif
+ 
+@@ -718,6 +743,9 @@ if features.get('vp9_encoder', false)
+ 		'sse2' : dsp_optional_sources['sse2'] + files(
+ 			'x86/fwd_txfm_sse2.c',
+ 		),
++		'avx2': dsp_optional_sources['avx2'] + files(
++			'x86/inv_txfm_avx2.c',
++		),
+ 		'neon': dsp_optional_sources['neon'] + files(
+ 			'arm/fdct4x4_neon.c',
+ 			'arm/fdct8x8_neon.c',
+@@ -744,7 +772,13 @@ if features.get('vp9_encoder', false)
+ 		}
+ 	endif
+ 
+-	if not features.get('vp9_highbitdepth', false)
++	if features.get('vp9_highbitdepth', false)
++		dsp_optional_sources += {
++			'neon' : dsp_optional_sources['neon'] + files(
++				'arm/highbd_avg_neon.c'
++			),
++		}
++	else
+ 		dsp_optional_sources += {
+ 			'avx2' : dsp_optional_sources['avx2'] + files(
+ 				'x86/fwd_txfm_avx2.c'
+@@ -979,6 +1013,8 @@ if features.get('vp9_encoder', false) # MANUAL
+ 			),
+ 			'neon' : dsp_optional_sources['neon'] + files(
+ 				'arm/highbd_quantize_neon.c',
++				'arm/highbd_hadamard_neon.c',
++				'arm/highbd_avg_neon.c',
+ 			),
+ 		}
+ 	endif
+@@ -1007,6 +1043,10 @@ if features.get('encoders', false) # MANUAL
+ 			'arm/sad_neon.c',
+ 			'arm/subtract_neon.c',
+ 		),
++		'neon_dotprod' : dsp_optional_sources['neon_dotprod'] + files(
++			'arm/sad4d_neon_dotprod.c',
++			'arm/sad_neon_dotprod.c',
++		),
+ 		'sse2' : dsp_optional_sources['sse2'] + files(
+ 			'x86/sum_squares_sse2.c',
+ 		),
+@@ -1059,7 +1099,9 @@ if features.get('encoders', false) # MANUAL
+ 				'x86/highbd_sad_avx2.c',
+ 			),
+ 			'neon' : dsp_optional_sources['neon'] + files(
++				'arm/highbd_sad4d_neon.c',
+ 				'arm/highbd_sad_neon.c',
++				'arm/highbd_subpel_variance_neon.c',
+ 			)
+ 		}
+ 	endif
+@@ -1081,6 +1123,9 @@ if features.get('encoders', false) or features.get('postproc', false) or feature
+ 			'arm/subpel_variance_neon.c',
+ 			'arm/variance_neon.c',
+ 		),
++		'neon_dotprod' : dsp_optional_sources['neon_dotprod'] + files(
++			'arm/variance_neon_dotprod.c',
++		),
+ 		'msa' : dsp_optional_sources['msa'] + files(
+ 			'mips/variance_msa.c',
+ 			'mips/sub_pixel_variance_msa.c',
+@@ -1098,6 +1143,7 @@ if features.get('encoders', false) or features.get('postproc', false) or feature
+ 			'x86/variance_sse2.c', # Contains SSE2 and SSSE3
+ 		),
+ 		'avx2' : dsp_optional_sources['avx2'] + files(
++			'x86/avg_pred_avx2.c',
+ 			'x86/variance_avx2.c',
+ 		),
+ 		'vsx' : dsp_optional_sources['vsx'] + files(
+@@ -1140,6 +1186,8 @@ if features.get('encoders', false) or features.get('postproc', false) or feature
+ 				'x86/highbd_variance_sse2.c',
+ 			),
+ 			'neon' : dsp_optional_sources['neon'] + files(
++				'arm/highbd_avg_pred_neon.c',
++				'arm/highbd_sse_neon.c',
+ 				'arm/highbd_variance_neon.c',
+ 			)
+ 		}
+diff --git a/vpx_dsp/vpx_dsp_rtcd_defs.py b/vpx_dsp/vpx_dsp_rtcd_defs.py
+index 03974bebd..17ddfde35 100755
+--- a/vpx_dsp/vpx_dsp_rtcd_defs.py
++++ b/vpx_dsp/vpx_dsp_rtcd_defs.py
+@@ -21,6 +21,10 @@ def vpx_dsp_forward_decls():
+ #include "vpx/vpx_integer.h"
+ #include "vpx_dsp/vpx_dsp_common.h"
+ #include "vpx_dsp/vpx_filter.h"
++#if CONFIG_VP9_ENCODER
++ struct macroblock_plane;
++ struct ScanOrder;
++#endif
+ 
+ ''')
+ forward_decls(*qw('vpx_dsp_forward_decls'))
+@@ -40,7 +44,7 @@ if opts["arch"] == "x86_64":
+ #
+ 
+ add_proto(*qw('void vpx_d207_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d207_predictor_4x4 sse2'))
++specialize(*qw('vpx_d207_predictor_4x4 neon sse2'))
+ 
+ add_proto(*qw('void vpx_d45_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d45_predictor_4x4 neon sse2'))
+@@ -48,7 +52,7 @@ specialize(*qw('vpx_d45_predictor_4x4 neon sse2'))
+ add_proto(*qw('void vpx_d45e_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ 
+ add_proto(*qw('void vpx_d63_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d63_predictor_4x4 ssse3'))
++specialize(*qw('vpx_d63_predictor_4x4 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_d63e_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ 
+@@ -59,12 +63,13 @@ specialize(*qw('vpx_h_predictor_4x4 neon dspr2 msa sse2'))
+ add_proto(*qw('void vpx_he_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ 
+ add_proto(*qw('void vpx_d117_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
++specialize(*qw('vpx_d117_predictor_4x4 neon'))
+ 
+ add_proto(*qw('void vpx_d135_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d135_predictor_4x4 neon'))
+ 
+ add_proto(*qw('void vpx_d153_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d153_predictor_4x4 ssse3'))
++specialize(*qw('vpx_d153_predictor_4x4 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_v_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_v_predictor_4x4 neon msa sse2'))
+@@ -88,7 +93,7 @@ add_proto(*qw('void vpx_dc_128_predictor_4x4'), "uint8_t *dst, ptrdiff_t stride,
+ specialize(*qw('vpx_dc_128_predictor_4x4 msa neon sse2'))
+ 
+ add_proto(*qw('void vpx_d207_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d207_predictor_8x8 ssse3'))
++specialize(*qw('vpx_d207_predictor_8x8 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_d45_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
+@@ -96,19 +101,20 @@ specialize(*qw('vpx_d45_predictor_8x8 neon sse2'))
+ 
+ add_proto(*qw('void vpx_d63_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
+-specialize(*qw('vpx_d63_predictor_8x8 ssse3'))
++specialize(*qw('vpx_d63_predictor_8x8 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_h_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
+ specialize(*qw('vpx_h_predictor_8x8 neon dspr2 msa sse2'))
+ 
+ add_proto(*qw('void vpx_d117_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
++specialize(*qw('vpx_d117_predictor_8x8 neon'))
+ 
+ add_proto(*qw('void vpx_d135_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d135_predictor_8x8 neon'))
+ 
+ add_proto(*qw('void vpx_d153_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d153_predictor_8x8 ssse3'))
++specialize(*qw('vpx_d153_predictor_8x8 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_v_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_v_predictor_8x8 neon msa sse2'))
+@@ -131,24 +137,25 @@ add_proto(*qw('void vpx_dc_128_predictor_8x8'), "uint8_t *dst, ptrdiff_t stride,
+ specialize(*qw('vpx_dc_128_predictor_8x8 neon msa sse2'))
+ 
+ add_proto(*qw('void vpx_d207_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d207_predictor_16x16 ssse3'))
++specialize(*qw('vpx_d207_predictor_16x16 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_d45_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d45_predictor_16x16 neon ssse3 vsx'))
+ 
+ add_proto(*qw('void vpx_d63_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d63_predictor_16x16 ssse3 vsx'))
++specialize(*qw('vpx_d63_predictor_16x16 neon ssse3 vsx'))
+ 
+ add_proto(*qw('void vpx_h_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_h_predictor_16x16 neon dspr2 msa sse2 vsx'))
+ 
+ add_proto(*qw('void vpx_d117_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
++specialize(*qw('vpx_d117_predictor_16x16 neon'))
+ 
+ add_proto(*qw('void vpx_d135_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d135_predictor_16x16 neon'))
+ 
+ add_proto(*qw('void vpx_d153_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d153_predictor_16x16 ssse3'))
++specialize(*qw('vpx_d153_predictor_16x16 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_v_predictor_16x16'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_v_predictor_16x16 neon msa sse2 vsx'))
+@@ -169,24 +176,25 @@ add_proto(*qw('void vpx_dc_128_predictor_16x16'), "uint8_t *dst, ptrdiff_t strid
+ specialize(*qw('vpx_dc_128_predictor_16x16 neon msa sse2 vsx'))
+ 
+ add_proto(*qw('void vpx_d207_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d207_predictor_32x32 ssse3'))
++specialize(*qw('vpx_d207_predictor_32x32 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_d45_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d45_predictor_32x32 neon ssse3 vsx'))
+ 
+ add_proto(*qw('void vpx_d63_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d63_predictor_32x32 ssse3 vsx'))
++specialize(*qw('vpx_d63_predictor_32x32 neon ssse3 vsx'))
+ 
+ add_proto(*qw('void vpx_h_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_h_predictor_32x32 neon msa sse2 vsx'))
+ 
+ add_proto(*qw('void vpx_d117_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
++specialize(*qw('vpx_d117_predictor_32x32 neon'))
+ 
+ add_proto(*qw('void vpx_d135_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_d135_predictor_32x32 neon'))
+ 
+ add_proto(*qw('void vpx_d153_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+-specialize(*qw('vpx_d153_predictor_32x32 ssse3'))
++specialize(*qw('vpx_d153_predictor_32x32 neon ssse3'))
+ 
+ add_proto(*qw('void vpx_v_predictor_32x32'), "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left")
+ specialize(*qw('vpx_v_predictor_32x32 neon msa sse2 vsx'))
+@@ -209,25 +217,25 @@ specialize(*qw('vpx_dc_128_predictor_32x32 msa neon sse2 vsx'))
+ # High bitdepth functions
+ if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+     add_proto(*qw('void vpx_highbd_d207_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d207_predictor_4x4 sse2'))
++    specialize(*qw('vpx_highbd_d207_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d45_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d45_predictor_4x4 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d63_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d63_predictor_4x4 sse2'))
++    specialize(*qw('vpx_highbd_d63_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_h_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_h_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d117_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d117_predictor_4x4 sse2'))
++    specialize(*qw('vpx_highbd_d117_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d135_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d135_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d153_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d153_predictor_4x4 sse2'))
++    specialize(*qw('vpx_highbd_d153_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_v_predictor_4x4'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_v_predictor_4x4 neon sse2'))
+@@ -248,25 +256,25 @@ if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+     specialize(*qw('vpx_highbd_dc_128_predictor_4x4 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d207_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d207_predictor_8x8 ssse3'))
++    specialize(*qw('vpx_highbd_d207_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d45_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d45_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d63_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d63_predictor_8x8 ssse3'))
++    specialize(*qw('vpx_highbd_d63_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_h_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_h_predictor_8x8 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d117_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d117_predictor_8x8 ssse3'))
++    specialize(*qw('vpx_highbd_d117_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d135_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d135_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d153_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d153_predictor_8x8 ssse3'))
++    specialize(*qw('vpx_highbd_d153_predictor_8x8 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_v_predictor_8x8'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_v_predictor_8x8 neon sse2'))
+@@ -287,25 +295,25 @@ if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+     specialize(*qw('vpx_highbd_dc_128_predictor_8x8 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d207_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d207_predictor_16x16 ssse3'))
++    specialize(*qw('vpx_highbd_d207_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d45_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d45_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d63_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d63_predictor_16x16 ssse3'))
++    specialize(*qw('vpx_highbd_d63_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_h_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_h_predictor_16x16 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d117_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d117_predictor_16x16 ssse3'))
++    specialize(*qw('vpx_highbd_d117_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d135_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d135_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d153_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d153_predictor_16x16 ssse3'))
++    specialize(*qw('vpx_highbd_d153_predictor_16x16 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_v_predictor_16x16'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_v_predictor_16x16 neon sse2'))
+@@ -326,25 +334,25 @@ if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+     specialize(*qw('vpx_highbd_dc_128_predictor_16x16 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d207_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d207_predictor_32x32 ssse3'))
++    specialize(*qw('vpx_highbd_d207_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d45_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d45_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d63_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d63_predictor_32x32 ssse3'))
++    specialize(*qw('vpx_highbd_d63_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_h_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_h_predictor_32x32 neon sse2'))
+ 
+     add_proto(*qw('void vpx_highbd_d117_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d117_predictor_32x32 ssse3'))
++    specialize(*qw('vpx_highbd_d117_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d135_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_d135_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_d153_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+-    specialize(*qw('vpx_highbd_d153_predictor_32x32 ssse3'))
++    specialize(*qw('vpx_highbd_d153_predictor_32x32 neon ssse3'))
+ 
+     add_proto(*qw('void vpx_highbd_v_predictor_32x32'), "uint16_t *dst, ptrdiff_t stride, const uint16_t *above, const uint16_t *left, int bd")
+     specialize(*qw('vpx_highbd_v_predictor_32x32 neon sse2'))
+@@ -376,22 +384,22 @@ if vpx_config("CONFIG_VP9") == "yes":
+     specialize(*qw('vpx_convolve_avg neon dspr2 msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8 sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8 sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8_horiz'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8_horiz sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8_horiz sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8_vert'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8_vert sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8_vert sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8_avg'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8_avg sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8_avg sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8_avg_horiz'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8_avg_horiz sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8_avg_horiz sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_convolve8_avg_vert'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+-    specialize(*qw('vpx_convolve8_avg_vert sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx'))
++    specialize(*qw('vpx_convolve8_avg_vert sse2 ssse3 avx2 neon neon_dotprod neon_i8mm dspr2 msa vsx mmi lsx'))
+ 
+     add_proto(*qw('void vpx_scaled_2d'), "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h")
+     specialize(*qw('vpx_scaled_2d ssse3 neon msa'))
+@@ -591,7 +599,7 @@ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+         specialize(*qw('vpx_fdct8x8_1 sse2 neon msa'))
+ 
+         add_proto(*qw('void vpx_fdct16x16'), "const int16_t *input, tran_low_t *output, int stride")
+-        specialize(*qw('vpx_fdct16x16 neon sse2 msa lsx'))
++        specialize(*qw('vpx_fdct16x16 neon sse2 avx2 msa lsx'))
+ 
+         add_proto(*qw('void vpx_fdct16x16_1'), "const int16_t *input, tran_low_t *output, int stride")
+         specialize(*qw('vpx_fdct16x16_1 sse2 neon msa'))
+@@ -635,12 +643,12 @@ if vpx_config("CONFIG_VP9") == "yes":
+         specialize(*qw('vpx_idct8x8_64_add neon sse2 vsx'))
+         specialize(*qw('vpx_idct8x8_12_add neon sse2 ssse3'))
+         specialize(*qw('vpx_idct8x8_1_add neon sse2'))
+-        specialize(*qw('vpx_idct16x16_256_add neon sse2 vsx'))
++        specialize(*qw('vpx_idct16x16_256_add neon sse2 avx2 vsx'))
+         specialize(*qw('vpx_idct16x16_38_add neon sse2'))
+         specialize(*qw('vpx_idct16x16_10_add neon sse2'))
+         specialize(*qw('vpx_idct16x16_1_add neon sse2'))
+-        specialize(*qw('vpx_idct32x32_1024_add neon sse2 vsx'))
+-        specialize(*qw('vpx_idct32x32_135_add neon sse2 ssse3'))
++        specialize(*qw('vpx_idct32x32_1024_add neon sse2 avx2 vsx'))
++        specialize(*qw('vpx_idct32x32_135_add neon sse2 ssse3 avx2'))
+         specialize(*qw('vpx_idct32x32_34_add neon sse2 ssse3'))
+         specialize(*qw('vpx_idct32x32_1_add neon sse2'))
+         specialize(*qw('vpx_iwht4x4_16_add sse2 vsx'))
+@@ -716,17 +724,17 @@ if vpx_config("CONFIG_VP9") == "yes":
+ # Quantization
+ #
+ if vpx_config("CONFIG_VP9_ENCODER") == "yes":
+-    add_proto(*qw('void vpx_quantize_b'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++    add_proto(*qw('void vpx_quantize_b'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+     specialize(*qw('vpx_quantize_b neon sse2 ssse3 avx avx2 vsx lsx'))
+ 
+-    add_proto(*qw('void vpx_quantize_b_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++    add_proto(*qw('void vpx_quantize_b_32x32'), "const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+     specialize(*qw('vpx_quantize_b_32x32 neon ssse3 avx avx2 vsx lsx'))
+ 
+     if vpx_config("CONFIG_VP9_HIGHBITDEPTH") == "yes":
+-        add_proto(*qw('void vpx_highbd_quantize_b'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++        add_proto(*qw('void vpx_highbd_quantize_b'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+         specialize(*qw('vpx_highbd_quantize_b neon sse2 avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_quantize_b_32x32'), "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan")
++        add_proto(*qw('void vpx_highbd_quantize_b_32x32'), "const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *const scan_order")
+         specialize(*qw('vpx_highbd_quantize_b_32x32 neon sse2 avx2'))
+         # CONFIG_VP9_HIGHBITDEPTH
+     # CONFIG_VP9_ENCODER
+@@ -738,32 +746,35 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+     add_proto(*qw('void vpx_subtract_block'), "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride")
+     specialize(*qw('vpx_subtract_block neon msa mmi sse2 avx2 vsx lsx'))
+ 
++    add_proto(*qw('int64_t'), "vpx_sse", "const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, int width, int height")
++    specialize(*qw('vpx_sse sse4_1 avx2 neon neon_dotprod'))
++
+     #
+     # Single block SAD
+     #
+     add_proto(*qw('unsigned int vpx_sad64x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad64x64 neon avx2 msa sse2 vsx mmi lsx'))
++    specialize(*qw('vpx_sad64x64 neon neon_dotprod avx2 msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_sad64x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad64x32 neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad64x32 neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad32x64 neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad32x64 neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad32x32 neon avx2 msa sse2 vsx mmi lsx'))
++    specialize(*qw('vpx_sad32x32 neon neon_dotprod avx2 msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad32x16 neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad32x16 neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad16x32 neon msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad16x32 neon neon_dotprod msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad16x16 neon msa sse2 vsx mmi lsx'))
++    specialize(*qw('vpx_sad16x16 neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_sad16x8 neon msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad16x8 neon neon_dotprod msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad8x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+     specialize(*qw('vpx_sad8x16 neon msa sse2 vsx mmi'))
+@@ -780,6 +791,45 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+     add_proto(*qw('unsigned int vpx_sad4x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+     specialize(*qw('vpx_sad4x4 neon msa sse2 mmi'))
+ 
++    add_proto(*qw('unsigned int vpx_sad_skip_64x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_64x64 neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_64x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_64x32 neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_32x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_32x64 neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_32x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_32x32 neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_32x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_32x16 neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_16x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_16x32 neon neon_dotprod sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_16x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_16x16 neon neon_dotprod sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_16x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_16x8 neon neon_dotprod sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_8x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_8x16 neon sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_8x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_8x8 neon sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_8x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_8x4 neon'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_4x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_4x8 neon sse2'))
++
++    add_proto(*qw('unsigned int vpx_sad_skip_4x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++    specialize(*qw('vpx_sad_skip_4x4 neon'))
++
+     #
+     # Avg
+     #
+@@ -804,19 +854,19 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+             specialize(*qw('vpx_hadamard_32x32 sse2 avx2 neon'))
+ 
+             add_proto(*qw('void vpx_highbd_hadamard_8x8'), "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff")
+-            specialize(*qw('vpx_highbd_hadamard_8x8 avx2'))
++            specialize(*qw('vpx_highbd_hadamard_8x8 avx2 neon'))
+ 
+             add_proto(*qw('void vpx_highbd_hadamard_16x16'), "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff")
+-            specialize(*qw('vpx_highbd_hadamard_16x16 avx2'))
++            specialize(*qw('vpx_highbd_hadamard_16x16 avx2 neon'))
+ 
+             add_proto(*qw('void vpx_highbd_hadamard_32x32'), "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff")
+-            specialize(*qw('vpx_highbd_hadamard_32x32 avx2'))
++            specialize(*qw('vpx_highbd_hadamard_32x32 avx2 neon'))
+ 
+             add_proto(*qw('int vpx_satd'), "const tran_low_t *coeff, int length")
+             specialize(*qw('vpx_satd avx2 sse2 neon'))
+ 
+             add_proto(*qw('int vpx_highbd_satd'), "const tran_low_t *coeff, int length")
+-            specialize(*qw('vpx_highbd_satd avx2'))
++            specialize(*qw('vpx_highbd_satd avx2 neon'))
+         else:
+             add_proto(*qw('void vpx_hadamard_8x8'), "const int16_t *src_diff, ptrdiff_t src_stride, int16_t *coeff")
+             specialize(*qw('vpx_hadamard_8x8 sse2 neon msa vsx lsx'), f"{ssse3_x86_64}")
+@@ -832,38 +882,37 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+ 
+ 
+         add_proto(*qw('void vpx_int_pro_row'), "int16_t hbuf[16], const uint8_t *ref, const int ref_stride, const int height")
+-        specialize(*qw('vpx_int_pro_row sse2 neon msa'))
+-
++        specialize(*qw('vpx_int_pro_row neon sse2 msa'))
+         add_proto(*qw('int16_t vpx_int_pro_col'), "const uint8_t *ref, const int width")
+-        specialize(*qw('vpx_int_pro_col sse2 neon msa'))
++        specialize(*qw('vpx_int_pro_col neon sse2 msa'))
+ 
+         add_proto(*qw('int vpx_vector_var'), "const int16_t *ref, const int16_t *src, const int bwl")
+         specialize(*qw('vpx_vector_var neon sse2 msa'))
+         # CONFIG_VP9_ENCODER
+ 
+     add_proto(*qw('unsigned int vpx_sad64x64_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad64x64_avg neon avx2 msa sse2 vsx mmi lsx'))
++    specialize(*qw('vpx_sad64x64_avg neon neon_dotprod avx2 msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_sad64x32_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad64x32_avg neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad64x32_avg neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x64_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad32x64_avg neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad32x64_avg neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x32_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad32x32_avg neon avx2 msa sse2 vsx mmi lsx'))
++    specialize(*qw('vpx_sad32x32_avg neon neon_dotprod avx2 msa sse2 vsx mmi lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_sad32x16_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad32x16_avg neon avx2 msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad32x16_avg neon neon_dotprod avx2 msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x32_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad16x32_avg neon msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad16x32_avg neon neon_dotprod msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x16_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad16x16_avg neon msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad16x16_avg neon neon_dotprod msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad16x8_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+-    specialize(*qw('vpx_sad16x8_avg neon msa sse2 vsx mmi'))
++    specialize(*qw('vpx_sad16x8_avg neon neon_dotprod msa sse2 vsx mmi'))
+ 
+     add_proto(*qw('unsigned int vpx_sad8x16_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+     specialize(*qw('vpx_sad8x16_avg neon msa sse2 mmi'))
+@@ -883,45 +932,84 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+     #
+     # Multi-block SAD, comparing a reference to N independent blocks
+     #
+-    add_proto(*qw('void vpx_sad64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad64x64x4d avx512 avx2 neon msa sse2 vsx mmi lsx'))
++    add_proto(*qw('void vpx_sad64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad64x64x4d avx512 avx2 neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad64x32x4d neon msa sse2 vsx mmi lsx'))
++    add_proto(*qw('void vpx_sad64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad64x32x4d neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad32x64x4d neon msa sse2 vsx mmi lsx'))
++    add_proto(*qw('void vpx_sad32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad32x64x4d neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad32x32x4d avx2 neon msa sse2 vsx mmi lsx'))
++    add_proto(*qw('void vpx_sad32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad32x32x4d avx2 neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad32x16x4d neon msa sse2 vsx mmi'))
++    add_proto(*qw('void vpx_sad32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad32x16x4d neon neon_dotprod msa sse2 vsx mmi'))
+ 
+-    add_proto(*qw('void vpx_sad16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad16x32x4d neon msa sse2 vsx mmi'))
++    add_proto(*qw('void vpx_sad16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad16x32x4d neon neon_dotprod msa sse2 vsx mmi'))
+ 
+-    add_proto(*qw('void vpx_sad16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad16x16x4d neon msa sse2 vsx mmi lsx'))
++    add_proto(*qw('void vpx_sad16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad16x16x4d neon neon_dotprod msa sse2 vsx mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+-    specialize(*qw('vpx_sad16x8x4d neon msa sse2 vsx mmi'))
++    add_proto(*qw('void vpx_sad16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad16x8x4d neon neon_dotprod msa sse2 vsx mmi'))
+ 
+-    add_proto(*qw('void vpx_sad8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    add_proto(*qw('void vpx_sad8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+     specialize(*qw('vpx_sad8x16x4d neon msa sse2 mmi'))
+ 
+-    add_proto(*qw('void vpx_sad8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    add_proto(*qw('void vpx_sad8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+     specialize(*qw('vpx_sad8x8x4d neon msa sse2 mmi lsx'))
+ 
+-    add_proto(*qw('void vpx_sad8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    add_proto(*qw('void vpx_sad8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+     specialize(*qw('vpx_sad8x4x4d neon msa sse2 mmi'))
+ 
+-    add_proto(*qw('void vpx_sad4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    add_proto(*qw('void vpx_sad4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+     specialize(*qw('vpx_sad4x8x4d neon msa sse2 mmi'))
+ 
+-    add_proto(*qw('void vpx_sad4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    add_proto(*qw('void vpx_sad4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+     specialize(*qw('vpx_sad4x4x4d neon msa sse2 mmi'))
+ 
++    add_proto(*qw('void vpx_sad_skip_64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_64x64x4d neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_64x32x4d neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_32x64x4d neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_32x32x4d neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_32x16x4d neon neon_dotprod avx2 sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_16x32x4d neon neon_dotprod sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_16x16x4d neon neon_dotprod sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_16x8x4d neon neon_dotprod sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_8x16x4d neon sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_8x8x4d neon sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_8x4x4d neon'))
++
++    add_proto(*qw('void vpx_sad_skip_4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_4x8x4d neon sse2'))
++
++    add_proto(*qw('void vpx_sad_skip_4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++    specialize(*qw('vpx_sad_skip_4x4x4d neon'))
++
+     add_proto(*qw('uint64_t vpx_sum_squares_2d_i16'), "const int16_t *src, int stride, int size")
+     specialize(*qw('vpx_sum_squares_2d_i16 neon sse2 msa'))
+ 
+@@ -942,6 +1030,9 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+         add_proto(*qw('void vpx_highbd_subtract_block'), "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src8_ptr, ptrdiff_t src_stride, const uint8_t *pred8_ptr, ptrdiff_t pred_stride, int bd")
+         specialize(*qw('vpx_highbd_subtract_block neon avx2'))
+ 
++        add_proto(*qw('int64_t'), "vpx_highbd_sse", "const uint8_t *a8, int a_stride, const uint8_t *b8,int b_stride, int width, int height")
++        specialize(*qw('vpx_highbd_sse sse4_1 avx2 neon'))
++
+         #
+         # Single block SAD
+         #
+@@ -984,16 +1075,56 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+         add_proto(*qw('unsigned int vpx_highbd_sad4x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
+         specialize(*qw('vpx_highbd_sad4x4 neon'))
+ 
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_64x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_64x64 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_64x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_64x32 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_32x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_32x64 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_32x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_32x32 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_32x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_32x16 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_16x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_16x32 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_16x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_16x16 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_16x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_16x8 neon sse2 avx2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_8x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_8x16 neon sse2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_8x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_8x8 neon sse2'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_8x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_8x4 neon'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_4x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_4x8 neon'))
++
++        add_proto(*qw('unsigned int vpx_highbd_sad_skip_4x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride")
++        specialize(*qw('vpx_highbd_sad_skip_4x4 neon'))
++
+         #
+         # Avg
+         #
+         add_proto(*qw('unsigned int vpx_highbd_avg_8x8'), "const uint8_t *s8, int p")
+-        specialize(*qw('vpx_highbd_avg_8x8 sse2'))
++        specialize(*qw('vpx_highbd_avg_8x8 sse2 neon'))
+ 
+         add_proto(*qw('unsigned int vpx_highbd_avg_4x4'), "const uint8_t *s8, int p")
+-        specialize(*qw('vpx_highbd_avg_4x4 sse2'))
++        specialize(*qw('vpx_highbd_avg_4x4 sse2 neon'))
+ 
+         add_proto(*qw('void vpx_highbd_minmax_8x8'), "const uint8_t *s8, int p, const uint8_t *d8, int dp, int *min, int *max")
++        specialize(*qw('vpx_highbd_minmax_8x8 neon'))
+ 
+         add_proto(*qw('unsigned int vpx_highbd_sad64x64_avg'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred")
+         specialize(*qw('vpx_highbd_sad64x64_avg sse2 neon avx2'))
+@@ -1037,45 +1168,84 @@ if vpx_config("CONFIG_ENCODERS") == "yes":
+         #
+         # Multi-block SAD, comparing a reference to N independent blocks
+         #
+-        add_proto(*qw('void vpx_highbd_sad64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad64x64x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad64x32x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad32x64x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad32x32x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad32x16x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad16x32x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad16x16x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad16x8x4d sse2 neon avx2'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad8x16x4d sse2 neon'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad8x8x4d sse2 neon'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad8x4x4d sse2 neon'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad4x8x4d sse2 neon'))
+ 
+-        add_proto(*qw('void vpx_highbd_sad4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        add_proto(*qw('void vpx_highbd_sad4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
+         specialize(*qw('vpx_highbd_sad4x4x4d sse2 neon'))
+ 
++        add_proto(*qw('void vpx_highbd_sad_skip_64x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_64x64x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_64x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_64x32x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_32x64x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_32x64x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_32x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_32x32x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_32x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_32x16x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_16x32x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_16x32x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_16x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_16x16x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_16x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_16x8x4d neon sse2 avx2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_8x16x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_8x16x4d neon sse2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_8x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_8x8x4d neon sse2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_8x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_8x4x4d neon'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_4x8x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_4x8x4d neon sse2'))
++
++        add_proto(*qw('void vpx_highbd_sad_skip_4x4x4d'), "const uint8_t *src_ptr, int src_stride, const uint8_t *const ref_array[4], int ref_stride, uint32_t sad_array[4]")
++        specialize(*qw('vpx_highbd_sad_skip_4x4x4d neon'))
++
+         #
+         # Structured Similarity (SSIM)
+         #
+@@ -1091,73 +1261,73 @@ if vpx_config("CONFIG_ENCODERS") == "yes" or vpx_config("CONFIG_POSTPROC") == "y
+     # Variance
+     #
+     add_proto(*qw('unsigned int vpx_variance64x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance64x64 sse2 avx2 neon msa mmi vsx lsx'))
++    specialize(*qw('vpx_variance64x64 sse2 avx2 neon neon_dotprod msa mmi vsx lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance64x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance64x32 sse2 avx2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance64x32 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance32x64'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance32x64 sse2 avx2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance32x64 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance32x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance32x32 sse2 avx2 neon msa mmi vsx lsx'))
++    specialize(*qw('vpx_variance32x32 sse2 avx2 neon neon_dotprod msa mmi vsx lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance32x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance32x16 sse2 avx2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance32x16 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance16x32'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance16x32 sse2 avx2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance16x32 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance16x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance16x16 sse2 avx2 neon msa mmi vsx lsx'))
++    specialize(*qw('vpx_variance16x16 sse2 avx2 neon neon_dotprod msa mmi vsx lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance16x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance16x8 sse2 avx2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance16x8 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance8x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance8x16 sse2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance8x16 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance8x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance8x8 sse2 neon msa mmi vsx lsx'))
++    specialize(*qw('vpx_variance8x8 sse2 avx2 neon neon_dotprod msa mmi vsx lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance8x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance8x4 sse2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance8x4 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance4x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance4x8 sse2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance4x8 sse2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_variance4x4'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_variance4x4 sse2 neon msa mmi vsx'))
++    specialize(*qw('vpx_variance4x4 sse2 neon neon_dotprod msa mmi vsx'))
+ 
+     #
+     # Specialty Variance
+     #
+     add_proto(*qw('void vpx_get16x16var'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum")
+-    specialize(*qw('vpx_get16x16var sse2 avx2 neon msa vsx lsx'))
++    specialize(*qw('vpx_get16x16var sse2 avx2 neon neon_dotprod msa vsx lsx'))
+ 
+     add_proto(*qw('void vpx_get8x8var'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum")
+-    specialize(*qw('vpx_get8x8var sse2 neon msa vsx'))
++    specialize(*qw('vpx_get8x8var sse2 neon neon_dotprod msa vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_mse16x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_mse16x16 sse2 avx2 neon msa mmi vsx lsx'))
++    specialize(*qw('vpx_mse16x16 sse2 avx2 neon neon_dotprod msa mmi vsx lsx'))
+ 
+     add_proto(*qw('unsigned int vpx_mse16x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_mse16x8 sse2 avx2 msa mmi vsx'))
++    specialize(*qw('vpx_mse16x8 sse2 avx2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_mse8x16'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_mse8x16 sse2 msa mmi vsx'))
++    specialize(*qw('vpx_mse8x16 sse2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_mse8x8'), "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse")
+-    specialize(*qw('vpx_mse8x8 sse2 msa mmi vsx'))
++    specialize(*qw('vpx_mse8x8 sse2 neon neon_dotprod msa mmi vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_get_mb_ss'), "const int16_t *")
+     specialize(*qw('vpx_get_mb_ss sse2 msa vsx'))
+ 
+     add_proto(*qw('unsigned int vpx_get4x4sse_cs'), "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride")
+-    specialize(*qw('vpx_get4x4sse_cs neon msa vsx'))
++    specialize(*qw('vpx_get4x4sse_cs neon neon_dotprod msa vsx'))
+ 
+     add_proto(*qw('void vpx_comp_avg_pred'), "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride")
+-    specialize(*qw('vpx_comp_avg_pred neon sse2 vsx lsx'))
++    specialize(*qw('vpx_comp_avg_pred neon sse2 avx2 vsx lsx'))
+ 
+     #
+     # Subpixel Variance
+diff --git a/vpx_ports/meson.build b/vpx_ports/meson.build
+index 961ed54bd..c8079af98 100644
+--- a/vpx_ports/meson.build
++++ b/vpx_ports/meson.build
+@@ -12,9 +12,6 @@ ports_optional_sources = {
+ 	'mmx' : files(
+ 		# 'emms_mmx.c' # MANUAL
+ 	),
+-	'arm' : files(
+-		'arm_cpudetect.c',
+-	),
+ 	'ppc' : files(
+ 		'ppc_cpudetect.c',
+ 	),
+@@ -24,6 +21,7 @@ ports_optional_sources = {
+ 	'loongarch' : files(
+ 		'loongarch_cpudetect.c',
+ 	),
++	'arm': files(), # MANUAL
+ }
+ 
+ ports_headers_sources = files(
+@@ -41,6 +39,7 @@ ports_headers_sources = files(
+ ports_headers_optional_sources = {
+ 	'arm' : files(
+ 		'arm.h',
++		'arm_cpudetect.h'
+ 	),
+ 	'ppc' : files(
+ 		'ppc.h',
+@@ -66,6 +65,8 @@ ports_asm_optional_sources = {
+ 	),
+ }
+ 
++#### --- END GENERATED --- ####
++
+ ports_headers_sources += files( # MANUAL
+ 	'emmintrin_compat.h',
+ 	'mem_ops.h',
+@@ -73,6 +74,18 @@ ports_headers_sources += files( # MANUAL
+ 	'vpx_once.h',
+ )
+ 
++if features.get('aarch64', false) # MANUAL
++	ports_sources += files(
++		'aarch64_cpudetect.c'
++	)
++else
++	ports_optional_sources += {
++		'arm' : ports_optional_sources['arm'] + files(
++			'aarch32_cpudetect.c'
++		),
++	}
++endif
++
+ if features.get('x86', false) # MANUAL
+ 	ports_optional_sources += {
+ 		'mmx' : ports_optional_sources['mmx'] + files(
+@@ -115,8 +128,6 @@ ports_headers_optional_sources += { # MANUAL
+ 	)
+ }
+ 
+-#### --- END GENERATED --- ####
+-
+ codec_srcs += ports_sources
+ optional_sources = get_variable('ports_optional_sources', {})
+ foreach comp_name, comp_sources : optional_sources
+diff --git a/vpx_util/meson.build b/vpx_util/meson.build
+index e39384421..fa6d42e5e 100644
+--- a/vpx_util/meson.build
++++ b/vpx_util/meson.build
+@@ -30,6 +30,9 @@ util_headers_optional_sources = {
+ 	),
+ }
+ 
++#### --- END GENERATED --- ####
++
++
+ if features.get('bitstream_debug', false) or features.get('mismatch_debug', false)
+ 	util_sources += files(
+ 		'vpx_debug_util.c'
+@@ -40,8 +43,6 @@ if features.get('bitstream_debug', false) or features.get('mismatch_debug', fals
+ 	)
+ endif
+ 
+-#### --- END GENERATED --- ####
+-
+ optional_sources = get_variable('util_optional_sources', {})
+ foreach comp_name, comp_sources : optional_sources
+ 	if features.get(comp_name, false)
+-- 
+2.44.0.windows.1
+
+
+From e9e378d725ae4d0fadcc5e8ac72105b3e1edbd5c Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 10 Jul 2024 19:50:24 -0300
+Subject: [PATCH] meson: Properly ban shared libraries with the MSVC ABI
+
+I hadn't noticed that the codeblock already existed, it was just in a
+different place.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/21>
+
+diff --git a/meson.build b/meson.build
+index 198165e61..fee067173 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1542,12 +1542,14 @@ endif
+ 
+ ### process_detect ###
+ 
+-# Shared builds are supported everywhere thanks to
+-# the Meson generation of the module definition files.
+-# if features.get('shared', false) and not ['linux', 'solaris', 'darwin', 'iphonesimulator'].contains(tgt_os) and not features.get('gnu', false)
+-# 	# Again, no OS/2 because Meson itself doens't support it
+-# 	error('Shared library build is only supported on ELF and Darwin for now')
+-# endif
++# MSVC requires declspec on data symbols when importing from a shared library.
++if features.get('shared', false) and not ['linux', 'solaris', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os) 
++	if features.get('gcc', false) # Looks like a typo on upstream
++		warning('Shared library build is only supported on ELF; assuming this is OK')
++	else
++ 		error('Shared library build is only supported on ELF and Darwin for now')
++	endif
++endif
+ 
+ features.set('unistd_h', c.has_header('unistd.h'))
+ if c.has_header('vpx/vpx_integer.h', include_directories: include_directories('.'))
+@@ -1670,14 +1672,6 @@ vpx_config_c = configure_file(
+ 
+ # libs.mk
+ 
+-if features.get('shared', false) and not ['linux', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os)
+-	if features.get('gcc', false) # Looks like a typo on upstream
+-		warn('Shared libraries are only supported on ELF; assuming this is OK')
+-	else
+-		error('Shared libraries are only supported on ELF, OS/2, and Darwin for now')
+-	endif
+-endif
+-
+ rtcd_exe = find_program('build/make/rtcd.py', required: true)
+ 
+ extra_libs += c.find_library('m', required: false)
+-- 
+2.44.0.windows.1
+
+
+From 26d95c89ad8da6f958e909783c3c353d7ee4ca86 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 11 Jul 2024 01:10:29 +0000
+Subject: [PATCH] meson: Fix wrong Xcode testing for armv7
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/21>
+
+diff --git a/meson.build b/meson.build
+index fee067173..df50b53d4 100644
+--- a/meson.build
++++ b/meson.build
+@@ -765,7 +765,7 @@ if tgt_isa.startswith('arm')
+ 					check: true
+ 				).stdout().strip().split('\n').get(0, '').split()
+ 
+-				if features.get('neon', false) and xcode_version.get(1, '').version_compare('>=6.3')
++				if features.get('neon', false) and not xcode_version.get(1, '').version_compare('>=6.3')
+ 					feature = 'neon'
+ 					if not features.get(feature, false)
+ 						if not features.has(feature)
+-- 
+2.44.0.windows.1
+
+
+From 2918ddf8a880cf0d9768b1c8464d288c2fcb87c0 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Sat, 20 Jul 2024 20:56:31 +0000
+Subject: [PATCH] meson: Fix discrepancy in option formatting between the RTCD
+ Perl and Python generators
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/21>
+
+diff --git a/meson.build b/meson.build
+index df50b53d4..0ad31918a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1816,7 +1816,20 @@ else
+ 	asm_compiler = disabler()
+ endif
+ 
+-rtcd_h_template = ['--arch=@0@'.format(tgt_isa), '--config=@INPUT0@'] + rtcd_options
++rtcd_h_template = ['--arch=@0@'.format(tgt_isa), '--config=@INPUT0@']
++
++original_rtcd_options = []
++merge_rtcd_opt = ''
++foreach opt: rtcd_options
++	if merge_rtcd_opt != ''
++		original_rtcd_options += ['@0@-@1@'.format(merge_rtcd_opt, opt)]
++		merge_rtcd_opt = ''
++	elif opt == '--disable'
++		merge_rtcd_opt = opt
++	else
++		original_rtcd_options += opt
++	endif
++endforeach
+ 
+ doxy_template = find_program('meson/generate_doxy.py', required: true)
+ 
+@@ -1849,7 +1862,7 @@ foreach symbol, input_file : codec_rtcds
+ 	rtcd_py = files(input_file)
+ 
+ 	rtcd_h = configure_file(
+-		command: [rtcd_exe] + rtcd_h_template + ['--sym=@0@'.format(symbol), '@INPUT1@'],
++		command: [rtcd_exe] + rtcd_h_template + rtcd_options + ['--sym=@0@'.format(symbol), '@INPUT1@'],
+ 		input: [config_mk] + rtcd_py,
+ 		output: rtcd_filename,
+ 		capture: true,
+@@ -1864,7 +1877,7 @@ foreach symbol, input_file : codec_rtcds
+ 		)
+ 
+ 		original_rtcd_h = configure_file(
+-			command: [original_rtcd_exe] + rtcd_h_template + ['--sym=@0@'.format(symbol), '@INPUT1@'],
++			command: [original_rtcd_exe] + rtcd_h_template + original_rtcd_options + ['--sym=@0@'.format(symbol), '@INPUT1@'],
+ 			input: [config_mk] + original_rtcd_pl,
+ 			output: 'original@0@'.format(rtcd_filename),
+ 			capture: true,
+-- 
+2.44.0.windows.1
+
+
+From 31fdd5dd78347b2468d8a3c4a946f21d230cf19b Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 6 Aug 2024 17:00:29 -0300
+Subject: [PATCH] vp9: Fix Apple silicon build
+
+ld: Undefined symbols:
+  _vp9_block_error_fp_neon, referenced from:
+      _block_yrd in vp9_encoder_vp9_pickmode.c.o
+  _vp9_block_error_neon, referenced from:
+      _rd_pick_intra_sub_8x8_y_mode in vp9_encoder_vp9_rdopt.c.o
+      _rd_pick_intra_sub_8x8_y_mode in vp9_encoder_vp9_rdopt.c.o
+      _rd_pick_best_sub8x8_mode in vp9_encoder_vp9_rdopt.c.o
+      _dist_block in vp9_encoder_vp9_rdopt.c.o
+      _vp9_setup_tpl_stats in vp9_encoder_vp9_tpl_model.c.o
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/21>
+
+diff --git a/vp9/meson.build b/vp9/meson.build
+index e9314966c..c1c63f044 100644
+--- a/vp9/meson.build
++++ b/vp9/meson.build
+@@ -131,7 +131,7 @@ vp9_cx_optional_sources = {
+ 		# 'encoder/arm/neon/vp9_highbd_temporal_filter_neon.c', # MANUAL
+ 		'encoder/arm/neon/vp9_dct_neon.c',
+ 		# 'encoder/arm/neon/vp9_denoiser_neon.c', # MANUAL
+-		# 'encoder/arm/neon/vp9_error_neon.c', # MANUAL
++		'encoder/arm/neon/vp9_error_neon.c',
+ 		'encoder/arm/neon/vp9_frame_scale_neon.c',
+ 		'encoder/arm/neon/vp9_quantize_neon.c',
+ 		# 'encoder/arm/neon/vp9_highbd_error_neon.c', # MANUAL
+@@ -380,9 +380,6 @@ if features.get('vp9_highbitdepth', false)
+ 	}
+ else
+ 	vp9_cx_optional_sources += {
+-		'neon' : vp9_cx_optional_sources['neon'] + files(
+-			'encoder/arm/neon/vp9_error_neon.c',
+-		),
+ 		'msa' : vp9_cx_optional_sources['msa'] + files(
+ 			'encoder/mips/msa/vp9_fdct4x4_msa.c',
+ 			'encoder/mips/msa/vp9_fdct8x8_msa.c',
+-- 
+2.44.0.windows.1
+
+
+From 6f80ad7c656f3b0373afaf5fac8698c794b084f2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 2 Sep 2024 12:51:27 -0300
+Subject: [PATCH] meson: Fix missing install of vpx_tpl.h header
+
+See gstreamer/gstreamer#3765
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/23>
+
+diff --git a/meson.build b/meson.build
+index 0ad31918a..e34ab284b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1970,7 +1970,7 @@ if features.get('vp8_encoder', false) or features.get('vp9_encoder', false)
+ 	headers += files(
+ 		'vpx/vp8.h',
+ 		'vpx/vp8cx.h',
+-  		'vpx/vpx_ext_ratectrl.h',
++		'vpx/vpx_ext_ratectrl.h',
+ 	)
+ endif
+ if features.get('vp8_decoder', false) or features.get('vp9_decoder', false)
+@@ -1987,6 +1987,7 @@ endif
+ if features.get('encoders', false)
+ 	headers += files(
+ 		'vpx/vpx_encoder.h',
++		'vpx/vpx_tpl.h',
+ 	)
+ endif
+ 
+@@ -2146,3 +2147,4 @@ if features.get('install_docs', false)
+ 		install_dir: get_option('datadir') / meson.project_name(),
+ 	)
+ endif
++
+diff --git a/vpx/meson.build b/vpx/meson.build
+index 854e49f75..23600e597 100644
+--- a/vpx/meson.build
++++ b/vpx/meson.build
+@@ -26,7 +26,6 @@ api_headers_sources = files(
+ 	'vpx_image.h',
+ 	'vpx_integer.h',
+ 	'vpx_ext_ratectrl.h',
+-	'vpx_tpl.h',
+ )
+ 
+ api_headers_optional_sources = {
+@@ -94,7 +93,7 @@ foreach comp_name, comp_sources : optional_sources
+ 			comp_name: codec_arch_headers.get(comp_name, []) + comp_sources
+ 		}
+ 	else
+-		api_headers_sources += comp_sources
++		codec_headers += comp_sources
+ 	endif
+ endforeach
+ 
 -- 
 2.44.0.windows.1
 
