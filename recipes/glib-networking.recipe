@@ -4,36 +4,40 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.74.0'
+    version = '2.80.0'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '1f185aaef094123f8e25d8fa55661b3fd71020163a0174adb35a37685cda613b'
+    tarball_checksum = 'd8f4f1aab213179ae3351617b59dab5de6bcc9e785021eee178998ebd4bb3acf'
 
-    meson_options = {'libproxy': 'disabled', 'gnome_proxy': 'disabled',
-                     'gnutls': 'disabled', 'openssl': 'enabled',
-                     # Also build static modules on all platforms
-                     'static_modules': 'true'}
-    deps = ['glib']
+    # static_modules is now governed by default_library
+    # https://gitlab.gnome.org/GNOME/glib-networking/-/commit/270d54a5ef9a3c9cb96997dbe0fbcb329dbf80e8
+    meson_options = {'libproxy': 'enabled', 'gnome_proxy': 'disabled',
+                     'gnutls': 'disabled', 'openssl': 'enabled'}
+    deps = ['glib', 'libproxy']
     # openssl on Linux
     use_system_libs = True
 
-    # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
-    patches = [name + '/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch']
-
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
-    files_devel = ['%(libdir)s/gio/modules/libgioopenssl.a']
+    files_devel = []
 
     def prepare(self):
+        # Glib doesn't support static libraries on Windows yet
+        if self.config.target_platform == Platform.WINDOWS:
+            self.library_type = LibraryType.SHARED
+        else:
+            self.files_devel.append(
+                '%(libdir)s/gio/modules/libgioopenssl.a')
         # Pick system openssl if on Linux and not cross-compiling
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
 
     def post_install(self):
-        # Meson does not generate la files
-        LibtoolLibrary('gioopenssl', None, None, None,
-                os.path.join(self.config.libdir, 'gio', 'modules'),
-                self.config.target_platform, deps=['ssl', 'crypto']).save()
+        if self.config.target_platform != Platform.WINDOWS:
+            # Meson does not generate la files
+            LibtoolLibrary('gioopenssl', None, None, None,
+                    os.path.join(self.config.libdir, 'gio', 'modules'),
+                    self.config.target_platform, deps=['ssl', 'crypto']).save()
         super().post_install()

@@ -4,20 +4,14 @@ import sys
 
 class Recipe(recipe.Recipe):
     name = 'gobject-introspection'
-    version = '1.74.0'
+    version = '1.80.1'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '347b3a719e68ba4c69ff2d57ee2689233ea8c07fc492205e573386779e42d653'
+    tarball_checksum = 'a1df7c424e15bda1ab639c00e9051b9adf5cea1a9e512f8a603b53cd199bc6d8'
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
-    deps = ['glib']
-
-    patches = [
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/448
-        f'{name}/0001-giscanner-Allow-passing-full-paths-to-libraries-with.patch',
-        f'{name}/0002-dumper-Fix-introspection-binaries-missing-rpaths-for.patch'
-    ]
+    deps = ['glib'] # 'glib-base'
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
@@ -74,6 +68,15 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/pkgconfig/gobject-introspection-no-export-1.0.pc',
         'share/gobject-introspection-1.0',
         'share/aclocal/introspection.m4'
+    ]
+
+    library_type = LibraryType.STATIC
+
+    # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1149#note_2562914
+    # Remove if introspected Glib is re-added
+    patches = [
+        f'{name}/0001-Revert-build-Do-not-compile-uninstalled-GIR-into-typ.patch',
+        f'{name}/0002-Revert-build-Do-not-install-generated-GLib-GIR-files.patch',
     ]
 
     def prepare(self):

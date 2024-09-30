@@ -1,0 +1,133 @@
+From ca5d550500d8607c1b93b22451924a71c49596bb Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 8 Jun 2020 06:04:49 +0530
+Subject: [PATCH 21/24] WIP: gtimezone: Partially port to WinRT
+
+get_default_timezone() was easy to port, but to port the timezone
+DST transition rule code, need to understand how the existing code
+works. Probably a full day of work. The needed work is to replace the
+code leading up to `register_tzi_to_tzi()` calls with equivalent code
+using C++ WinRT APIs.
+
+`register_tzi_to_tzi()` converts TZI information coming from the Win32
+Registry into the format used by the `TIME_ZONE_INFORMATION` struct.
+---
+ glib/gtimezone.c            | 18 ++++++++++++++----
+ glib/gutils-winrt-private.h |  2 ++
+ glib/gutils-winrt.cpp       |  9 +++++++++
+ 3 files changed, 25 insertions(+), 4 deletions(-)
+
+diff --git a/glib/gtimezone.c b/glib/gtimezone.c
+index 0c3cae3f7..954a079f6 100644
+--- a/glib/gtimezone.c
++++ b/glib/gtimezone.c
+@@ -46,11 +46,14 @@
+ #endif
+ 
+ #ifdef G_OS_WIN32
+-
+ #define STRICT
+ #include <windows.h>
+ #include <wchar.h>
++/* WinRT implementation for getting the default timezone */
++#ifdef G_WINAPI_ONLY_APP
++#  include "gutils-winrt-private.h"
+ #endif
++#endif /* G_OS_WIN32 */
+ 
+ /**
+  * GTimeZone:
+@@ -880,6 +883,9 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
+   return TRUE;
+ }
+ 
++#ifdef G_WINAPI_ONLY_APP
++#define windows_default_tzname g_winrt_get_default_timezone
++#else
+ static gchar*
+ windows_default_tzname (void)
+ {
+@@ -949,6 +955,9 @@ register_tzi_to_tzi (RegTZI *reg, TIME_ZONE_INFORMATION *tzi)
+   tzi->DaylightBias = reg->DaylightBias;
+ }
+ 
++/* TODO: When building for UWP, the Windows registry is not available, and the
++ * recommended way to get timezone adjustment information is by using
++ * TimeZoneInfo.AdjustmentRule */
+ static guint
+ rules_from_windows_time_zone (const gchar   *identifier,
+                               const gchar   *resolved_identifier,
+@@ -1127,8 +1136,9 @@ utf16_conv_failed:
+ 
+   return 0;
+ }
++#endif /* !G_WINAPI_ONLY_APP */
+ 
+-#endif
++#endif /* G_OS_WIN32 */
+ 
+ static void
+ find_relative_date (TimeZoneDate *buffer)
+@@ -1663,7 +1673,7 @@ rules_from_identifier (const gchar   *identifier,
+                               hour earlier that standard */
+     tzr.dlt_offset = tzr.std_offset - 3600;
+   if (*pos == '\0')
+-#ifdef G_OS_WIN32
++#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
+     /* Windows allows us to use the US DST boundaries if they're not given */
+     {
+       guint i, rules_num = 0;
+@@ -1902,7 +1912,7 @@ g_time_zone_new_identifier (const gchar *identifier)
+           init_zone_from_iana_info (tz, zoneinfo, g_steal_pointer (&resolved_identifier));
+           g_bytes_unref (zoneinfo);
+         }
+-#elif defined (G_OS_WIN32)
++#elif defined (G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
+       if ((rules_num = rules_from_windows_time_zone (identifier,
+                                                      resolved_identifier,
+                                                      &rules)))
+diff --git a/glib/gutils-winrt-private.h b/glib/gutils-winrt-private.h
+index 229800000..99d2e5a93 100644
+--- a/glib/gutils-winrt-private.h
++++ b/glib/gutils-winrt-private.h
+@@ -31,6 +31,8 @@ enum GUtilsWinRTStorageFolderID
+ 
+ char * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
+ 
++gchar * g_winrt_get_default_timezone (void);
++
+ G_END_DECLS
+ 
+ #endif /* __G_UTILS_WINRT_PRIVATE_H__ */
+diff --git a/glib/gutils-winrt.cpp b/glib/gutils-winrt.cpp
+index 30a3b2096..9f814bd20 100644
+--- a/glib/gutils-winrt.cpp
++++ b/glib/gutils-winrt.cpp
+@@ -19,11 +19,13 @@
+ #include "glib-private.h"
+ 
+ #include <winrt/Windows.Storage.h>
++#include <winrt/Windows.Globalization.h>
+ 
+ #include "gutils-winrt-private.h"
+ 
+ using namespace winrt;
+ using namespace Windows::Storage;
++using namespace Windows::Globalization;
+ 
+ static gchar *
+ from_hstring (winrt::hstring s)
+@@ -93,3 +95,10 @@ g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id)
+       g_abort ();
+   }
+ }
++
++extern "C" gchar *
++g_winrt_get_default_timezone (void)
++{
++  auto calendar = Calendar();
++  return from_hstring (calendar.GetTimeZone());
++}
+-- 
+2.44.0.windows.1
+

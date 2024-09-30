@@ -1,0 +1,36 @@
+From 042c9ce11a21ac4e00aa1a77b98d009170c6bf28 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 29 Dec 2022 00:47:28 +0100
+Subject: [PATCH 06/11] gio: fix duplicate g_trace_* symbols in static libs
+ with --default-library=both
+
+Should fix ld.gold linker errors linking static glib/gio into an app:
+
+error: /builds/cerbero-android-universal/arm64/lib/libglib-2.0.a(gtrace.c.o): multiple definition of 'g_trace_mark'
+/builds/cerbero-android-universal/arm64/lib/libgio-2.0.a(.._glib_gtrace.c.o): previous definition here
+
+error: /builds/cerbero-android-universal/arm64/lib/libglib-2.0.a(gtrace.c.o): multiple definition of 'g_trace_define_int64_counter'
+/builds/cerbero-android-universal/arm64/lib/libgio-2.0.a(.._glib_gtrace.c.o): previous definition here
+
+error: /builds/cerbero-android-universal/arm64/lib/libglib-2.0.a(gtrace.c.o): multiple definition of 'g_trace_set_int64_counter'
+/builds/cerbero-android-universal/arm64/lib/libgio-2.0.a(.._glib_gtrace.c.o): previous definition here
+---
+ gio/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/meson.build b/gio/meson.build
+index 59c2b0fc0..e8818eaf6 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -608,7 +608,7 @@ gio_base_sources = files(
+ 
+ gio_sources = gio_base_sources
+ 
+-if glib_build_shared
++if not glib_build_static
+   gio_sources += files ('../glib/gtrace.c')
+ endif
+ 
+-- 
+2.44.0.windows.1
+

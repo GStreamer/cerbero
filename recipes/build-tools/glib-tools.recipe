@@ -2,16 +2,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.62.5'
+    version = '2.80.5'
     stype = SourceType.TARBALL
     url = 'gnome://glib/%(maj_ver)s/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
-    tarball_checksum = 'b8d1cdafa46658b63d7512efbe2cd21bd36cd7be83140e44930c47b79f82452e'
+    tarball_checksum = '9f23a9de803c695bbfde7e37d6626b18b9a83869689dd79019bf3ae66c3e6771'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    meson_options = {'internal_pcre': 'true', 'libmount': 'false',
-                     'dtrace': 'false', 'iconv': 'auto', 'selinux' : 'disabled'}
-    deps = ['libffi', 'zlib', 'pkg-config']
+    meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'selinux' : 'disabled', 'introspection': 'disabled', 'tests': 'false'}
+    deps = ['libffi', 'zlib', 'pkg-config', 'pcre2']
 
     # Without these, the relocator won't take effect on macOS
     files_bins = [
