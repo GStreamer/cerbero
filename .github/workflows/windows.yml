@@ -21,6 +21,16 @@ on:
           - '["floor-to-ceiling-windows-latest-runner"]'
           - '["self-hosted", "Windows", "X64", "cerbero"]'
         default: '["self-hosted", "Windows", "X64", "cerbero"]'
+      force-build:
+        description: 'Force the build'
+        required: false
+        type: boolean
+        default: false
+      no-cache:
+        description: 'Do not use cache when building'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -52,7 +62,8 @@ jobs:
           cerbero-repo: ${{ inputs.cerbero-repo || github.repository }}
           cerbero-ref: ${{ inputs.cerbero-ref || github.ref }}
           cerbero-args: --clocktime --timestamps -v visualstudio,noasserts,nochecks
-          force: true
+          force: ${{ inputs.force-build == true }}
+          no-cache: ${{ inputs.no-cache == true }}
           bootstrap-system: true
           s3-download-paths: >-
             ${{ vars.GSTREAMER_S3_UPLOAD_BUCKET && vars.GSTREAMER_S3_UPLOAD_PREFIX && format('s3://{0}/{1}', vars.GSTREAMER_S3_UPLOAD_BUCKET, vars.GSTREAMER_S3_UPLOAD_PREFIX) || '' }}
