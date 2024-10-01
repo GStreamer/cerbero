@@ -171,7 +171,9 @@ class BuildSteps(object):
 
     @classmethod
     def all_names(cls):
-        members = inspect.getmembers(cls, lambda x: isinstance(x, tuple))
+        # In 3.13, __static_attributes__ is a new tuple attribute. Just ignore
+        # all attributes starting with __.
+        members = inspect.getmembers(cls, lambda x: isinstance(x, tuple) and x and not x[0].startswith('__'))
         return tuple(e[1][1] for e in members)
 
 
