@@ -28,6 +28,7 @@ class Recipe(custom.GStreamer):
                      'hls-crypto': 'openssl',
                      'ivfparse': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
+                     'lcevcdecoder': 'enabled',
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
                      'qroverlay': 'enabled',
@@ -84,7 +85,7 @@ class Recipe(custom.GStreamer):
                      'wildmidi': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
+            'zlib', 'openh264', 'opus', 'lcevcdec', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
@@ -244,6 +245,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsthls%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstid3tag%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstivfparse%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstlcevcdecoder%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmidi%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmxf%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstopenh264%(mext)s',
@@ -278,6 +280,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsthls.a', '%(libdir)s/gstreamer-1.0/libgsthls.la',
              '%(libdir)s/gstreamer-1.0/libgstid3tag.a', '%(libdir)s/gstreamer-1.0/libgstid3tag.la',
              '%(libdir)s/gstreamer-1.0/libgstivfparse.a', '%(libdir)s/gstreamer-1.0/libgstivfparse.la',
+             '%(libdir)s/gstreamer-1.0/libgstlcevcdecoder.a', '%(libdir)s/gstreamer-1.0/libgstlcevcdecoder.la',
              '%(libdir)s/gstreamer-1.0/libgstmidi.a', '%(libdir)s/gstreamer-1.0/libgstmidi.la',
              '%(libdir)s/gstreamer-1.0/libgstmxf.a', '%(libdir)s/gstreamer-1.0/libgstmxf.la',
              '%(libdir)s/gstreamer-1.0/libgstopenh264.a', '%(libdir)s/gstreamer-1.0/libgstopenh264.la',
