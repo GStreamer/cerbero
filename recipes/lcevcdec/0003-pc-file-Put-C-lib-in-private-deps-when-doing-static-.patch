@@ -1,0 +1,64 @@
+From 057f025042fbe4b538cdbfd943b25b6006cb78c1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
+Date: Tue, 4 Nov 2025 19:42:37 -0500
+Subject: [PATCH 3/4] pc file: Put C++ lib in private deps when doing static
+ build
+
+---
+ cmake/modules/CMakeInstall.cmake | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/cmake/modules/CMakeInstall.cmake b/cmake/modules/CMakeInstall.cmake
+index e7645f1..4b02a22 100644
+--- a/cmake/modules/CMakeInstall.cmake
++++ b/cmake/modules/CMakeInstall.cmake
+@@ -33,9 +33,9 @@ endif ()
+ # Find correct pkg-config libs
+ if (NOT BUILD_SHARED_LIBS)
+     if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+-        set(PC_LIBS "-lc++ -llog")
++        set(PC_LIBS_PRIVATE "-lc++ -llog")
+     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+-        set(PC_LIBS "-lstdc++")
++        set(PC_LIBS_PRIVATE "-lstdc++")
+     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+         # Further check if libc++ is used instead of libstdc++
+         include(CheckCXXSourceCompiles)
+@@ -52,14 +52,14 @@ if (NOT BUILD_SHARED_LIBS)
+             USING_LIBCXX)
+ 
+         if (USING_LIBCXX)
+-            set(PC_LIBS "-lc++")
++            set(PC_LIBS_PRIVATE "-lc++")
+         else ()
+-            set(PC_LIBS "-lstdc++")
++            set(PC_LIBS_PRIVATE "-lstdc++")
+         endif ()
+     endif ()
+ endif ()
+ 
+-list(APPEND PC_LIBS "-lm")
++list(APPEND PC_LIBS_PRIVATE "-lm")
+ 
+ if (VN_SDK_API_LAYER)
+     list(APPEND PC_LIBS "-llcevc_dec_api")
+@@ -111,11 +111,15 @@ if (VN_SDK_PIPELINE_VULKAN)
+     set(PC_VULKAN_PIPELINE "yes")
+ endif ()
+ 
+-string(REPLACE ";" " " PC_LIBS "${PC_LIBS}")
+ if (BUILD_SHARED_LIBS)
+     string(REPLACE ";" " " PC_LIBS_PRIVATE "${PC_LIBS_PRIVATE}")
+     set(PC_LIBS_PRIVATE "Libs.private: ${PC_LIBS_PRIVATE}")
++else ()
++    set(PC_LIBS "${PC_LIBS_PRIVATE};${PC_LIBS}")
++    unset(PC_LIBS_PRIVATE)
+ endif ()
++string(REPLACE ";" " " PC_LIBS "${PC_LIBS}")
++
+ if (PC_REQUIRES_PRIVATE)
+     string(REPLACE ";" " " PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE}")
+     set(PC_REQUIRES_PRIVATE "Requires.private: ${PC_REQUIRES_PRIVATE}")
+-- 
+2.51.1
+

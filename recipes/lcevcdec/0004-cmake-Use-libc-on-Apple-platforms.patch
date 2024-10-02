@@ -1,0 +1,51 @@
+From fe465a74f62139991b5cd4688a1249f7c2e0c81a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
+Date: Wed, 5 Nov 2025 17:29:13 -0500
+Subject: [PATCH 4/4] cmake: Use libc++ on Apple platforms
+
+---
+ cmake/modules/CMakeInstall.cmake | 20 +++++++++++---------
+ 1 file changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/cmake/modules/CMakeInstall.cmake b/cmake/modules/CMakeInstall.cmake
+index 4b02a22..c1781b5 100644
+--- a/cmake/modules/CMakeInstall.cmake
++++ b/cmake/modules/CMakeInstall.cmake
+@@ -35,11 +35,11 @@ if (NOT BUILD_SHARED_LIBS)
+     if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+         set(PC_LIBS_PRIVATE "-lc++ -llog")
+     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+-        set(PC_LIBS_PRIVATE "-lstdc++")
++      set(PC_LIBS_PRIVATE "-lstdc++")
+     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+-        # Further check if libc++ is used instead of libstdc++
+-        include(CheckCXXSourceCompiles)
+-        check_cxx_source_compiles(
++      # Further check if libc++ is used instead of libstdc++
++      include(CheckCXXSourceCompiles)
++      check_cxx_source_compiles(
+             "
+         #include <cstddef>
+         int main() {
+@@ -51,11 +51,13 @@ if (NOT BUILD_SHARED_LIBS)
+         }"
+             USING_LIBCXX)
+ 
+-        if (USING_LIBCXX)
+-            set(PC_LIBS_PRIVATE "-lc++")
+-        else ()
+-            set(PC_LIBS_PRIVATE "-lstdc++")
+-        endif ()
++      if (USING_LIBCXX)
++        set(PC_LIBS_PRIVATE "-lc++")
++      else ()
++        set(PC_LIBS_PRIVATE "-lstdc++")
++      endif ()
++    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
++      set(PC_LIBS_PRIVATE "-lc++")
+     endif ()
+ endif ()
+ 
+-- 
+2.51.1
+
