@@ -1,0 +1,29 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+
+class Recipe(recipe.Recipe):
+    name = 'fmt'
+    version = '12.1.0'
+    stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
+    library_type = LibraryType.BOTH
+    cmake_generator = 'ninja'
+    can_msvc = True
+    url = 'https://github.com/fmtlib/fmt/releases/download/%(version)s/fmt-%(version)s.zip'
+    tarball_checksum = '695fd197fa5aff8fc67b5f2bbc110490a875cdf7a41686ac8512fb480fa8ada7'
+    licenses = [{License.BSD: ['LICENSE']}]
+    deps = []
+
+    configure_options = ['-DFMT_TEST=OFF']
+
+    files_libs = ['libfmt']
+    files_devel = ['include/fmt', '%(libdir)s/pkgconfig/fmt.pc',
+                   '%(libdir)s/cmake/fmt']
+
+    def post_install(self):
+        # CMake does not generate la files
+        libtool_la = LibtoolLibrary('libfmt', None, None, None,
+                                    self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()
