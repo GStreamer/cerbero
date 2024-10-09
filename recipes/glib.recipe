@@ -37,7 +37,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '9f23a9de803c695bbfde7e37d6626b18b9a83869689dd79019bf3ae66c3e6771'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'tests': 'true', 'introspection': 'disabled'}
+    meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'tests': 'false', 'introspection': 'disabled'}
     deps = ['libffi', 'zlib', 'pcre2']
 
     patches = [
