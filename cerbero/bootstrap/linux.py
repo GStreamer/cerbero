@@ -179,7 +179,7 @@ class RedHatBootstrapper(UnixBootstrapper):
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
 
-        if self.config.distro_version < DistroVersion.FEDORA_23:
+        if self.config.distro_version < 'fedora_23':
             self.tool = ['yum']
         elif self.config.distro_version in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
             self.tool = ['yum']
@@ -189,7 +189,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
-            if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
+            if self.config.distro_version in ['fedora_24', 'fedora_25']:
                 self.packages.append('libncurses-compat-libs.i686')
             if self.config.arch in [Architecture.X86_64, Architecture.X86]:
                 self.packages.append('wine')

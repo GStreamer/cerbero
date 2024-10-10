@@ -331,64 +331,22 @@ Terminating.""",
                 distro_version = 'ubuntu_{number}_{name}'.format(number=d[1].replace('.', '_'), name=distro_version)
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in [
-            'RedHat',
-            'Fedora',
-            'Fedora Linux',
-            'CentOS',
-            'Red Hat Enterprise Linux Server',
-            'CentOS Linux',
-            'Amazon Linux',
-            'Rocky Linux',
-        ]:
+        elif d[0].startswith('Fedora'):
             distro = Distro.REDHAT
-            if d[1] == '16':
-                distro_version = DistroVersion.FEDORA_16
-            elif d[1] == '17':
-                distro_version = DistroVersion.FEDORA_17
-            elif d[1] == '18':
-                distro_version = DistroVersion.FEDORA_18
-            elif d[1] == '19':
-                distro_version = DistroVersion.FEDORA_19
-            elif d[1] == '20':
-                distro_version = DistroVersion.FEDORA_20
-            elif d[1] == '21':
-                distro_version = DistroVersion.FEDORA_21
-            elif d[1] == '22':
-                distro_version = DistroVersion.FEDORA_22
-            elif d[1] == '23':
-                distro_version = DistroVersion.FEDORA_23
-            elif d[1] == '24':
-                distro_version = DistroVersion.FEDORA_24
-            elif d[1] == '25':
-                distro_version = DistroVersion.FEDORA_25
-            elif d[1] == '26':
-                distro_version = DistroVersion.FEDORA_26
-            elif d[1] == '27':
-                distro_version = DistroVersion.FEDORA_27
-            elif d[1] == '28':
-                distro_version = DistroVersion.FEDORA_28
-            elif d[1] == '29':
-                distro_version = DistroVersion.FEDORA_29
-            elif d[1] == '30':
-                distro_version = DistroVersion.FEDORA_30
-            elif d[1] == '31':
-                distro_version = DistroVersion.FEDORA_31
-            elif d[1] == '32':
-                distro_version = DistroVersion.FEDORA_32
-            elif d[0].startswith('Fedora'):
-                # str(int()) is for ensuring that the fedora version is
-                # actually a number
-                distro_version = 'fedora_' + str(int(d[1]))
-            elif d[1] == '6' or d[1].startswith('6.'):
+            # str(int()) is for ensuring that the fedora version is
+            # actually a number
+            distro_version = 'fedora_' + str(int(d[1]))
+        elif d[0].startswith(('RedHat', 'CentOS', 'Red Hat')):
+            distro = Distro.REDHAT
+            if d[1] == '6' or d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
             elif d[1] == '7' or d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
-            elif d[1] == '8' or d[1].startswith('8.'):
-                distro_version = DistroVersion.REDHAT_8
-            elif d[1] == '9' or d[1].startswith('9.'):
-                distro_version = DistroVersion.REDHAT_9
-            elif d[0] == 'Amazon Linux' and d[1].startswith('2'):
+            else:
+                distro_version = 'redhat_' + d[1][:3]
+        elif d[0] in ('Amazon Linux', 'Rocky Linux'):
+            distro = Distro.REDHAT
+            if d[0] == 'Amazon Linux' and d[1].startswith('2'):
                 distro_version = DistroVersion.AMAZON_LINUX_2
             elif d[1] == 'amazon':
                 distro_version = DistroVersion.AMAZON_LINUX
