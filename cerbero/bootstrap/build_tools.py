@@ -26,7 +26,7 @@ from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
 from cerbero.utils import shell
-from cerbero.enums import Platform, Distro
+from cerbero.enums import Platform, Distro, Architecture
 
 
 class BuildTools(BootstrapperBase, Fetch):
@@ -122,6 +122,13 @@ class BuildTools(BootstrapperBase, Fetch):
             os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         shell.new_call([python, '-m', 'pip', 'install', 'setuptools', 'packaging'])
+        if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
+            # Create an x86_64 python for introspection in universal builds
+            python_wrapper = os.path.join(self.config.build_tools_prefix, 'bin', 'python3-x86_64')
+            with open(python_wrapper, 'w') as f:
+                f.write('#!/bin/sh\n')
+                f.write('arch -x86_64 python3 "$@"\n')
+            os.chmod(python_wrapper, 0o755)
 
     async def start(self, jobs=0):
         self.setup_venv()

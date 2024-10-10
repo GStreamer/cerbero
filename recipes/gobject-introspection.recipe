@@ -70,21 +70,16 @@ class Recipe(recipe.Recipe):
         'share/aclocal/introspection.m4'
     ]
 
-    library_type = LibraryType.STATIC
-
     # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1149#note_2562914
     # Remove if introspected Glib is re-added
     patches = [
         f'{name}/0001-Revert-build-Do-not-compile-uninstalled-GIR-into-typ.patch',
         f'{name}/0002-Revert-build-Do-not-install-generated-GLib-GIR-files.patch',
         f'{name}/0001-giscanner-remove-dependency-on-distutils.msvccompile.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/503
+        f'{name}/0001-meson-Use-the-specified-python-if-it-s-custom.patch',
     ]
 
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            # gobject-introspection forces a Python 3 interpreter named "python3",
-            # which on Windows matches the one provided by UCRT64. However, 
-            # Meson's Python 3 interpreter is `python.exe`. Meson
-            # can handle this for us, provided we either don't force the
-            # naming, or supply the correct name to `find_installation` here.
+        if self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
             self.meson_options['python'] = self.config.python_exe

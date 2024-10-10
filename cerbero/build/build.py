@@ -971,9 +971,14 @@ class Meson(Build, ModifyEnvBase):
         ):
             extra_properties += 'needs_exe_wrapper = false\n'
             if self.config.target_arch == Architecture.X86_64:
-                for tool in ('glib-compile-resources', 'gio-querymodules'):
+                tools = ['glib-compile-resources', 'gio-querymodules']
+                pytools = ['glib-mkenums', 'glib-genmarshal', 'gdbus-codegen']
+                if self.config.variants.gi:
+                    tools += ['g-ir-compiler', 'g-ir-generate']
+                    pytools += ['g-ir-scanner', 'g-ir-annotation-tool']
+                for tool in tools:
                     binaries[tool] = [os.path.join(self.config.prefix, 'bin', tool)]
-                for pytool in ('glib-mkenums', 'glib-genmarshal', 'gdbus-codegen'):
+                for pytool in pytools:
                     binaries[pytool] = [self.config.python_exe, os.path.join(self.config.prefix, 'bin', pytool)]
 
         extra_binaries = ''

@@ -767,7 +767,9 @@ class Config(object):
         if self.target_arch != self.arch:
             if self.target_arch == Architecture.X86 and self.arch == Architecture.X86_64:
                 return True
-            if self.cross_universal_type() == 'merged':
+            if self.target_platform == Platform.DARWIN and self.target_arch == Architecture.X86_64:
+                return True
+            if self.target_arch == Architecture.UNIVERSAL and self.cross_universal_type() == 'merged':
                 return True
             return False
         return True
@@ -776,9 +778,14 @@ class Config(object):
         if not self.prefix_is_executable():
             return False
         # When building cross-macos-universal, the merged prefix is executable
-        # on both arm64 and x86_64, but introspection runs executables from the
-        # builddir before merging.
-        if self.target_platform == Platform.DARWIN and self.target_arch == Architecture.UNIVERSAL:
+        # on both arm64 and x86_64, but introspection runs executables before
+        # merging, so we only support it when running on arm64, where we have
+        # Rosetta available.
+        if (
+            self.target_platform == Platform.DARWIN
+            and self.target_arch == Architecture.UNIVERSAL
+            and self.arch != Architecture.ARM64
+        ):
             return False
         return True
 
@@ -974,6 +981,9 @@ class Config(object):
             self.python_exe = Path(self.build_tools_prefix, 'bin', 'python').as_posix()
         else:
             self.python_exe = Path(sys.executable).as_posix()
+        if self.platform == Platform.DARWIN and self.target_arch == Architecture.X86_64:
+            # Created by the build-tools bootstrapper
+            self.python_exe = os.path.join(self.build_tools_prefix, 'bin', 'python3-x86_64')
 
     def _get_exe_suffix(self):
         if self.platform != Platform.WINDOWS:

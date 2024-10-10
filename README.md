@@ -34,6 +34,9 @@ On macOS you will need to have install the following software:
 
 Cerbero will build all other required packages during [bootstrap](#Bootstrap).
 
+Note that introspection and python support will only be enabled when building
+on ARM64 (Apple Silicon).
+
 ### Windows Setup
 
 The initial setup on Windows is automated with the PowerShell script
