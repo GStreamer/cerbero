@@ -79,10 +79,12 @@ class Recipe(recipe.Recipe):
                       self.files_binutils])
         self.files_binutils = files
 
-    def post_install(self):
+    async def install(self):
+        await super().install()
+
         # Prefix binaries with the host triplet
         if self.config.target_platform == Platform.WINDOWS:
-            for f in self.files_list_by_category('bins'):
+            for f in self.files_list_by_category('bins', only_existing=False):
                 f = os.path.join(self.config.prefix, f)
                 shutil.copy(f.replace(self.target + '-', ''), f)
         # libtool m4 macros uses non-prefixed 'strings' command.
@@ -92,4 +94,3 @@ class Recipe(recipe.Recipe):
             if os.path.exists(strings):
                 os.remove(strings)
             shell.symlink('%s-strings' % self.target, 'strings', bindir)
-        super().post_install()
