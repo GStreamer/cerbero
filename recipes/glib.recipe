@@ -78,6 +78,7 @@ class Recipe(recipe.Recipe):
         'bin/glib-genmarshal',
         'bin/gresource%(bext)s',
         'bin/gdbus-codegen',
+        'bin/gio-querymodules%(bext)s',
         '%(libdir)s/glib-2.0/include',
         '%(libdir)s/pkgconfig/gio-2.0.pc',
         '%(libdir)s/pkgconfig/glib-2.0.pc',

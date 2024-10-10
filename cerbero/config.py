@@ -449,8 +449,8 @@ class Config(object):
 
         # Ensure that variants continue to override all other configuration
         self.variants.override(variants_override)
-        if not self.prefix_is_executable() and self.variants.gi:
-            m.warning(_('gobject introspection requires an executable ' "prefix, 'gi' variant will be removed"))
+        if self.variants.gi and not self.gi_supported():
+            m.warning(_("gobject introspection requires an executable target, 'gi' variant will be removed"))
             self.variants.gi = False
 
         for c in list(self.arch_config.values()):
@@ -767,6 +767,18 @@ class Config(object):
         if self.target_arch != self.arch:
             if self.target_arch == Architecture.X86 and self.arch == Architecture.X86_64:
                 return True
+            if self.cross_universal_type() == 'merged':
+                return True
+            return False
+        return True
+
+    def gi_supported(self):
+        if not self.prefix_is_executable():
+            return False
+        # When building cross-macos-universal, the merged prefix is executable
+        # on both arm64 and x86_64, but introspection runs executables from the
+        # builddir before merging.
+        if self.target_platform == Platform.DARWIN and self.target_arch == Architecture.UNIVERSAL:
             return False
         return True
 

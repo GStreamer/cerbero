@@ -960,6 +960,20 @@ class Meson(Build, ModifyEnvBase):
         for k, v in props.items():
             extra_properties += '{} = {}\n'.format(k, str(v))
 
+        # When building cross-macos-universal on arm64, we can use Rosetta to
+        # transparently run the x86_64 binaries. Inform Meson about this.
+        if (
+            self.config.target_platform == Platform.DARWIN
+            and self.config.target_arch != self.config.arch
+            and self.config.arch == Architecture.ARM64
+        ):
+            extra_properties += 'needs_exe_wrapper = false\n'
+            if self.config.target_arch == Architecture.X86_64:
+                for tool in ('glib-compile-resources', 'gio-querymodules'):
+                    binaries[tool] = [os.path.join(self.config.prefix, 'bin', tool)]
+                for pytool in ('glib-mkenums', 'glib-genmarshal', 'gdbus-codegen'):
+                    binaries[pytool] = [self.config.python_exe, os.path.join(self.config.prefix, 'bin', pytool)]
+
         extra_binaries = ''
         for k, v in binaries.items():
             extra_binaries += '{} = {}\n'.format(k, str(v))
