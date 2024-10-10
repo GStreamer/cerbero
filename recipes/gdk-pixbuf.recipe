@@ -40,6 +40,12 @@ class Recipe(recipe.Recipe):
                 '2.10.0', 'loaders.cache')
             shell.replace(cache, {self.config.prefix: '../'})
 
+        # Meson isn't aware that this is a target platform executable
+        if self.config.target_platform == Platform.WINDOWS:
+            pc = os.path.join(self.config.libdir, 'pkgconfig',
+                'gdk-pixbuf-2.0.pc')
+            shell.replace(pc, {'gdk-pixbuf-query-loaders': 'gdk-pixbuf-query-loaders.exe'})
+
         lib = LibtoolLibrary('gdk_pixbuf-2.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gobject-2.0', 'gio-2.0', 'tiff', 'jpeg', 'png16'])
         lib.save()
