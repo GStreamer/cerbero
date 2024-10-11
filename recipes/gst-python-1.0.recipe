@@ -1,0 +1,34 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(custom.GStreamer):
+    name = 'gst-python-1.0'
+    licenses = [License.LGPLv2Plus]
+    btype = BuildType.MESON
+    library_type = LibraryType.SHARED
+    tarball_checksum = '041c2255c1ea9936c777dcb08a36ecaa6a24a69a12fc46ef53f1530d46c59f9d'
+    meson_options = {
+        'tests': 'disabled',
+    }
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-rtsp-server-1.0', 'pygobject']
+
+    files_plugins = [
+        '%(libdir)s/gstreamer-1.0/libgstpython%(mext)s',
+    ]
+    files_python = [
+        '%(pydir)s/gi/overrides/Gst.py',
+        '%(pydir)s/gi/overrides/GstAudio.py',
+        '%(pydir)s/gi/overrides/GstPbutils.py',
+        '%(pydir)s/gi/overrides/GstVideo.py',
+        '%(pydir)s/gi/overrides/_gi_gst%(pext)s',
+    ]
+
+    def prepare(self):
+        if self.config.variants.rust:
+            # runtime dependency gstreamer-webrtc-1.0 is required somewhere down the line, but only if gst-plugins-rs is build ?
+            self.deps += ['gst-plugins-rs', 'gst-plugins-bad-1.0']
+
+        python_exe = self.config.get_build_python_exe()
+        if python_exe:
+            self.meson_options['python-exe'] = str(python_exe)
+        elif self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
+            self.meson_options['python-exe'] = self.config.python_exe
