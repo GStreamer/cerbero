@@ -31,7 +31,6 @@ class Recipe(recipe.Recipe):
     meson_options = {
         # XXX: check whether neon support works better
         'arm_neon' : 'false',
-        'introspection' : 'disabled',
         'installed_tests': 'false',
         'tests': 'false',
     }
@@ -51,7 +50,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")
-            self.meson_options['introspection'] = 'enabled'
 
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
