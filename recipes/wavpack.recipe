@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '5.4.0'
+    version = '5.7.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/dbry/WavPack/archive/%(version)s.tar.gz'
     tarball_dirname = 'WavPack-%(version)s'
-    tarball_checksum = 'abbe5ca3fc918fdd64ef216200a5c896243ea803a059a0662cd362d0fa827cd2'
+    tarball_checksum = 'c5742ba1054d36ff3d22f0101a9be066f55f6becb9b2a7352c79fa362f2d3d76'
     licenses = [{License.BSD_like: ['COPYING']}]
 
     btype = BuildType.CMAKE
@@ -60,15 +60,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             shell.replace(os.path.join(self.config_src_dir, 'wavpack.pc.in'),
                           {'-lwavpack': '-lwavpack @LIBM@'})
-
-    async def install(self):
-        await super().install()
-        # CMake build system installs include/wavpack.h but we want
-        # include/wavpack/wavpack.h
-        incdir = Path(self.config.prefix) / 'include'
-        todir = incdir / 'wavpack'
-        todir.mkdir(exist_ok=True)
-        (incdir / 'wavpack.h').replace(todir / 'wavpack.h')
 
     def post_install(self):
         deps = ['-lm']
