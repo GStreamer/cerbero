@@ -944,7 +944,9 @@ class Meson(Build, ModifyEnvBase):
         build_tool_paths = build_env['PATH'].get()
         for name, tool in build_env.items():
             # Autoconf env vars, incorrectly detected as a build tool because of 'yes'
-            if name.startswith('ac_cv'):
+            if '_cv_' in name:
+                continue
+            if name in ('EDITOR', 'SHELL', '_'):
                 continue
             # Files are always executable on Windows
             if name in ('HISTFILE', 'GST_REGISTRY_1_0'):
