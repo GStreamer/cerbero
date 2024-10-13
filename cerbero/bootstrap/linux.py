@@ -164,7 +164,6 @@ class RedHatBootstrapper(UnixBootstrapper):
         'libXi-devel',
         'perl-XML-Simple',
         'gperf',
-        'wget',
         'libXrandr-devel',
         'libXtst-devel',
         'git',
@@ -178,13 +177,22 @@ class RedHatBootstrapper(UnixBootstrapper):
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
+        dv = self.config.distro_version
 
-        if self.config.distro_version < DistroVersion.FEDORA_23:
+        if dv < 'fedora_23':
             self.tool = ['yum']
-        elif self.config.distro_version in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
+        elif dv in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
             self.tool = ['yum']
-        elif self.config.distro_version == DistroVersion.REDHAT_8:
-            self.tool = ['yum', '--enablerepo=PowerTools']
+        elif dv.startswith('redhat_8'):
+            if dv < 'redhat_8.3':
+                self.tool = ['yum', '--enablerepo=PowerTools']
+            else:
+                self.tool = ['dnf', '--enablerepo=powertools']
+
+        if dv.startswith('fedora_') and dv > 'fedora_39':
+            self.packages.append('curl')
+        else:
+            self.packages.append('wget')
 
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
