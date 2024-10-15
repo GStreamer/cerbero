@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     version = '1.1.1s'
     licenses = [{License.OPENSSL: ['LICENSE']}]
     stype = SourceType.TARBALL
-    url = 'https://gstreamer.freedesktop.org/src/mirror/{0}-{1}.tar.gz'.format(name, version)
+    url = 'https://github.com/openssl/openssl/releases/download/OpenSSL_{0}/openssl-{1}.tar.gz'.format(version.replace('.','_'), version)
     tarball_checksum = 'c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa'
     deps = ['ca-certificates', 'zlib']
     # Parallel make fails randomly due to undefined macros, probably races
