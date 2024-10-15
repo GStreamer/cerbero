@@ -198,20 +198,35 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     return o
 
 
-def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False, shell=False):
+def new_call(
+    cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False, shell=False, input=None
+):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
-        logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
+        if input:
+            logfile.write(f'Running command {cmd!r} with stdin {input} in {cmd_dir}\n')
+        else:
+            logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
         logfile.flush()
     if verbose:
         m.message('Running {!r}\n'.format(cmd))
-    if not interactive:
+    if input:
+        stdin = None
+    elif not interactive:
         stdin = subprocess.DEVNULL
     else:
         stdin = None
     try:
         subprocess.run(
-            cmd, cwd=cmd_dir, env=env, stdout=logfile, stderr=subprocess.STDOUT, stdin=stdin, shell=shell, check=True
+            cmd,
+            cwd=cmd_dir,
+            env=env,
+            stdout=logfile,
+            stderr=subprocess.STDOUT,
+            stdin=stdin,
+            input=input,
+            shell=shell,
+            check=True,
         )
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
