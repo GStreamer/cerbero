@@ -275,6 +275,8 @@ class ArchBootstrapper(UnixBootstrapper):
         'ccache',
         'openssl',
         'alsa-lib',
+        'which',
+        'libpulse',
     ]
 
     def __init__(self, config, offline, assume_yes):
