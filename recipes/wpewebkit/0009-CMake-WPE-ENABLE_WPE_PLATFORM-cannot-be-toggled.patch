@@ -1,7 +1,7 @@
 From 527878df784541243dd99e842e35f0703bfe11d3 Mon Sep 17 00:00:00 2001
 From: Adrian Perez de Castro <aperez@igalia.com>
 Date: Wed, 18 Sep 2024 07:11:34 -0700
-Subject: [PATCH 09/12] [CMake][WPE] ENABLE_WPE_PLATFORM cannot be toggled
+Subject: [PATCH 09/14] [CMake][WPE] ENABLE_WPE_PLATFORM cannot be toggled
  https://bugs.webkit.org/show_bug.cgi?id=279879
 
 Reviewed by Carlos Garcia Campos.

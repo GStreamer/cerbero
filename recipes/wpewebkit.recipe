@@ -203,7 +203,8 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0010-GTK-WPE-IPC-Connection-fails-to-unset-FD_CLOEXEC.patch',
                 'wpewebkit/0011-WPE-Auxiliary-processes-fail-to-launch-if-ProcessPro.patch',
                 'wpewebkit/0012-Add-Android-support-to-Skia-integration.patch',
-                'wpewebkit/0013-Remove-Float16Array-from-WebInspectorUI.patch'
+                'wpewebkit/0013-Remove-Float16Array-from-WebInspectorUI.patch',
+                'wpewebkit/0014-TextureMapper-Preserve-3d-layers-don-t-get-flattened.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

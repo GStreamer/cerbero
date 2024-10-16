@@ -1,7 +1,7 @@
 From 68f64322a1b220c325dfa10afaf3041e83def3ef Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Tue, 24 Sep 2024 03:16:13 -0700
-Subject: [PATCH 10/12] [GTK][WPE] IPC::Connection fails to unset FD_CLOEXEC
+Subject: [PATCH 10/14] [GTK][WPE] IPC::Connection fails to unset FD_CLOEXEC
  https://bugs.webkit.org/show_bug.cgi?id=280256
 
 Reviewed by Carlos Garcia Campos.

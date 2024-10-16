@@ -1,15 +1,15 @@
-From f40d89b20fb748a11061cd97114a128505c1bc8a Mon Sep 17 00:00:00 2001
+From 448728d4475f1235fb94a16a29e32a516a1c4241 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Mon, 23 Sep 2024 16:28:50 +0300
-Subject: [PATCH 12/12] Add Android support to Skia integration
+Subject: [PATCH 12/14] Add Android support to Skia integration
 
 ---
- Source/ThirdParty/skia/CMakeLists.txt         | 23 +++++++++++++++++--
- .../platform/graphics/skia/FontCacheSkia.cpp  | 11 ++++++++-
- 2 files changed, 31 insertions(+), 3 deletions(-)
+ Source/ThirdParty/skia/CMakeLists.txt         | 28 +++++++++++++++++--
+ .../platform/graphics/skia/FontCacheSkia.cpp  | 11 +++++++-
+ 2 files changed, 35 insertions(+), 4 deletions(-)
 
 diff --git a/Source/ThirdParty/skia/CMakeLists.txt b/Source/ThirdParty/skia/CMakeLists.txt
-index 756a9a4532cc..b29dac1a5d25 100644
+index 756a9a4532cc..efe77f7fb965 100644
 --- a/Source/ThirdParty/skia/CMakeLists.txt
 +++ b/Source/ThirdParty/skia/CMakeLists.txt
 @@ -1,10 +1,18 @@
@@ -45,7 +45,7 @@ index 756a9a4532cc..b29dac1a5d25 100644
      src/ports/SkGlobalInitialization_default.cpp
      src/ports/SkImageGenerator_skia.cpp
      src/ports/SkOSFile_posix.cpp
-@@ -892,6 +898,19 @@ add_library(Skia STATIC
+@@ -892,6 +898,23 @@ add_library(Skia STATIC
      modules/skcms/src/skcms_TransformSkx.cc
  )
  
@@ -60,11 +60,23 @@ index 756a9a4532cc..b29dac1a5d25 100644
 +else ()
 +    target_sources(Skia PRIVATE src/ports/SkDebug_stdio.cpp)
 +    target_sources(Skia PRIVATE src/ports/SkFontMgr_fontconfig.cpp)
++
++    target_link_libraries(Skia PRIVATE
++        Fontconfig::Fontconfig
++    )
 +endif ()
 +
  if (USE_SYSTEM_MALLOC)
      target_sources(Skia PRIVATE src/ports/SkMemory_malloc.cpp)
  else ()
+@@ -908,7 +931,6 @@ endif ()
+ 
+ target_link_libraries(Skia PRIVATE
+     Epoxy::Epoxy
+-    Fontconfig::Fontconfig
+     Freetype::Freetype
+     JPEG::JPEG
+     PNG::PNG
 diff --git a/Source/WebCore/platform/graphics/skia/FontCacheSkia.cpp b/Source/WebCore/platform/graphics/skia/FontCacheSkia.cpp
 index d49d11fed66e..95a15bb07c47 100644
 --- a/Source/WebCore/platform/graphics/skia/FontCacheSkia.cpp

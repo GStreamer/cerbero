@@ -1,7 +1,7 @@
 From 4d9121d87aab4d0866f4c570e26ed5a011b32d09 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 15:32:57 +0200
-Subject: [PATCH 01/12] Android logging macro
+Subject: [PATCH 01/14] Android logging macro
 
 ---
  Source/WebKit/config.h | 3 +++

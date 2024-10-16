@@ -1,7 +1,7 @@
 From e65ac14d30368972c7cc40010765982263d8fcec Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Thu, 12 Sep 2024 00:15:33 -0700
-Subject: [PATCH 08/12] [WebDriver][WPE] Mouse interaction simulation needs to
+Subject: [PATCH 08/14] [WebDriver][WPE] Mouse interaction simulation needs to
  take accout device scale with old API
  https://bugs.webkit.org/show_bug.cgi?id=279438
 

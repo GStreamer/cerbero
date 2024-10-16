@@ -1,0 +1,390 @@
+From dd3c5e35bd8ecc9af4790d490846d57eb5e5d5b5 Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Tue, 8 Oct 2024 23:57:25 +0300
+Subject: [PATCH 14/14] [TextureMapper] Preserve-3d layers don't get flattened
+ correctly https://bugs.webkit.org/show_bug.cgi?id=281079
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Reviewed by NOBODY (OOPS!).
+
+The TextureMapper incorrectly flattens layers to wrong 2D plane
+in the 3D rendering context. Instead of accumulating 3D transformations
+for each layer, it resets transformations to the page root layer's 2D plane
+for leaf layers. This fix ensures that proper 3D transforms are applied
+throughout the entire 3D context and leaf layers are flattened correctly.
+
+Expected Behavior (as per CSS spec):
+
+"The element establishing the 3D rendering context, along with other 3D transformed
+elements participating in the context, should be rendered into its own plane.
+This plane includes the element’s backgrounds, borders, box decorations, content,
+and descendant elements—excluding descendants that have their own planes."
+
+* Source/WebCore/platform/graphics/texmap/TextureMapperLayer.cpp:
+(WebCore::TextureMapperFlattenedLayer::TextureMapperFlattenedLayer):
+(WebCore::TextureMapperFlattenedLayer::bind):
+(WebCore::TextureMapperFlattenedLayer::layerRect const):
+(WebCore::TextureMapperFlattenedLayer::surface const):
+(WebCore::TextureMapperFlattenedLayer::paintToTextureMapper):
+(WebCore::TextureMapperLayer::preprocess):
+(WebCore::TextureMapperLayer::collectLayersToFlattenRecursive):
+(WebCore::TextureMapperLayer::flatten):
+(WebCore::TextureMapperLayer::computeFlattenedRegion):
+(WebCore::TextureMapperLayer::postprocess):
+(WebCore::TextureMapperLayer::freeFlattenedLayersRecursive):
+(WebCore::TextureMapperLayer::computeTransformsRecursive):
+(WebCore::TextureMapperLayer::paint):
+(WebCore::TextureMapperLayer::paintSelf):
+(WebCore::TextureMapperLayer::paintSelfAndChildren):
+(WebCore::TextureMapperLayer::flattensAsLeafOf3DSceneOr3DPerspective const):
+(WebCore::TextureMapperLayer::has3DLocalTransform const):
+(WebCore::TextureMapperLayer::accumulatesTransform const):
+(WebCore::TextureMapperLayer::computeOverlapRegions):
+(WebCore::TextureMapperLayer::paintRecursive):
+* Source/WebCore/platform/graphics/texmap/TextureMapperLayer.h:
+---
+ .../graphics/texmap/TextureMapperLayer.cpp    | 202 ++++++++++++++++--
+ .../graphics/texmap/TextureMapperLayer.h      |  14 ++
+ 2 files changed, 201 insertions(+), 15 deletions(-)
+
+diff --git a/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.cpp b/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.cpp
+index 786e23b53075..8c6d064c5860 100644
+--- a/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.cpp
++++ b/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.cpp
+@@ -60,6 +60,40 @@ struct TextureMapperLayer::ComputeTransformData {
+     }
+ };
+ 
++class TextureMapperFlattenedLayer final {
++    WTF_MAKE_FAST_ALLOCATED;
++public:
++    explicit TextureMapperFlattenedLayer(const IntRect& rect)
++        : m_rect(rect)
++    { }
++
++    void bind(TextureMapper& textureMapper)
++    {
++        if (!m_texture)
++            m_texture = textureMapper.acquireTextureFromPool(m_rect.size(), { BitmapTexture::Flags::SupportsAlpha });
++        textureMapper.bindSurface(m_texture.get());
++    }
++
++    inline IntRect layerRect() const
++    {
++        return m_rect;
++    }
++
++    RefPtr<BitmapTexture> surface() const
++    {
++        return m_texture;
++    }
++
++    void paintToTextureMapper(TextureMapper& textureMapper, const FloatRect& targetRect, const TransformationMatrix& modelViewMatrix, float opacity)
++    {
++        textureMapper.drawTexture(*m_texture.get(), targetRect, modelViewMatrix, opacity);
++    }
++
++private:
++    IntRect m_rect;
++    RefPtr<BitmapTexture> m_texture;
++};
++
+ TextureMapperLayer::TextureMapperLayer(Damage::ShouldPropagate propagateDamage)
+     : m_propagateDamage(propagateDamage)
+ {
+@@ -73,6 +107,92 @@ TextureMapperLayer::~TextureMapperLayer()
+     removeFromParent();
+ }
+ 
++void TextureMapperLayer::flattenDescendantLayersIfNecessary(TextureMapperPaintOptions& options)
++{
++    // Preprocess is called as a first step before painting any layers
++
++    // Traverse all children in depth first, post-order
++    for (auto* child : m_children) {
++        child->flattenDescendantLayersIfNecessary(options);
++
++        if (child->flattensAsLeafOf3DSceneOr3DPerspective())
++            child->flatten(options);
++    }
++}
++
++void TextureMapperLayer::flatten(TextureMapperPaintOptions& options)
++{
++    // Flattens descendant layers to into this planes z=0 2D root.
++    if (m_flattenedLayer)
++        m_flattenedLayer = nullptr;
++
++    // Reset transformations as this layer is root 2D
++    SetForScope scopedLocalTransform(m_layerTransforms.localTransform, TransformationMatrix());
++    m_layerTransforms.combined = { };
++    m_layerTransforms.combinedForChildren = { };
++#if USE(COORDINATED_GRAPHICS)
++    SetForScope scopedFutureLocalTransform(m_layerTransforms.futureLocalTransform, TransformationMatrix());
++    m_layerTransforms.futureLocalTransform = { };
++    m_layerTransforms.futureCombined = { };
++    m_layerTransforms.futureCombinedForChildren = { };
++#endif
++    ComputeTransformData data;
++    if (m_state.maskLayer)
++        m_state.maskLayer->computeTransformsRecursive(data);
++    if (m_state.replicaLayer)
++        m_state.replicaLayer->computeTransformsRecursive(data);
++    if (m_state.backdropLayer)
++        m_state.backdropLayer->computeTransformsRecursive(data);
++    for (auto* child : m_children)
++        child->computeTransformsRecursive(data);
++
++    Region layerRegion;
++    computeFlattenedRegion(layerRegion);
++
++    auto flattenedLayerRect = layerRegion.bounds();
++    auto flattenedLayer = WTF::makeUnique<TextureMapperFlattenedLayer>(flattenedLayerRect);
++
++    flattenedLayer->bind(options.textureMapper);
++    {
++        SetForScope scopedSurface(options.surface, flattenedLayer->surface());
++        SetForScope scopedOffset(options.offset, -IntSize(flattenedLayerRect.x(), flattenedLayerRect.y()));
++        SetForScope scopedOpacity(options.opacity, 1);
++
++        paintSelfAndChildren(options);
++    }
++
++    m_flattenedLayer = WTFMove(flattenedLayer);
++    options.textureMapper.bindSurface(options.surface.get());
++}
++
++void TextureMapperLayer::computeFlattenedRegion(Region& region)
++{
++    auto rect = isFlattened() ? m_flattenedLayer->layerRect() : layerRect();
++
++    bool shouldExpand = m_currentFilters.hasOutsets() && !m_state.masksToBounds && !m_state.maskLayer;
++    if (shouldExpand) {
++        auto outsets = m_currentFilters.outsets();
++        rect.move(-outsets.left(), -outsets.top());
++        rect.expand(outsets.left() + outsets.right(), outsets.top() + outsets.bottom());
++    }
++
++    region.unite(enclosingIntRect(m_layerTransforms.combined.mapRect(rect)));
++
++    if (!m_state.masksToBounds && !m_state.maskLayer) {
++        for (auto* child : m_children)
++            child->computeFlattenedRegion(region);
++    }
++}
++
++void TextureMapperLayer::freeFlattenedDescendantLayers()
++{
++    if (m_flattenedLayer)
++        m_flattenedLayer = nullptr;
++
++    for (auto* child : m_children)
++        child->freeFlattenedDescendantLayers();
++}
++
+ void TextureMapperLayer::computeTransformsRecursive(ComputeTransformData& data)
+ {
+     if (m_state.size.isEmpty() && m_state.masksToBounds)
+@@ -100,8 +220,8 @@ void TextureMapperLayer::computeTransformsRecursive(ComputeTransformData& data)
+         if (m_isReplica)
+             m_layerTransforms.combined.translate(-m_state.pos.x(), -m_state.pos.y());
+ 
+-        if (!m_state.preserves3D)
+-            m_layerTransforms.combinedForChildren = m_layerTransforms.combinedForChildren.to2dTransform();
++        if (!accumulatesTransformForChildren())
++            m_layerTransforms.combinedForChildren.flatten();
+         m_layerTransforms.combinedForChildren.multiply(m_state.childrenTransform);
+         m_layerTransforms.combinedForChildren.translate3d(-originX, -originY, -m_state.anchorPoint.z());
+ 
+@@ -121,8 +241,8 @@ void TextureMapperLayer::computeTransformsRecursive(ComputeTransformData& data)
+         m_layerTransforms.futureCombinedForChildren = m_layerTransforms.futureCombined;
+         m_layerTransforms.futureCombined.translate3d(-originX, -originY, -m_state.anchorPoint.z());
+ 
+-        if (!m_state.preserves3D)
+-            m_layerTransforms.futureCombinedForChildren = m_layerTransforms.futureCombinedForChildren.to2dTransform();
++        if (!accumulatesTransformForChildren())
++            m_layerTransforms.futureCombinedForChildren.flatten();
+         m_layerTransforms.futureCombinedForChildren.multiply(m_state.childrenTransform);
+         m_layerTransforms.futureCombinedForChildren.translate3d(-originX, -originY, -m_state.anchorPoint.z());
+ #endif
+@@ -144,13 +264,15 @@ void TextureMapperLayer::computeTransformsRecursive(ComputeTransformData& data)
+         return z / w;
+     };
+ 
+-    data.updateDepthRange(calculateZ(0, 0));
+-    data.updateDepthRange(calculateZ(m_state.size.width(), 0));
+-    data.updateDepthRange(calculateZ(0, m_state.size.height()));
+-    data.updateDepthRange(calculateZ(m_state.size.width(), m_state.size.height()));
++    auto rect = isFlattened() ? m_flattenedLayer->layerRect() : layerRect();
++
++    data.updateDepthRange(calculateZ(rect.x(), rect.y()));
++    data.updateDepthRange(calculateZ(rect.x() + rect.width(), rect.y()));
++    data.updateDepthRange(calculateZ(rect.x(), rect.y() + rect.height()));
++    data.updateDepthRange(calculateZ(rect.x() + rect.width(), rect.y() + rect.height()));
+ 
+     if (m_parent && m_parent->m_state.preserves3D)
+-        m_centerZ = calculateZ(m_state.size.width() / 2, m_state.size.height() / 2);
++        m_centerZ = calculateZ(rect.x() + rect.width() / 2, rect.y() + rect.height() / 2);
+ 
+     if (m_state.maskLayer)
+         m_state.maskLayer->computeTransformsRecursive(data);
+@@ -175,13 +297,18 @@ void TextureMapperLayer::computeTransformsRecursive(ComputeTransformData& data)
+ 
+ void TextureMapperLayer::paint(TextureMapper& textureMapper)
+ {
++    TextureMapperPaintOptions options(textureMapper);
++    options.surface = textureMapper.currentSurface();
++
++    flattenDescendantLayersIfNecessary(options);
++
+     ComputeTransformData data;
+     computeTransformsRecursive(data);
+     textureMapper.setDepthRange(data.zNear, data.zFar);
+ 
+-    TextureMapperPaintOptions options(textureMapper);
+-    options.surface = textureMapper.currentSurface();
+     paintRecursive(options);
++
++    freeFlattenedDescendantLayers();
+ }
+ 
+ void TextureMapperLayer::paintSelf(TextureMapperPaintOptions& options)
+@@ -198,6 +325,14 @@ void TextureMapperLayer::paintSelf(TextureMapperPaintOptions& options)
+     transform.multiply(options.transform);
+     transform.multiply(m_layerTransforms.combined);
+ 
++    if (isFlattened()) {
++        auto flattenedLayerRect = m_flattenedLayer->layerRect();
++        transform.translate3d(flattenedLayerRect.x(), flattenedLayerRect.y(), 0);
++        IntRect drawRect(0, 0, flattenedLayerRect.width(), flattenedLayerRect.height());
++        m_flattenedLayer->paintToTextureMapper(options.textureMapper, drawRect, transform, options.opacity);
++        return;
++    }
++
+     TextureMapperSolidColorLayer solidColorLayer;
+     TextureMapperBackingStore* backingStore = m_backingStore;
+     if (m_state.backgroundColor.isValid()) {
+@@ -340,8 +475,10 @@ void TextureMapperLayer::paintSelfAndChildren(TextureMapperPaintOptions& options
+         }
+     }
+ 
+-    for (auto* child : m_children)
+-        child->paintRecursive(options);
++    if (!isFlattened()) {
++        for (auto* child : m_children)
++            child->paintRecursive(options);
++    }
+ 
+     if (shouldClip)
+         options.textureMapper.endClip();
+@@ -355,6 +492,39 @@ bool TextureMapperLayer::shouldBlend() const
+     return m_currentOpacity < 1;
+ }
+ 
++bool TextureMapperLayer::flattensAsLeafOf3DSceneOr3DPerspective() const
++{
++    bool isLeafOf3DScene = !m_state.preserves3D && (m_parent && m_parent->preserves3D());
++    bool hasPerspective = m_layerTransforms.localTransform.hasPerspective() && m_layerTransforms.localTransform.m34() != -1.f;
++    if ((isLeafOf3DScene || hasPerspective) && !m_children.isEmpty() && has3DLocalTransform())
++        return true;
++
++    return false;
++}
++
++bool TextureMapperLayer::has3DLocalTransform() const
++{
++    return !(!m_layerTransforms.localTransform.m13() && !m_layerTransforms.localTransform.m23()
++        && !m_layerTransforms.localTransform.m31() && !m_layerTransforms.localTransform.m32()
++        && m_layerTransforms.localTransform.m33() == 1 && !m_layerTransforms.localTransform.m34()
++        && !m_layerTransforms.localTransform.m43() && m_layerTransforms.localTransform.m44() == 1);
++}
++
++bool TextureMapperLayer::accumulatesTransformForChildren() const
++{
++    return preserves3D();
++}
++
++bool TextureMapperLayer::preserves3D() const
++{
++    return m_state.preserves3D;
++}
++
++bool TextureMapperLayer::isFlattened() const
++{
++    return m_flattenedLayer != nullptr;
++}
++
+ bool TextureMapperLayer::isVisible() const
+ {
+     if (m_state.size.isEmpty() && (m_state.masksToBounds || m_state.maskLayer || m_children.isEmpty()))
+@@ -576,7 +746,9 @@ void TextureMapperLayer::computeOverlapRegions(ComputeOverlapRegionData& data, c
+         return;
+ 
+     FloatRect localBoundingRect;
+-    if (m_backingStore || m_state.masksToBounds || m_state.maskLayer || hasFilters())
++    if (isFlattened())
++        localBoundingRect = m_flattenedLayer->layerRect();
++    else if (m_backingStore || m_state.masksToBounds || m_state.maskLayer || hasFilters())
+         localBoundingRect = layerRect();
+     else if (m_contentsLayer || m_state.solidColor.isVisible())
+         localBoundingRect = m_state.contentsRect;
+@@ -802,7 +974,7 @@ void TextureMapperLayer::paintRecursive(TextureMapperPaintOptions& options)
+ 
+     SetForScope scopedOpacity(options.opacity, options.opacity * m_currentOpacity);
+ 
+-    if (m_state.preserves3D)
++    if (preserves3D())
+         paintWith3DRenderingContext(options);
+     else if (shouldBlend())
+         paintUsingOverlapRegions(options);
+diff --git a/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.h b/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.h
+index 95f8a501a2ee..2c040ff9c316 100644
+--- a/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.h
++++ b/Source/WebCore/platform/graphics/texmap/TextureMapperLayer.h
+@@ -41,6 +41,7 @@ template<> struct IsDeprecatedWeakRefSmartPointerException<WebCore::TextureMappe
+ namespace WebCore {
+ 
+ class TextureMapper;
++class TextureMapperFlattenedLayer;
+ class TextureMapperPaintOptions;
+ class TextureMapperPlatformLayer;
+ 
+@@ -140,6 +141,11 @@ private:
+         return const_cast<TextureMapperLayer&>(*this);
+     }
+ 
++    void flattenDescendantLayersIfNecessary(TextureMapperPaintOptions&);
++    void flatten(TextureMapperPaintOptions&);
++    void computeFlattenedRegion(Region&);
++    void freeFlattenedDescendantLayers();
++
+     struct ComputeTransformData;
+     void computeTransformsRecursive(ComputeTransformData&);
+ 
+@@ -180,6 +186,13 @@ private:
+ 
+     bool shouldBlend() const;
+ 
++    bool flattensAsLeafOf3DScene() const;
++    bool flattensAsLeafOf3DSceneOr3DPerspective() const;
++    bool has3DLocalTransform() const;
++    bool accumulatesTransformForChildren() const;
++    bool preserves3D() const;
++    bool isFlattened() const;
++
+     inline FloatRect layerRect() const
+     {
+         return FloatRect(FloatPoint::zero(), m_state.size);
+@@ -190,6 +203,7 @@ private:
+     WeakPtr<TextureMapperLayer> m_effectTarget;
+     TextureMapperBackingStore* m_backingStore { nullptr };
+     TextureMapperPlatformLayer* m_contentsLayer { nullptr };
++    std::unique_ptr<TextureMapperFlattenedLayer> m_flattenedLayer { nullptr };
+     float m_currentOpacity { 1.0 };
+     FilterOperations m_currentFilters;
+     float m_centerZ { 0 };
+-- 
+2.43.0
+

@@ -1,7 +1,7 @@
 From 231fd83807ef6e701e534567a5cb2690c3d5f203 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Sun, 22 May 2022 23:03:03 +0300
-Subject: [PATCH 04/12] Workaround for Android emulator samplerExternalOES
+Subject: [PATCH 04/14] Workaround for Android emulator samplerExternalOES
  precision issue
 
 For some unknown reason glShaderSource fails with 0x505 GL_OUT_OF_MEMORY

@@ -1,7 +1,7 @@
 From 052e869d493ae989b1cd2141f4a95bfe0a355ecd Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 25 Oct 2023 23:46:04 +0300
-Subject: [PATCH 06/12] Enable Android on ANGLE for WebGL support
+Subject: [PATCH 06/14] Enable Android on ANGLE for WebGL support
 
 ---
  Source/ThirdParty/ANGLE/CMakeLists.txt                      | 2 ++
