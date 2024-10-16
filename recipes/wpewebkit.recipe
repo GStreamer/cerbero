@@ -202,8 +202,8 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0009-CMake-WPE-ENABLE_WPE_PLATFORM-cannot-be-toggled.patch',
                 'wpewebkit/0010-GTK-WPE-IPC-Connection-fails-to-unset-FD_CLOEXEC.patch',
                 'wpewebkit/0011-WPE-Auxiliary-processes-fail-to-launch-if-ProcessPro.patch',
-                'wpewebkit/0012-Add-Android-support-to-Skia-integration.patch'
-
+                'wpewebkit/0012-Add-Android-support-to-Skia-integration.patch',
+                'wpewebkit/0013-Remove-Float16Array-from-WebInspectorUI.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
