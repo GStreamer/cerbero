@@ -1,7 +1,7 @@
-From d892b0c801d25914f22872aa0e215bf8adf2c935 Mon Sep 17 00:00:00 2001
+From afca5ccc6c28121ee7ffb2d43dc4b391300ab797 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Mon, 2 Sep 2024 18:39:42 -0300
-Subject: [PATCH 3/3] meson: Consider native dependencies also on Linux
+Subject: [PATCH 2/3] meson: Consider native dependencies also on Linux
 
 Fixes building librsvg with Debian Bookworm, which uses GCC 10 and
 needs to be linked against (at least) libdl.
