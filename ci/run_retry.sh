@@ -6,6 +6,8 @@ set -o pipefail
 ERRORS=(
     "Warning: An error occurred while preparing SDK package Android SDK Tools: Connection reset."
     "The Xcode build system has crashed. Build again to continue."
+    "libc++abi: terminating with uncaught exception"
+    "failed to rename archive file: Access is denied. (os error 5)"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
