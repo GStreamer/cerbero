@@ -708,10 +708,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         """
         Runs post installation steps
         """
-        self.fixup_pc_files()
+        self.install_licenses()
         if self.name.startswith('gst'):
             self.generate_gst_la_files()
-        self.install_licenses()
+        self.fixup_pc_files()
 
     def built_version(self):
         """
