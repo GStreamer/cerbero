@@ -7,7 +7,9 @@ ERRORS=(
     "Warning: An error occurred while preparing SDK package Android SDK Tools: Connection reset."
     "The Xcode build system has crashed. Build again to continue."
     "libc++abi: terminating with uncaught exception"
-    "failed to rename archive file: Access is denied. (os error 5)"
+    # https://github.com/rust-lang/rust/issues/127883#issuecomment-2290594194
+    "Access is denied (os error 5)"
+    "LINK : fatal error LNK1104: cannot open file"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
