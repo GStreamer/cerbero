@@ -449,6 +449,7 @@ class Recipe(custom.GStreamer):
         Platform.WINDOWS: [
              '%(libdir)s/gstreamer-1.0/libgstd3d%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstd3d11%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstd3d12%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstwasapi%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
@@ -474,6 +475,7 @@ class Recipe(custom.GStreamer):
         Platform.WINDOWS: [
              '%(libdir)s/gstreamer-1.0/libgstd3d.a', '%(libdir)s/gstreamer-1.0/libgstd3d.la',
              '%(libdir)s/gstreamer-1.0/libgstd3d11.a', '%(libdir)s/gstreamer-1.0/libgstd3d11.la',
+             '%(libdir)s/gstreamer-1.0/libgstd3d12.a', '%(libdir)s/gstreamer-1.0/libgstd3d12.la',
              '%(libdir)s/gstreamer-1.0/libgstwasapi.a', '%(libdir)s/gstreamer-1.0/libgstwasapi.la',
              '%(libdir)s/gstreamer-1.0/libgstdecklink.a', '%(libdir)s/gstreamer-1.0/libgstdecklink.la',
             ],
@@ -526,7 +528,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['d3d11'] = 'enabled'
             self.meson_options['d3d11-math'] = 'enabled'
-            self.meson_options['d3d12'] = 'disabled'
+            self.meson_options['d3d12'] = 'enabled'
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
@@ -541,14 +543,6 @@ class Recipe(custom.GStreamer):
                 self.meson_options['d3d12-wgc'] = 'enabled'
                 # HLSL cross-compile is not supported
                 self.meson_options['d3d-hlsl-precompile'] = 'enabled'
-                # D3D12 needs newer SDK than system installed one with helper library
-                self.deps.append('directx-headers')
-                self.enable_plugin('d3d12', 'sys')
-                self.files_libs += ['libgstd3d12-1.0']
-                self.files_plugins_devel += [
-                    'include/gstreamer-1.0/gst/d3d12',
-                    '%(libdir)s/pkgconfig/gstreamer-d3d12-1.0.pc',
-                ]
                 # Download webview2 nuget package
                 self.deps.append('webview2')
                 self.enable_plugin('webview2', 'sys')
@@ -568,6 +562,14 @@ class Recipe(custom.GStreamer):
 
             # d3d11/d3d12 HLSL shader library
             self.files_libs += ['libgstd3dshader-1.0']
+
+            # D3D12 needs newer SDK than system installed one with helper library
+            self.deps.append('directx-headers')
+            self.files_libs += ['libgstd3d12-1.0']
+            self.files_plugins_devel += [
+                'include/gstreamer-1.0/gst/d3d12',
+                '%(libdir)s/pkgconfig/gstreamer-d3d12-1.0.pc',
+            ]
 
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
