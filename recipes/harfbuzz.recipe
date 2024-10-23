@@ -30,6 +30,7 @@ class Recipe(recipe.Recipe):
         # Disable werror from pragmas. Currently fails building on macOS 12.3
         # and should actually be controlled by the build system.
         self.append_env('CFLAGS', '-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR')
+        self.append_env('CXXFLAGS', '-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR')
 
         if self.config.target_platform == Platform.DARWIN:
             self.meson_options['coretext'] = 'enabled'
