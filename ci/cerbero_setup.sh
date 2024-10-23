@@ -132,9 +132,9 @@ cerbero_deps_script() {
     $CERBERO $CERBERO_ARGS show-config
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
     $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
-    $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
-    $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
-    $CERBERO $CERBERO_ARGS build --offline $more_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build --offline $more_deps
 
     if [[ -n ${CERBERO_OVERRIDDEN_DIST_DIR} ]]; then
         mkdir -p "${CERBERO_HOME}/dist/${ARCH}"
