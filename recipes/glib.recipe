@@ -121,6 +121,7 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
+        # glib-2.80.5/COPYING: Can't create 'glib-2.80.5/COPYING': No such file or directory
         if self.config.platform == Platform.WINDOWS:
             self.force_tarfile = True
 
