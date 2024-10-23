@@ -106,7 +106,14 @@ class Recipe(recipe.Recipe):
                 logfile=self.logfile,
             )
         else:
-            ar = shutil.which('ar')
+            if self.config.variants.mingw:
+                ar = os.path.join(
+                    self.config.toolchain_prefix,
+                    'bin',
+                    f'{self.config.tools_prefix}ar'
+                )
+            else:
+                ar = shutil.which('ar')
             with tempfile.TemporaryDirectory() as tmpdir:
                 whole_lib = os.path.join(self.config.libdir, 'libx265.a')
                 shutil.copy(whole_lib, os.path.join(tmpdir, 'libx265-8bit.a'))
