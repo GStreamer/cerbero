@@ -31,6 +31,14 @@ inputs:
   s3-upload-path:
     description: 'S3 path to upload to'
     required: false
+  gst-plugins-rs-repo:
+    description: 'Repository to use for gst-plugins-rs'
+    required: false
+    default: 'https://github.com/blinemedical/gst-plugins-rs'
+  gst-plugins-rs-ref:
+    description: 'Ref/tag to use for gst-plugins-rs'
+    required: false
+    default: 'gstreamer-1.24.8'
   force:
     description: 'Whether to force the build'
     required: false
@@ -185,6 +193,8 @@ runs:
         CERBERO_ARGS: ${{ inputs.cerbero-args }}
         CERBERO_PACKAGE_ARGS: ${{ inputs.cerbero-package-args }}
         CERBERO_PACKAGE_ORIGIN: ${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.version-info.outputs.cerbero-short-sha }}
+        GST_PLUGINS_RS_SOURCE: ${{ inputs.gst-plugins-rs-repo }}
+        GST_PLUGINS_RS_REF: ${{ inputs.gst-plugins-rs-ref }}
       run: |
         # Set up Cerbero configuration
         echo "cerbero-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -199,6 +209,10 @@ runs:
         echo "vs_install_version = \"vs17\"" >> localconf.cbc
         echo "num_of_cpus = ${NUMBER_OF_PROCESSORS}" >> localconf.cbc
         echo "package_origin = \"${CERBERO_PACKAGE_ORIGIN}\"" >> localconf.cbc
+
+        # Switch gst-plugins-rs provider to blinemedical
+        echo "recipes_remotes = {'gst-plugins-rs': {'patched': '${GST_PLUGINS_RS_SOURCE}'}}" >> localconf.cbc
+        echo "recipes_commits = {'gst-plugins-rs': 'patched/${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
         cat localconf.cbc
 
         git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
