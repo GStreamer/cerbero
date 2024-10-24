@@ -35,7 +35,6 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' -DWIN32=1'
         if self.config.target_platform == Platform.ANDROID:
             # configure for android
-            self.configure_options += ' -DANDROID_NDK=1 '
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
         self.configure_options += ' -DZLIB_ROOT=%s ' % self.config.prefix
 

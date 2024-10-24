@@ -24,7 +24,7 @@ import asyncio
 from pathlib import Path
 from itertools import chain
 
-from cerbero.enums import Platform, Architecture, Distro, LibraryType
+from cerbero.enums import Platform, Architecture, Distro, DistroVersion, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import shell, add_system_libs, determine_num_cargo_jobs
 from cerbero.utils import messages as m
@@ -704,11 +704,37 @@ class CMake(MakefilesBase):
         elif self.config.target_platform == Platform.IOS:
             system_name = 'iOS'
 
-        if self.config.cross_compiling() or self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += [f'-DCMAKE_SYSTEM_NAME={system_name}']
-
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.configure_options += ['-DCMAKE_OSX_ARCHITECTURES=' + self.config.target_arch]
+
+        # We always need a toolchain file because CMakeLists.txt requires these values to be set.
+        # The Android NDK provides one, so we use that as-is.
+        # This recipe uses these to decide which cpuinfo implementation to use:
+        # https://github.com/libjpeg-turbo/libjpeg-turbo/blob/3.0.3/CMakeLists.txt#L92
+        if self.config.target_platform == Platform.ANDROID:
+            arch = self.config.target_arch
+            if self.config.target_arch == Architecture.ARMv7:
+                arch = 'armeabi-v7a'
+            elif self.config.target_arch == Architecture.ARM64:
+                arch = 'arm64-v8a'
+            self.configure_options += [
+                f"-DCMAKE_TOOLCHAIN_FILE={self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake",
+                f'-DANDROID_ABI={arch}',
+                # Required by taglib and svt-av1
+                f'-DANDROID_PLATFORM={DistroVersion.get_android_api_version(self.config.target_distro_version)}',
+            ]
+        # A toolchain file triggers specific cross compiling logic
+        # in wavpack and taglib
+        elif self.config.cross_compiling():
+            with open(f'{self.config_src_dir}/toolchain.cmake', 'w') as f:
+                f.write(f'set(CMAKE_SYSTEM_NAME {system_name})\n')
+                f.write(f'set(CMAKE_SYSTEM_PROCESSOR {self.config.target_arch})\n')
+            self.configure_options += [f'-DCMAKE_TOOLCHAIN_FILE={self.config_src_dir}/toolchain.cmake']
+        elif self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += [
+                f'-DCMAKE_SYSTEM_NAME={system_name}',
+                f'-DCMAKE_SYSTEM_PROCESSOR={self.config.target_arch}',
+            ]
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -716,9 +742,13 @@ class CMake(MakefilesBase):
             sysroot = r.match(cflags).group(1)
             self.configure_options += ['-DCMAKE_OSX_SYSROOT=' + sysroot]
 
+        # Supplying these with the Android toolchain file breaks the former
+        if self.config.target_platform != Platform.ANDROID:
+            self.configure_options += [
+                '-DCMAKE_C_COMPILER=' + cc,
+                '-DCMAKE_CXX_COMPILER=' + cxx,
+            ]
         self.configure_options += [
-            '-DCMAKE_C_COMPILER=' + cc,
-            '-DCMAKE_CXX_COMPILER=' + cxx,
             '-DCMAKE_C_FLAGS=' + cflags,
             '-DCMAKE_CXX_FLAGS=' + cxxflags,
             '-DLIB_SUFFIX=' + self.config.lib_suffix,

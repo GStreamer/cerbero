@@ -21,35 +21,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libqrencode']
     files_devel = ['include/qrencode.h', '%(libdir)s/pkgconfig/libqrencode.pc']
 
-    async def configure(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            system_name = 'Windows'
-        elif self.config.target_platform == Platform.LINUX:
-            system_name = 'Linux'
-        elif self.config.target_platform == Platform.DARWIN:
-            system_name = 'Darwin'
-        elif self.config.target_platform == Platform.IOS:
-            system_name = 'iOS'
-
-        # We always need a toolchain file because CMakeLists.txt requires these values to be set.
-        # The Android NDK provides one, so we use that as-is.
-        # This recipe uses these to decide which cpuinfo implementation to use:
-        # https://github.com/libjpeg-turbo/libjpeg-turbo/blob/3.0.3/CMakeLists.txt#L92
-        if self.config.target_platform == Platform.ANDROID:
-            arch = self.config.target_arch
-            if self.config.target_arch == Architecture.ARMv7:
-                arch = 'armeabi-v7a'
-            elif self.config.target_arch == Architecture.ARM64:
-                arch = 'arm64-v8a'
-            self.configure_options += f" -DCMAKE_TOOLCHAIN_FILE={self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake -DANDROID_ABI={arch}"
-        else:
-            with open(f'{self.config_src_dir}/toolchain.cmake', 'w') as f:
-                f.write(f'set(CMAKE_SYSTEM_NAME {system_name})\n')
-                f.write(f'set(CMAKE_SYSTEM_PROCESSOR {self.config.target_arch})\n')
-            self.configure_options += f' -DCMAKE_TOOLCHAIN_FILE={self.config_src_dir}/toolchain.cmake'
-
-        await super().configure()
-
     def post_install(self):
         # Meson does not generate la files
         libtool_la = LibtoolLibrary('libqrencode', None, None, None,
