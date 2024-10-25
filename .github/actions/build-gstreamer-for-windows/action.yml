@@ -212,7 +212,7 @@ runs:
 
         # Switch gst-plugins-rs provider to blinemedical
         echo "recipes_remotes = {'gst-plugins-rs': {'patched': '${GST_PLUGINS_RS_SOURCE}'}}" >> localconf.cbc
-        echo "recipes_commits = {'gst-plugins-rs': 'patched/${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
+        echo "recipes_commits = {'gst-plugins-rs': '${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
         cat localconf.cbc
 
         git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
