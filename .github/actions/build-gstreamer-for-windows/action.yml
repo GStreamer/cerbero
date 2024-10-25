@@ -38,7 +38,7 @@ inputs:
   gst-plugins-rs-ref:
     description: 'Ref/tag to use for gst-plugins-rs'
     required: false
-    default: '0.12-lldc'
+    default: '0.12.9-lldc.1'
   force:
     description: 'Whether to force the build'
     required: false
