@@ -587,11 +587,6 @@ class FilesProvider(object):
         for x in files:
             file = pattern % x
             typelibs[file] = None
-        # Add the architecture for universal builds
-        pattern = '{}/{}/girepository-1.0/%s.typelib'.format(self.extensions['libdir'], self.config.target_arch)
-        for x in files:
-            file = pattern % x
-            typelibs[file] = None
         return typelibs
 
     def _list_girfiles(self):
@@ -611,11 +606,6 @@ class FilesProvider(object):
         files = {}
         # Use a * for the arch in universal builds
         pattern = 'share/gir-1.0/%s.gir'
-        for gir in girs:
-            file = pattern % gir
-            files[file] = None
-        # Add the architecture for universal builds
-        pattern = 'share/gir-1.0/%s/%%s.gir' % self.config.target_arch
         for gir in girs:
             file = pattern % gir
             files[file] = None
