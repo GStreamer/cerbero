@@ -11,6 +11,9 @@ class Recipe(recipe.Recipe):
     url = f'https://github.com/libproxy/libproxy/archive/refs/tags/{version}.tar.gz'
     tarball_checksum = 'a6e2220349b2025de9b6d9d7f8bb347bf0c728f02a921761ad5f9f66c7436de9'
 
+    # libproxy only builds a dynamic library
+    library_type = LibraryType.SHARED
+
     # Symbol export in MSVS (all compilers) is broken,
     # relies on -fvisibility=default
     can_msvc = False
@@ -38,7 +41,7 @@ class Recipe(recipe.Recipe):
             self.meson_options['config-osx'] = 'false'
 
     def post_install(self):
-        LibtoolLibrary('libproxy', 0, 5, 4, self.config.libdir,
+        LibtoolLibrary('libproxy', None, None, None, self.config.libdir,
                 self.config.target_platform).save()
         super().post_install()
 
