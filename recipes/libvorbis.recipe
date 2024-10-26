@@ -23,8 +23,16 @@ class Recipe(recipe.Recipe):
     ]
 
     def post_install(self):
-        LibtoolLibrary(self.name, 1, 3, 7,
+        LibtoolLibrary('libvorbis', None, None, None,
                         self.config.libdir, self.config.target_platform,
                         deps=['ogg'],
+                        static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('libvorbisenc', None, None, None,
+                        self.config.libdir, self.config.target_platform,
+                        deps=['vorbis'],
+                        static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('libvorbisfile', None, None, None,
+                        self.config.libdir, self.config.target_platform,
+                        deps=['vorbis'],
                         static_only=self.library_type == LibraryType.STATIC).save()
         super().post_install()
