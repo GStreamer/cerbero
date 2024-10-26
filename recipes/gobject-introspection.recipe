@@ -1,6 +1,6 @@
  # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import sys
 
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gobject-introspection'
@@ -12,8 +12,14 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
     deps = ['glib'] # 'glib-base'
+    meson_options = {
+        'doctool': 'disabled',
+        'cairo': 'disabled',
+    }
 
-    files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
+    # libgirepository is built with shared_library()
+    library_type = LibraryType.SHARED
+    files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
     files_typelibs = ['cairo-1.0',
         'DBus-1.0',
@@ -34,15 +40,12 @@ class Recipe(recipe.Recipe):
         'xlib-2.0']
     files_gi = [
         '%(libdir)s/gobject-introspection/giscanner/__init__.py',
-        '%(libdir)s/gobject-introspection/giscanner/_giscanner%(pext)s',
+        '%(libdir)s/gobject-introspection/giscanner/_giscanner*%(pext)s',
         '%(libdir)s/gobject-introspection/giscanner/annotationmain.py',
         '%(libdir)s/gobject-introspection/giscanner/annotationparser.py',
         '%(libdir)s/gobject-introspection/giscanner/ast.py',
         '%(libdir)s/gobject-introspection/giscanner/cachestore.py',
         '%(libdir)s/gobject-introspection/giscanner/codegen.py',
-        '%(libdir)s/gobject-introspection/giscanner/collections/__init__.py',
-        '%(libdir)s/gobject-introspection/giscanner/collections/counter.py',
-        '%(libdir)s/gobject-introspection/giscanner/collections/ordereddict.py',
         '%(libdir)s/gobject-introspection/giscanner/docmain.py',
         '%(libdir)s/gobject-introspection/giscanner/docwriter.py',
         '%(libdir)s/gobject-introspection/giscanner/dumper.py',
@@ -50,7 +53,6 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/gobject-introspection/giscanner/girparser.py',
         '%(libdir)s/gobject-introspection/giscanner/girwriter.py',
         '%(libdir)s/gobject-introspection/giscanner/introspectablepass.py',
-        '%(libdir)s/gobject-introspection/giscanner/libtoolimporter.py',
         '%(libdir)s/gobject-introspection/giscanner/maintransformer.py',
         '%(libdir)s/gobject-introspection/giscanner/message.py',
         '%(libdir)s/gobject-introspection/giscanner/scannermain.py',
@@ -83,3 +85,11 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
             self.meson_options['python'] = self.config.python_exe
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libgirepository-1.0', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=['gobject-2.0', 'gio-2.0', 'gmodule-2.0', 'ffi'])
+        libtool_la.save()
+        super().post_install()
