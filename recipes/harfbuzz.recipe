@@ -14,16 +14,18 @@ class Recipe(recipe.Recipe):
     meson_options = {'icu': 'enabled',
                      'glib': 'enabled',
                      'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
-                     'gobject': 'disabled',
+                     'gobject': 'enabled',
                      'icu_builtin': 'false',
-                     'introspection': 'disabled',
                      'tests': 'disabled'}
 
-    patches = []
-
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
-    files_libs = ['libharfbuzz', 'libharfbuzz-icu']
-    files_devel = ['include/harfbuzz/*.h', '%(libdir)s/pkgconfig/harfbuzz.pc']
+    files_libs = ['libharfbuzz', 'libharfbuzz-icu', 'libharfbuzz-gobject']
+    files_devel = [
+        'include/harfbuzz/*.h',
+        '%(libdir)s/pkgconfig/harfbuzz.pc',
+        '%(libdir)s/pkgconfig/harfbuzz-icu.pc',
+        '%(libdir)s/pkgconfig/harfbuzz-gobject.pc',
+    ]
     files_typelibs = ['HarfBuzz-0.0']
 
     def prepare(self):
@@ -40,7 +42,7 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('harfbuzz', None, None, None,
                 self.config.libdir, self.config.target_platform,
                 deps=['glib-2.0', 'freetype', 'fontconfig']).save()
-        LibtoolLibrary('harfbuzz-subset', None, None, None,
+        LibtoolLibrary('harfbuzz-gobject', None, None, None,
                 self.config.libdir, self.config.target_platform,
-                deps=['harfbuzz']).save()
+                deps=['gobject-2.0', 'harfbuzz']).save()
         super().post_install()
