@@ -27,9 +27,10 @@ class Recipe(recipe.Recipe):
     files_loader = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
     files_devel = ['include/librsvg-2.0/librsvg/*.h',
                    '%(libdir)s/pkgconfig/librsvg-2.0.pc']
-    files_typelibs = ['Rsvg-2.0']
+    #files_typelibs = ['Rsvg-2.0']
 
     meson_options = {
+        'pixbuf-loader': 'enabled',
         'introspection': 'disabled',
         'docs': 'disabled',
         'vala': 'disabled',
@@ -39,6 +40,7 @@ class Recipe(recipe.Recipe):
     patches = [
         f"{name}/0001-makedef-rework-flags-to-work-with-Ubuntu-and-Fedora.patch",
         f"{name}/0002-meson-Consider-native-dependencies-also-on-Linux.patch",
+        # https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1040
         f"{name}/0003-meson-Use-a-temporary-directory-instead-of-a-tempora.patch",
     ]
 
@@ -126,7 +128,7 @@ class Recipe(recipe.Recipe):
         await super().compile()
 
     def post_install(self):
-        LibtoolLibrary('librsvg', None, None, None, self.config.libdir,
+        LibtoolLibrary('librsvg-2', None, None, None, self.config.libdir,
                 self.config.target_platform).save()
         # It's not actually needed for restricting the export list, but for
         # removing the bitcode from the static library
