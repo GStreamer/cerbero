@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.tools.libtool import LibtoolLibrary
-from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'cairo'
@@ -69,6 +68,10 @@ class Recipe(recipe.Recipe):
                                     deps=['gobject-2.0', 'pixman-1', 'freetype', 'fontconfig', 'png16', 'z'])
         libtool_la.save()
         libtool_la = LibtoolLibrary('libcairo-gobject', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=['cairo', 'gobject-2.0', 'pixman-1', 'freetype', 'fontconfig', 'png16', 'z'])
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('libcairo-script-interpreter', None, None, None,
                                     self.config.libdir, self.config.target_platform,
                                     deps=['cairo', 'gobject-2.0', 'pixman-1', 'freetype', 'fontconfig', 'png16', 'z'])
         libtool_la.save()
