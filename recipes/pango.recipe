@@ -10,7 +10,6 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '8800f812d89ee61388188703203f3a7878963c22f8695aaf1fa0a1a1428d17ae'
     licenses = [License.LGPLv2Plus]
     deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'harfbuzz']
-    meson_options = {'introspection': 'disabled'}
     patches = [
       # TODO: propose upstream for merging
       'pango/0001-meson-fix-freetype-lookup-with-MSVC-using-pkg-config.patch',
@@ -39,7 +38,7 @@ class Recipe(recipe.Recipe):
         'Pango-1.0',
         'PangoCairo-1.0',
         'PangoFT2-1.0'
-        ]
+    ]
 
     def post_install(self):
         LibtoolLibrary('pango-1.0', None, None, None, self.config.libdir,
