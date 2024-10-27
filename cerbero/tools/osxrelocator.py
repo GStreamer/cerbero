@@ -37,9 +37,9 @@ class OSXRelocator(object):
     ID if the file is a shared library.
     """
 
-    def __init__(self, root, lib_prefix, recursive, logfile=None):
+    def __init__(self, root, install_prefix, recursive, logfile=None):
         self.root = root
-        self.lib_prefix = self._fix_path(lib_prefix)
+        self.install_prefix = self._fix_path(install_prefix)
         self.recursive = recursive
         self.use_relative_paths = True
         self.logfile = None
@@ -59,7 +59,7 @@ class OSXRelocator(object):
         @object_file: Path to the object file
         @id: New ID; if None, it'll be `@rpath/<basename>`
         """
-        id = id or object_file.replace(self.lib_prefix, '@rpath')
+        id = id or object_file.replace(self.install_prefix, '@rpath')
         if not self._is_mach_o_file(object_file):
             return
         cmd = [INT_CMD, '-id', id, object_file]
@@ -96,7 +96,7 @@ class OSXRelocator(object):
             raise FatalError(f'Cannot relocate a fixed location framework: {dylib_id}')
         # With that out of the way, we need to sort out how many parents
         # need to be navigated to reach the root of the GStreamer prefix
-        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/'))
+        depth = len(os.path.dirname(original_file).split('/')) - len(self.install_prefix.split('/'))
         p_depth = '/..' * depth
         # These paths assume that the file being relocated resides within
         # <GStreamer root>/lib
@@ -133,13 +133,11 @@ class OSXRelocator(object):
             cmd = [INT_CMD, '-add_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
         # Change dependencies' paths from absolute to @rpath/
+        print(original_file, self.install_prefix)
         for lib in self.list_shared_libraries(object_file):
-            if self.lib_prefix in lib:
-                new_lib = lib.replace(self.lib_prefix, '@rpath')
-            elif '@rpath/lib/' in lib:
-                # These are leftovers from meson thinking RPATH == prefix
-                new_lib = lib.replace('@rpath/lib/', '@rpath/')
-            else:
+            new_lib = lib.replace(self.install_prefix, '@rpath').replace('@rpath/lib/', '@rpath/')
+            # These are leftovers from meson thinking RPATH == prefix
+            if new_lib == lib:
                 continue
             cmd = [INT_CMD, '-change', lib, new_lib, object_file]
             shell.new_call(cmd, fail=False, logfile=self.logfile)
