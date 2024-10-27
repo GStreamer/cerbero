@@ -981,7 +981,11 @@ class Config(object):
             self.python_exe = Path(self.build_tools_prefix, 'bin', 'python').as_posix()
         else:
             self.python_exe = Path(sys.executable).as_posix()
-        if self.platform == Platform.DARWIN and self.target_arch == Architecture.X86_64:
+        if (
+            self.platform == Platform.DARWIN
+            and self.arch == Architecture.ARM64
+            and self.target_arch == Architecture.X86_64
+        ):
             # Created by the build-tools bootstrapper
             self.python_exe = os.path.join(self.build_tools_prefix, 'bin', 'python3-x86_64')
 
