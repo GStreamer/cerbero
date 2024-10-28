@@ -34,11 +34,9 @@ inputs:
   gst-plugins-rs-repo:
     description: 'Repository to use for gst-plugins-rs'
     required: false
-    default: 'https://github.com/blinemedical/gst-plugins-rs'
   gst-plugins-rs-ref:
     description: 'Ref/tag to use for gst-plugins-rs'
     required: false
-    default: '0.12.9-lldc.1'
   force:
     description: 'Whether to force the build'
     required: false
@@ -210,9 +208,11 @@ runs:
         echo "num_of_cpus = ${NUMBER_OF_PROCESSORS}" >> localconf.cbc
         echo "package_origin = \"${CERBERO_PACKAGE_ORIGIN}\"" >> localconf.cbc
 
-        # Switch gst-plugins-rs provider to blinemedical
-        echo "recipes_remotes = {'gst-plugins-rs': {'patched': '${GST_PLUGINS_RS_SOURCE}'}}" >> localconf.cbc
-        echo "recipes_commits = {'gst-plugins-rs': '${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
+        # Handle custom gst-plugins-rs provider
+        if [ -n "${GST_PLUGINS_RS_SOURCE}" ] && [ -n "${GST_PLUGINS_RS_REF}" ]; then
+          echo "recipes_remotes = {'gst-plugins-rs': {'patched': '${GST_PLUGINS_RS_SOURCE}'}}" >> localconf.cbc
+          echo "recipes_commits = {'gst-plugins-rs': '${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
+        fi
         cat localconf.cbc
 
         git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
