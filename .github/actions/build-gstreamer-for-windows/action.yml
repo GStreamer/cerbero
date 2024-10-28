@@ -221,7 +221,7 @@ runs:
         echo "CERBERO_ARGS=${CERBERO_ARGS}" >> $GITHUB_ENV
         echo "CERBERO_PACKAGE_ARGS=${CERBERO_PACKAGE_ARGS}" >> $GITHUB_ENV
 
-        config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}" | sha256sum | cut -d' ' -f1)
+        config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}${GST_PLUGINS_RS_SOURCE}${GST_PLUGINS_RS_REF}" | sha256sum | cut -d' ' -f1)
         echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
 
     - id: restore-cerbero-sources-cache
