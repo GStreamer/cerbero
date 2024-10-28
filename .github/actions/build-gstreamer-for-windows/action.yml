@@ -31,6 +31,12 @@ inputs:
   s3-upload-path:
     description: 'S3 path to upload to'
     required: false
+  gst-plugins-rs-repo:
+    description: 'Repository to use for gst-plugins-rs'
+    required: false
+  gst-plugins-rs-ref:
+    description: 'Ref/tag to use for gst-plugins-rs'
+    required: false
   force:
     description: 'Whether to force the build'
     required: false
@@ -185,6 +191,8 @@ runs:
         CERBERO_ARGS: ${{ inputs.cerbero-args }}
         CERBERO_PACKAGE_ARGS: ${{ inputs.cerbero-package-args }}
         CERBERO_PACKAGE_ORIGIN: ${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.version-info.outputs.cerbero-short-sha }}
+        GST_PLUGINS_RS_SOURCE: ${{ inputs.gst-plugins-rs-repo }}
+        GST_PLUGINS_RS_REF: ${{ inputs.gst-plugins-rs-ref }}
       run: |
         # Set up Cerbero configuration
         echo "cerbero-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -199,6 +207,12 @@ runs:
         echo "vs_install_version = \"vs17\"" >> localconf.cbc
         echo "num_of_cpus = ${NUMBER_OF_PROCESSORS}" >> localconf.cbc
         echo "package_origin = \"${CERBERO_PACKAGE_ORIGIN}\"" >> localconf.cbc
+
+        # Handle custom gst-plugins-rs provider
+        if [ -n "${GST_PLUGINS_RS_SOURCE}" ] && [ -n "${GST_PLUGINS_RS_REF}" ]; then
+          echo "recipes_remotes = {'gst-plugins-rs': {'patched': '${GST_PLUGINS_RS_SOURCE}'}}" >> localconf.cbc
+          echo "recipes_commits = {'gst-plugins-rs': '${GST_PLUGINS_RS_REF}'}" >> localconf.cbc
+        fi
         cat localconf.cbc
 
         git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
@@ -207,7 +221,7 @@ runs:
         echo "CERBERO_ARGS=${CERBERO_ARGS}" >> $GITHUB_ENV
         echo "CERBERO_PACKAGE_ARGS=${CERBERO_PACKAGE_ARGS}" >> $GITHUB_ENV
 
-        config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}" | sha256sum | cut -d' ' -f1)
+        config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}${GST_PLUGINS_RS_SOURCE}${GST_PLUGINS_RS_REF}" | sha256sum | cut -d' ' -f1)
         echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
 
     - id: restore-cerbero-sources-cache
