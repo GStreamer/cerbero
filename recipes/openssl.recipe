@@ -149,7 +149,6 @@ class Recipe(recipe.Recipe):
             self.make += ['build_libs', 'openssl.pc', 'libssl.pc', 'libcrypto.pc']
             self.make_install = ['make', 'install_dev', 'RANLIB=' + ranlib]
 
-       
         if self.config.platform == Platform.WINDOWS:
             # Ensure that our Perl's File/Spec.pm uses backward slashes when
             # building for MSVC and forward-slashes when building for MinGW.
@@ -179,6 +178,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.IOS:
             self.library_type = LibraryType.STATIC
         if self.config.target_platform == Platform.ANDROID:
+            self.patches += [
+                'openssl/0004-Android-fix-relocation-of-OPENSSL_armcap_P.patch',
+            ]
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
             self.set_env('ANDROID_NDK_ROOT', self.get_env('ANDROID_NDK_HOME'))
 
