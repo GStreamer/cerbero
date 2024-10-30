@@ -27,7 +27,7 @@ from hashlib import sha256
 from cerbero.commands import Command, register_command
 from cerbero.enums import Platform, Distro
 from cerbero.errors import FatalError
-from cerbero.utils import _, N_, ArgparseArgument, git, shell, run_until_complete
+from cerbero.utils import N_, ArgparseArgument, git, shell, run_until_complete
 from cerbero.utils import messages as m
 
 
@@ -39,14 +39,12 @@ class BaseCache(Command):
     log_size = 10
 
     def __init__(self, args=[]):
-        args.append(
+        args += [
             ArgparseArgument(
-                '--commit', action='store', type=str, default='HEAD', help=_('the commit to pick artifact from')
-            )
-        )
-        args.append(
-            ArgparseArgument('--branch', action='store', type=str, default='main', help=_('Git branch to search from'))
-        )
+                '--commit', action='store', type=str, default='HEAD', help='the commit to pick artifact from'
+            ),
+            ArgparseArgument('--branch', action='store', type=str, default='main', help='Git branch to search from'),
+        ]
         Command.__init__(self, args)
 
     def get_ci_builds_dir(self, config):
@@ -144,7 +142,7 @@ class BaseCache(Command):
 
     def run(self, config, args):
         if not config.uninstalled:
-            raise FatalError(_('fetch-cache is only available with ' 'cerbero-uninstalled'))
+            raise FatalError('fetch-cache is only available with cerbero-uninstalled')
 
 
 class FetchCache(BaseCache):
@@ -154,7 +152,7 @@ class FetchCache(BaseCache):
     def __init__(self, args=[]):
         args.append(
             ArgparseArgument(
-                '--namespace', action='store', type=str, default='gstreamer', help=_('GitLab namespace to search from')
+                '--namespace', action='store', type=str, default='gstreamer', help='GitLab namespace to relocate from'
             )
         )
         BaseCache.__init__(self, args)
@@ -370,7 +368,7 @@ class UploadCache(BaseCache):
         deps_filepath = self.get_deps_filepath(config)
         log_filepath = self.get_log_filepath(config)
         if not os.path.exists(deps_filepath) or not os.path.exists(log_filepath):
-            raise FatalError(_('gen-cache must be run before running upload-cache.'))
+            raise FatalError('gen-cache must be run before running upload-cache.')
 
         try:
             # Setup tempory private key from env
