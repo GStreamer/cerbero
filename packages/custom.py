@@ -5,7 +5,7 @@ from cerbero.enums import License
 
 class GStreamer:
     url = 'http://gstreamer.freedesktop.org'
-    version = '1.24.9'
+    version = '1.24.9.1'
     vendor = 'GStreamer Project'
     licenses = [License.LGPLv2Plus]
     org = 'org.freedesktop.gstreamer'
