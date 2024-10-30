@@ -133,7 +133,6 @@ class OSXRelocator(object):
             cmd = [INT_CMD, '-add_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
         # Change dependencies' paths from absolute to @rpath/
-        print(original_file, self.install_prefix)
         for lib in self.list_shared_libraries(object_file):
             new_lib = lib.replace(self.install_prefix, '@rpath').replace('@rpath/lib/', '@rpath/')
             # These are leftovers from meson thinking RPATH == prefix
