@@ -59,18 +59,40 @@ cerbero_package_and_check() {
 }
 
 cerbero_before_script() {
-    local gst_user_branch=
-    local gstrs_user_branch=
+    # Default: unset, use recipe defaults
+    local gst_commit
+    local gst_remote
+    local gstpluginsrs_commit
+    local gstpluginsrs_remote
     pwd
     ls -lha
 
-    if [[ -n ${CI_COMMIT_REF_NAME} ]] && [[ ${CI_COMMIT_REF_NAME} != ${GST_UPSTREAM_BRANCH} ]]; then
-        local ci_project_ns_url="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}"
-        if user_branch_exists_in gstreamer "${CI_COMMIT_REF_NAME}"; then
-            gst_user_branch=1
+    # Three special cases in which we should build against a user-specific
+    # branch of gstreamer or gst-plugins-rs:
+    # 1. We have been triggered by gstreamer monorepo CI
+    #    - ci/gitlab/trigger_cerbero_pipeline.py
+    # 2. We have been triggered by gst-plugins-rs CI
+    #    - ci/cerbero/trigger_cerbero_pipeline.py
+    # 3. We are running as part of CI for a cerbero merge request
+    if [[ -n ${CI_GSTREAMER_PATH} ]]; then
+        echo "gstreamer trigger CI, using MR user branch"
+        gst_commit="${CI_GSTREAMER_REF_NAME}"
+        gst_remote="${CI_SERVER_URL}/${CI_GSTREAMER_PATH}"
+    elif [[ -n ${CI_GST_PLUGINS_RS_PATH} ]]; then
+        echo "gst-plugins-rs trigger CI, using MR user branch"
+        gstpluginsrs_commit="${CI_GST_PLUGINS_RS_REF_NAME}"
+        gstpluginsrs_remote="${CI_SERVER_URL}/${CI_GST_PLUGINS_RS_PATH}"
+    elif [[ ${CI_PROJECT_NAMESPACE} != gstreamer ]]; then
+        echo "Cerbero merge request, checking for matching branches in user forks of gstreamer and gst-plugins-rs"
+        if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
+            gst_commit="${CI_COMMIT_REF_NAME}"
+            gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
+            echo "Found gstreamer branch ${gst_commit} in ${gst_remote}"
         fi
-        if user_branch_exists_in gst-plugins-rs "${CI_COMMIT_REF_NAME}"; then
-            gstrs_user_branch=1
+        if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gst-plugins-rs" "${CI_COMMIT_REF_NAME}"; then
+            gstpluginsrs_commit="${CI_COMMIT_REF_NAME}"
+            gstpluginsrs_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gst-plugins-rs"
+            echo "Found gst-plugins-rs branch ${gstpluginsrs_commit} in ${gstpluginsrs_remote}"
         fi
     fi
 
@@ -93,38 +115,24 @@ cerbero_before_script() {
         echo "num_of_cpus = ${FDO_CI_CONCURRENT}" >> localconf.cbc
     fi
 
-    # These vars are set for pipelines via trigger_cerbero_pipeline.py in
-    # gstreamer and gst-plugins-rs CI
     echo "recipes_commits = {" >> localconf.cbc
-    if [[ -n $gst_user_branch ]]; then
-        echo "  'gstreamer-1.0': 'ci/${CI_COMMIT_REF_NAME}'," >> localconf.cbc
-    else
-        echo "  'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'," >> localconf.cbc
+    if [[ -n $gst_commit ]]; then
+        echo "  'gstreamer-1.0': 'ci/${gst_commit}'," >> localconf.cbc
     fi
-    if [[ -n $CI_GST_PLUGINS_RS_REF_NAME ]]; then
-        echo "  'gst-plugins-rs-1.0': 'ci/${CI_GST_PLUGINS_RS_REF_NAME}'," >> localconf.cbc
-    elif [[ -n $gstrs_user_branch ]]; then
-        echo "  'gst-plugins-rs-1.0': 'ci/${CI_COMMIT_REF_NAME}'," >> localconf.cbc
+    if [[ -n $gstpluginsrs_commit ]]; then
+        echo "  'gst-plugins-rs-1.0': 'ci/${gstpluginsrs_commit}'," >> localconf.cbc
     fi
     echo "}" >> localconf.cbc
 
     echo "recipes_remotes = {" >> localconf.cbc
-
-    # Add gstreamer monorepo remote
-    if [[ -n $gst_user_branch ]]; then
-        echo "  'gstreamer-1.0': {'ci': '${ci_project_ns_url}/gstreamer'}," >> localconf.cbc
-    else
-        echo "  'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}," >> localconf.cbc
+    if [[ -n $gst_remote ]]; then
+        echo "  'gstreamer-1.0': {'ci': '${gst_remote}'}," >> localconf.cbc
     fi
-
-    # Add gst-plugins-rs remote
-    if [[ -n $CI_GST_PLUGINS_RS_URL ]]; then
-        echo "  'gst-plugins-rs-1.0': {'ci': '${CI_GST_PLUGINS_RS_URL}'}," >> localconf.cbc
-    elif [[ -n $gstrs_user_branch ]]; then
-        echo "  'gst-plugins-rs-1.0': {'ci': '${ci_project_ns_url}/gst-plugins-rs'}," >> localconf.cbc
+    if [[ -n $gstpluginsrs_remote ]]; then
+        echo "  'gst-plugins-rs-1.0': {'ci': '${gstpluginsrs_remote}'}," >> localconf.cbc
     fi
-
     echo "}" >> localconf.cbc
+
     cat localconf.cbc
 
     # GitLab runner does not always wipe the image after each job, so do that

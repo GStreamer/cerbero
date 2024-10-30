@@ -393,35 +393,7 @@ build cerbero cross win64:
     EXAMPLES_HOME: ${CI_PROJECT_DIR}/gstreamer/subprojects
     GSTREAMER_ROOT_ANDROID: ${CI_PROJECT_DIR}/cerbero-android-universal
   script:
-    # Clone gstreamer repository to get gst-examples and gst-docs
-    - rm -rf gstreamer
-    - |-
-      if ./ci/exists_branch_in_user_repo.sh gstreamer "${CI_COMMIT_REF_NAME}"; then
-        git clone "${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer" -b "${CI_COMMIT_REF_NAME}" --depth 1 gstreamer/
-      else
-        git clone "$CI_GSTREAMER_URL" -b "${CI_GSTREAMER_REF_NAME}" --depth 1 gstreamer/
-      fi
-    - mkdir -p ${OUTPUT_DIR}
-
-    # extract our binaries
-    - rm -f gstreamer-1.0-android-universal-*-runtime.tar.*
-    - mkdir ${GSTREAMER_ROOT_ANDROID}
-    - time tar -C ${GSTREAMER_ROOT_ANDROID} -xf gstreamer-1.0-android-universal-*.tar.*
-
-    # gst-examples - player
-    - chmod +x ${EXAMPLES_HOME}/gst-examples/playback/player/android/gradlew
-    - ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-examples/playback/player/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-examples/playback/player/android assembleDebug
-    - cp ${EXAMPLES_HOME}/gst-examples/playback/player/android/app/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
-
-    # gst-examples - vulkan
-    - chmod +x ${EXAMPLES_HOME}/gst-examples/vulkan/android/gradlew
-    - ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-examples/vulkan/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-examples/vulkan/android assembleDebug
-    - cp ${EXAMPLES_HOME}/gst-examples/vulkan/android/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
-
-    # gst-docs android tutorials
-    - chmod +x ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/gradlew
-    - ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android assembleDebug
-    - cp ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/android-tutorial-*/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
+    - ci/examples_setup.sh build_android_examples
   after_script:
     - rm -rf ${GSTREAMER_ROOT_ANDROID} gstreamer
   artifacts:
@@ -577,28 +549,7 @@ build cerbero cross-ios universal x86_64-host:
       CODE_SIGNING_ALLOWED="NO"
       CODE_SIGN_ENTITLEMENTS=""
   script:
-    # install the binaries
-    - installer -pkg gstreamer-1.0-devel-*-ios-universal.pkg -target CurrentUserHomeDirectory -verbose
-
-    # Clone gstreamer repository to get gst-examples and gst-docs
-    - |-
-      if ./ci/exists_branch_in_user_repo.sh gstreamer "${CI_COMMIT_REF_NAME}"; then
-        git clone "${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer" -b "${CI_COMMIT_REF_NAME}" --depth 1 gstreamer/
-      else
-        git clone "$CI_GSTREAMER_URL" -b "${CI_GSTREAMER_REF_NAME}" --depth 1 gstreamer/
-      fi
-    # dump some useful information
-    - xcodebuild -version
-    - xcodebuild -showsdks
-    - echo ${XCODE_BUILD_ARGS} > xcode_buildargs
-
-    # gst-docs ios tutorials
-    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
-    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
-
-    # gst-examples
-    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
-    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
+    - ci/examples_setup.sh build_ios_examples
   after_script:
     - rm -rf gstreamer
   cache: []
