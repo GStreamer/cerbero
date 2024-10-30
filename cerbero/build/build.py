@@ -1302,15 +1302,11 @@ class Cargo(Build, ModifyEnvBase):
             return min(determine_num_cargo_jobs(), self.config.num_of_cpus)
         return 1
 
-    def get_cargo_args(self, packages=None, features=None):
+    def get_cargo_args(self):
         args = self.cargo_args[:]
-        if packages is None:
-            packages = self.cargo_packages
-        if features is None:
-            features = self.cargo_features
-        if features:
-            args += ['--features=' + ','.join(features)]
-        for package in packages:
+        if self.cargo_features:
+            args += ['--features=' + ','.join(self.cargo_features)]
+        for package in self.cargo_packages:
             args += ['-p', package]
         return args
 
@@ -1416,7 +1412,7 @@ class CargoC(Cargo):
                 link_args += ['-C', f'link-arg={arg}']
             self.set_env('RUSTFLAGS', ' '.join(link_args))
 
-    def get_cargoc_args(self, packages=None, features=None):
+    def get_cargoc_args(self):
         cargoc_args = [
             '--release',
             '--frozen',
@@ -1436,13 +1432,13 @@ class CargoC(Cargo):
         if self.config.variants.nochecks:
             cargoc_args += ['--config', 'overflow-checks=false']
 
-        cargoc_args += self.get_cargo_args(packages, features)
+        cargoc_args += self.get_cargo_args()
         return cargoc_args
 
     @modify_environment
-    async def compile(self, packages=None, features=None):
+    async def compile(self):
         self.maybe_add_system_libs(step='configure+compile')
-        cmd = [self.cargo, 'cbuild'] + self.get_cargoc_args(packages, features)
+        cmd = [self.cargo, 'cbuild'] + self.get_cargoc_args()
         await self.retry_run(shell.async_call, cmd, self.cargo_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
