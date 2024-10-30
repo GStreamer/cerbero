@@ -8,12 +8,12 @@ quoted() {
   python3 -c "import urllib.parse; print(urllib.parse.quote('$1', safe=''))"
 }
 
-REPO_NAME=$(quoted "$1")
+PROJECT_PATH=$(quoted "$1")
 BRANCH_NAME=$(quoted "$2")
 
-if [[ -z ${REPO_NAME} ]] || [[ -z ${BRANCH_NAME} ]]; then
-  echo "Usage: $0 <repo_name> <branch_name>"
+if [[ -z ${PROJECT_PATH} ]] || [[ -z ${BRANCH_NAME} ]]; then
+  echo "Usage: $0 <namespace/repo_name> <branch_name>"
   exit 1
 fi
 
-curl --fail-with-body -s "${CI_API_V4_URL}/projects/${CI_PROJECT_NAMESPACE}%2F${REPO_NAME}/repository/branches/${BRANCH_NAME}"
+curl --fail-with-body -s "${CI_API_V4_URL}/projects/${PROJECT_PATH}/repository/branches/${BRANCH_NAME}"
