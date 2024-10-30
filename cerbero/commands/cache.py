@@ -295,31 +295,8 @@ class GenCache(BaseCache):
     def __init__(self, args=[]):
         BaseCache.__init__(self, args)
 
-    def create_tarball_tarfile(self, workdir, out_file, *in_files, exclude=None):
-        import tarfile
-
-        m.action('Generating cache file with tarfile + xz')
-
-        def exclude_filter(tarinfo):
-            for each in exclude:
-                if each in tarinfo.name:
-                    return None
-            print(tarinfo.name)
-            return tarinfo
-
-        prev_cwd = os.getcwd()
-        os.chdir(workdir)
-        out_tar, _ = os.path.splitext(out_file)
-        try:
-            with tarfile.open(out_tar, 'w') as tf:
-                for in_file in in_files:
-                    tf.add(in_file, filter=exclude_filter)
-        finally:
-            os.chdir(prev_cwd)
-        m.action('Compressing cache file with xz')
-        shell.new_call(['xz', '-vv', '--threads=0', out_tar])
-
-    def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
+    def create_tarball(self, workdir, out_file, *in_files):
+        exclude = ['var/tmp']
         cmd = [
             shell.get_tar_cmd(),
             '-C',
@@ -333,15 +310,6 @@ class GenCache(BaseCache):
         cmd += in_files
         m.action(f'Generating cache file with {cmd!r}')
         shell.new_call(cmd)
-
-    def create_tarball(self, config, workdir, *args):
-        exclude = ['var/tmp']
-        # MSYS tar seems to hang sometimes while compressing on Windows CI, so
-        # use the tarfile module
-        if config.platform == Platform.WINDOWS:
-            self.create_tarball_tarfile(workdir, *args, exclude=exclude)
-        else:
-            self.create_tarball_tar(workdir, *args, exclude=exclude)
 
     def gen_dep(self, config, args, deps, sha):
         deps_filepath = self.get_deps_filepath(config)
@@ -357,7 +325,7 @@ class GenCache(BaseCache):
         distdir = f'dist/{platform_arch}'
         try:
             self.create_tarball(
-                config, workdir, deps_filepath, 'build-tools', config.build_tools_cache, distdir, config.cache_file
+                workdir, deps_filepath, 'build-tools', config.build_tools_cache, distdir, config.cache_file
             )
             url = self.make_url(config, args, '%s-%s' % (sha, self.deps_filename))
             deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filepath), 'url': url})
