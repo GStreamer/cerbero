@@ -85,6 +85,14 @@ class Package(Command):
                     ),
                 ),
                 ArgparseArgument(
+                    '--exclude',
+                    '-e',
+                    action='append',
+                    type=str,
+                    default=None,
+                    help=_('Recipes to exclude when building, only when using --only-build-deps'),
+                ),
+                ArgparseArgument(
                     '-k', '--keep-temp', action='store_true', default=False, help=_('Keep temporary files for debug')
                 ),
                 ArgparseArgument(
@@ -121,8 +129,11 @@ class Package(Command):
         if args.skip_deps_build and args.only_build_deps:
             raise UsageError(_('Cannot use --skip-deps-build together with ' '--only-build-deps'))
 
+        if args.exclude and not args.only_build_deps:
+            raise UsageError(_('Cannot use --exclude without --only-build-deps'))
+
         if not args.skip_deps_build:
-            self._build_deps(config, p, args.no_devel, args.offline, args.dry_run, args.jobs)
+            self._build_deps(config, p, args.no_devel, args.exclude, args.offline, args.dry_run, args.jobs)
 
         if args.only_build_deps or args.dry_run:
             return
@@ -163,11 +174,14 @@ class Package(Command):
         paths = p.post_package(paths, output_dir) or paths
         m.action(_('Package successfully created in %s') % ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package, has_devel, offline, dry_run, jobs):
+    def _build_deps(self, config, package, has_devel, exclude, offline, dry_run, jobs):
         build_command = build.Build()
+        deps = set(package.recipes_dependencies(has_devel))
+        if exclude:
+            deps.difference_update(exclude)
         build_command.runargs(
             config,
-            package.recipes_dependencies(has_devel),
+            deps,
             cookbook=self.store.cookbook,
             dry_run=dry_run,
             offline=offline,

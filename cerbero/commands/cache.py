@@ -32,7 +32,7 @@ from cerbero.utils import messages as m
 
 
 class BaseCache(Command):
-    base_url = 'https://artifacts.gstreamer-foundation.net/cerbero-deps/%s/%s/%s'
+    base_url = 'https://artifacts.gstreamer-foundation.net/cerbero-deps'
     ssh_address = 'cerbero-deps-uploader@artifacts.gstreamer-foundation.net'
     deps_filename = 'cerbero-deps.tar.xz'
     log_filename = 'cerbero-deps.log'
@@ -46,6 +46,13 @@ class BaseCache(Command):
             ),
             ArgparseArgument('--branch', action='store', type=str, default='main', help='Git branch to search from'),
             ArgparseArgument('--dry-run', action='store_true', help='Run without doing any writes'),
+            ArgparseArgument(
+                '--project',
+                action='store',
+                type=str,
+                default='gstreamer',
+                help='Gitlab project (gstreamer or gst-plugins-rs)',
+            ),
         ]
         Command.__init__(self, args)
 
@@ -121,11 +128,15 @@ class BaseCache(Command):
         target_distro = f'{distro}_{config.arch}'
         return target_distro, target_arch
 
-    def make_url(self, config, args, filename):
+    def get_artifact_dir(self, config, args):
+        project = args.project
         branch = args.branch
         distro, arch = self.get_distro_and_arch(config)
-        base_url = self.base_url % (branch, distro, arch)
-        return '%s/%s' % (base_url, filename)
+        return '/'.join([project, branch, distro, arch])
+
+    def make_url(self, config, args, filename):
+        artifact_dir = self.get_artifact_dir(config, args)
+        return '%s/%s/%s' % (self.base_url, artifact_dir, filename)
 
     def get_deps(self, config, args):
         url = self.make_url(config, args, self.log_filename)
@@ -399,9 +410,7 @@ class UploadCache(BaseCache):
             scp_cmd = ['scp'] + ssh_opt
 
             # Ensure directory sturcture is in place
-            branch = args.branch
-            distro, arch = self.get_distro_and_arch(config)
-            base_dir = os.path.join(branch, distro, arch)
+            base_dir = self.get_artifact_dir(config, args)
             m.message(f'Making directory structure: {base_dir}')
             if not self.dry_run:
                 shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir], verbose=True)
@@ -431,7 +440,7 @@ class UploadCache(BaseCache):
 
             # Now remove the obsoleted dep file if needed
             for dep in deps[self.log_size - 1 :]:
-                old_remote_deps_filepath = os.path.join(base_dir, os.path.basename(dep['url']))
+                old_remote_deps_filepath = os.path.relpath(dep['url'], self.base_url)
                 rm_cmd = ['rm', '-f', old_remote_deps_filepath]
                 m.message(f'Removing obsolete dep file: {rm_cmd!r}')
                 if not self.dry_run:

@@ -150,12 +150,33 @@ cerbero_script() {
     $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
     du -sch "${CERBERO_SOURCES}" || true
 
-    $CERBERO $CERBERO_ARGS fetch-cache --branch "${GST_UPSTREAM_BRANCH}"
+    local project
+    if [[ -n $CI_GST_PLUGINS_RS_REF_NAME ]]; then
+        project="gst-plugins-rs"
+    else
+        project="gstreamer"
+    fi
+    $CERBERO $CERBERO_ARGS fetch-cache --branch "${GST_UPSTREAM_BRANCH}" --project "${project}"
 
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
     fix_build_tools
 
     cerbero_package_and_check
+}
+
+upload_cache() {
+    # Check that the env var is set. Don't expand this protected variable by
+    # doing something silly like [[ -n ${CERBERO_...} ]] because it will get
+    # printed in the CI logs due to set -x
+    if env | grep -q -e CERBERO_PRIVATE_SSH_KEY; then
+        # Don't generate and upload caches for scheduled pipelines on main branch
+        if [[ "x${CI_PIPELINE_SOURCE}" != "xschedule" ]]; then
+            time $CERBERO $CERBERO_ARGS gen-cache \
+                --project="$1" --branch "${GST_UPSTREAM_BRANCH}"
+            time $CERBERO $CERBERO_ARGS upload-cache \
+                --project="$1" --branch "${GST_UPSTREAM_BRANCH}"
+        fi
+    fi
 }
 
 cerbero_deps_script() {
@@ -185,17 +206,13 @@ cerbero_deps_script() {
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build --offline $more_deps
+    # All external deps have been built, upload the cache for the cerbero CI
+    # triggered by the gstreamer monorepo
+    upload_cache gstreamer
 
-    # Check that the env var is set. Don't expand this protected variable by
-    # doing something silly like [[ -n ${CERBERO_...} ]] because it will get
-    # printed in the CI logs due to set -x
-    if env | grep -q -e CERBERO_PRIVATE_SSH_KEY; then
-        # Don't generate and upload caches for scheduled pipelines on main branch
-        if [[ "x${CI_PIPELINE_SOURCE}" != "xschedule" ]]; then
-            time $CERBERO $CERBERO_ARGS gen-cache --branch "${GST_UPSTREAM_BRANCH}"
-            time $CERBERO $CERBERO_ARGS upload-cache --branch "${GST_UPSTREAM_BRANCH}"
-        fi
-    fi
+    # Now, build everything except gst-plugins-rs
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps --exclude gst-plugins-rs
+    upload_cache gst-plugins-rs
 
     cerbero_package_and_check
 }
