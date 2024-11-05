@@ -92,8 +92,10 @@ endif()
 
 set(_gst_required_vars)
 
-# for setting the default GTlsDatabase
-list(APPEND GStreamer_EXTRA_DEPS gio-2.0)
+if (ca_certificates IN_LIST GStreamerMobile_FIND_COMPONENTS)
+    # for setting the default GTlsDatabase
+    list(APPEND GStreamer_EXTRA_DEPS gio-2.0)
+endif()
 
 if (ANDROID)
     list(APPEND GStreamer_EXTRA_DEPS zlib)
@@ -542,6 +544,10 @@ if(ca_certificates IN_LIST GStreamerMobile_FIND_COMPONENTS)
 
             if (TARGET GStreamerMobile)
                 add_dependencies(GStreamerMobile copycacertificatesres_${ANDROID_ABI})
+                target_compile_definitions(GStreamerMobile
+                    PRIVATE
+                        GSTREAMER_INCLUDE_CA_CERTIFICATES
+                )
             endif()
         elseif (APPLE)
             list(APPEND GSTREAMER_RESOURCES "${GStreamer_CA_BUNDLE}")
