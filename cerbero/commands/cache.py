@@ -37,6 +37,7 @@ class BaseCache(Command):
     deps_filename = 'cerbero-deps.tar.xz'
     log_filename = 'cerbero-deps.log'
     log_size = 10
+    dry_run = False
 
     def __init__(self, args=[]):
         args += [
@@ -44,6 +45,7 @@ class BaseCache(Command):
                 '--commit', action='store', type=str, default='HEAD', help='the commit to pick artifact from'
             ),
             ArgparseArgument('--branch', action='store', type=str, default='main', help='Git branch to search from'),
+            ArgparseArgument('--dry-run', action='store_true', help='Run without doing any writes'),
         ]
         Command.__init__(self, args)
 
@@ -70,11 +72,12 @@ class BaseCache(Command):
     # FIXME: move this to utils
     def checksum(self, fname):
         h = sha256()
-        with open(fname, 'rb') as f:
-            # Read in chunks of 512k till f.read() returns b'' instead of reading
-            # the whole file at once which will fail on systems with low memory
-            for block in iter(lambda: f.read(512 * 1024), b''):
-                h.update(block)
+        if not self.dry_run:
+            with open(fname, 'rb') as f:
+                # Read in chunks of 512k till f.read() returns b'' instead of reading
+                # the whole file at once which will fail on systems with low memory
+                for block in iter(lambda: f.read(512 * 1024), b''):
+                    h.update(block)
         return h.hexdigest()
 
     def get_git_sha(self, commit):
@@ -141,6 +144,7 @@ class BaseCache(Command):
         return os.path.join(config.home_dir, self.log_filename)
 
     def run(self, config, args):
+        self.dry_run = args.dry_run
         if not config.uninstalled:
             raise FatalError('fetch-cache is only available with cerbero-uninstalled')
 
@@ -262,6 +266,8 @@ class FetchCache(BaseCache):
         try:
             dep_path = os.path.join(config.home_dir, os.path.basename(dep['url']))
             m.action(f'Downloading deps cache {dep["url"]}')
+            if self.dry_run:
+                return
             await shell.download(dep['url'], dep_path, overwrite=is_ci)
             if dep['checksum'] != self.checksum(dep_path):
                 m.warning('Corrupted dependency file, ignoring.')
@@ -307,15 +313,16 @@ class GenCache(BaseCache):
         cmd += ['-cf', out_file]
         cmd += in_files
         m.action(f'Generating cache file with {cmd!r}')
-        shell.new_call(cmd)
+        if not self.dry_run:
+            shell.new_call(cmd)
 
     def gen_dep(self, config, args, deps, sha):
         deps_filepath = self.get_deps_filepath(config)
-        if os.path.exists(deps_filepath):
+        if not self.dry_run and os.path.exists(deps_filepath):
             os.remove(deps_filepath)
 
         log_filepath = self.get_log_filepath(config)
-        if os.path.exists(log_filepath):
+        if not self.dry_run and os.path.exists(log_filepath):
             os.remove(log_filepath)
 
         workdir = config.home_dir
@@ -328,15 +335,23 @@ class GenCache(BaseCache):
             url = self.make_url(config, args, '%s-%s' % (sha, self.deps_filename))
             deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filepath), 'url': url})
             deps = deps[0 : self.log_size]
-            with open(log_filepath, 'w') as outfile:
-                json.dump(deps, outfile, indent=1)
+            log_json = json.dumps(deps, indent=1)
+            if self.dry_run:
+                print('Generated JSON:')
+                print(log_json)
+            else:
+                with open(log_filepath, 'w') as outfile:
+                    outfile.write(log_json)
         except FatalError:
             if os.path.exists(deps_filepath):
                 os.remove(deps_filepath)
             if os.path.exists(log_filepath):
                 os.remove(log_filepath)
             raise
-        fsize = os.path.getsize(deps_filepath) / (1024 * 1024)
+        if self.dry_run:
+            fsize = -1
+        else:
+            fsize = os.path.getsize(deps_filepath) / (1024 * 1024)
         m.message(f'build-dep cache {deps_filepath} of size {fsize:.2f}MB generated')
 
     def run(self, config, args):
@@ -367,8 +382,9 @@ class UploadCache(BaseCache):
 
         deps_filepath = self.get_deps_filepath(config)
         log_filepath = self.get_log_filepath(config)
-        if not os.path.exists(deps_filepath) or not os.path.exists(log_filepath):
-            raise FatalError('gen-cache must be run before running upload-cache.')
+        if not self.dry_run:
+            if not os.path.exists(deps_filepath) or not os.path.exists(log_filepath):
+                raise FatalError('gen-cache must be run before running upload-cache.')
 
         try:
             # Setup tempory private key from env
@@ -386,28 +402,40 @@ class UploadCache(BaseCache):
             branch = args.branch
             distro, arch = self.get_distro_and_arch(config)
             base_dir = os.path.join(branch, distro, arch)
-            shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir], verbose=True)
+            m.message(f'Making directory structure: {base_dir}')
+            if not self.dry_run:
+                shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir], verbose=True)
 
             # Upload the deps files first
             remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-            shell.new_call(scp_cmd + [deps_filepath, '%s:%s' % (self.ssh_address, remote_deps_filepath)], verbose=True)
+            upload_cmd = scp_cmd + [deps_filepath, f'{self.ssh_address}:{remote_deps_filepath}']
+            m.message(f'Uploading deps file: {upload_cmd!r}')
+            if not self.dry_run:
+                shell.new_call(upload_cmd, verbose=True)
 
             # Upload the new log
             remote_tmp_log_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-            shell.new_call(
-                scp_cmd + [log_filepath, '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)], verbose=True
-            )
+            upload_cmd = scp_cmd + [log_filepath, f'{self.ssh_address}:{remote_tmp_log_filepath}']
+            m.message(f'Uploading deps log: {upload_cmd!r}')
+            if not self.dry_run:
+                shell.new_call(upload_cmd, verbose=True)
 
             # Override the new log in a way that we reduce the risk of corrupted
             # fetch.
             remote_log_filepath = os.path.join(base_dir, self.log_filename)
-            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath], verbose=True)
+            rename_cmd = ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath]
+            m.message(f'Renaming deps log: {rename_cmd!r}')
+            if not self.dry_run:
+                shell.new_call(rename_cmd, verbose=True)
             m.message('New deps cache uploaded and deps log updated')
 
             # Now remove the obsoleted dep file if needed
             for dep in deps[self.log_size - 1 :]:
                 old_remote_deps_filepath = os.path.join(base_dir, os.path.basename(dep['url']))
-                shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filepath], verbose=True)
+                rm_cmd = ['rm', '-f', old_remote_deps_filepath]
+                m.message(f'Removing obsolete dep file: {rm_cmd!r}')
+                if not self.dry_run:
+                    shell.new_call(ssh_cmd + rm_cmd, verbose=True)
         finally:
             shutil.rmtree(tmpdir)
 
