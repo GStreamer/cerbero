@@ -709,7 +709,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         Runs post installation steps
         """
         self.install_licenses()
-        if self.name.startswith('gst'):
+        # FIXME: remove once 1.26 is published
+        if self.name.startswith('gst') and self.config.target_platform == Platform.ANDROID:
             self.generate_gst_la_files()
         self.fixup_pc_files()
 
