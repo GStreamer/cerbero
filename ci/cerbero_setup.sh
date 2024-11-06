@@ -210,8 +210,10 @@ cerbero_deps_script() {
     # triggered by the gstreamer monorepo
     upload_cache gstreamer
 
-    # Now, build everything except gst-plugins-rs
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps --exclude gst-plugins-rs
+    # Now, build everything except gst-plugins-rs and gst-android-1.0 since
+    # that also pulls gst-plugins-rs in
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps \
+            --exclude gst-plugins-rs --exclude gst-android-1.0 --exclude gstreamer-ios-templates
     upload_cache gst-plugins-rs
 
     cerbero_package_and_check
