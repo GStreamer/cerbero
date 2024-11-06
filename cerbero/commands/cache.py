@@ -319,7 +319,6 @@ class GenCache(BaseCache):
             for each in exclude:
                 if each in tarinfo.name:
                     return None
-            print(tarinfo.name)
             return tarinfo
 
         prev_cwd = os.getcwd()
@@ -332,14 +331,13 @@ class GenCache(BaseCache):
         finally:
             os.chdir(prev_cwd)
         m.action('Compressing cache file with xz')
-        shell.new_call(['xz', '-vv', '--threads=0', out_tar])
+        shell.new_call(['xz', '--threads=0', out_tar])
 
     def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
         cmd = [
             shell.get_tar_cmd(),
             '-C',
             workdir,
-            '--verbose',
             '--use-compress-program=xz --threads=0',
         ]
         for each in exclude:
