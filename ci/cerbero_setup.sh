@@ -145,7 +145,12 @@ cerbero_before_script() {
 cerbero_script() {
     show_ccache_sum
 
-    $CERBERO $CERBERO_ARGS show-config
+    $CERBERO $CERBERO_ARGS show-config | tee config.txt
+    if [[ -n $CI_GST_PLUGINS_RS_REF_NAME ]] && grep -q '\<rust : False\>' config.txt; then
+        echo "gst-plugins-rs trigger CI, but Rust variant is disabled. Skipping job."
+        return 0
+    fi
+
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
     $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
     du -sch "${CERBERO_SOURCES}" || true
