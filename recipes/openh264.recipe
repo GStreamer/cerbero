@@ -4,26 +4,21 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'openh264'
-    version = '2.3.0'
+    version = '2.5.0'
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
-    tarball_checksum = '99b0695272bee73a3b3a5fcb1afef462c11a142d1dc35a2c61fef5a4b7d60bc0'
+    tarball_name = 'openh264-2.5.0.tar.gz'
+    tarball_checksum = '94c8ca364db990047ec4ec3481b04ce0d791e62561ef5601443011bdc00825e3'
     tarball_dirname = 'openh264-%(version)s'
-    # FIXME: can we specify a full fallback url? On our mirror the file is openh264-2.3.0.tar.gz
-    # because the filename v2.3.0.tar.gz is already taken by an openjpeg tarball.
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     meson_options = {'tests': 'disabled'}
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', '%(libdir)s/pkgconfig/openh264.pc']
-    patches = ['openh264/0001-meson-add-option-to-disable-asm-optimisations.patch']
-
-    async def configure(self):
-        if self.config.target_platform == Platform.ANDROID and \
-                self.config.target_arch == Architecture.X86:
-            # Fails to link with lld citing relocation errors
-            self.meson_options['asm'] = 'disabled'
-        await super().configure()
+    patches = [
+        # https://github.com/cisco/openh264/pull/3804
+        f'{name}/0001-build-Add-missing-flags-for-x86-asm-support.patch',
+    ]
 
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!
