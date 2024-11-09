@@ -54,6 +54,27 @@ class EditCache(Command):
             arguments.append(ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type, help=N_('Modify ' + attr)))
         Command.__init__(self, arguments)
 
+    def _modify(self, recipe_name, cookbook, status, args):
+        if args.reset:
+            cookbook.reset_recipe_status(recipe_name)
+            m.message(f'Recipe {recipe_name} reset')
+            return
+        if args.touch:
+            status.touch()
+        for attr in self.recipe_attributes:
+            var = getattr(args, attr)
+            if var is not None:
+                if isinstance(getattr(self.recipe_status, attr), bool):
+                    if var.lower() == 'true':
+                        var = True
+                    elif var.lower() == 'false':
+                        var = False
+                    else:
+                        m.error(f'Error: Attribute "{attr}" needs to be either "True" or "False"')
+                        return
+                setattr(status, attr, var)
+        print(f'After : {recipe_name}: {status}')
+
     def run(self, config, args):
         if args.bootstrap:
             config.cache_file = config.build_tools_cache
@@ -73,39 +94,19 @@ class EditCache(Command):
             '{} cache values for recipes: {}'.format('Showing' if not is_modifying else 'Modifying', ', '.join(recipes))
         )
 
-        for recipe in recipes:
-            if recipe not in global_status.keys():
-                m.error('Recipe {} not in cookbook'.format(recipe))
+        for recipe_name in recipes:
+            if recipe_name not in global_status.keys():
+                m.error(f'Recipe {recipe_name} not in cookbook')
                 continue
-            status = global_status[recipe]
-            print('[{}]'.format(recipe))
+            status = global_status[recipe_name]
             text = ''
             if is_modifying:
-                text = 'Before\n'
-            print('{}{}\n'.format(text, status))
+                text = 'Before: '
+            print(f'{text}{recipe_name}: ', end='')
+            print(f'{status}')
             if is_modifying:
-                if args.reset:
-                    cookbook.reset_recipe_status(recipe)
-                    m.message('Recipe {} reset'.format(recipe))
-                else:
-                    if args.touch:
-                        status.touch()
-
-                    for attr in self.recipe_attributes:
-                        var = getattr(args, attr)
-                        if var is not None:
-                            if isinstance(getattr(self.recipe_status, attr), bool):
-                                if var.lower() == 'true':
-                                    var = True
-                                elif var.lower() == 'false':
-                                    var = False
-                                else:
-                                    m.error('Error: Attribute "{}" needs to be either "True" or "False"'.format(attr))
-                                    return
-                            setattr(status, attr, var)
-
-                    cookbook.save()
-                    print('After\n{}\n'.format(status))
+                self._modify(recipe_name, cookbook, status, args)
+                cookbook.save()
 
 
 register_command(EditCache)
