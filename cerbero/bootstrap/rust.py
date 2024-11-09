@@ -76,7 +76,7 @@ class RustBootstrapper(BootstrapperBase):
     channel = None
 
     def __init__(self, config, offline):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'rust')
         self.offline = offline
         self.build_triple = self.config.rust_build_triple
         self.target_triples = self.config.rust_target_triples

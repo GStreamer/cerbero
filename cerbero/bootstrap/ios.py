@@ -33,7 +33,7 @@ from cerbero.enums import Distro, Architecture
 
 class IOSBootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'ios')
 
     async def start(self, jobs=0):
         if self.config.arch == Architecture.ARM64 and not os.path.exists('/Library/Apple/usr/lib/libRosettaAot.dylib'):

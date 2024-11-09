@@ -43,7 +43,7 @@ DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
 DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = 'Default <default@change.me>'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
-DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror/']
+DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror']
 RUST_TRIPLE_MAPPING = {
     (Platform.ANDROID, Architecture.ARM64): 'aarch64-linux-android',
     (Platform.ANDROID, Architecture.ARMv7): 'armv7-linux-androideabi',

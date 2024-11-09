@@ -67,7 +67,7 @@ class MSYSBootstrapper(BootstrapperBase):
     packages = ['msys-flex', 'msys-bison', 'msys-perl']
 
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'msys')
         self.perl_prefix = self.config.mingw_perl_prefix
         self.prefix = self.config.toolchain_prefix
         # MinGW Perl needed by openssl
@@ -159,7 +159,7 @@ class MSYS2Bootstrapper(BootstrapperBase):
     ]
 
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'msys2')
 
     async def start(self, jobs=0):
         shell.new_call(['pacman', '-Sy', '--noconfirm', '--needed'] + self.packages)
@@ -172,7 +172,7 @@ class MinGWBootstrapper(BootstrapperBase):
     """
 
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'mingw')
         self.prefix = self.config.toolchain_prefix
         self.arch = self.config.target_arch
         # Register all network resources this bootstrapper needs. They will all

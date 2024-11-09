@@ -95,6 +95,22 @@ class Source(object):
     def have_cargo_lock_file(self):
         return os.path.exists(os.path.join(self.config_src_dir, 'Cargo.lock'))
 
+    def get_fallback_urls(self, url):
+        urls = []
+        fname = os.path.basename(url)
+        # Namespaced directory structure
+        for mirror in self.config.extra_mirrors:
+            urls.append(f'{mirror}/{self.name}/{fname}')
+        for mirror in DEFAULT_MIRRORS:
+            # Some recipes use a mirror as the primary URL
+            if url.startswith(mirror):
+                continue
+            urls.append(f'{mirror}/{self.name}/{fname}')
+        # Flat directory structure (for backwards compat)
+        for mirror in self.config.extra_mirrors:
+            urls.append(f'{mirror}/{fname}')
+        return urls
+
     async def cargo_update(self, offline, logfile):
         update_args = ['--verbose']
         if offline:
@@ -155,12 +171,12 @@ class Source(object):
             subprojects.append(subproj_name)
         m.log(f'Downloading meson subprojects: {", ".join(subprojects)}', logfile=logfile)
         for subproj_name, ((url, fallback_url), fpath, fhash) in downloads:
-            mirrors = self.config.extra_mirrors + DEFAULT_MIRRORS
+            fallback_urls = self.get_fallback_urls(fpath)
             if fallback_url:
                 # Our mirror implementation assumes that the basename is the same
-                mirrors.insert(0, os.path.dirname(fallback_url))
+                fallback_urls.append(fallback_url)
             await shell.download(
-                url, fpath, check_cert=self.check_cert, overwrite=False, logfile=logfile, mirrors=mirrors
+                url, fpath, check_cert=self.check_cert, overwrite=False, logfile=logfile, fallback_urls=fallback_urls
             )
             self.verify(fpath, fhash)
 
@@ -354,7 +370,7 @@ class BaseTarball(object):
             check_cert=self.check_cert,
             overwrite=redownload,
             logfile=get_logfile(self),
-            mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS),
+            fallback_urls=self.get_fallback_urls(self.url),
         )
         self.verify(fname, self.tarball_checksum)
 

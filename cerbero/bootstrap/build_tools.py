@@ -37,7 +37,7 @@ class BuildTools(BootstrapperBase, Fetch):
     }
 
     def __init__(self, config, offline):
-        BootstrapperBase.__init__(self, config, offline)
+        BootstrapperBase.__init__(self, config, offline, None)
 
         if self.config.variants.rust:
             self.BUILD_TOOLS.append('cargo-c')
