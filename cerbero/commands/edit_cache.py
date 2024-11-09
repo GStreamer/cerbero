@@ -57,9 +57,9 @@ class EditCache(Command):
     def run(self, config, args):
         if args.bootstrap:
             config.cache_file = config.build_tools_cache
-        cookbook = CookBook(config)
+        cookbook = CookBook(config, reset_status=False)
 
-        is_modifying = False or args.touch or args.reset
+        is_modifying = args.touch or args.reset
         if not is_modifying:
             for attr in self.recipe_attributes:
                 if getattr(args, attr) is not None:

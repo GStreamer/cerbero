@@ -92,7 +92,7 @@ class CookBook(object):
 
     RECIPE_EXT = '.recipe'
 
-    def __init__(self, config, load=True, offline=False, skip_errors=False):
+    def __init__(self, config, load=True, offline=False, skip_errors=False, reset_status=True):
         self.offline = offline
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
@@ -106,7 +106,7 @@ class CookBook(object):
 
         if not os.path.exists(config.recipes_dir):
             raise FatalError(_('Recipes dir %s not found') % config.recipes_dir)
-        self.update(skip_errors)
+        self.update(skip_errors, reset_status)
 
     def set_config(self, config):
         """
@@ -138,11 +138,11 @@ class CookBook(object):
         """
         self.status = status
 
-    def update(self, skip_errors):
+    def update(self, skip_errors, reset_status):
         """
         Reloads the recipes list and updates the cookbook
         """
-        self._load_recipes(skip_errors)
+        self._load_recipes(skip_errors, reset_status)
         self._load_manifest()
         self.save()
 
@@ -375,7 +375,7 @@ class CookBook(object):
             self.status[recipe_name] = RecipeStatus(filepath, steps=[], file_hash=recipe.get_checksum())
         return self.status[recipe_name]
 
-    def _load_recipes(self, skip_errors):
+    def _load_recipes(self, skip_errors, reset_status):
         self.recipes = {}
         recipes = defaultdict(dict)
         recipes_repos = self._config.get_recipes_repos()
@@ -393,6 +393,9 @@ class CookBook(object):
             if overridden:
                 m.warning(f'Overriding recipes during priority {key}: {overridden}')
             self.recipes.update(new_recipes)
+
+        if not reset_status:
+            return
 
         # Check for updates in the recipe file to reset the status
         for recipe in list(self.recipes.values()):
