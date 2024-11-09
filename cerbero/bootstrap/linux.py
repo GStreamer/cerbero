@@ -32,7 +32,7 @@ class UnixBootstrapper(BootstrapperBase):
     packages = []
 
     def __init__(self, config, offline, assume_yes):
-        BootstrapperBase.__init__(self, config, offline)
+        BootstrapperBase.__init__(self, config, offline, 'linux')
         self.assume_yes = assume_yes
         if user_is_root() and 'sudo' in self.tool:  # no need for sudo as root user
             self.tool.remove('sudo')

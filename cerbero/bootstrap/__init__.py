@@ -22,9 +22,10 @@ from cerbero.build.source import BaseTarball, Source
 
 
 class BootstrapTarball(BaseTarball, Source):
-    def __init__(self, config, offline, url, checksum, download_dir, tarball_name=None):
+    def __init__(self, config, offline, name, url, checksum, download_dir, tarball_name=None):
         self.config = config
         self.offline = offline
+        self.name = name
         self.url = url
         self.download_dir = download_dir
         self.tarball_name = tarball_name
@@ -47,9 +48,10 @@ class BootstrapperBase(object):
     # List of extract steps to be performed
     extract_steps = None
 
-    def __init__(self, config, offline):
+    def __init__(self, config, offline, name):
         self.config = config
         self.offline = offline
+        self.name = name
         self.fetch_urls = []
         self.extract_steps = []
         self.sources = {}
@@ -58,9 +60,15 @@ class BootstrapperBase(object):
         raise NotImplementedError("'start' must be implemented by subclasses")
 
     async def fetch_urls_impl(self, urls):
-        for url, name, checksum in urls:
+        for url, tarball_name, checksum in urls:
             source = BootstrapTarball(
-                self.config, self.offline, url, checksum, self.config.local_sources, tarball_name=name
+                self.config,
+                self.offline,
+                self.name,
+                url,
+                checksum,
+                self.config.local_sources,
+                tarball_name=tarball_name,
             )
             self.sources[url] = source
             await source.fetch()

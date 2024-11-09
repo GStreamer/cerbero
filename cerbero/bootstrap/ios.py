@@ -30,7 +30,7 @@ from cerbero.config import Distro
 
 class IOSBootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'ios')
 
     async def start(self, jobs=0):
         # FIXME: enable it when buildbots are properly configured

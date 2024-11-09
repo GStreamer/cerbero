@@ -27,7 +27,7 @@ from cerbero.enums import Architecture
 
 class OSXBootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
+        super().__init__(config, offline, 'macos')
 
     async def start(self, jobs=0):
         # skip system package install if not needed

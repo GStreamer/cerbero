@@ -31,7 +31,6 @@ import shutil
 import hashlib
 import urllib.request
 import urllib.error
-import urllib.parse
 import collections
 from pathlib import Path, PurePath
 
@@ -383,7 +382,7 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
         raise FatalError('Unknown tarball format %s' % filepath)
 
 
-async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mirrors=None):
+async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fallback_urls=None):
     """
     Downloads a file
 
@@ -397,10 +396,11 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
     @type check_cert: bool
     @param logfile: path to the file to log instead of stdout
     @type logfile: str
-    @param mirrors: list of mirrors to use as fallback
-    @type logfile: list
     """
     user_agent = 'GStreamerCerbero/' + CERBERO_VERSION
+    urls = [url]
+    if fallback_urls:
+        urls += fallback_urls
 
     if not overwrite and os.path.exists(dest):
         if logfile is None:
@@ -410,13 +410,6 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         if not os.path.exists(os.path.dirname(dest)):
             os.makedirs(os.path.dirname(dest))
         m.log('Downloading {}'.format(url), logfile)
-
-    urls = [url]
-    if mirrors is not None:
-        filename = os.path.basename(url)
-        # Add a traling '/' the url so that urljoin joins correctly urls
-        # in case users provided it without the trailing '/'
-        urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
     if sys.platform.startswith('win'):
         cmd = [
