@@ -59,7 +59,7 @@ required, depending on the operating system:
 ``GStreamer_Mobile_MODULE_NAME``
   Name for the GStreamer::mobile shared library. Default is ``gstreamer_android`` (Android) or ``gstreamer_mobile`` (iOS).
 
-``GStreamerMobile_ASSETS_DIR``
+``GStreamer_ASSETS_DIR``
   Target directory for deploying assets to.
 
 ``G_IO_MODULES``
@@ -102,13 +102,14 @@ if (ANDROID)
 endif()
 
 # Prepare Android hotfixes for x264
-if(ANDROID_ABI STREQUAL "armeabi")
+if(ANDROID_ABI MATCHES "^armeabi")
     set(NEEDS_NOTEXT_FIX TRUE)
     set(NEEDS_BSYMBOLIC_FIX TRUE)
 elseif(ANDROID_ABI STREQUAL "x86")
     set(NEEDS_NOTEXT_FIX TRUE)
     set(NEEDS_BSYMBOLIC_FIX TRUE)
-elseif(ANDROID_ABI STREQUAL "x86_64")
+# arm64: https://ffmpeg.org/pipermail/ffmpeg-devel/2022-July/298734.html 
+elseif(ANDROID_ABI STREQUAL "x86_64" OR ANDROID_ABI STREQUAL "arm64-v8a")
     set(NEEDS_BSYMBOLIC_FIX TRUE)
 endif()
 
@@ -142,13 +143,13 @@ if(NOT DEFINED GStreamer_Mobile_MODULE_NAME)
 endif()
 
 if(ANDROID)
-    if(NOT DEFINED GStreamerMobile_ASSETS_DIR AND DEFINED GStreamerMobile_ASSETS_DIR)
-        set(GStreamerMobile_ASSETS_DIR "${GStreamerMobile_ASSETS_DIR}")
-    elseif(NOT DEFINED GStreamerMobile_ASSETS_DIR)
-        set(GStreamerMobile_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src/assets/")
+    if(NOT DEFINED GStreamer_ASSETS_DIR AND DEFINED GSTREAMER_ASSETS_DIR)
+        set(GStreamer_ASSETS_DIR "${GSTREAMER_ASSETS_DIR}")
+    elseif(NOT DEFINED GStreamer_ASSETS_DIR)
+        set(GStreamer_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src/assets/")
     else()
         # Same as above
-        set(GStreamerMobile_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${GStreamerMobile_ASSETS_DIR}")
+        set(GStreamer_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${GStreamer_ASSETS_DIR}")
     endif()
 
     if(NOT DEFINED GStreamer_NDK_BUILD_PATH AND DEFINED GSTREAMER_NDK_BUILD_PATH)
@@ -157,13 +158,13 @@ if(ANDROID)
         set(GStreamer_NDK_BUILD_PATH  "${GStreamer_ROOT}/share/gst-android/ndk-build/")
     endif()
 elseif(IOS)
-    if(NOT DEFINED GStreamerMobile_ASSETS_DIR AND DEFINED GStreamerMobile_ASSETS_DIR)
-        set(GStreamerMobile_ASSETS_DIR ${GStreamerMobile_ASSETS_DIR})
-    elseif(NOT DEFINED GStreamerMobile_ASSETS_DIR)
-        set(GStreamerMobile_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    if(NOT DEFINED GStreamer_ASSETS_DIR AND DEFINED GStreamer_ASSETS_DIR)
+        set(GStreamer_ASSETS_DIR ${GStreamer_ASSETS_DIR})
+    elseif(NOT DEFINED GStreamer_ASSETS_DIR)
+        set(GStreamer_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
     else()
         # Same as above
-        set(GStreamerMobile_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${GStreamerMobile_ASSETS_DIR}")
+        set(GStreamer_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../${GStreamer_ASSETS_DIR}")
     endif()
 endif()
 
@@ -492,18 +493,18 @@ if(fonts IN_LIST GStreamerMobile_FIND_COMPONENTS)
                 copyfontsres_${ANDROID_ABI}
                 COMMAND
                     "${CMAKE_COMMAND}" -E make_directory
-                    "${GStreamerMobile_ASSETS_DIR}/fontconfig/fonts/truetype/"
+                    "${GStreamer_ASSETS_DIR}/fontconfig/fonts/truetype/"
                 COMMAND
                     "${CMAKE_COMMAND}" -E copy
                     "${GStreamer_UBUNTU_R_TTF}"
-                    "${GStreamerMobile_ASSETS_DIR}/fontconfig/fonts/truetype/"
+                    "${GStreamer_ASSETS_DIR}/fontconfig/fonts/truetype/"
                 COMMAND
                     "${CMAKE_COMMAND}" -E copy
                     "${GStreamer_FONTS_CONF}"
-                    "${GStreamerMobile_ASSETS_DIR}/fontconfig/"
+                    "${GStreamer_ASSETS_DIR}/fontconfig/"
                 BYPRODUCTS
-                    "${GStreamerMobile_ASSETS_DIR}/fontconfig/fonts/truetype/Ubuntu-R.ttf"
-                    "${GStreamerMobile_ASSETS_DIR}/fontconfig/fonts.conf"
+                    "${GStreamer_ASSETS_DIR}/fontconfig/fonts/truetype/Ubuntu-R.ttf"
+                    "${GStreamer_ASSETS_DIR}/fontconfig/fonts.conf"
             )
 
             if (TARGET GStreamerMobile)
@@ -534,12 +535,12 @@ if(ca_certificates IN_LIST GStreamerMobile_FIND_COMPONENTS)
                 copycacertificatesres_${ANDROID_ABI}
                 COMMAND
                     "${CMAKE_COMMAND}" -E make_directory
-                    "${GStreamerMobile_ASSETS_DIR}/ssl/certs/"
+                    "${GStreamer_ASSETS_DIR}/ssl/certs/"
                 COMMAND
                     "${CMAKE_COMMAND}" -E copy
                     "${GStreamer_CA_BUNDLE}"
-                    "${GStreamerMobile_ASSETS_DIR}/ssl/certs/"
-                BYPRODUCTS "${GStreamerMobile_ASSETS_DIR}/ssl/certs/ca-certificates.crt"
+                    "${GStreamer_ASSETS_DIR}/ssl/certs/"
+                BYPRODUCTS "${GStreamer_ASSETS_DIR}/ssl/certs/ca-certificates.crt"
             )
 
             if (TARGET GStreamerMobile)
