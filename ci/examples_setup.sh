@@ -3,6 +3,10 @@
 
 set -ex
 
+user_branch_exists_in() {
+    ./ci/exists_branch_in_user_repo.sh "$1" "$2"
+}
+
 clone_gstreamer() {
     local gst_commit="$GST_UPSTREAM_BRANCH"
     local gst_remote="${CI_SERVER_URL}/gstreamer/gstreamer"
@@ -24,6 +28,8 @@ clone_gstreamer() {
             gst_commit="${CI_COMMIT_REF_NAME}"
             gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
             echo "Found branch ${gst_commit} in ${gst_remote}"
+        else
+            gst_remote="${CI_SERVER_URL}/gstreamer/gstreamer"
         fi
     fi
 
