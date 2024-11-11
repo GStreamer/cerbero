@@ -308,6 +308,7 @@ class Config(object):
         'package_tarball_compression',
         'extra_mirrors',
         'extra_bootstrap_packages',
+        'override_bootstrap_packages',
         'moltenvk_prefix',
         'vs_install_path',
         'vs_install_version',
@@ -697,6 +698,7 @@ class Config(object):
         self.set_property('extra_properties', {})
         self.set_property('extra_mirrors', [])
         self.set_property('extra_bootstrap_packages', {})
+        self.set_property('override_bootstrap_packages', {})
         self.set_property('bash_completions', set())
         # Increase open-files limits
         set_nofile_ulimit()

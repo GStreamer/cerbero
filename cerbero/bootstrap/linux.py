@@ -43,9 +43,20 @@ class UnixBootstrapper(BootstrapperBase):
 
         if self.config.distro_packages_install:
             extra_packages = self.config.extra_bootstrap_packages.get(self.config.platform, None)
+            override_packages = self.config.override_bootstrap_packages.get(self.config.platform, None)
+            if extra_packages and override_packages:
+                raise ConfigurationError(
+                    'You are setting "extra_bootstrap_packages" and "override_bootstrap_packages" '
+                    'on the same CBC. This might cause conflicts.'
+                )
             if extra_packages:
                 self.packages += extra_packages.get(self.config.distro, [])
                 self.packages += extra_packages.get(self.config.distro_version, [])
+            if override_packages:
+                self.packages = []
+                self.packages += override_packages.get(self.config.distro, [])
+                self.packages += override_packages.get(self.config.distro_version, [])
+
             tool = self.tool
             if self.assume_yes:
                 tool += self.yes_arg
