@@ -17,6 +17,7 @@ stages:
   - 'trigger'
   - 'build docker'
   - 'check sources'
+  - 'tests'
   - 'build'
   # Use the resulting binaries
   - 'integrate'
@@ -109,6 +110,30 @@ default:
     FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
     FDO_UPSTREAM_REPO: "gstreamer/cerbero"
 
+.tests ubuntu image:
+  variables:
+    FDO_DISTRIBUTION_TAG: "$TESTS_UBUNTU_TAG"
+    FDO_DISTRIBUTION_VERSION: "22.04"
+    FDO_DISTRIBUTION_PACKAGES: >-
+      bash
+      ca-certificates
+      curl
+      file
+      git
+      lbzip2
+      pkg-config
+      python3-distro
+      python3-distro-info
+      python3-venv
+      python3-setuptools
+      python3-minimal
+      rsync
+      ssh-client
+      sudo
+      xz-utils
+    FDO_UPSTREAM_REPO: gstreamer/cerbero
+    FDO_REPO_SUFFIX: tests
+
 manual trigger:
   image: "debian:stable-slim"
   stage: "trigger"
@@ -149,6 +174,15 @@ checks fedora image:
   extends:
     - .checks fedora image
     - .fdo.container-build@fedora
+  variables:
+    GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
+
+tests ubuntu image:
+  stage: "build docker"
+  extends:
+    - .tests ubuntu image
+    - .fdo.container-build@ubuntu
   variables:
     GIT_STRATEGY: none
   tags: [ 'placeholder-job' ]
@@ -298,6 +332,20 @@ pre-commit checks:
     pre-commit run --all-files --show-diff-on-failure
   variables:
     PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
+  tags: [ 'placeholder-job' ]
+
+tests:
+  extends:
+    - .tests ubuntu image
+    - .fdo.suffixed-image@ubuntu
+  needs:
+    - "tests ubuntu image"
+  stage: 'tests'
+  script:
+    python3 -m unittest discover -s test -f
+  variables:
+    CERBERO_UNINSTALLED: 1
+    PYTHONPATH: ':./test:./cerbero'
   tags: [ 'placeholder-job' ]
 
 #

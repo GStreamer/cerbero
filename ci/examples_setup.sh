@@ -24,7 +24,7 @@ clone_gstreamer() {
         echo "gst-plugins-rs trigger CI, using ${gst_commit} in ${gst_remote}"
     elif [[ ${CI_PROJECT_NAMESPACE} != gstreamer ]]; then
         echo "Cerbero merge request, checking for matching branch in user fork of gstreamer"
-        if ./ci/exists_branch_in_user_repo.sh "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
+        if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
             gst_commit="${CI_COMMIT_REF_NAME}"
             gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
             echo "Found branch ${gst_commit} in ${gst_remote}"
