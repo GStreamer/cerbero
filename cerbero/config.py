@@ -515,6 +515,8 @@ class Config(object):
             'GST_PLUGIN_PATH_1_0',
             'GST_REGISTRY',
             'GST_REGISTRY_1_0',
+            'MONO_PATH',
+            'MONO_GAC_PREFIX',
         )
         for each in runtime_env:
             env[each] = to_winepath(env[each])
