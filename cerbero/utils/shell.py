@@ -675,7 +675,7 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
             rc_tmp.write(shellrc)
             rc_tmp.flush()
             if 'zsh' in shell:
-                env['ZDOTDIR'] = tmp.name
+                env['ZDOTDIR'] = tmp
                 os.execlpe(shell, shell, env)
             else:
                 # Check if the shell supports passing the rcfile
