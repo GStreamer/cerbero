@@ -22,4 +22,4 @@ class Recipe(recipe.Recipe):
         self.env['WINEPREFIX'] = os.path.join(self.config.prefix, 'var', 'tmp', 'wine')
         self.env['WINEDEBUG'] = 'fixme-all'
         await shell.async_call(['wine', 'msiexec', '/i', os.path.join(self.download_dir, self.tarball_name)],
-           cmd_dir=wine_path, env=self.env)
+           cmd_dir=wine_path, env=self.env, logfile=self.logfile)

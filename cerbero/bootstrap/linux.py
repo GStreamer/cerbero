@@ -122,7 +122,7 @@ class DebianBootstrapper(UnixBootstrapper):
                 self.packages.append('libc6:i386')
                 self.checks.append(self.create_debian_arch_check('i386'))
             if self.config.arch in [Architecture.X86_64, Architecture.X86]:
-                self.packages.append('wine')
+                self.packages += ['wine', 'xvfb']
 
     def create_debian_arch_check(self, arch):
         def check_arch():
@@ -225,7 +225,7 @@ class RedHatBootstrapper(UnixBootstrapper):
             if self.config.distro_version in ['fedora_24', 'fedora_25']:
                 self.packages.append('libncurses-compat-libs.i686')
             if self.config.arch in [Architecture.X86_64, Architecture.X86]:
-                self.packages.append('wine')
+                self.packages += ['wine', 'which', 'xorg-x11-server-Xvfb']
         if user_is_root():
             return
         self.tool = ['sudo'] + self.tool
@@ -271,7 +271,7 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch in [Architecture.X86_64, Architecture.X86]:
-                self.packages.append('wine')
+                self.packages += ['wine', 'xvfb-run']
 
 
 class ArchBootstrapper(UnixBootstrapper):
@@ -319,7 +319,7 @@ class ArchBootstrapper(UnixBootstrapper):
             self.packages.append('gcc')
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch in [Architecture.X86_64, Architecture.X86]:
-                self.packages.append('wine')
+                self.packages += ['wine', 'xorg-server-xvfb']
 
 
 class GentooBootstrapper(UnixBootstrapper):
