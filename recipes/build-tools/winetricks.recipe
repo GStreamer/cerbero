@@ -6,10 +6,10 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'winetricks'
-    version = '20210825'
+    version = '20240105'
     stype = SourceType.TARBALL
     url = 'https://github.com/Winetricks/winetricks/archive/refs/tags/%(version)s.tar.gz'
-    tarball_checksum = 'bac77918ef4d58c6465a1043fd996d09c3ee2c5a07f56ed089c4c65a71881277'
+    tarball_checksum = 'e92929045cf9ffb1e8d16ef8fd971ea1cf63a28a73916b1951e9553c94482f61'
     btype = BuildType.CUSTOM
 
     async def install(self):
