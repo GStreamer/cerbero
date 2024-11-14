@@ -120,7 +120,7 @@ cerbero_before_script() {
         echo "  'gstreamer-1.0': 'ci/${gst_commit}'," >> localconf.cbc
     fi
     if [[ -n $gstpluginsrs_commit ]]; then
-        echo "  'gst-plugins-rs-1.0': 'ci/${gstpluginsrs_commit}'," >> localconf.cbc
+        echo "  'gst-plugins-rs': 'ci/${gstpluginsrs_commit}'," >> localconf.cbc
     fi
     echo "}" >> localconf.cbc
 
@@ -129,7 +129,7 @@ cerbero_before_script() {
         echo "  'gstreamer-1.0': {'ci': '${gst_remote}'}," >> localconf.cbc
     fi
     if [[ -n $gstpluginsrs_remote ]]; then
-        echo "  'gst-plugins-rs-1.0': {'ci': '${gstpluginsrs_remote}'}," >> localconf.cbc
+        echo "  'gst-plugins-rs': {'ci': '${gstpluginsrs_remote}'}," >> localconf.cbc
     fi
     echo "}" >> localconf.cbc
 
