@@ -466,8 +466,8 @@ class MSIWithNinjaPackager(PackagerBase):
         if isinstance(self.package, App):
             self.packagedeps = [self.package]
         tmp_dirs = self._create_merge_modules(writer, package_type)
-        config_path = self._create_config()
-        return (self._create_msi(writer, config_path), tmp_dirs)
+        (config_path, ui_path) = self._create_config()
+        return (self._create_msi(writer, config_path, ui_path), tmp_dirs)
 
     def _create_merge_modules(self, writer: Writer, package_type: PackageType) -> list[Path]:
         packagedeps = {}
@@ -496,16 +496,19 @@ class MSIWithNinjaPackager(PackagerBase):
         config_path = config.write(self.output_dir)
         return config_path
 
-    def _create_msi(self, writer: Writer, config_path) -> Path:
+    def _create_msi(self, writer: Writer, config_path, ui_path) -> Path:
         wixobjs = []
 
         # Make the MSI manifest relative to the Ninja root.
         msi_manifest = f'{self._package_name()}.wxs'
+
         # Writes the manifest for the MSI installer.
         MSI(self.config, self.package, self.packagedeps, config_path, self.store).write(
             (self.output_dir / msi_manifest).as_posix()
         )
         wixobjs.append(msi_manifest)
+        if ui_path:
+            wixobjs.append(ui_path)
 
         implicit_deps = []
         if self.package.wix_use_fragment:

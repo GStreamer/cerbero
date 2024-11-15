@@ -362,16 +362,18 @@ class VSFragment(Fragment):
 
 class WixConfig(WixBase):
     wix_config = 'wix/Config.wxi'
+    ui_path = 'wix/wixui_Mondo_GStreamer.wxi'
 
     def __init__(self, config, package):
         self.config_path = os.path.join(config.data_dir, self.wix_config)
+        self.ui_path = os.path.join(config.data_dir, self.ui_path)
         self.arch = config.target_arch
         self.abi = ' '.join(config._get_toolchain_target_platform_arch())
         self.package = package
         if isinstance(self.package, App):
             self.ui_type = 'WixUI_InstallDir'
         else:
-            self.ui_type = 'WixUI_Mondo'
+            self.ui_type = 'WixUI_Mondo_GStreamer'
         # Wine doesn't support other than mszip
         if config.cross_compiling():
             self.compression = 'mszip'
@@ -397,10 +399,12 @@ class WixConfig(WixBase):
             '@Compression@': self.compression,
         }
         shell.replace(config_out_path, replacements)
-        return config_out_path
-
-    def _product_name(self):
-        return '%s' % self.package.shortdesc
+        if self.ui_type == 'WixUI_Mondo_GStreamer':
+            ui_out_path = os.path.join(output_dir, os.path.basename(self.ui_path))
+            shutil.copy(self.ui_path, ui_out_path)
+            return (config_out_path, ui_out_path)
+        else:
+            return (config_out_path, None)
 
     def _program_folder(self):
         if self.arch == Architecture.X86:
