@@ -1,46 +1,20 @@
-From ae486ebcc2ca2f5c40723af5c8e2f7a4f96909c4 Mon Sep 17 00:00:00 2001
+From 290b3245adbe0ac63d8e4377c84d9c8bc437f627 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH 02/14] Implement Android WebProcess and NetworkProcess entry
+Subject: [PATCH 2/6] Implement Android WebProcess and NetworkProcess entry
  points
 
 ---
- .../soup/NetworkProcessMainSoup.cpp           | 34 ++++++++-----------
- .../WebProcess/wpe/WebProcessMainWPE.cpp      | 13 +++++++
- Source/WebKit/webkitglib-symbols.map          |  1 +
- 3 files changed, 28 insertions(+), 20 deletions(-)
+ .../NetworkProcess/soup/NetworkProcessMainSoup.cpp  | 13 +++++++++++++
+ Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp  | 13 +++++++++++++
+ Source/WebKit/webkitglib-symbols.map                |  1 +
+ 3 files changed, 27 insertions(+)
 
 diff --git a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
-index f98cd65a0ea1..3dae162d5cfa 100644
+index dc26ae7acb81..bb5898e947b2 100644
 --- a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
 +++ b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
-@@ -37,28 +37,22 @@
- 
- namespace WebKit {
- 
--class NetworkProcessMainSoup final: public AuxiliaryProcessMainBaseNoSingleton<NetworkProcess> {
--public:
--    bool platformInitialize() override
--    {
--#if USE(GCRYPT)
--        PAL::GCrypt::initialize();
--#endif
--        return true;
--    }
--
--    void platformFinalize() override
--    {
--        // FIXME: Is this still needed? We should probably destroy all existing sessions at this point instead.
--        // Needed to destroy the SoupSession and SoupCookieJar, e.g. to avoid
--        // leaking SQLite temporary journaling files.
--        process().destroySession(PAL::SessionID::defaultSessionID());
--    }
--};
--
- int NetworkProcessMain(int argc, char** argv)
- {
--    return AuxiliaryProcessMain<NetworkProcessMainSoup>(argc, argv);
-+    return AuxiliaryProcessMain<AuxiliaryProcessMainBaseNoSingleton<NetworkProcess>>(argc, argv);
+@@ -67,3 +67,16 @@ int NetworkProcessMain(int argc, char** argv)
  }
  
  } // namespace WebKit

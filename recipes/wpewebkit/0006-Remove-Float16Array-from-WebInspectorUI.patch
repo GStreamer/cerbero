@@ -1,7 +1,7 @@
-From 9a3139885a047037519bbfc4f3cc1d37f2105a1e Mon Sep 17 00:00:00 2001
+From aea652ec0cc796b51791ed1b00af6b16d2f53113 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 16 Oct 2024 16:44:03 +0300
-Subject: [PATCH 13/14] Remove Float16Array from WebInspectorUI
+Subject: [PATCH 6/6] Remove Float16Array from WebInspectorUI
 
 * Source/WebInspectorUI/UserInterface/Base/Utilities.js:
 ---
