@@ -624,6 +624,15 @@ cerbero deps msvc x86_64:
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
 
+cerbero deps msvc x86:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_x86'
+    CONFIG: 'win32.cbc'
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
+
 cerbero deps mingw x86_64:
   extends: ['.cerbero deps', '.cerbero windows native']
   variables:
@@ -633,15 +642,46 @@ cerbero deps mingw x86_64:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
   when: 'manual'
 
+cerbero deps mingw x86:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86'
+    CONFIG: 'win32.cbc'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
+
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_x86_64'
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+
+build cerbero msvc x86:
+  extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_x86'
+    CONFIG: 'win32.cbc'
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+  when: 'manual'
 
 build cerbero mingw x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
   variables:
     ARCH: 'mingw_x86_64'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+  when: 'manual'
+
+build cerbero mingw x86:
+  extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86'
+    CONFIG: 'win32.cbc'
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
