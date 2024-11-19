@@ -14,6 +14,7 @@ include:
   - local: '.gitlab-image-tags.yml'
 
 stages:
+  - 'trigger'
   - 'build docker'
   - 'check sources'
   - 'build'
@@ -108,7 +109,14 @@ default:
     FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
     FDO_UPSTREAM_REPO: "gstreamer/cerbero"
 
-.manual trigger:
+manual trigger:
+  image: "debian:stable-slim"
+  stage: "trigger"
+  variables:
+    GIT_STRATEGY: "none"
+  tags: [ "placeholder-job" ]
+  script:
+    - echo "Trigger job done, now running the pipeline."
   rules:
     # If this pipeline is triggered from gstreamer, trigger the pipeline automatically
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
@@ -127,8 +135,8 @@ default:
 
 fedora image:
   stage: "build docker"
+  needs: [ "manual trigger" ]
   extends:
-    - .manual trigger
     - .fedora image
     - .fdo.container-build@fedora
   variables:
@@ -137,6 +145,7 @@ fedora image:
 
 checks fedora image:
   stage: "build docker"
+  needs: []
   extends:
     - .checks fedora image
     - .fdo.container-build@fedora
@@ -146,8 +155,8 @@ checks fedora image:
 
 android fedora image:
   stage: "build docker"
+  needs: [ "manual trigger" ]
   extends:
-    - .manual trigger
     - .android fedora image
     - .fdo.container-build@fedora
   variables:
@@ -156,8 +165,8 @@ android fedora image:
 
 ubuntu image:
   stage: "build docker"
+  needs: [ "manual trigger" ]
   extends:
-    - .manual trigger
     - .ubuntu image
     - .fdo.container-build@ubuntu
   variables:
@@ -463,7 +472,7 @@ cerbero cross-android universal examples:
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
-  needs: []
+  needs: [ "manual trigger" ]
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -508,7 +517,7 @@ build cerbero cross-macos universal arm64-host:
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
-  needs: []
+  needs: [ "manual trigger" ]
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -576,7 +585,7 @@ cerbero cross-ios universal examples arm64-host:
 #
 .cerbero windows native:
   image: $WINDOWS_IMAGE
-  needs: []
+  needs: [ "manual trigger" ]
   tags:
     - 'docker'
     - 'windows'
