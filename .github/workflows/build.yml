@@ -42,7 +42,7 @@ jobs:
           ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
           ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} package -f wpewebkit
       - name: Store packages
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4
         with:
           name: wpe-deps-${{ matrix.target }}
           path: ./wpewebkit-android-${{ matrix.target }}*
