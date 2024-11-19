@@ -368,7 +368,7 @@ class WixConfig(WixBase):
         self.config_path = os.path.join(config.data_dir, self.wix_config)
         self.ui_path = os.path.join(config.data_dir, self.ui_path)
         self.arch = config.target_arch
-        self.abi = ' '.join(config._get_toolchain_target_platform_arch())
+        self.abi_desc = ' '.join(config._get_toolchain_target_platform_arch(readable=True))
         self.package = package
         if isinstance(self.package, App):
             self.ui_type = 'WixUI_InstallDir'
@@ -390,9 +390,9 @@ class WixConfig(WixBase):
             '@Manufacturer@': self.package.vendor,
             '@Version@': self._format_version(self.package.version),
             '@PackageComments@': self.package.longdesc,
-            '@Description@': f'{self.package.shortdesc} ({self.abi})',
+            '@Description@': f'{self.package.shortdesc} ({self.abi_desc})',
             '@ProjectURL': self.package.url,
-            '@ProductName@': f'{self.package.shortdesc} ({self.abi})',
+            '@ProductName@': f'{self.package.shortdesc} ({self.abi_desc})',
             '@ProgramFilesFolder@': self._program_folder(),
             '@Platform@': self._platform(),
             '@UIType@': self.ui_type,

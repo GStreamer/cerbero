@@ -941,19 +941,23 @@ class Config(object):
             if os.path.exists(config_path):
                 self._parse(config_path, reset=False)
 
-    def _get_toolchain_target_platform_arch(self):
+    def _get_toolchain_target_platform_arch(self, readable=False):
+        mingw = 'MinGW' if readable else 'mingw'
+        msvc = 'MSVC' if readable else 'msvc'
+        uwp = 'UWP' if readable else 'uwp'
+        debug = ' Debug' if readable else '-debug'
         if self.target_platform != Platform.WINDOWS or self._is_build_tools_config:
             return (self.target_platform, self.target_arch)
         if not self.variants.visualstudio:
-            return ('mingw', self.target_arch)
+            return (mingw, self.target_arch)
         # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
         if self.variants.uwp:
-            target_platform = 'uwp'
+            target_platform = uwp
         else:
-            target_platform = 'msvc'
+            target_platform = msvc
         # Debug CRT needs a separate prefix
         if self.variants.vscrt == 'mdd':
-            target_platform += '-debug'
+            target_platform += debug
         # Check for invalid configuration of a custom Visual Studio path
         if self.vs_install_path and not self.vs_install_version:
             raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
