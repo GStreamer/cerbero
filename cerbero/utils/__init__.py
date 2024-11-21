@@ -252,19 +252,16 @@ Terminating.""",
                 d = ('arch', 'Arch', 'Linux')
             elif os.path.exists('/etc/os-release'):
                 with open('/etc/os-release', 'r') as f:
-                    if 'ID="amzn"\n' in f.readlines():
-                        d = ('RedHat', 'amazon', '')
-                    else:
-                        f.seek(0, 0)
-                        for line in f:
-                            # skip empty lines and comment lines
-                            if line.strip() and not line.lstrip().startswith('#'):
-                                k, v = line.rstrip().split('=')
-                                if k == 'NAME':
-                                    name = v.strip('"')
-                                elif k == 'VERSION_ID':
-                                    version = v.strip('"')
-                        d = (name, version, '')
+                    f.seek(0, 0)
+                    for line in f:
+                        # skip empty lines and comment lines
+                        if line.strip() and not line.lstrip().startswith('#'):
+                            k, v = line.rstrip().split('=')
+                            if k == 'NAME':
+                                name = v.strip('"')
+                            elif k == 'VERSION_ID':
+                                version = v.strip('"')
+                    d = (name, version, '')
 
         if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint', 'Linux Mint']:
             distro = Distro.DEBIAN
@@ -342,58 +339,26 @@ Terminating.""",
             'Rocky Linux',
         ]:
             distro = Distro.REDHAT
-            if d[1] == '16':
-                distro_version = DistroVersion.FEDORA_16
-            elif d[1] == '17':
-                distro_version = DistroVersion.FEDORA_17
-            elif d[1] == '18':
-                distro_version = DistroVersion.FEDORA_18
-            elif d[1] == '19':
-                distro_version = DistroVersion.FEDORA_19
-            elif d[1] == '20':
-                distro_version = DistroVersion.FEDORA_20
-            elif d[1] == '21':
-                distro_version = DistroVersion.FEDORA_21
-            elif d[1] == '22':
-                distro_version = DistroVersion.FEDORA_22
-            elif d[1] == '23':
-                distro_version = DistroVersion.FEDORA_23
-            elif d[1] == '24':
-                distro_version = DistroVersion.FEDORA_24
-            elif d[1] == '25':
-                distro_version = DistroVersion.FEDORA_25
-            elif d[1] == '26':
-                distro_version = DistroVersion.FEDORA_26
-            elif d[1] == '27':
-                distro_version = DistroVersion.FEDORA_27
-            elif d[1] == '28':
-                distro_version = DistroVersion.FEDORA_28
-            elif d[1] == '29':
-                distro_version = DistroVersion.FEDORA_29
-            elif d[1] == '30':
-                distro_version = DistroVersion.FEDORA_30
-            elif d[1] == '31':
-                distro_version = DistroVersion.FEDORA_31
-            elif d[1] == '32':
-                distro_version = DistroVersion.FEDORA_32
-            elif d[0].startswith('Fedora'):
-                # str(int()) is for ensuring that the fedora version is
-                # actually a number
-                distro_version = 'fedora_' + str(int(d[1]))
-            elif d[1] == '6' or d[1].startswith('6.'):
+            # str(int()) is for ensuring that the fedora version is
+            # actually a number
+            distro_version = 'fedora_' + str(int(d[1]))
+        elif d[0].startswith(('RedHat', 'CentOS', 'Red Hat', 'Rocky Linux', 'AlmaLinux')):
+            distro = Distro.REDHAT
+            if d[1] == '6' or d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
             elif d[1] == '7' or d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
-            elif d[1] == '8' or d[1].startswith('8.'):
-                distro_version = DistroVersion.REDHAT_8
-            elif d[1] == '9' or d[1].startswith('9.'):
-                distro_version = DistroVersion.REDHAT_9
-            elif d[0] == 'Amazon Linux' and d[1].startswith('2'):
-                distro_version = DistroVersion.AMAZON_LINUX_2
-            elif d[1] == 'amazon':
-                distro_version = DistroVersion.AMAZON_LINUX
             else:
-                # FIXME Fill this
+                distro_version = 'redhat_' + d[1]
+        elif d[0].startswith('Amazon Linux'):
+            distro = Distro.REDHAT
+            if d[0].endswith('AMI'):
+                distro_version = DistroVersion.REDHAT_6
+            elif d[1] == '2':
+                distro_version = DistroVersion.REDHAT_7
+            elif d[1] == '2023':
+                distro_version = DistroVersion.AMAZON_LINUX_2023
+            else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0].strip() in ['openSUSE']:
             distro = Distro.SUSE
@@ -403,7 +368,7 @@ Terminating.""",
                 distro_version = DistroVersion.OPENSUSE_42_3
             else:
                 # FIXME Fill this
-                raise FatalError("Distribution OpenSuse '%s' " 'not supported' % str(d))
+                raise FatalError("Distribution OpenSuse '%s' not supported" % str(d))
         elif d[0].strip() in ['openSUSE Tumbleweed']:
             distro = Distro.SUSE
             distro_version = DistroVersion.OPENSUSE_TUMBLEWEED
@@ -649,7 +614,7 @@ def detect_qt5(platform, arch, is_universal):
             # require QT5_PREFIX before Qt 5.14 with android universal
             if not qt5_prefix:
                 m.warning(
-                    'Please set QT5_PREFIX if you want to build ' 'the Qt5 plugin for android-universal with Qt < 5.14'
+                    'Please set QT5_PREFIX if you want to build the Qt5 plugin for android-universal with Qt < 5.14'
                 )
                 return (None, None)
         else:

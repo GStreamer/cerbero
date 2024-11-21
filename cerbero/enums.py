@@ -124,11 +124,9 @@ class DistroVersion:
     # further fedora versions are generated automatically
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
-    REDHAT_8 = 'redhat_8'
-    REDHAT_9 = 'redhat_9'
-    # Amazon Linux seems to be RedHat/CentOS-based
-    AMAZON_LINUX = 'amazon_linux'
-    AMAZON_LINUX_2 = 'amazon_linux_2'
+    # further RedHat versions are generated automatically, like:
+    # REDHAT_8_1 = 'redhat_8.1'
+    AMAZON_LINUX_2023 = 'amazonlinux_2023'
     ARCH_ROLLING = 'rolling'
     GENTOO_VERSION = 'gentoo-version'
     OPENSUSE_42_2 = 'opensuse_42_2'
