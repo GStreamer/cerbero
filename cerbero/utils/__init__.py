@@ -353,6 +353,9 @@ Terminating.""",
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))
+        elif d[0].startswith('AlmaLinux'):
+            distro = Distro.REDHAT
+            distro_version = 'almalinux_' + d[1][:3]
         elif d[0].strip() in ['openSUSE']:
             distro = Distro.SUSE
             if d[1] == '42.2':

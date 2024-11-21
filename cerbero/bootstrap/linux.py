@@ -206,6 +206,19 @@ class RedHatBootstrapper(UnixBootstrapper):
         else:
             self.packages.append('wget')
 
+        if dv.startswith('almalinux_'):
+            try:
+                shell.new_call(['rpm', '-q', 'epel-release'])
+            except CommandError:
+                command = ['dnf', 'install', 'epel-release']
+                if not user_is_root():
+                    command = ['sudo'] + command
+                if assume_yes:
+                    command += ['-y']
+                self.checks.append(lambda: shell.new_call(command, interactive=True))
+            self.tool = ['dnf', '--enablerepo=powertools']
+            self.packages.remove('perl-FindBin')
+
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
