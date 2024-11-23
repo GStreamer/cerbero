@@ -391,7 +391,7 @@ class WixConfig(WixBase):
             '@Version@': self._format_version(self.package.version),
             '@PackageComments@': self.package.longdesc,
             '@Description@': f'{self.package.shortdesc} ({self.abi_desc})',
-            '@ProjectURL': self.package.url,
+            '@ProjectURL@': self.package.url,
             '@ProductName@': f'{self.package.shortdesc} ({self.abi_desc})',
             '@ProgramFilesFolder@': self._program_folder(),
             '@Platform@': self._platform(),
