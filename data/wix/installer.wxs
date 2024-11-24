@@ -2,8 +2,6 @@
 	<Package Language="$(var.Language)" Manufacturer="$(var.Manufacturer)" Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)" Version="$(var.Version)" ProductCode="$(var.ProductID)">
 		<SummaryInformation Description="$(var.Description)" Manufacturer="$(var.Manufacturer)"/>
 
-		<MediaTemplate EmbedCab="yes" MaximumUncompressedMediaSize="50" CompressionLevel="$(var.Compression)"/>
-
 		<!-- Upgrades -->
 		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit"/>
 

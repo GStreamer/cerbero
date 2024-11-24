@@ -442,6 +442,7 @@ class MSI(WixBase):
         if not self.product:
             raise RuntimeError
         self._add_include()
+        self._add_compression(not config.cross_compiling())
         self._customize_ui()
         self._add_vs_properties()
 
@@ -455,6 +456,17 @@ class MSI(WixBase):
             self.wix_config = to_winepath(self.wix_config)
         inc = etree.PI('include %s' % self.wix_config)
         self.root.insert(0, inc)
+
+    def _add_compression(self, shard):
+        mediatemplate = etree.SubElement(
+            self.product,
+            'MediaTemplate',
+            EmbedCab='yes',
+            CompressionLevel='$(var.Compression)',
+        )
+        if shard:
+            # On Wine this yields corrupted sharded cabinets.
+            mediatemplate.set('MaximumUncompressedMediaSize', '50')
 
     def _fill(self):
         self._add_install_dir()
