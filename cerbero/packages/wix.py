@@ -628,45 +628,48 @@ class MSI(WixBase):
         # installation folder
         name = self._package_var().replace(' ', '')
 
-        # Add INSTALLDIR in the registry only for the runtime package
-        if self.package.package_mode == PackageType.RUNTIME:
-            regcomponent = etree.SubElement(
-                self.installdir, 'Component', Id='RegistryInstallDir', Guid=self._get_uuid()
-            )
-            regkey = etree.SubElement(
-                regcomponent,
-                'RegistryKey',
-                Id='RegistryInstallDirRoot',
-                ForceCreateOnInstall='yes',
-                ForceDeleteOnUninstall='yes',
-                Key=self._registry_key(name),
-                Root=self.REG_ROOT,
-            )
-            etree.SubElement(
-                regkey,
-                'RegistryValue',
-                Id='RegistryInstallDirValue',
-                Type='string',
-                Name='InstallDir',
-                Value='[INSTALLDIR]',
-            )
-            etree.SubElement(
-                regkey,
-                'RegistryValue',
-                Id='RegistryVersionValue',
-                Type='string',
-                Name='Version',
-                Value=self.package.version,
-            )
-            etree.SubElement(
-                regkey,
-                'RegistryValue',
-                Id='RegistrySDKVersionValue',
-                Type='string',
-                Name='SdkVersion',
-                Value=self.package.sdk_version,
-            )
-            etree.SubElement(self.main_feature, 'ComponentRef', Id='RegistryInstallDir')
+        # Add INSTALLDIR in the registry only when missing
+        regcomponent = etree.SubElement(
+            self.installdir,
+            'Component',
+            Id='RegistryInstallDir',
+            Guid=self._get_uuid(),
+            Condition='NOT GSTINSTALLDIR',
+        )
+        regkey = etree.SubElement(
+            regcomponent,
+            'RegistryKey',
+            Id='RegistryInstallDirRoot',
+            ForceCreateOnInstall='yes',
+            ForceDeleteOnUninstall='yes',
+            Key=self._registry_key(name),
+            Root=self.REG_ROOT,
+        )
+        etree.SubElement(
+            regkey,
+            'RegistryValue',
+            Id='RegistryInstallDirValue',
+            Type='string',
+            Name='InstallDir',
+            Value='[INSTALLDIR]',
+        )
+        etree.SubElement(
+            regkey,
+            'RegistryValue',
+            Id='RegistryVersionValue',
+            Type='string',
+            Name='Version',
+            Value=self.package.version,
+        )
+        etree.SubElement(
+            regkey,
+            'RegistryValue',
+            Id='RegistrySDKVersionValue',
+            Type='string',
+            Name='SdkVersion',
+            Value=self.package.sdk_version,
+        )
+        etree.SubElement(self.main_feature, 'ComponentRef', Id='RegistryInstallDir')
 
     def _add_get_install_dir_from_registry(self):
         name = self._package_var().replace(' ', '')
