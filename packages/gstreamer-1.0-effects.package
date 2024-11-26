@@ -33,3 +33,6 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_effects')
             self.files_devel.append('gst-plugins-rs:plugins_effects_devel')
+
+        if self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
+            self.files.append('frei0r-plugins:plugins')

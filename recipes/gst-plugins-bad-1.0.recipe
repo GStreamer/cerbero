@@ -175,7 +175,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstfieldanalysis%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstfreeverb%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstfrei0r%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstgaudieffects%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstgeometrictransform%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstinter%(mext)s',
@@ -213,7 +212,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad.a', '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad.la',
              '%(libdir)s/gstreamer-1.0/libgstfieldanalysis.a', '%(libdir)s/gstreamer-1.0/libgstfieldanalysis.la',
              '%(libdir)s/gstreamer-1.0/libgstfreeverb.a', '%(libdir)s/gstreamer-1.0/libgstfreeverb.la',
-             '%(libdir)s/gstreamer-1.0/libgstfrei0r.a', '%(libdir)s/gstreamer-1.0/libgstfrei0r.la',
              '%(libdir)s/gstreamer-1.0/libgstgaudieffects.a', '%(libdir)s/gstreamer-1.0/libgstgaudieffects.la',
              '%(libdir)s/gstreamer-1.0/libgstgeometrictransform.a', '%(libdir)s/gstreamer-1.0/libgstgeometrictransform.la',
              '%(libdir)s/gstreamer-1.0/libgstinter.a', '%(libdir)s/gstreamer-1.0/libgstinter.la',
@@ -521,6 +519,10 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
 
         self.enable_plugin('x265', 'codecs', dep='x265')
+
+        if self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
+            # These need plugins
+            self.enable_plugin('frei0r', 'effects', dep='frei0r-plugins')
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi2'] = 'disabled'
