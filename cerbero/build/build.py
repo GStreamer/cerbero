@@ -645,7 +645,6 @@ class CMake(MakefilesBase):
         '-H%(make_dir)s '
         '-B%(build_dir)s '
         '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s '
-        '-DCMAKE_INSTALL_LIBDIR=%(libdir)s '
         '-DCMAKE_INSTALL_BINDIR=bin '
         '-DCMAKE_INSTALL_INCLUDEDIR=include '
         '%(options)s -DCMAKE_BUILD_TYPE=Release '
@@ -657,6 +656,7 @@ class CMake(MakefilesBase):
         MakefilesBase.__init__(self)
         self.build_dir = os.path.join(self.build_dir, 'b')
         self.config_sh = 'cmake'
+        self.configure_tpl += f'-DCMAKE_INSTALL_LIBDIR={self.config.rel_libdir} '
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
             self.config_sh = shutil.which('cmake', path=shell.get_path_minus_msys(self.env['PATH']))
@@ -1171,7 +1171,7 @@ class Meson(Build, ModifyEnvBase):
             self.meson_sh,
             'setup',
             '--prefix=' + self.config.prefix,
-            '--libdir=lib' + self.config.lib_suffix,
+            '--libdir=' + self.config.rel_libdir,
             '-Ddebug=' + debug,
             '--default-library=' + self.library_type,
             '-Doptimization=' + opt,
