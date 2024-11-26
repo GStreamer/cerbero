@@ -4,17 +4,23 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'frei0r-plugins'
-    version = '1.7.0'
+    version = '2.3.3'
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'
-    can_msvc = False
-    url = 'https://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '1b1ff8f0f9bc23eed724e94e9a7c1d8f0244bfe33424bb4fe68e6460c088523a'
+    can_msvc = True
+    url = 'https://github.com/dyne/frei0r/archive/refs/tags/v%(version)s.tar.gz'
+    tarball_dirname = 'frei0r-%(version)s'
+    tarball_checksum = 'aeeefe3a9b44761b2cf110017d2b1dfa2ceeb873da96d283ba5157380c5d0ce5'
+    configure_args = '-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON'
 
     files_plugins = ['%(libdir)s/frei0r-1']
     files_devel = [
         '%(libdir)s/pkgconfig/frei0r.pc',
         'include/frei0r.h',
+    ]
+
+    patches = [
+        f'{name}/0001-cmake-Fix-c99-standard-flag-wiping-out-cross-compila.patch'
     ]
