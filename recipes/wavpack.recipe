@@ -4,16 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '5.4.0'
+    version = '5.7.0'
     stype = SourceType.TARBALL
-    url = 'https://github.com/dbry/WavPack/archive/%(version)s.tar.gz'
-    tarball_dirname = 'WavPack-%(version)s'
-    tarball_checksum = 'abbe5ca3fc918fdd64ef216200a5c896243ea803a059a0662cd362d0fa827cd2'
+    url = 'https://www.wavpack.com/wavpack-%(version)s.tar.bz2'
+    tarball_checksum = '8944b237968a1b3976a1eb47cd556916e041a2aa8917495db65f82c3fcc2a225'
     licenses = [{License.BSD_like: ['COPYING']}]
-
+    library_type = LibraryType.STATIC
     btype = BuildType.CMAKE
     configure_options = '-DWAVPACK_INSTALL_CMAKE_MODULE=OFF \
-        -DWAVPACK_ENABLE_LIBCRYPTO=OFF \
+        -DWAVPACK_INSTALL_PKGCONFIG_MODULE=ON \
         -DWAVPACK_INSTALL_DOCS=OFF \
         -DWAVPACK_BUILD_DOCS=OFF \
         -DWAVPACK_BUILD_PROGRAMS=OFF \
@@ -23,55 +22,31 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
 
     patches = [
-        name + '/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
-        name + '/0001-cmake-Set-SOVERSION-to-match-Autotools.patch',
+        f'{name}/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
+        f'{name}/0002-cmake-Set-SOVERSION-to-match-Autotools.patch',
     ]
 
     files_libs = ['libwavpack']
     files_devel = ['include/wavpack', '%(libdir)s/pkgconfig/wavpack.pc']
 
     def prepare(self):
-        if self.config.target_arch not in [Architecture.X86, Architecture.X86_64, Architecture.ARMv7, Architecture.ARMv7S] or self.config.target_platform == Platform.IOS:
+        if self.config.target_arch == Architecture.ARM64 or self.config.target_platform == Platform.IOS:
             self.configure_options += ' -DWAVPACK_ENABLE_ASM=OFF '
         # We only want static libs on iOS and Android
         if self.config.target_platform not in (Platform.IOS, Platform.ANDROID):
             self.configure_options += ' -DBUILD_SHARED_LIBS=ON '
             self.library_type = LibraryType.SHARED
-        else:
-            self.library_type = LibraryType.STATIC
         if self.config.cross_compiling() and self.config.target_platform not in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS_EXITCODE=0'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS=TRUE'
 
-    async def extract(self):
-        await super().extract()
-        # afxres.h is provided by the component "Visual C++ MFC" in the Visual
-        # Studio 2019 installer, but the component is not selected by default,
-        # and this header not actually needed by the resource file. Everything
-        # works fine with just windows.h
-        shell.replace(os.path.join(self.config_src_dir, 'wavpackdll/wavpackdll.rc'),
-                      {'afxres.h': 'windows.h'})
-        # CMake can only build shared or static libs, and we need the static
-        # libs on Android and iOS. This means we need to link to -lm, which
-        # will only get pulled in with pkg-config --libs --static, which is not
-        # what the gst-plugins-good dependency() call does. So let's add it to
-        # the Libs: line.
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
-            shell.replace(os.path.join(self.config_src_dir, 'wavpack.pc.in'),
-                          {'-lwavpack': '-lwavpack @LIBM@'})
-
-    async def install(self):
-        await super().install()
-        # CMake build system installs include/wavpack.h but we want
-        # include/wavpack/wavpack.h
-        incdir = Path(self.config.prefix) / 'include'
-        todir = incdir / 'wavpack'
-        todir.mkdir(exist_ok=True)
-        (incdir / 'wavpack.h').replace(todir / 'wavpack.h')
-
     def post_install(self):
         deps = ['-lm']
+        if self.config.target_platform == Platform.ANDROID:
+            # Meson prefers shared lib lookup always
+            shell.replace(f'{self.config.libdir}/pkgconfig/wavpack.pc',
+                              {' -lwavpack': ' -lwavpack -lm'})
         libtool_la = LibtoolLibrary('wavpack', None, None, None, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()

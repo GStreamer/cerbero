@@ -1,7 +1,7 @@
-From ec46d2fd9daa70e4c8bbdd228316e6b4cc78a375 Mon Sep 17 00:00:00 2001
+From 40b46ddd4b45bac521d7a0ef29988007367fdc22 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 22 Jan 2022 14:01:04 +0530
-Subject: [PATCH] cmake: Set SOVERSION to match Autotools
+Subject: [PATCH 2/2] cmake: Set SOVERSION to match Autotools
 
 Nothing is ever simple, is it.
 ---
@@ -9,10 +9,10 @@ Nothing is ever simple, is it.
  1 file changed, 2 insertions(+)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 970505b..a066724 100644
+index d2bb794..c92ba8b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -223,6 +223,8 @@ target_compile_definitions(wavpack
+@@ -222,6 +222,8 @@ target_compile_definitions(wavpack
          $<$<AND:$<BOOL:${WAVPACK_ENABLE_ASM}>,$<BOOL:${CPU_ASM_ARM32}>>:OPT_ASM_ARM32>
  )
  
@@ -22,5 +22,5 @@ index 970505b..a066724 100644
  	set_source_files_properties(src/pack_x86.asm src/unpack_x86.asm PROPERTIES COMPILE_FLAGS "/safeseh")
  endif()
 -- 
-2.34.1.windows.1
+2.47.0.windows.2
 
