@@ -196,12 +196,17 @@ class Recipe(recipe.Recipe):
         if Platform.is_apple_mobile(self.config.target_platform):
             # Note: disable 'no-devcryptoeng' when we finally target the
             # *real* ios configuration targets
+            self.library_type = LibraryType.STATIC
             config_sh += ' no-shared no-dso no-async no-devcryptoeng '
             # Undefined symbols in aesni_* in libcrypto.a only on x86_64
             if self.config.target_arch == Architecture.X86_64:
                 config_sh += ' no-asm '
         else:
             config_sh += ' shared '
+            # native Windows build doesn't support building static libraries
+            # and DLLs at the same time -- Configurations/README.md
+            if self.config.target_platform == Platform.WINDOWS:
+                self.library_type = LibraryType.SHARED
 
         # ssl3 is needed by sphinx which is used by gst-validate, which tries
         # to use this libssl and fails with undefined symbols. md2 is needed by
@@ -230,6 +235,8 @@ class Recipe(recipe.Recipe):
                                logfile=self.logfile, env=self.env)
 
     def post_install(self):
+        if self.using_msvc():
+            shell.replace(f'{self.config.libdir}/cmake/OpenSSL/OpenSSLConfig.cmake', {'libssl.lib': 'ssl.lib', 'libcrypto.lib': 'crypto.lib'})
         # XXX: Don't forget to update this when the soname is bumped!
         # We don't build shared libraries on iOS as the build system
         # of openssl is broken and iOS does not support them anyway.
