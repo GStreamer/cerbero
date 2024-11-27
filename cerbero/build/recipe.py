@@ -433,6 +433,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 for line in contents:
                     if line.startswith('prefix=') and 'pcfiledir' not in line:
                         line = f'prefix={prefix_value}'
+                    elif f'={self.config.prefix}' in line:
+                        line = line.replace(self.config.prefix, '${prefix}')
                     fo.write(line + '\n')
 
     def relocate_site_packages(self):
