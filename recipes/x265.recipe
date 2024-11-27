@@ -57,7 +57,7 @@ class Recipe(recipe.Recipe):
             shell.check_output(
                 [
                     lib_exe,
-                    "/OUT:x265.a",
+                    "/OUT:libx265.a",
                     str(self.hdr10lib.absolute()),
                     str(self.hdr12lib.absolute()),
                 ],
