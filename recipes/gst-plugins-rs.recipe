@@ -170,7 +170,7 @@ class Recipe(recipe.Recipe):
             src = os.path.join(self.config.libdir, 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             if os.path.exists(src):
-                shutil.copy(src, dst)
+                shutil.move(src, dst)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         # It also follows MSVC convention for static/import libraries
