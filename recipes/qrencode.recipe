@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
+import shutil
+
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -25,6 +28,13 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libqrencode']
     files_devel = ['include/qrencode.h', '%(libdir)s/pkgconfig/libqrencode.pc']
+
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+        if self.using_msvc():
+            shutil.move(
+                    os.path.join(self.config.libdir, 'qrencode.lib'),
+                    os.path.join(self.config.libdir, 'libqrencode.a'))
 
     def post_install(self):
         # Meson does not generate la files
