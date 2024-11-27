@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -28,6 +29,16 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.configure_options.append(f'-DZLIB_ROOT={self.config.prefix}')
+
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+        # This step must be idempotent, hence why it's done here
+        if self.using_msvc():
+            shutil.move(
+                    os.path.join(self.config.libdir, 'png16_static.lib'),
+                    os.path.join(self.config.libdir, 'libpng16.a'))
+            shell.replace(f'{self.config.libdir}/libpng/libpng16-release.cmake', {'lib/png16_static.lib:': 'lib/libpng16.a'})
+            shell.replace(f'{self.config.libdir}/cmake/PNG/pngTargets-release.cmake', {'lib/png16_static.lib:': 'lib/libpng16.a'})
 
     def post_install(self):
         # Meson does not generate la files
