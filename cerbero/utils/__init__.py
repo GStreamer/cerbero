@@ -252,19 +252,16 @@ Terminating.""",
                 d = ('arch', 'Arch', 'Linux')
             elif os.path.exists('/etc/os-release'):
                 with open('/etc/os-release', 'r') as f:
-                    if 'ID="amzn"\n' in f.readlines():
-                        d = ('RedHat', 'amazon', '')
-                    else:
-                        f.seek(0, 0)
-                        for line in f:
-                            # skip empty lines and comment lines
-                            if line.strip() and not line.lstrip().startswith('#'):
-                                k, v = line.rstrip().split('=')
-                                if k == 'NAME':
-                                    name = v.strip('"')
-                                elif k == 'VERSION_ID':
-                                    version = v.strip('"')
-                        d = (name, version, '')
+                    f.seek(0, 0)
+                    for line in f:
+                        # skip empty lines and comment lines
+                        if line.strip() and not line.lstrip().startswith('#'):
+                            k, v = line.rstrip().split('=')
+                            if k == 'NAME':
+                                name = v.strip('"')
+                            elif k == 'VERSION_ID':
+                                version = v.strip('"')
+                    d = (name, version, '')
 
         if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint', 'Linux Mint']:
             distro = Distro.DEBIAN
@@ -336,26 +333,24 @@ Terminating.""",
             # str(int()) is for ensuring that the fedora version is
             # actually a number
             distro_version = 'fedora_' + str(int(d[1]))
-        elif d[0].startswith(('RedHat', 'CentOS', 'Red Hat')):
+        elif d[0].startswith(('RedHat', 'CentOS', 'Red Hat', 'Rocky Linux', 'AlmaLinux')):
             distro = Distro.REDHAT
             if d[1] == '6' or d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
             elif d[1] == '7' or d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
             else:
-                distro_version = 'redhat_' + d[1][:3]
-        elif d[0] in ('Amazon Linux', 'Rocky Linux'):
+                distro_version = 'redhat_' + d[1]
+        elif d[0].startswith('Amazon Linux'):
             distro = Distro.REDHAT
-            if d[0] == 'Amazon Linux' and d[1].startswith('2'):
-                distro_version = DistroVersion.AMAZON_LINUX_2
-            elif d[1] == 'amazon':
-                distro_version = DistroVersion.AMAZON_LINUX
+            if d[0].endswith('AMI'):
+                distro_version = DistroVersion.REDHAT_6
+            elif d[1] == '2':
+                distro_version = DistroVersion.REDHAT_7
+            elif d[1] == '2023':
+                distro_version = DistroVersion.AMAZON_LINUX_2023
             else:
-                # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0].startswith('AlmaLinux'):
-            distro = Distro.REDHAT
-            distro_version = 'almalinux_' + d[1][:3]
         elif d[0].strip() in ['openSUSE']:
             distro = Distro.SUSE
             if d[1] == '42.2':
