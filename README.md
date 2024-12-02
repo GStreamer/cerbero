@@ -48,7 +48,7 @@ installs the necessary tools with [Chocolatey](https://chocolatey.org/):
 * MSYS2
 * Git
 * Python 3
-* WiX
+* WiX 5.0.1 or higher
 
 Start an admin PowerShell and run:
 
