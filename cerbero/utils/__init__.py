@@ -488,7 +488,7 @@ def get_wix_prefix(config):
     elif config.cross_compiling():
         wix_prefix = 'C:/Program Files/WiX Toolset v5.0/bin'
     elif 'WIX5' in os.environ:
-        wix_prefix = os.path.join(os.environ['WIX5'], 'bin')
+        wix_prefix = os.environ['WIX5']
     if not wix_prefix or not os.path.exists(wix_prefix):
         wix_prefix = 'C:/Program Files%s/WiX Toolset v5.0/bin'
         wix_prefix_x86 = wix_prefix % ' (x86)'
