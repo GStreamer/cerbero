@@ -472,9 +472,21 @@ def escape_path(path):
 
 
 def get_wix_prefix(config):
+    from cerbero.utils import shell
+
     wix_prefix = None
-    if config.cross_compiling():
-        return 'C:/Program Files/WiX Toolset v5.0/bin'
+    wix_path, found, newer = shell.check_tool_version('wix', '5.0.1', env=config.env)
+    if found:
+        if newer:
+            wix_prefix = os.path.dirname(wix_path)
+        else:
+            if config.platform != Platform.WINDOWS:
+                m = ', please run bootstrap again'
+            else:
+                m = ', please update it'
+            raise FatalError(f'Configured WiX {found} which is too old {m}')
+    elif config.cross_compiling():
+        wix_prefix = 'C:/Program Files/WiX Toolset v5.0/bin'
     elif 'WIX5' in os.environ:
         wix_prefix = os.path.join(os.environ['WIX5'], 'bin')
     if not wix_prefix or not os.path.exists(wix_prefix):
