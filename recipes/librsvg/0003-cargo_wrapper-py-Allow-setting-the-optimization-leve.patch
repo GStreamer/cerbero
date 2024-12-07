@@ -1,0 +1,79 @@
+From 5db1c43b1ecca591222e8ac0e6ca1bbd82f1a5f2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 9 Dec 2024 10:07:14 -0300
+Subject: [PATCH 3/3] cargo_wrapper.py: Allow setting the optimization level
+ from meson
+
+---
+ meson.build            | 11 +++++++++--
+ meson/cargo_wrapper.py | 18 ++++++++++++++----
+ 2 files changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index d2dab37c5..65250b929 100644
+--- a/meson.build
++++ b/meson.build
+@@ -444,8 +444,15 @@ cargo_wrapper_args = [
+   '--libdir', get_option('libdir'),
+ ]
+ 
+-if not get_option('debug') or \
+-   (is_msvc_style and get_option('buildtype') == 'debugoptimized')
++if get_option('debug')
++  optimization = get_option('optimization')
++  if optimization in ['0', '1', '2', '3', 's']
++    cargo_wrapper_args += ['--optimization', optimization]
++  elif optimization != 'plain' # g
++    cargo_wrapper_args += ['--optimization', '1']
++    # plain: https://github.com/mesonbuild/meson/issues/7194
++  endif
++else
+   cargo_wrapper_args += ['--release']
+ endif
+ 
+diff --git a/meson/cargo_wrapper.py b/meson/cargo_wrapper.py
+index 48ce2f15e..52f228829 100755
+--- a/meson/cargo_wrapper.py
++++ b/meson/cargo_wrapper.py
+@@ -57,10 +57,6 @@ parser.add_argument(
+     "--build-triplet", help="Build toolchain triplet (for cross builds using specific toolchain version)"
+ )
+ 
+-parser.add_argument(
+-    "--release", action="store_true", help="Build artifacts in release mode"
+-)
+-
+ parser.add_argument(
+     "--avif", action="store_true", help="Enable AVIF support"
+ )
+@@ -89,6 +85,15 @@ group.add_argument(
+ )
+ group.add_argument("--bin", help="Name of binary to build")
+ 
++g = parser.add_argument_group("Optimizations")
++group = parser.add_mutually_exclusive_group(required=False)
++group.add_argument(
++    "--release", action="store_true", help="Build artifacts in release mode"
++)
++group.add_argument(
++    '--optimization', type=str, choices=['0', '1', '2', '3', 's'], help="Set optimization level"
++)
++
+ args = parser.parse_args()
+ 
+ if args.toolchain_version is not None and args.target is None and args.build_triplet is None:
+@@ -163,6 +168,11 @@ if args.release:
+     cargo_cmd.extend(['--release'])
+ else:
+     buildtype = 'debug'
++    if args.optimization:
++        if 'CARGO_BUILD_RUSTFLAGS' in env:
++            env['CARGO_BUILD_RUSTFLAGS'] = env['CARGO_BUILD_RUSTFLAGS'] + f' -C opt-level={args.optimization}'
++        else:
++            env['CARGO_BUILD_RUSTFLAGS'] = f'-C opt-level={args.optimization}'
+ 
+ if args.target:
+     cargo_cmd.extend(['--target', args.target])
+-- 
+2.47.0.windows.2
+
