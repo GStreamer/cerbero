@@ -471,33 +471,44 @@ def escape_path(path):
     return Path(path).as_posix()
 
 
+def decorator_escape_path(fn):
+    def wrapper(*args, **kwargs):
+        return escape_path(fn(*args, **kwargs))
+
+    return wrapper
+
+
+@decorator_escape_path
 def get_wix_prefix(config):
     from cerbero.utils import shell
 
-    wix_prefix = None
+    if config.platform != Platform.WINDOWS:
+        err_msg = ', please run bootstrap again'
+    else:
+        err_msg = ', please update it'
     wix_path, found, newer = shell.check_tool_version('wix', '5.0.1', env=config.env)
     if found:
         if newer:
-            wix_prefix = os.path.dirname(wix_path)
-        else:
-            if config.platform != Platform.WINDOWS:
-                m = ', please run bootstrap again'
-            else:
-                m = ', please update it'
-            raise FatalError(f'Configured WiX {found} which is too old {m}')
-    elif config.cross_compiling():
-        wix_prefix = 'C:/Program Files/WiX Toolset v5.0/bin'
-    elif 'WIX5' in os.environ:
-        wix_prefix = os.environ['WIX5']
-    if not wix_prefix or not os.path.exists(wix_prefix):
-        wix_prefix = 'C:/Program Files%s/WiX Toolset v5.0/bin'
-        wix_prefix_x86 = wix_prefix % ' (x86)'
-        wix_prefix = wix_prefix % ''
-        if not os.path.exists(wix_prefix):
-            wix_prefix = wix_prefix_x86
-    if not os.path.exists(wix_prefix):
-        raise FatalError("The required packaging tool 'WiX' was not found")
-    return escape_path(wix_prefix)
+            return os.path.dirname(wix_path)
+        raise FatalError(f'Need WiX 5.0, found {found} which is too old{err_msg}')
+    if config.cross_compiling():
+        return 'C:/Program Files/WiX Toolset v5.0/bin'
+    progfiles = ('C:/Program Files/', 'C:/Program Files (x86)/')
+    if 'WIX5' in os.environ:
+        return os.environ['WIX5']
+    # The hunt for WiX 5.0
+    wixdir = 'WiX Toolset v5.0/bin'
+    for d in progfiles:
+        wix_prefix = d + wixdir
+        if os.path.exists(wix_prefix):
+            return wix_prefix
+    # If the user has WiX 3 installed, give a better error message
+    for d in progfiles:
+        for wixdir in ('Windows Installer XML v3.5/bin', 'Wix Toolset v3.11/bin'):
+            wix_prefix = d + wixdir
+            if os.path.exists(wix_prefix):
+                raise FatalError(f'Need WiX 5.0, found WiX 3 which is too old{err_msg}')
+    raise FatalError('The required packaging tool WiX 5.0 was not found')
 
 
 def add_system_libs(config, new_env, old_env=None):
