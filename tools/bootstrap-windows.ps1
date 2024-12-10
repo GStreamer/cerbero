@@ -132,7 +132,7 @@ if (!(Is-Newer 'py' $python_req)) {
 }
 python -m pip install setuptools
 
-if (!(Is-Newer 'wix' $wix_req)) {
+if (!(Is-Newer 'wix' $wix_req) -and !(Is-Newer "$env:WIX5\wix" $wix_req)) {
   Write-Host "WiX >= $wix_req not found, installing..."
   Invoke-WebRequest -Uri $wix_url -OutFile "$env:TEMP\wix-tools-x64.msi"
 
