@@ -1,0 +1,193 @@
+From 04c3015cd2d187102fc3cc83670c86c92936b4e3 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 11 Dec 2024 13:03:04 -0300
+Subject: [PATCH 2/3] Add shared library support
+
+---
+ libdca/dca.def     | 15 ++++++++++
+ libdca/dca.sym     | 14 ++++++++++
+ libdca/dca.ver     | 19 +++++++++++++
+ libdca/meson.build | 68 ++++++++++++++++++++++++++++++++++++++++++++--
+ meson.build        |  4 +++
+ 5 files changed, 117 insertions(+), 3 deletions(-)
+ create mode 100644 libdca/dca.def
+ create mode 100644 libdca/dca.sym
+ create mode 100644 libdca/dca.ver
+
+diff --git a/libdca/dca.def b/libdca/dca.def
+new file mode 100644
+index 0000000..d6f1c4e
+--- /dev/null
++++ b/libdca/dca.def
+@@ -0,0 +1,15 @@
++EXPORTS
++    dca_bitstream_get_bh
++    dca_bitstream_init
++    dca_block
++    dca_blocks_num
++    dca_downmix
++    dca_downmix_coeff
++    dca_downmix_init
++    dca_dynrng
++    dca_frame
++    dca_free
++    dca_init
++    dca_samples
++    dca_syncinfo
++    dca_upmix
+diff --git a/libdca/dca.sym b/libdca/dca.sym
+new file mode 100644
+index 0000000..6a5fd00
+--- /dev/null
++++ b/libdca/dca.sym
+@@ -0,0 +1,14 @@
++_dca_bitstream_get_bh
++_dca_bitstream_init
++_dca_block
++_dca_blocks_num
++_dca_downmix
++_dca_downmix_coeff
++_dca_downmix_init
++_dca_dynrng
++_dca_frame
++_dca_free
++_dca_init
++_dca_samples
++_dca_syncinfo
++_dca_upmix
+diff --git a/libdca/dca.ver b/libdca/dca.ver
+new file mode 100644
+index 0000000..ebd0961
+--- /dev/null
++++ b/libdca/dca.ver
+@@ -0,0 +1,19 @@
++{
++    global:
++        dca_bitstream_get_bh;
++        dca_bitstream_init;
++        dca_block;
++        dca_blocks_num;
++        dca_downmix;
++        dca_downmix_coeff;
++        dca_downmix_init;
++        dca_dynrng;
++        dca_frame;
++        dca_free;
++        dca_init;
++        dca_samples;
++        dca_syncinfo;
++        dca_upmix;
++    local:
++        *;
++};
+diff --git a/libdca/meson.build b/libdca/meson.build
+index ee4abb2..b82d385 100644
+--- a/libdca/meson.build
++++ b/libdca/meson.build
+@@ -12,16 +12,78 @@ libdca_sources = files(
+ 	'downmix.c',
+ )
+ 
+-libdca_lib = library(
++if host_machine.system() in ['darwin', 'ios']
++	makedef_extension = 'sym'
++elif host_machine.system() in ['windows', 'cygwin']
++	makedef_extension = 'def'
++else
++	makedef_extension = 'ver'
++endif
++
++libdca_static = static_library(
+ 	'dca',
+ 	libdca_sources + config_h,
+ 	c_args: c_args,
+ 	include_directories: include_dirs,
+ 	dependencies: libdca_deps,
+-	version: meson.project_version(),
+-	install: true,
++	install: get_option('default_library') in ['static', 'both'],
+ )
+ 
++dca_def_name = '@0@.@1@'.format(meson.project_name(), makedef_extension)
++
++version_script = meson.current_source_dir() / dca_def_name
++
++if host_machine.system() in ['darwin', 'ios']
++	vflag = ['-Wl,-exported_symbols_list,@0@'.format(version_script)]
++elif host_machine.system() not in ['windows', 'cygwin']
++	vflag = ['-Wl,--version-script,@0@'.format(version_script)]
++else
++	vflag = []
++endif
++
++# Some systems, reportedly OpenBSD and macOS, refuse
++# to create libraries without any object files. Compiling
++# this file, and adding its object file to the library,
++# will prevent the library from being empty.
++if cc.has_function_attribute('unused')
++	dca_dummy = configure_file(
++	command: [
++		python,
++		'-c',
++		'print("static int __attribute__((unused)) __dca_dummy;")'
++	],
++	capture: true,
++	output: '_dca_dummy.c'
++  )
++else
++	dca_dummy = configure_file(
++		command: [
++			python,
++			'-c',
++			'print("static int __dca_dummy; int dummy(void) { return __dca_dummy; }")'
++		],
++		capture: true,
++		output: '_dca_dummy.c'
++	)
++endif
++
++if get_option('default_library') in ['shared', 'both']
++	libdca_lib = shared_library('dca',
++		dca_dummy,
++		c_args: c_args,
++		link_args: vflag,
++		link_whole: libdca_static,
++		dependencies: libdca_deps,
++		include_directories: include_dirs,
++		vs_module_defs: dca_def_name,
++		link_depends: files(dca_def_name),
++		version: meson.project_version(),
++		install: true,
++	)
++else
++	libdca_lib = libdca_static
++endif
++
+ pkg = import('pkgconfig')
+ 
+ libdca_pkg = pkg.generate(
+diff --git a/meson.build b/meson.build
+index 02204c7..0da7de3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3,6 +3,7 @@ project('dca', 'c',
+ 	version: '0.0.7',
+ 	meson_version: '>= 1.3.0',
+ 	default_options: [
++		'buildtype=debugoptimized',
+ 		'warning_level=1',
+ 		'c_std=gnu11,c11',
+ 	]
+@@ -10,6 +11,9 @@ project('dca', 'c',
+ 
+ cc = meson.get_compiler('c')
+ 
++py = import('python')
++python = py.find_installation()
++
+ conf = configuration_data()
+ 
+ libao_deps = []
+-- 
+2.47.0.windows.2
+

@@ -3,32 +3,18 @@ from pathlib import Path
 
 class Recipe(recipe.Recipe):
     name = 'libdca'
-    version = '0.0.6'
+    version = '0.0.7'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'https://download.videolan.org/pub/videolan/libdca/%(version)s/libdca-%(version)s.tar.bz2'
-    tarball_checksum = '98f98a9aa000a26b927c6facd15d18dcf664238adfc5db24f533c5932cdb1f40'
+    tarball_checksum = '3a0b13815f582c661d2388ffcabc2f1ea82f471783c400f765f2ec6c81065f6a'
     licenses = [License.GPLv2Plus]
-    configure_options = '--disable-oss'
 
     files_libs = ['libdca']
     files_devel = ['include/dca.h', 'include/dts.h',
                    '%(libdir)s/pkgconfig/libdca.pc', '%(libdir)s/pkgconfig/libdts.pc']
-
-    def prepare(self):
-        # Don't enable always-inline, breaks the build on macos (space is significant)
-        self.set_env('ac_cv_c_inline', 'inline ')
-
-    def post_install(self):
-        # Create relative symlinks to prevent breakage during packaging
-        if self.config.platform != Platform.WINDOWS:
-            dangling = [
-                ('libdca.a', self.config.libdir + '/libdts.a'),
-                ('extract_dca.1', 'share/man/man1/extract_dts.1'),
-                ('dcadec.1', 'share/man/man1/dtsdec.1'),
-            ]
-            prefix = Path(self.config.prefix)
-            for src, dest in dangling:
-                dest = prefix / dest
-                dest.unlink()
-                dest.symlink_to(src)
-        super().post_install()
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+        f'{name}/0002-Add-shared-library-support.patch',
+        f'{name}/0003-Allow-building-with-MSVC.patch',
+    ]

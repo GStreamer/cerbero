@@ -1,0 +1,59 @@
+From 588f0390130d5cb772574b0b61bf19bf889cd56b Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 11 Dec 2024 13:24:13 -0300
+Subject: [PATCH 3/3] Allow building with MSVC
+
+---
+ libdca/dca_internal.h | 18 ++++++++++++------
+ meson.build           |  6 ++----
+ 2 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/libdca/dca_internal.h b/libdca/dca_internal.h
+index 2c43cf0..f9a63ad 100644
+--- a/libdca/dca_internal.h
++++ b/libdca/dca_internal.h
+@@ -186,12 +186,18 @@ typedef int16_t quantizer_t;
+ #define MUL(a,b) ((int)(((int64_t)(a) * (b) + (1 << 29)) >> 30))
+ #define MUL_L(a,b) ((int)(((int64_t)(a) * (b) + (1 << 25)) >> 26))
+ #elif 1
+-#define MUL(a,b) \
+-({ int32_t _ta=(a), _tb=(b), _tc; \
+-   _tc=(_ta & 0xffff)*(_tb >> 16)+(_ta >> 16)*(_tb & 0xffff); (int32_t)(((_tc >> 14))+ (((_ta >> 16)*(_tb >> 16)) << 2 )); })
+-#define MUL_L(a,b) \
+-({ int32_t _ta=(a), _tb=(b), _tc; \
+-   _tc=(_ta & 0xffff)*(_tb >> 16)+(_ta >> 16)*(_tb & 0xffff); (int32_t)((_tc >> 10) + (((_ta >> 16)*(_tb >> 16)) << 6)); })
++static inline int32_t MUL(level_t a, level_t b)
++{
++   int32_t _ta=(a), _tb=(b), _tc;
++   _tc=(_ta & 0xffff)*(_tb >> 16)+(_ta >> 16)*(_tb & 0xffff);
++   return (int32_t)(((_tc >> 14))+ (((_ta >> 16)*(_tb >> 16)) << 2 ));
++}
++static inline int32_t MUL_L(level_t a, level_t b)
++{
++   int32_t _ta=(a), _tb=(b), _tc;
++   _tc=(_ta & 0xffff)*(_tb >> 16)+(_ta >> 16)*(_tb & 0xffff);
++   return (int32_t)((_tc >> 10) + (((_ta >> 16)*(_tb >> 16)) << 6));
++}
+ #else
+ #define MUL(a,b) (((a) >> 15) * ((b) >> 15))
+ #define MUL_L(a,b) (((a) >> 13) * ((b) >> 13))
+diff --git a/meson.build b/meson.build
+index b0c375a..35c5dc4 100644
+--- a/meson.build
++++ b/meson.build
+@@ -48,10 +48,8 @@ foreach h: functions.split(' ')
+ 	conf.set(k, v)
+ endforeach
+ 
+-if cc.get_define('_MSC_VER') == '' or cc.get_id() != 'msvc'
+-	if get_option('fixed').allowed()
+-		c_args += ['-DLIBDCA_FIXED']
+-	endif
++if get_option('fixed').allowed()
++	c_args += ['-DLIBDCA_FIXED']
+ endif
+ if get_option('double').allowed()
+ 	c_args += ['-DLIBDCA_DOUBLE']
+-- 
+2.47.0.windows.2
+

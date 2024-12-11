@@ -1,0 +1,251 @@
+From de37084ca7945979aa6d7479e7945d4650e1bee7 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 11 Dec 2024 12:29:40 -0300
+Subject: [PATCH 1/3] Add Meson build
+
+---
+ .gitignore          |  4 +++
+ include/meson.build | 11 +++++++
+ libao/meson.build   | 23 ++++++++++++++
+ libdca/meson.build  | 40 ++++++++++++++++++++++++
+ meson.build         | 74 +++++++++++++++++++++++++++++++++++++++++++++
+ meson_options.txt   |  4 +++
+ src/meson.build     | 27 +++++++++++++++++
+ 7 files changed, 183 insertions(+)
+ create mode 100644 include/meson.build
+ create mode 100644 libao/meson.build
+ create mode 100644 libdca/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 src/meson.build
+
+diff --git a/.gitignore b/.gitignore
+index 0d82b65..d47a4d3 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -25,3 +25,7 @@ src/extract_dca
+ src/extract_dts
+ test/compare
+ /INSTALL
++build
++b
++.cache
++.vscode
+diff --git a/include/meson.build b/include/meson.build
+new file mode 100644
+index 0000000..71517ee
+--- /dev/null
++++ b/include/meson.build
+@@ -0,0 +1,11 @@
++headers = files(
++	'dca.h',
++	'dts.h',
++)
++
++headers_no_install = files(
++	'tendra.h',
++	'audio_out.h',
++)
++
++install_headers(headers)
+diff --git a/libao/meson.build b/libao/meson.build
+new file mode 100644
+index 0000000..67a4f3f
+--- /dev/null
++++ b/libao/meson.build
+@@ -0,0 +1,23 @@
++libao_sources = files(
++	'audio_out.c',
++	'audio_out_null.c',
++	'audio_out_float.c',
++	'audio_out_oss.c',
++	'audio_out_solaris.c',
++	'audio_out_al.c',
++	'audio_out_win.c',
++	'audio_out_wav.c',
++	'audio_out_aif.c',
++	'audio_out_peak.c'
++	'convert2s16.c',
++	'audio_out_internal.h',
++)
++
++libao_lib = static_library(
++	'ao',
++	libao_sources,
++	c_args: c_args,
++	include_directories: include_dirs,
++	dependencies: libao_deps,
++	install: false,
++)
+diff --git a/libdca/meson.build b/libdca/meson.build
+new file mode 100644
+index 0000000..ee4abb2
+--- /dev/null
++++ b/libdca/meson.build
+@@ -0,0 +1,40 @@
++libdca_sources = files(
++	'dca_internal.h',
++	'tables.h',
++	'tables_quantization.h',
++	'tables_huffman.h',
++	'tables_fir.h',
++	'tables_adpcm.h',
++	'tables_vq.h',
++	'bitstream.h',
++	'bitstream.c',
++	'parse.c',
++	'downmix.c',
++)
++
++libdca_lib = library(
++	'dca',
++	libdca_sources + config_h,
++	c_args: c_args,
++	include_directories: include_dirs,
++	dependencies: libdca_deps,
++	version: meson.project_version(),
++	install: true,
++)
++
++pkg = import('pkgconfig')
++
++libdca_pkg = pkg.generate(
++	libdca_lib,
++	name: 'libdca',
++	description: 'A decoding library for DTS Coherent Acoustics streams.',
++	version: meson.project_version()
++)
++
++pkg.generate(
++	libdca_lib,
++	name: 'libdts',
++	description: 'Backward compatibility place-holder for libdca.',
++	requires: ['libdca = @0@'.format(meson.project_version())],
++	version: meson.project_version()
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..02204c7
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,74 @@
++project('dca', 'c',
++	license: 'GPL-2.0-or-later',
++	version: '0.0.7',
++	meson_version: '>= 1.3.0',
++	default_options: [
++		'warning_level=1',
++		'c_std=gnu11,c11',
++	]
++)
++
++cc = meson.get_compiler('c')
++
++conf = configuration_data()
++
++libao_deps = []
++libdca_deps = []
++
++c_args = [
++	'-DHAVE_CONFIG_H'
++]
++
++m_dep = cc.find_library('m', required: false)
++
++if cc.has_function('cos', dependencies: m_dep, required: true)
++	libao_deps += m_dep
++	libdca_deps += m_dep
++endif
++
++headers = 'sys/time.h time.h sys/timeb.h io.h'
++
++foreach h: headers.split(' ')
++	k = 'HAVE_@0@'.format(h.underscorify().to_upper())
++	v = cc.has_header(h)
++	conf.set(k, v)
++endforeach
++
++conf.set('HAVE_STRUCT_TIMEVAL', cc.has_type('struct timeval', prefix: '#include <sys/time.h\n>#include <time.h>'))
++
++functions = 'memalign gettimeofday ftime'
++
++foreach h: functions.split(' ')
++	k = 'HAVE_@0@'.format(h.underscorify().to_upper())
++	v = cc.has_function(h)
++	conf.set(k, v)
++endforeach
++
++if cc.get_define('_MSC_VER') == '' or cc.get_id() != 'msvc'
++	if get_option('fixed').allowed()
++		c_args += ['-DLIBDCA_FIXED']
++	endif
++endif
++if get_option('double').allowed()
++	c_args += ['-DLIBDCA_DOUBLE']
++endif
++
++if host_machine.system() in ['windows', 'cygwin']
++	libao_deps += cc.find_library('winmm', required: get_option('win'))
++	c_args += ['-DLIBAO_WIN']
++endif
++
++config_h = configure_file(
++	output: 'config.h',
++	configuration: conf
++)
++
++include_dirs = include_directories('.', 'include')
++
++subdir('include')
++subdir('libdca')
++
++if get_option('tools').allowed()
++subdir('libao')
++subdir('src')
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..ecfd474
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,4 @@
++option('fixed', type: 'feature', value: 'auto', description: 'use fixed-point arithmetic')
++option('double', type: 'feature', value: 'auto', description: 'use double-precision samples')
++option('win', type: 'feature', value: 'auto', description: 'make a version using win audio')
++option('tools', type: 'feature', value: 'disabled', description: 'build tools')
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..92b3947
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,27 @@
++dcadec_sources = files(
++	'dcadec.c',
++	'getopt.h',
++	'getopt.c',
++	'gettimeofday.h',
++	'gettimeofday.c',
++)
++
++dcadec = executable(
++	'dcadec',
++	dcadec_sources,
++	link_with: [libao_lib, libdca_lib],
++	install: true,
++)
++
++extract_dca_sources = files(
++	'extract_dca.c', 'getopt.c'
++)
++
++extract_dca = executable(
++	'dcadec',
++	dcadec_sources,
++	link_with: [libao_lib, libdca_lib],
++	install: true,
++)
++
++install_man(files('dcadec.1', 'extract_dca.1'))
+-- 
+2.47.0.windows.2
+
