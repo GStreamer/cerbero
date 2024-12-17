@@ -1,8 +1,9 @@
-From ce03adee8dee58a25c9bfa6e137390e9c13d6ca2 Mon Sep 17 00:00:00 2001
+From 5e4563986102d8bca1cec525f9b1072d786dd16c Mon Sep 17 00:00:00 2001
 From: Jeff Lenk <jeff@jefflenk.com>
 Date: Fri, 29 Nov 2013 22:16:49 -0600
-Subject: [PATCH] FS-6010 --resolve
+Subject: [PATCH 3/5] FS-6010 --resolve
 
+(cherry picked from commit 9e00aa6e4718f21ddbac3ebac5248a504380c1f2)
 ---
  src/spandsp/fast_convert.h | 4 ++++
  1 file changed, 4 insertions(+)
@@ -44,5 +45,5 @@ index 10679ea..af54e68 100644
      __inline long int lfastrint(double x)
      {
 -- 
-2.25.1
+2.39.5 (Apple Git-154)
 

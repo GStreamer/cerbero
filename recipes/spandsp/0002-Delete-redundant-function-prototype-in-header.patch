@@ -1,7 +1,7 @@
-From cf4a00fa48ed5fff880747e906acc48ff8e4b777 Mon Sep 17 00:00:00 2001
+From 694b005f5eb5240291514b4096db564227dae2be Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 22 Feb 2020 06:13:24 +0530
-Subject: [PATCH] Delete redundant function prototype in header
+Subject: [PATCH 2/5] Delete redundant function prototype in header
 
 This is causing a failure with Meson 0.53 since it passes
 `-Werror=redundant-decls` when `--werror` is enabled.
@@ -43,5 +43,5 @@ index 698c4e7..c4ece9a 100644
      \param phase_acc A pointer to a phase accumulator value.
      \param phase_rate The phase increment to be applied.
 -- 
-2.24.1
+2.39.5 (Apple Git-154)
 

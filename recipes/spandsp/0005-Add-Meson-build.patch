@@ -1,0 +1,738 @@
+From 1b764cbfa8af21e595c67bcd671d82428e55e6ea Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 16 Dec 2024 22:07:52 -0300
+Subject: [PATCH 5/5] Add Meson build
+
+---
+ .gitignore              |  35 ++++
+ meson.build             | 290 ++++++++++++++++++++++++++++++++
+ src/meson.build         | 364 ++++++++++++++++++++++++++++++++++++++++
+ src/spandsp/telephony.h |   2 +-
+ 4 files changed, 690 insertions(+), 1 deletion(-)
+ create mode 100644 .gitignore
+ create mode 100644 meson.build
+ create mode 100644 src/meson.build
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..d8c5bc1
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,35 @@
++src/v17_v32bis_rx_rrc.h
++src/v17_v32bis_tx_rrc.h
++src/v22bis_rx_1200_rrc.h
++src/v22bis_rx_2400_rrc.h
++src/v22bis_tx_rrc.h
++src/v27ter_rx_2400_rrc.h
++src/v27ter_rx_4800_rrc.h
++src/v27ter_tx_2400_rrc.h
++src/v27ter_tx_4800_rrc.h
++src/v29rx_rrc.h
++src/v29tx_rrc.h
++INSTALL
++test-data/itu/tiff-fx/Makefile
++test-data/itu/tiff-fx/Makefile.in
++
++src/at_interpreter_dictionary.h
++src/cielab_luts.h
++src/math_fixed_tables.h
++src/t43_gray_code_tables.h
++src/v17_v32bis_rx_floating_rrc.h
++src/v17_v32bis_tx_floating_rrc.h
++src/v22bis_rx_1200_floating_rrc.h
++src/v22bis_rx_2400_floating_rrc.h
++src/v22bis_tx_floating_rrc.h
++src/v27ter_rx_2400_floating_rrc.h
++src/v27ter_rx_4800_floating_rrc.h
++src/v27ter_tx_2400_floating_rrc.h
++src/v27ter_tx_4800_floating_rrc.h
++src/v29rx_floating_rrc.h
++src/v29tx_floating_rrc.h
++
++.cache
++build
++b
++.vscode
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..be06dce
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,290 @@
++project('spandsp', 'c',
++    version: '0.0.6',
++    meson_version: '>= 1.3.0',
++    default_options: [
++        'buildtype=debugoptimized',
++        'c_std=gnu11,c11'
++    ]
++)
++
++cc = meson.get_compiler('c')
++
++c_args = [
++    '-DHAVE_CONFIG_H',
++]
++
++if cc.get_define('_MSC_VER') != ''
++    c_args += [
++        '-D_USE_MATH_DEFINES', # M_PI
++        '-D_CRT_SECURE_NO_DEPRECATE',
++        '-D_CRT_NONSTDC_NO_DEPRECATE',
++        '-D_CRT_SECURE_NO_WARNINGS', # sprintf, sscanf,
++    ]
++endif
++
++conf = configuration_data()
++inserts = configuration_data()
++
++conf.set('__inline__', 'inline')
++
++if not cc.has_function('lrint', prefix: '#include <math.h>') and not cc.has_function('lrintf', prefix: '#include <math.h>')
++    warning('Missing C99 standard functions lrint() and lrintf().\nThis may cause benign compiler warnings on some systems (ie Solaris).')
++endif
++
++# MSVC does not complain if a function's missing until link time
++conf.set('HAVE_ALIGNED_ALLOC', cc.links('''#define _ISOC11_SOURCE
++#include <stdlib.h>
++int main() { aligned_alloc(0,0); return 0; }
++''', name: 'Supports aligned_alloc'))
++
++symbols = [
++    'memalign',
++    'memmove',
++    'memset',
++    'select',
++    'strcasecmp',
++    'strchr',
++    'strdup',
++    'strerror',
++    'strstr',
++    'strtol',
++    'gettimeofday',
++    'drand48',
++]
++
++foreach f: symbols
++    conf.set('HAVE_@0@'.format(f.to_upper()), cc.has_function(f))
++endforeach
++
++# https://github.com/mesonbuild/meson/issues/1083
++conf.set('HAVE_POSIX_MEMALIGN', cc.has_function('posix_memalign', prefix: '#include <stdlib.h>'))
++
++headers = [
++    'socket.h',
++    'inttypes.h',
++    'stdint.h',
++    'stdbool.h',
++    'stdfix.h',
++    'unistd.h',
++    'stdlib.h',
++    'string.h',
++    'strings.h',
++    'malloc.h',
++    'math.h',
++    'float.h',
++    'fcntl.h',
++    'sys/time.h',
++    # 'sys/select.h',
++    # 'sys/ioctl.h',
++    'sys/fcntl.h',
++    # 'sndfile.h',
++    # 'fenv.h',
++    # 'fftw3.h',
++    # 'fftw.h',
++    # 'pcap.h',
++    # 'pthread.h',
++    'getopt.h',
++]
++
++if host_machine.system() not in ['dragonfly', 'netbsd', 'freebsd']
++    headers += ['tgmath.h']
++endif
++
++# MSVC needs /experimental:c11atomics
++if cc.compiles('#include <stdatomic.h>\nint main() {return 0;}', name: 'Supports C11 atomics')
++    conf.set('HAVE_STDATOMIC_H', 1)
++endif
++
++foreach h: headers
++    conf.set('HAVE_@0@'.format(h.underscorify().to_upper()), cc.has_header(h))
++endforeach
++
++include_these_headers = [
++    'inttypes.h',
++    'stdint.h',
++    'stdbool.h',
++    'math.h',
++]
++foreach h: headers
++    id = h.underscorify().to_upper()
++    k = id.replace('_H', '_HEADER')
++    if conf.get('HAVE_@0@'.format(id))
++        inserts.set('INSERT_@0@'.format(k), '#include <@0@>'.format(h))
++    endif
++endforeach
++
++libxml_dep = dependency('libxml-2.0', required: false)
++
++if libxml_dep.found()
++    headers = [
++        'libxml/xmlmemory.h',
++        'libxml/parser.h',
++        'libxml/xinclude.h',
++    ]
++
++    foreach h: headers
++        conf.set('HAVE_@0@'.format(h.underscorify().to_upper()), cc.has_header(h, dependencies: libxml_dep))
++    endforeach
++endif
++
++# FIXME: fltk support is for tests only, needs C++ and CMake support
++# See https://www.fltk.org/str.php?L2180
++
++m_dep = cc.find_library('m', required: false)
++
++conf.set('HAVE_OPEN_MEMSTREAM', cc.has_function('open_memstream', dependencies: m_dep))
++
++cc.has_function('cos', dependencies: m_dep, required: true)
++
++symbols = [
++    'sinf',
++    'cosf',
++    'tanf',
++    'asinf',
++    'acosf',
++    'atanf',
++    'atan2f',
++    'ceilf',
++    'floorf',
++    'powf',
++    'expf',
++    'logf',
++    'log10f',
++]
++
++foreach f: symbols
++    conf.set('HAVE_@0@'.format(f.to_upper()), cc.has_function(f, dependencies: m_dep))
++endforeach
++
++c_shared_args = []
++if host_machine.system() in ['windows', 'cygwin']
++    c_shared_args += ['-DLIBSPANDSP_EXPORTS', '-DSPANDSP_USE_EXPORT_CAPABILITY']
++    inserts.set('SPANDSP_USE_EXPORT_CAPABILITY', '#define SPANDSP_USE_EXPORT_CAPABILITY 1')
++elif cc.has_function_attribute('visibility:default')
++    c_args += ['-DSPANDSP_USE_EXPORT_CAPABILITY']
++    inserts.set('SPANDSP_USE_EXPORT_CAPABILITY', '#define SPANDSP_USE_EXPORT_CAPABILITY 1')
++else
++    # conf.set('SPANDSP_USE_EXPORT_CAPABILITY', false)
++    inserts.set('SPANDSP_USE_EXPORT_CAPABILITY', '#undef SPANDSP_USE_EXPORT_CAPABILITY')
++endif
++
++c_args += cc.get_supported_arguments([
++    '-ffast-math',
++    '/fp:fast',
++    '-Wunused-variable',
++    '-Wwrite-strings',
++    '-Wstrict-prototypes',
++    '-Wmissing-prototypes',
++    '-Wunused-but-set-variable',
++    '/wd4100', # The formal parameter is not referenced in the body of the function. The unreferenced parameter is ignored.
++    '/wd4200', # Non standard extension C zero sized array
++    '/wd4706', # assignment within conditional expression
++    '/wd4244', # conversion from 'type1' to 'type2', possible loss of data
++    '/wd4295', # array is too small to include a terminating null character
++    '/wd4125', # decimal digit terminates octal escape sequence
++    '/wd4305', # 'function' : truncation from 'double' to 'float'
++    '/wd4018', # '<' : signed/unsigned mismatch
++    '/wd4389', # '==' : signed/unsigned mismatch
++    '/wd4285', # 'return' : conversion from 'int' to 'size_t', signed/unsigned mismatch
++    '/wd4267', # '=': conversion from 'size_t' to 'int', possible loss of data
++    '/wd4005', # '__inline__': macro redefinition
++])
++
++# We do not activate instruction sets here as this library has no cpuid capability
++if cc.has_define('_MSC_VER')
++    inserts.set('SPANDSP_USE_FIXED_POINT', '#ifdef _MSC_VER\n#define __inline__ __inline\n#pragma warning(disable:4200)\n#endif\n#undef SPANDSP_USE_FIXED_POINT')
++else
++    inserts.set('SPANDSP_USE_FIXED_POINT', '#undef SPANDSP_USE_FIXED_POINT')
++endif
++if host_machine.cpu_family() != 'arm'
++    conf.set('SPANDSP_MISALIGNED_ACCESS_FAILS', true)
++    inserts.set('SPANDSP_MISALIGNED_ACCESS_FAILS', '#define SPANDSP_MISALIGNED_ACCESS_FAILS 1')
++else
++    inserts.set('SPANDSP_MISALIGNED_ACCESS_FAILS', '#undef SPANDSP_MISALIGNED_ACCESS_FAILS')
++endif
++
++sets = {
++    '__AVX__': 'SPANDSP_USE_AVX',
++    '__SSE4_2__': 'SPANDSP_USE_SSE4_2',
++    '__SSE4_1__': 'SPANDSP_USE_SSE4_1',
++    '__SSSE3__': 'SPANDSP_USE_SSSE3',
++    '__SSE3__': 'SPANDSP_USE_SSE3',
++    '__SSE2__': 'SPANDSP_USE_SSE2',
++    '__SSE__': 'SPANDSP_USE_SSE',
++    '__MMX__': 'SPANDSP_USE_MMX',
++}
++enable_all_arches = false
++# FIXME: MSVC provides no way to detect /arch:SSE4.2
++if cc.get_define('_M_IX86_FP') == '2' or cc.has_define('__AVX2__')
++    enable_all_arches = true
++elif cc.get_define('_M_IX86_FP') == '1' or (cc.get_argument_syntax() == 'msvc' and host_machine.cpu_family() == 'x86_64')
++    enable_all_arches = true
++    sets = {
++        '__SSE2__': 'SPANDSP_USE_SSE2',
++        '__SSE__': 'SPANDSP_USE_SSE',
++        '__MMX__': 'SPANDSP_USE_MMX',
++    }
++endif
++foreach k, v : sets
++    if enable_all_arches or cc.has_define(k)
++        conf.set(v, 1)
++    endif
++endforeach
++
++tiff_dep = dependency('libtiff-4', required: false)
++
++conf.set10('HAVE_LIBTIFF', tiff_dep.found())
++if not tiff_dep.found()
++    c_args += cc.get_supported_arguments(['-Wno-return-type'])
++endif
++
++if cc.has_function('TIFFCreateCustomDirectory', dependencies: tiff_dep)
++    if cc.has_header('tif_dir.h', dependencies: tiff_dep)
++        conf.set('SPANDSP_SUPPORT_TIFF_FX', 1)
++        inserts.set('SPANDSP_SUPPORT_TIFF_FX', '#define SPANDSP_SUPPORT_TIFF_FX 1')
++    else
++        inserts.set('SPANDSP_SUPPORT_TIFF_FX', '#undef SPANDSP_SUPPORT_TIFF_FX')
++    endif
++    conf.set('SPANDSP_SUPPORT_T43', 1)
++    inserts.set('SPANDSP_SUPPORT_T43', '#define SPANDSP_SUPPORT_T43 1')
++else
++    inserts.set('SPANDSP_SUPPORT_TIFF_FX', '#undef SPANDSP_SUPPORT_TIFF_FX')
++    inserts.set('SPANDSP_SUPPORT_T43', '#undef SPANDSP_SUPPORT_T43')
++endif
++
++jpeg_dep = dependency('libjpeg')
++
++# ssl_dep = cc.find_library('ssl', required: false)
++
++# conf.set('SPANDSP_SUPPORT_FLEXSSL', cc.has_function('TLS_client_method', dependencies: ssl_dep))
++
++winsock_dep = cc.find_library('ws2_32', required: false)
++
++libs = [m_dep, tiff_dep, jpeg_dep, winsock_dep] #, ssl_dep]
++
++# conf.set('SPANDSP_SUPPORT_V32BIS', 1)
++# inserts.set('SPANDSP_SUPPORT_V32BIS', '#define SPANDSP_SUPPORT_V32BIS 1')
++inserts.set('SPANDSP_SUPPORT_V32BIS', '#undef SPANDSP_SUPPORT_V32BIS')
++# conf.set('SPANDSP_SUPPORT_V34', 1)
++# inserts.set('SPANDSP_SUPPORT_V34', '#define SPANDSP_SUPPORT_V34 1')
++inserts.set('SPANDSP_SUPPORT_V34', '#undef SPANDSP_SUPPORT_V34')
++# conf.set('SPANDSP_SUPPORT_SSLFAX', 1)
++
++conf.set_quoted('PACKAGE', meson.project_name())
++conf.set_quoted('VERSION', meson.project_version())
++
++config_h = configure_file(
++    output: 'config.h',
++    configuration: conf
++)
++
++include_dirs = include_directories('.')
++
++subdir('src')
++
++pkg = import('pkgconfig')
++
++pkg.generate(
++    libspandep,
++    description: 'A DSP library for telephony.',
++)
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..1c3dfab
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,364 @@
++libspandsp_sources = files(
++    'ademco_contactid.c',
++    'adsi.c',
++    'async.c',
++    'at_interpreter.c',
++    'awgn.c',
++    'bell_r2_mf.c',
++    'bert.c',
++    'bit_operations.c',
++    'bitstream.c',
++    'complex_filters.c',
++    'complex_vector_float.c',
++    'complex_vector_int.c',
++    'crc.c',
++    'dds_float.c',
++    'dds_int.c',
++    'dtmf.c',
++    'echo.c',
++    'fax.c',
++    'fax_modems.c',
++    'fsk.c',
++    'g711.c',
++    'g722.c',
++    'g726.c',
++    'gsm0610_decode.c',
++    'gsm0610_encode.c',
++    'gsm0610_long_term.c',
++    'gsm0610_lpc.c',
++    'gsm0610_preprocess.c',
++    'gsm0610_rpe.c',
++    'gsm0610_short_term.c',
++    'hdlc.c',
++    'ima_adpcm.c',
++    'image_translate.c',
++    'logging.c',
++    'lpc10_analyse.c',
++    'lpc10_decode.c',
++    'lpc10_encode.c',
++    'lpc10_placev.c',
++    'lpc10_voicing.c',
++    'math_fixed.c',
++    'modem_echo.c',
++    'modem_connect_tones.c',
++    'noise.c',
++    'oki_adpcm.c',
++    'playout.c',
++    'plc.c',
++    'power_meter.c',
++    'queue.c',
++    'schedule.c',
++    'sig_tone.c',
++    'silence_gen.c',
++    'super_tone_rx.c',
++    'super_tone_tx.c',
++    'swept_tone.c',
++    't4_rx.c',
++    't4_tx.c',
++    't30.c',
++    't30_api.c',
++    't30_logging.c',
++    't31.c',
++    't35.c',
++    't38_core.c',
++    't38_gateway.c',
++    't38_non_ecm_buffer.c',
++    't38_terminal.c',
++    'testcpuid.c',
++    'time_scale.c',
++    'timezone.c',
++    'tone_detect.c',
++    'tone_generate.c',
++    'v17rx.c',
++    'v17tx.c',
++    'v18.c',
++    'v22bis_rx.c',
++    'v22bis_tx.c',
++    'v27ter_rx.c',
++    'v27ter_tx.c',
++    'v29rx.c',
++    'v29tx.c',
++    'v42.c',
++    'v42bis.c',
++    'v8.c',
++    'vector_float.c',
++    'vector_int.c',
++)
++
++if cc.get_define('_MSC_VER') != ''
++    libspandsp_sources += files(
++        'msvc/gettimeofday.c'
++    )
++endif
++
++make_incdirs = [include_dirs, include_directories('.')]
++
++if cc.has_define('_MSC_VER')
++    make_incdirs += include_directories('msvc')
++    getopt = files(
++        'msvc/getopt.c'
++    )
++else
++    getopt = []
++endif
++
++make_at_dictionary = executable(
++    'make_at_dictionary',
++    files(
++        'make_at_dictionary.c',
++    ),
++    c_args: ['-DHAVE_CONFIG_H'],
++    include_directories: make_incdirs,
++    native: true,
++    install: false,
++)
++
++make_math_fixed_tables = executable(
++    'make_math_fixed_tables',
++    files(
++        'make_math_fixed_tables.c',
++    ),
++    c_args: ['-DHAVE_CONFIG_H'],
++    include_directories: make_incdirs,
++    dependencies: m_dep,
++    native: true,
++    install: false,
++)
++
++make_modem_filter = executable(
++    'make_modem_filter',
++    files(
++        'make_modem_filter.c',
++        'filter_tools.c',
++    ) + getopt,
++    c_args: ['-DHAVE_CONFIG_H', '-DSPANDSP_INTERNAL'],
++    include_directories: make_incdirs,
++    dependencies: m_dep,
++    native: true,
++    install: false,
++)
++
++at_interpreter_h = custom_target(
++    output: 'at_interpreter_dictionary.h',
++    capture: true,
++    command: [make_at_dictionary]
++)
++
++math_fixed_tables_h = custom_target(
++    output: 'math_fixed_tables.h',
++    capture: true,
++    command: [make_math_fixed_tables]
++)
++
++modem_filter_headers = {
++    'v17_v32bis_rx_fixed_rrc.h': ['-m', 'V.17', '-i', '-r'],
++    'v17_v32bis_rx_floating_rrc.h': ['-m', 'V.17', '-r'],
++    'v17_v32bis_tx_fixed_rrc.h': ['-m', 'V.17', '-i', '-t'],
++    'v17_v32bis_tx_floating_rrc.h': ['-m', 'V.17', '-t'],
++    'v22bis_rx_1200_fixed_rrc.h': ['-m', 'V.22bis1200', '-i', '-r'],
++    'v22bis_rx_2400_fixed_rrc.h': ['-m', 'V.22bis2400', '-i', '-r'],
++    'v22bis_rx_1200_floating_rrc.h': ['-m', 'V.22bis1200', '-r'],
++    'v22bis_rx_2400_floating_rrc.h': ['-m', 'V.22bis2400', '-r'],
++    'v22bis_tx_fixed_rrc.h':  ['-m', 'V.22bis', '-i', '-t'],
++    'v22bis_tx_floating_rrc.h':  ['-m', 'V.22bis', '-t'],
++    'v27ter_rx_2400_fixed_rrc.h':  ['-m', 'V.27ter2400', '-i', '-r'],
++    'v27ter_rx_4800_fixed_rrc.h':  ['-m', 'V.27ter4800', '-i', '-r'],
++    'v27ter_rx_2400_floating_rrc.h':  ['-m', 'V.27ter2400', '-r'],
++    'v27ter_rx_4800_floating_rrc.h':  ['-m', 'V.27ter4800', '-r'],
++    'v27ter_tx_2400_fixed_rrc.h':  ['-m', 'V.27ter2400', '-i', '-t'],
++    'v27ter_tx_4800_fixed_rrc.h':  ['-m', 'V.27ter4800', '-i', '-t'],
++    'v27ter_tx_2400_floating_rrc.h':  ['-m', 'V.27ter2400', '-t'],
++    'v27ter_tx_4800_floating_rrc.h':  ['-m', 'V.27ter4800', '-t'],
++    'v29rx_fixed_rrc.h':  ['-m', 'V.29', '-i', '-r'],
++    'v29tx_fixed_rrc.h':  ['-m', 'V.29', '-i', '-t'],
++    'v29rx_floating_rrc.h':  ['-m', 'V.29', '-r'],
++    'v29tx_floating_rrc.h':  ['-m', 'V.29', '-t'],
++}
++
++foreach k, v : modem_filter_headers
++    tgt = custom_target(
++        output: [k],
++        capture: true,
++        command: [make_modem_filter] + v
++    )
++    libspandsp_sources += [tgt]
++endforeach
++
++spandsp_h = configure_file(
++    input: 'spandsp.h.in',
++    output: 'spandsp.h',
++    configuration: inserts,
++)
++
++libspandep = both_libraries(
++    'spandsp',
++    libspandsp_sources + [
++        config_h,
++        at_interpreter_h,
++        math_fixed_tables_h,
++        spandsp_h,
++    ] + files(
++        'spandsp/version.h',
++    ),
++    c_args: c_args,
++    c_shared_args: c_shared_args,
++    dependencies: libs,
++    include_directories: make_incdirs,
++    version: meson.project_version(),
++    gnu_symbol_visibility: 'hidden',
++    install: true,
++)
++
++install_headers(spandsp_h)
++
++install_headers(
++    files(
++        'spandsp/ademco_contactid.h',
++        'spandsp/adsi.h',
++        'spandsp/async.h',
++        'spandsp/arctan2.h',
++        'spandsp/at_interpreter.h',
++        'spandsp/awgn.h',
++        'spandsp/bell_r2_mf.h',
++        'spandsp/bert.h',
++        'spandsp/biquad.h',
++        'spandsp/bit_operations.h',
++        'spandsp/bitstream.h',
++        'spandsp/crc.h',
++        'spandsp/complex.h',
++        'spandsp/complex_filters.h',
++        'spandsp/complex_vector_float.h',
++        'spandsp/complex_vector_int.h',
++        'spandsp/dc_restore.h',
++        'spandsp/dds.h',
++        'spandsp/dtmf.h',
++        'spandsp/echo.h',
++        'spandsp/fast_convert.h',
++        'spandsp/fax.h',
++        'spandsp/fax_modems.h',
++        'spandsp/fir.h',
++        'spandsp/fsk.h',
++        'spandsp/g168models.h',
++        'spandsp/g711.h',
++        'spandsp/g722.h',
++        'spandsp/g726.h',
++        'spandsp/gsm0610.h',
++        'spandsp/hdlc.h',
++        'spandsp/ima_adpcm.h',
++        'spandsp/image_translate.h',
++        'spandsp/logging.h',
++        'spandsp/lpc10.h',
++        'spandsp/math_fixed.h',
++        'spandsp/modem_echo.h',
++        'spandsp/modem_connect_tones.h',
++        'spandsp/noise.h',
++        'spandsp/oki_adpcm.h',
++        'spandsp/playout.h',
++        'spandsp/plc.h',
++        'spandsp/power_meter.h',
++        'spandsp/queue.h',
++        'spandsp/saturated.h',
++        'spandsp/schedule.h',
++        'spandsp/stdbool.h',
++        'spandsp/sig_tone.h',
++        'spandsp/silence_gen.h',
++        'spandsp/super_tone_rx.h',
++        'spandsp/super_tone_tx.h',
++        'spandsp/swept_tone.h',
++        'spandsp/t30.h',
++        'spandsp/t30_api.h',
++        'spandsp/t30_fcf.h',
++        'spandsp/t30_logging.h',
++        'spandsp/t31.h',
++        'spandsp/t35.h',
++        'spandsp/t38_core.h',
++        'spandsp/t38_gateway.h',
++        'spandsp/t38_non_ecm_buffer.h',
++        'spandsp/t38_terminal.h',
++        'spandsp/t4_rx.h',
++        'spandsp/t4_tx.h',
++        'spandsp/t4_t6_decode.h',
++        'spandsp/t4_t6_encode.h',
++        'spandsp/telephony.h',
++        'spandsp/time_scale.h',
++        'spandsp/timezone.h',
++        'spandsp/timing.h',
++        'spandsp/tone_detect.h',
++        'spandsp/tone_generate.h',
++        'spandsp/v17rx.h',
++        'spandsp/v17tx.h',
++        'spandsp/v18.h',
++        'spandsp/v22bis.h',
++        'spandsp/v27ter_rx.h',
++        'spandsp/v27ter_tx.h',
++        'spandsp/v29rx.h',
++        'spandsp/v29tx.h',
++        'spandsp/v42.h',
++        'spandsp/v42bis.h',
++        'spandsp/v8.h',
++        'spandsp/vector_float.h',
++        'spandsp/vector_int.h',
++        'spandsp/version.h',
++        'spandsp/private/ademco_contactid.h',
++        'spandsp/private/adsi.h',
++        'spandsp/private/async.h',
++        'spandsp/private/at_interpreter.h',
++        'spandsp/private/awgn.h',
++        'spandsp/private/bell_r2_mf.h',
++        'spandsp/private/bert.h',
++        'spandsp/private/bitstream.h',
++        'spandsp/private/dtmf.h',
++        'spandsp/private/echo.h',
++        'spandsp/private/fax.h',
++        'spandsp/private/fax_modems.h',
++        'spandsp/private/fsk.h',
++        'spandsp/private/g711.h',
++        'spandsp/private/g722.h',
++        'spandsp/private/g726.h',
++        'spandsp/private/gsm0610.h',
++        'spandsp/private/hdlc.h',
++        'spandsp/private/ima_adpcm.h',
++        'spandsp/private/image_translate.h',
++        'spandsp/private/logging.h',
++        'spandsp/private/lpc10.h',
++        'spandsp/private/modem_connect_tones.h',
++        'spandsp/private/modem_echo.h',
++        'spandsp/private/noise.h',
++        'spandsp/private/oki_adpcm.h',
++        'spandsp/private/queue.h',
++        'spandsp/private/schedule.h',
++        'spandsp/private/sig_tone.h',
++        'spandsp/private/silence_gen.h',
++        'spandsp/private/super_tone_rx.h',
++        'spandsp/private/super_tone_tx.h',
++        'spandsp/private/swept_tone.h',
++        'spandsp/private/t30.h',
++        'spandsp/private/t30_dis_dtc_dcs_bits.h',
++        'spandsp/private/t31.h',
++        'spandsp/private/t38_core.h',
++        'spandsp/private/t38_gateway.h',
++        'spandsp/private/t38_non_ecm_buffer.h',
++        'spandsp/private/t38_terminal.h',
++        'spandsp/private/t4_rx.h',
++        'spandsp/private/t4_tx.h',
++        'spandsp/private/t4_t6_decode.h',
++        'spandsp/private/t4_t6_encode.h',
++        'spandsp/private/time_scale.h',
++        'spandsp/private/timezone.h',
++        'spandsp/private/tone_detect.h',
++        'spandsp/private/tone_generate.h',
++        'spandsp/private/v17rx.h',
++        'spandsp/private/v17tx.h',
++        'spandsp/private/v18.h',
++        'spandsp/private/v22bis.h',
++        'spandsp/private/v27ter_rx.h',
++        'spandsp/private/v27ter_tx.h',
++        'spandsp/private/v29rx.h',
++        'spandsp/private/v29tx.h',
++        'spandsp/private/v42.h',
++        'spandsp/private/v42bis.h',
++        'spandsp/private/v8.h',
++        'spandsp/expose.h',
++    ),
++    preserve_path : true
++)
+diff --git a/src/spandsp/telephony.h b/src/spandsp/telephony.h
+index 49d7200..0fd84f3 100644
+--- a/src/spandsp/telephony.h
++++ b/src/spandsp/telephony.h
+@@ -26,7 +26,7 @@
+ #if !defined(_SPANDSP_TELEPHONY_H_)
+ #define _SPANDSP_TELEPHONY_H_
+ 
+-#if defined(_M_IX86)  ||  defined(_M_X64)
++#if defined(SPANDSP_USE_EXPORT_CAPABILITY) && defined(_WIN32)
+ #if defined(LIBSPANDSP_EXPORTS)
+ #define SPAN_DECLARE(type)              __declspec(dllexport) type __stdcall
+ #define SPAN_DECLARE_NONSTD(type)       __declspec(dllexport) type __cdecl
+-- 
+2.39.5 (Apple Git-154)
+

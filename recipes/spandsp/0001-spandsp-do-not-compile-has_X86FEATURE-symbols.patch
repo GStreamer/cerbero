@@ -1,7 +1,7 @@
-From 4f279d35599b265be9f9c140759dda684ed47818 Mon Sep 17 00:00:00 2001
+From 09e9851d88a92ee3f88941906782ecc82a6e73f9 Mon Sep 17 00:00:00 2001
 From: George Kiagiadakis <george.kiagiadakis@collabora.com>
 Date: Sat, 24 Oct 2015 19:23:58 +0000
-Subject: [PATCH] spandsp: do not compile has_X86FEATURE symbols
+Subject: [PATCH 1/5] spandsp: do not compile has_X86FEATURE symbols
 
 They conflict with libmp3lame
 ---
@@ -30,5 +30,5 @@ index 2344c59..d3f77d7 100644
  {
      int result;
 -- 
-2.4.3
+2.39.5 (Apple Git-154)
 

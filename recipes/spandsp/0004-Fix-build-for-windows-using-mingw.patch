@@ -1,26 +1,28 @@
-From 942e7b8b035e2b53575b56b27084c03399cd87d5 Mon Sep 17 00:00:00 2001
+From 8af71f8ccc0aaa2d48ccf2112498beda8b17c0a8 Mon Sep 17 00:00:00 2001
 From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
 Date: Sat, 3 Oct 2015 19:44:00 +0100
-Subject: [PATCH] Fix build for windows using mingw
+Subject: [PATCH 4/5] Fix build for windows using mingw
 
 ---
- src/t4_rx.c | 3 +++
- 1 file changed, 3 insertions(+)
+ src/t4_rx.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/src/t4_rx.c b/src/t4_rx.c
-index eb24bf1..b0f7490 100644
+index eb24bf1..25b59c6 100644
 --- a/src/t4_rx.c
 +++ b/src/t4_rx.c
-@@ -60,6 +60,9 @@
+@@ -60,6 +60,11 @@
  #include "config.h"
  #endif
  
++#if !defined(_MSC_VER) && defined(_WIN32)
 +/* Avoid including winsock2.h */
 +extern int __stdcall gethostname(char * name, int namelen);
++#endif
 +
  #include <stdlib.h>
  #include <inttypes.h>
  #include <limits.h>
 -- 
-2.4.3
+2.39.5 (Apple Git-154)
 

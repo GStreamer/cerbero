@@ -1,44 +1,33 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
     name = 'spandsp'
     version = '0.0.6'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'https://www.soft-switch.org/downloads/spandsp/spandsp-%(version)s.tar.gz'
     tarball_checksum = 'cc053ac67e8ac4bb992f258fd94f275a7872df959f6a87763965feabfdcc9465'
     licenses = [License.LGPLv2_1Plus]
     deps = ['tiff']
-    allow_parallel_build = False
-    patches = [ 'spandsp/0001-spandsp-do-not-compile-has_X86FEATURE-symbols.patch',
-                'spandsp/0001-Don-t-do-a-whereis-which-dance-to-find-which.patch',
-                'spandsp/0001-Make-the-public-API-accessible-from-MSVC.patch',
-                'spandsp/0001-Delete-redundant-function-prototype-in-header.patch',
-                # upstream commit
-                # https://github.com/freeswitch/spandsp/commit/9e00aa6e4718f21ddbac3ebac5248a504380c1f2
-                'spandsp/0001-FS-6010-resolve.patch',
-                ]
+    # For generating the codec dictionaries
+    meson_needs_build_machine_compiler = True
+    patches = [
+        'spandsp/0001-spandsp-do-not-compile-has_X86FEATURE-symbols.patch',
+        'spandsp/0002-Delete-redundant-function-prototype-in-header.patch',
+        # upstream commit
+        # https://github.com/freeswitch/spandsp/commit/9e00aa6e4718f21ddbac3ebac5248a504380c1f2
+        'spandsp/0003-FS-6010-resolve.patch',
+        'spandsp/0004-Fix-build-for-windows-using-mingw.patch',
+        'spandsp/0005-Add-Meson-build.patch',
+    ]
 
     files_libs = ['libspandsp']
     files_devel = ['include/spandsp', 'include/spandsp.h', '%(libdir)s/pkgconfig/spandsp.pc']
 
-    def prepare(self):
-        # libdir is incorrectly overriden in configure.ac to lib64 for x86_64 archs
-        # we pass the correct one in make and make install
-        self.make += ['libdir={}'.format(self.config.libdir)]
-        self.make_install += ['libdir={}'.format(self.config.libdir)]
-        # Workaround broken autoconf test in cross compilation
-        if self.config.arch != self.config.target_arch or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
-            self.set_env('ac_cv_func_malloc_0_nonnull', 'yes')
-            self.set_env('ac_cv_func_realloc_0_nonnull', 'yes')
-        if self.config.target_platform == Platform.WINDOWS:
-            self.patches += ['spandsp/0001-Fix-build-for-windows-using-mingw.patch']
-
-        if self.config.platform == Platform.WINDOWS:
-            self.patches += ['spandsp/0001-Avoid-running-autoreconf-on-windows.patch']
-        else:
-            self.config_sh = 'sh ./autogen.sh && sh ./configure'
-            self.patches += [
-                'spandsp/0002-Define-LIBSPANDSP_EXPORTS-when-building-the-spandsp-.patch',
-                'spandsp/0003-Use-BUILT_SOURCES-to-generate-extra-headers.patch',
-            ]
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('spandsp', None, None, None, self.config.libdir, self.config.target_platform, deps=['jpeg', 'tiff'])
+        libtool_la.save()
+        super().post_install()
