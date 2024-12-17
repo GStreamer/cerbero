@@ -19,7 +19,7 @@ index d2dab37c5..65250b929 100644
  
 -if not get_option('debug') or \
 -   (is_msvc_style and get_option('buildtype') == 'debugoptimized')
-+if get_option('debug')
++if get_option('debug') and host_machine.system() not in ['darwin', 'ios']
 +  optimization = get_option('optimization')
 +  if optimization in ['0', '1', '2', '3', 's']
 +    cargo_wrapper_args += ['--optimization', optimization]
