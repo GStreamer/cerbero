@@ -6,7 +6,7 @@ from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '1.5.2'
+    version = '1.6.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
 
@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
     else:
         stype = SourceType.TARBALL
         url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-        tarball_checksum = 'f955e09ab0d71ef180ae85df65991d58ed8430323de7d77a37e11c9ea630910b'
+        tarball_checksum = '1eca49eb6c26d58bbee67fd3337d8ef557c0804e30a6d16bfdf269db997464de'
         patches = []
 
     files_bin = ['bin/meson']
