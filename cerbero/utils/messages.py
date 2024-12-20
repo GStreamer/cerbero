@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import io
 import sys
 import os
 import time
@@ -49,8 +50,12 @@ def enable_vt100():
 
 
 def console_is_interactive():
-    if not os.isatty(sys.stdout.fileno()):
+    try:
+        if not os.isatty(sys.stdout.fileno()):
+            return False
+    except io.UnsupportedOperation:
         return False
+
     if os.environ.get('TERM') == 'dumb':
         return False
     return True

@@ -194,6 +194,8 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
 
     if sys.stdout.encoding:
         o = o.decode(sys.stdout.encoding, errors='replace')
+    elif isinstance(o, bytes):
+        o = o.decode()
     return o
 
 

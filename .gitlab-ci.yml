@@ -127,6 +127,7 @@ default:
       python3-venv
       python3-setuptools
       python3-minimal
+      python3-xmlrunner
       rsync
       ssh-client
       sudo
@@ -342,11 +343,17 @@ tests:
     - "tests ubuntu image"
   stage: 'tests'
   script:
-    python3 -m unittest discover -s test -f
+    python3 -m xmlrunner --output-file tests.xml discover -s test
   variables:
     CERBERO_UNINSTALLED: 1
     PYTHONPATH: ':./test:./cerbero'
   tags: [ 'placeholder-job' ]
+  artifacts:
+    when: always
+    paths:
+      - tests.xml
+    reports:
+      junit: tests.xml
 
 #
 # Cerbero Linux X86_64 build

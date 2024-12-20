@@ -13,6 +13,6 @@ variables:
 
   UBUNTU_TAG: '2024-06-30.0'
 
-  TESTS_UBUNTU_TAG: '2024-12-19.0'
+  TESTS_UBUNTU_TAG: '2024-12-20.0'
 
   WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2024-11-12.0-main'
