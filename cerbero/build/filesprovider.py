@@ -517,6 +517,12 @@ class FilesProvider(object):
         if os.path.exists(os.path.join(self.config.prefix, f)):
             return f
         for py_prefix in self.py_prefixes:
+            original_path = os.path.join(py_prefix, f)
+            if os.path.exists(os.path.join(self.config.prefix, original_path)):
+                return original_path
+            elif os.path.isabs(f):
+                raise RuntimeError('Absolute path!')
+
             pydir = os.path.basename(os.path.normpath(py_prefix))
             pyversioname = re.sub(r'python|\.', '', pydir)
             cpythonname = 'cpython-' + pyversioname
@@ -537,7 +543,7 @@ class FilesProvider(object):
                 pyfiles.append(fe)
             else:
                 cached = os.path.join(pycachedir, os.path.basename(f))
-                fe = self._pyfile_get_name(os.path.join(self.config.prefix, cached))
+                fe = self._pyfile_get_name(cached)
                 if fe:
                     pyfiles.append(fe)
 
