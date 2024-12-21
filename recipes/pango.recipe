@@ -24,10 +24,10 @@ class Recipe(recipe.Recipe):
       'pango/0007-win32-Clean-up-directwrite-code.patch',
    ]
 
-    files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
+    files_libs = ['libpangocairo-1.0', 'libpango-1.0']
     files_bins = ['pango-view']
     files_devel = ['include/pango-1.0',
-        '%(libdir)s/pkgconfig/pangoft2.pc', '%(libdir)s/pkgconfig/pango.pc',
+        '%(libdir)s/pkgconfig/pango.pc',
         '%(libdir)s/pkgconfig/pangocairo.pc']
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
@@ -39,7 +39,6 @@ class Recipe(recipe.Recipe):
     files_typelibs = [
         'Pango-1.0',
         'PangoCairo-1.0',
-        'PangoFT2-1.0'
     ]
 
     def prepare(self):
@@ -47,13 +46,21 @@ class Recipe(recipe.Recipe):
             # Allow using Win10 APIs if dwrite_3.h is found
             self.append_env('CFLAGS', '-U_WIN32_WINNT')
 
+        if self.config.target_platform in [Platform.LINUX, Platform.IOS, Platform.ANDROID]:
+            self.files_libs.append('libpangoft2-1.0')
+            self.files_devel.append('%(libdir)s/pkgconfig/pangoft2.pc')
+            self.files_devel.append('PangoFT2-1.0')
+
     def post_install(self):
         LibtoolLibrary('pango-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gobject-2.0', 'fribidi', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
-        LibtoolLibrary('pangoft2-1.0', None, None, None, self.config.libdir,
-                self.config.target_platform, deps=['pango-1.0', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
+        pangocairo_deps = ['pango-1.0', 'cairo', 'pixman-1']
+        if self.config.target_platform in [Platform.LINUX, Platform.IOS, Platform.ANDROID]:
+            pangocairo_deps.append('pangoft2-1.0')
+            LibtoolLibrary('pangoft2-1.0', None, None, None, self.config.libdir,
+                    self.config.target_platform, deps=['pango-1.0', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
         LibtoolLibrary('pangocairo-1.0', None, None, None, self.config.libdir,
-                self.config.target_platform, deps=['pango-1.0', 'cairo', 'pixman-1', 'pangoft2-1.0']).save()
+                self.config.target_platform, deps=pangocairo_deps).save()
         if self.config.target_platform == Platform.WINDOWS:
             LibtoolLibrary('pangowin32-1.0', None, None, None, self.config.libdir,
                     self.config.target_platform, deps=['pango-1.0', 'cairo']).save()
