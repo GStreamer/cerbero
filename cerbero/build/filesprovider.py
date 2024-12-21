@@ -24,6 +24,7 @@ import inspect
 from functools import partial
 import shlex
 from pathlib import Path
+from typing import Optional, List
 
 from cerbero.config import Platform, LibraryType
 from cerbero.utils import shell
@@ -513,15 +514,20 @@ class FilesProvider(object):
             libs[pattern] = self._search_library
         return libs
 
-    def _pyfile_get_name(self, f):
+    def _pyfile_get_name(self, f) -> Optional[List[str]]:
         if os.path.exists(os.path.join(self.config.prefix, f)):
-            return f
+            return [f]
         for py_prefix in self.py_prefixes:
             original_path = os.path.join(py_prefix, f)
             if os.path.exists(os.path.join(self.config.prefix, original_path)):
-                return original_path
+                return [original_path]
+            elif '*' in f:
+                fs = glob.glob(os.path.join(self.config.prefix, original_path), recursive=True)
+                if fs:
+                    return [os.path.relpath(f, start=self.config.prefix) for f in fs]
             elif os.path.isabs(f):
-                raise RuntimeError('Absolute path!')
+                # A files_* entry is not made relative properly
+                raise RuntimeError(f'An absolute path "{f}"was supplied, please set relative paths only')
 
             pydir = os.path.basename(os.path.normpath(py_prefix))
             pyversioname = re.sub(r'python|\.', '', pydir)
@@ -531,7 +537,7 @@ class FilesProvider(object):
             for ex in ['', 'm']:
                 f = splitedext[0] + '.' + cpythonname + ex + splitedext[1]
                 if os.path.exists(os.path.join(self.config.prefix, f)):
-                    return f
+                    return [f]
         return None
 
     def _pyfile_get_cached(self, f):
@@ -558,9 +564,9 @@ class FilesProvider(object):
         files_exts = [f % self.extensions for f in files]
         files = self._list_files(files_exts)
         for f in files:
-            real_name = self._pyfile_get_name(f)
-            if real_name:
-                pyfiles[real_name] = None
+            real_names = self._pyfile_get_name(f)
+            if real_names:
+                pyfiles.update({i: None for i in real_names})
             else:
                 # Adding it so we notice there is a problem in the recipe
                 pyfiles[f] = None
