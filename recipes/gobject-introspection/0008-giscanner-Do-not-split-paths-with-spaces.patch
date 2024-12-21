@@ -1,0 +1,26 @@
+From fdccf68bf9add04f2e2895e12849ca96ecd009c1 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Sat, 21 Dec 2024 20:05:28 -0300
+Subject: [PATCH 8/9] giscanner: Do not split paths with spaces
+
+This breaks targeting stock Visual Studio under Windows.
+---
+ giscanner/msvccompiler.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/giscanner/msvccompiler.py b/giscanner/msvccompiler.py
+index e333a80f..c9f14b58 100644
+--- a/giscanner/msvccompiler.py
++++ b/giscanner/msvccompiler.py
+@@ -75,7 +75,7 @@ class MSVCCompiler(DistutilsMSVCCompiler):
+         if output_file is not None:
+             preprocess_options.append('-P')
+             source_basename = self._get_file_basename(source)
+-        cpp_args = self.cc.split()
++        cpp_args = [self.cc] if os.path.exists(self.cc) else self.cc.split()
+         if extra_preargs is not None:
+             cpp_args[:0] = extra_preargs
+         if extra_postargs is not None:
+-- 
+2.47.0.windows.2
+

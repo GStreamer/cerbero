@@ -1,0 +1,59 @@
+From c7b3999f04111ec9aa7cd8b893df13af23e7698d Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Sat, 21 Dec 2024 14:00:56 -0300
+Subject: [PATCH 7/9] build: Add giomoduledir to Windows PATH for g-ir-scanner
+
+---
+ meson.build | 33 +++++++++++++++++++++++++++++++--
+ 1 file changed, 31 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 4b2e5741..8418d0b9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -164,11 +164,40 @@ endif
+ pkg_config = find_program('pkg-config')
+ g_ir_scanner_env = environment()
+ dep_type = glib_dep.type_name()
+-if dep_type == 'internal'
+-  g_ir_scanner_env.append('PKG_CONFIG_PATH', meson.global_build_root() + '/meson-uninstalled')
++if dep_type == 'internal' or meson.is_subproject()
++  g_ir_scanner_env.prepend('PKG_CONFIG_PATH', meson.global_build_root() + '/meson-uninstalled')
+   g_ir_scanner_env.set('PKG_CONFIG', pkg_config.full_path())
+ endif
+ 
++pkg_config_path = get_option('pkg_config_path')
++if pkg_config_path.length() > 0
++  g_ir_scanner_env.append('PKG_CONFIG_PATH', pkg_config_path)
++endif
++
++# Set up the environment that will be fed to the build
++if host_system in ['darwin', 'ios']
++  var = 'DYLD_LIBRARY_PATH'
++elif host_system in ['windows', 'cygwin']
++  var = 'PATH'
++else
++  var = 'LD_LIBRARY_PATH'
++endif
++
++current_library_path = run_command(
++  [
++    python,
++    '-c',
++    'import os; print(os.environ["@0@"]) if "@0@" in os.environ else ""'.format(var)
++  ],
++  capture: true,
++  check: true,
++)
++
++g_ir_scanner_env.set(var, current_library_path.stdout().strip())
++if host_system in ['windows', 'cygwin']
++  g_ir_scanner_env.prepend(var, gio_dep.get_variable('giomoduledir'))
++endif
++
+ configure_file(
+   configuration: config,
+   output: 'config.h'
+-- 
+2.47.0.windows.2
+

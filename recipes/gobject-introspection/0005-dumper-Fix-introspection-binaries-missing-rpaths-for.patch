@@ -1,7 +1,7 @@
-From 7e77e10a5f683958786efaa23b173f52ed489ad1 Mon Sep 17 00:00:00 2001
+From affb4fac688486a418f143acebd22b7b9f5bac1e Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Fri, 17 May 2024 21:39:10 +0000
-Subject: [PATCH 5/5] dumper: Fix introspection binaries missing rpaths for
+Subject: [PATCH 5/9] dumper: Fix introspection binaries missing rpaths for
  relative dylibs
 
 Apple expects dylibs to have an ID of the form `@rpath/libyadda.dylib`.

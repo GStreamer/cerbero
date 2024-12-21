@@ -1,0 +1,30 @@
+From fb6b4d675ff512241cf13b411a6362f337b92805 Mon Sep 17 00:00:00 2001
+From: Chun-wei Fan <fanc999@yahoo.com.tw>
+Date: Tue, 25 Jun 2024 10:46:36 +0800
+Subject: [PATCH 6/9] scannerlexer.l: Handle Visual Studio-specific
+ __forceinline
+
+Treat that directive like an inline when running the g-ir-* scripts, so
+that the scanner won't complain when encountering this Visual
+Studio-specific directive.
+
+(cherry picked from commit ee817eb62f71fbc5f345b6f2ca2b7c2c18686516)
+---
+ giscanner/scannerlexer.l | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/giscanner/scannerlexer.l b/giscanner/scannerlexer.l
+index b6cc6499..26c6e302 100644
+--- a/giscanner/scannerlexer.l
++++ b/giscanner/scannerlexer.l
+@@ -168,6 +168,7 @@ stringtext				([^\\\"])|(\\.)
+ "__attribute" 		                { if (!parse_ignored_macro()) REJECT; }
+ "__const"                               { return CONST; }
+ "__extension__"                         { return EXTENSION; }
++"__forceinline"                         { return INLINE; }
+ "__inline__"                            { return INLINE; }
+ "__inline"				{ return INLINE; }
+ "__nonnull" 			        { if (!parse_ignored_macro()) REJECT; }
+-- 
+2.47.0.windows.2
+

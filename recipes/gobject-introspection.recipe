@@ -77,10 +77,17 @@ class Recipe(recipe.Recipe):
     patches = [
         f'{name}/0001-Revert-build-Do-not-compile-uninstalled-GIR-into-typ.patch',
         f'{name}/0002-Revert-build-Do-not-install-generated-GLib-GIR-files.patch',
-        f'{name}/0001-giscanner-remove-dependency-on-distutils.msvccompile.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/490 (merged in 1.81.2)
+        f'{name}/0003-giscanner-remove-dependency-on-distutils.msvccompile.patch',
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/503
-        f'{name}/0001-meson-Use-the-specified-python-if-it-s-custom.patch',
-        f'{name}/0002-dumper-Fix-introspection-binaries-missing-rpaths-for.patch'
+        f'{name}/0004-meson-Use-the-specified-python-if-it-s-custom.patch',
+        f'{name}/0005-dumper-Fix-introspection-binaries-missing-rpaths-for.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/474 (merged in 1.81.2)
+        f'{name}/0006-scannerlexer.l-Handle-Visual-Studio-specific-__force.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/511
+        f'{name}/0007-build-Add-giomoduledir-to-Windows-PATH-for-g-ir-scan.patch',
+        f'{name}/0008-giscanner-Do-not-split-paths-with-spaces.patch',
+        f'{name}/0009-dumper-Do-not-use-Bash-script-with-MSVC.patch',
     ]
 
     def prepare(self):
