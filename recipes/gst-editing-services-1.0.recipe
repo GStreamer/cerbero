@@ -20,4 +20,4 @@ class Recipe(custom.GStreamer):
     files_validate = ['%(libdir)s/gst-validate-launcher/python/launcher/apps/geslaunch.py',
                       'share/gstreamer-1.0/validate/scenarios/ges-edit-clip-while-paused.scenario']
 
-#    files_python = ['site-packages/ges%(pext)s']
+    files_python = ["%(pydir)s/gi/overrides/GES.py"]
