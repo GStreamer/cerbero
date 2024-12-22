@@ -132,8 +132,8 @@ import shlex
 
 os.environ['CERBERO_UNINSTALLED'] = '1'
 
-if not sys.version_info >= (3, 7, 0):
-    print('We require Python 3.7 or newer, but you have {}'.format(sys.version), file=sys.stderr)
+if not sys.version_info >= (3, 9, 0):
+    print('We require Python 3.9 or newer, but you have {}'.format(sys.version), file=sys.stderr)
     sys.exit(1)
 
 # __file__ is not set when we're called with -c
