@@ -256,7 +256,13 @@ class ProductPackage(PackagerBase):
         return paths
 
     def _prepare_pack(self):
-        self.include_dirs = PkgConfig.list_all_include_dirs(env=self.config.env)
+        env = self.config.env.copy()
+        # python3.xx-embed is a system package
+        if self.config.variants.python:
+            import sysconfig
+
+            env['PKG_CONFIG_PATH'] = f"{env['PKG_CONFIG_PATH']}:{sysconfig.get_config_var('LIBPC')}"
+        self.include_dirs = PkgConfig.list_all_include_dirs(env=env)
         self.tmp = tempfile.mkdtemp()
         self.fw_path = self.tmp
 
