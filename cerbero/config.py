@@ -863,14 +863,18 @@ class Config(object):
             self.py_prefixes.append(self.py_win_prefix)
         self.py_prefixes = list(set(self.py_prefixes))
 
+        if self.platform == Platform.WINDOWS:
+            # pythonpaths start with 'Lib' on Windows, which is extremely
+            # undesirable since our libdir is 'lib'. Windows APIs are
+            # case-preserving case-insensitive.
+            # Running this fix first is necessary because otherwise the WiX
+            # logic will enumerate lib/ first, and then Lib/ for the Python
+            # package, thus double defining the same artifact folder.
+            self.py_prefixes = [path.lower() for path in self.py_prefixes]
+
         # Ensure python paths exists because setup.py won't create them
         for path in self.py_prefixes:
             path = os.path.join(self.prefix, path)
-            if self.platform == Platform.WINDOWS:
-                # pythonpaths start with 'Lib' on Windows, which is extremely
-                # undesirable since our libdir is 'lib'. Windows APIs are
-                # case-preserving case-insensitive.
-                path = path.lower()
             # dict universal arches do not have an active prefix
             if not isinstance(self.universal_archs, dict):
                 self._create_path(path)
