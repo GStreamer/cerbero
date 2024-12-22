@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
+import shutil
+
 from cerbero.build.build import modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell, messages
@@ -249,4 +252,14 @@ class Recipe(recipe.Recipe):
         if self.using_msvc():
             shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'openssl.pc'), {'\\': '/'})
             shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'libcrypto.pc'), {'\\': '/'})
+        # g-ir-scanner expects import libraries to end in .lib when
+        # building a gir for "internal" (same project) libraries
+        # Unfixed OpenSSL breaks introspection for glib-networking and libnice
+        if self.using_msvc() and self.config.variants.gi:
+            prefix = Path(self.config.libdir)
+            for f in ['libssl.lib', 'libcrypto.lib']:
+                src = prefix / f
+                dst = src.with_stem(src.stem.replace('lib', ''))
+                dst.unlink(missing_ok=True)
+                shutil.copyfile(src, dst)
         super().post_install()
