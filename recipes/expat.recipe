@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'expat'
-    version = '2.6.2'
+    version = '2.6.4'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_6_2/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = 'ee14b4c5d8908b1bec37ad937607eab183d4d9806a08adee472c3c3121d27364'
+    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_6_4/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'a695629dae047055b37d50a0ff4776d1d45d0a4c842cf4ccee158441f55ff7ee'
     cmake_generator = 'ninja'
     can_msvc = True
     configure_options = '-DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_PKGCONFIG=ON'
