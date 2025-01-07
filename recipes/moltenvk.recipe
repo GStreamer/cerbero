@@ -74,7 +74,7 @@ class Recipe(recipe.Recipe):
         #
         # For non-universal builds on iOS, no extra steps are necessary.
         if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
-            self.skip_steps += [BuildSteps.MERGE, BuildSteps.CODE_SIGN]
+            self.skip_steps += [BuildSteps.MERGE]
 
     async def install(self):
         srcdir = Path(self.config.moltenvk_prefix)
@@ -164,6 +164,9 @@ class Recipe(recipe.Recipe):
             # The process would crash otherwise as not loadable
             await shell.async_call(['codesign', '--remove-signature', f], logfile=self.logfile)
             await shell.async_call(['lipo', '-thin', self.config.target_arch, f, '-output', f], logfile=self.logfile)
+            if self.config.variants.gi and f.endswith('.dylib'):
+                # Needed for running the introspection
+                await shell.async_call(['codesign', '-f', '-s', '-', f], logfile=self.logfile, env=self.env)
 
     def post_install(self):
         super().post_install()
