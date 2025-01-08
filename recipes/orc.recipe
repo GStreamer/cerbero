@@ -13,7 +13,9 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
 
-    patches = []
+    patches = [
+        'orc//0001-opcodes-Use-MIN-instead-of-CLAMP-for-known-unsigned-.patch',
+    ]
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
