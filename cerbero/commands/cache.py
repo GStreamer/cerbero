@@ -219,7 +219,7 @@ class FetchCache(BaseCache):
             cmd = ['install_name_tool', '-change', lib, new, object_file]
             shell.new_call(cmd, fail=True, verbose=True)
 
-    def relocate_macos_build_tools(self, config, old_path, new_path):
+    def relocate_macos_build_tools(self, config, old_paths, new_path):
         """
         build-tools on macOS have absolute paths as install names for all
         Mach-O files, so we need to relocate them to the new prefix.
@@ -236,7 +236,8 @@ class FetchCache(BaseCache):
                     object_file = os.path.join(dirpath, f)
                     if not self._is_mach_o_file(object_file):
                         continue
-                    self._change_lib_paths(object_file, old_path, new_path)
+                    for path in old_paths:
+                        self._change_lib_paths(object_file, path, new_path)
 
     def mark_windows_build_tools_dirty(self, config):
         """
@@ -266,10 +267,14 @@ class FetchCache(BaseCache):
         m.action(f'Relocating text files from {origin} to {dest}')
         sed = self.get_gnu_sed(config)
         # This is hacky, but fast enough
-        shell.call(f'grep -lrIe {origin} {dest} | xargs {sed} "s#{origin}#{dest}#g" -i', verbose=True)
+        origins = [origin]
+        if origin.startswith('/var/'):
+            origins.append(f'/private/{origin}')  # macOS APFS symbolic link
+        for o in origins:
+            shell.call(f'grep -lrIe {o} {dest} | xargs {sed} "s#{o}#{dest}#g" -i', verbose=True)
         # Need to relocate RPATHs and names in binaries
         if config.platform == Platform.DARWIN:
-            self.relocate_macos_build_tools(config, origin, dest)
+            self.relocate_macos_build_tools(config, origins, dest)
         elif config.platform == Platform.WINDOWS:
             self.mark_windows_build_tools_dirty(config)
 
