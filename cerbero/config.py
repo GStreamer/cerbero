@@ -597,6 +597,9 @@ class Config(object):
         if self.toolchain_prefix is not None:
             ld_library_path = self._join_path(ld_library_path, os.path.join(self.toolchain_prefix, 'lib'))
             includedir = self._join_path(includedir, os.path.join(self.toolchain_prefix, 'include'))
+        if self.lib_suffix and self.variants.python:
+            # if there is a lib_suffix and a Python build is present it would sit "next" to the lib_suffix dir rather than in it
+            ld_library_path = self._join_path(os.path.join(self.prefix, 'lib'), ld_library_path)
         # Most of these variables are extracted from jhbuild
         env = {
             'LD_LIBRARY_PATH': ld_library_path,
@@ -1141,3 +1144,40 @@ class Config(object):
             build_env = {}
 
         return merge_env_value_env(build_env, in_env or self.env)
+
+    # config helpers for recipes with Python dependencies:
+
+    def get_python_ext_suffix(self):
+        return sysconfig.get_config_vars().get('EXT_SUFFIX', '%(pext)s')
+
+    def get_python_version(self):
+        return self.extra_properties.get('python_version', sysconfig.get_python_version())
+
+    def get_python_name(self):
+        return f'python{self.get_python_version()}'
+
+    def get_build_python_exe(self):
+        py_name = self.get_python_name()
+        path = self._get_build_python_path('scripts', py_name)
+        if path:
+            return path.joinpath(py_name)
+        return None
+
+    def get_python_prefix(self):
+        if self.target_platform == Platform.WINDOWS:
+            return Path(self.py_win_prefix)
+        else:
+            return Path(self.py_prefix)
+
+    def _get_build_python_path(self, path_name, testfile):
+        py_version = self.get_python_version()
+        py_name = f'python{py_version}'
+        if path_name == 'scripts':
+            glue = 'bin'
+        elif path_name in ['include', 'platinclude']:
+            glue = Path('include', py_name)
+        else:
+            glue = Path('lib', py_name)
+        if Path(self.prefix, glue, testfile).exists():
+            return Path(self.prefix, glue)
+        return None

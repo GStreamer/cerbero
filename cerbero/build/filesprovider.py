@@ -194,7 +194,7 @@ class FilesProvider(object):
         self.config = config
         self.platform = config.target_platform
         self.extensions = self.EXTENSIONS[self.platform].copy()
-        self.extensions['pydir'] = config.py_prefix
+        self.extensions['pydir'] = str(config.get_python_prefix())
         self.extensions['pyplatdir'] = config.py_plat_prefix
         self.extensions['libdir'] = self.config.rel_libdir
         if self.platform == Platform.WINDOWS:
