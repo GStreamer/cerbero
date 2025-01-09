@@ -91,8 +91,12 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        if self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
-            self.meson_options['python'] = self.config.python_exe
+        if self.config.variants.python:
+            python_exe = self.config.get_build_python_exe()
+            if python_exe:
+                self.meson_options['python'] = str(python_exe)
+            elif self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
+                self.meson_options['python'] = self.config.python_exe
 
     async def extract(self):
         await super().extract()
