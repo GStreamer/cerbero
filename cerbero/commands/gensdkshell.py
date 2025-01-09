@@ -75,6 +75,7 @@ class GenSdkShell(Command):
         cmd=None,
         env=None,
         prefix_env_name='GSTREAMER_ROOT',
+        root_from_name=False,
     ):
         if cmd is None:
             cmd = self.DEFAULT_CMD
@@ -85,19 +86,25 @@ class GenSdkShell(Command):
         self._env = env
         prefix_env = '${%s}' % prefix_env_name
         libdir = libdir.replace(prefix, prefix_env)
+        if isinstance(py_prefixes, str):
+            python_path = os.path.join(prefix_env, py_prefixes)
+        elif isinstance(py_prefixes, list):
+            python_path = os.pathsep.join(py_prefixes)
+        else:
+            python_path = ''
         self._putvar('PATH', '%s/bin${PATH:+:$PATH}' % prefix_env)
         self._putvar('LD_LIBRARY_PATH', '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir)
         self._putvar(
             'PKG_CONFIG_PATH',
-            '%s/lib/pkgconfig:%s/share/pkgconfig' '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix_env, prefix_env),
+            '%s/pkgconfig:%s/share/pkgconfig' '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (libdir, prefix_env),
         )
         self._putvar('XDG_DATA_DIRS', '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}' % prefix_env)
         self._putvar('XDG_CONFIG_DIRS', '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}' % prefix_env)
         self._putvar('GST_REGISTRY_1_0', '${HOME}/.cache/gstreamer-1.0/gstreamer-cerbero-registry', None)
         self._putvar('GST_PLUGIN_SCANNER_1_0', '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env)
-        self._putvar('GST_PLUGIN_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
-        self._putvar('GST_PLUGIN_SYSTEM_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
-        self._putvar('PYTHONPATH', '%s${PYTHONPATH:+:$PYTHONPATH}' % (os.pathsep.join(py_prefixes)))
+        self._putvar('GST_PLUGIN_PATH_1_0', '%s/gstreamer-1.0' % libdir)
+        self._putvar('GST_PLUGIN_SYSTEM_PATH_1_0', '%s/gstreamer-1.0' % libdir)
+        self._putvar('PYTHONPATH', '%s${PYTHONPATH:+:$PYTHONPATH}' % python_path)
         self._putvar('CFLAGS', '-I%s/include ${CFLAGS}' % prefix_env, ' ')
         self._putvar('CXXFLAGS', '-I%s/include ${CXXFLAGS}' % prefix_env, ' ')
         self._putvar('CPPFLAGS', '-I%s/include ${CPPFLAGS}' % prefix_env, ' ')
@@ -105,7 +112,13 @@ class GenSdkShell(Command):
         self._putvar('GIO_EXTRA_MODULES', '%s/gio/modules' % libdir)
         self._putvar('GI_TYPELIB_PATH', '%s/girepository-1.0' % libdir)
 
-        envstr = 'export %s="%s"\n' % (prefix_env_name, prefix)
+        envstr = ''
+        if root_from_name:
+            envstr += 'scriptdir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-${(%):-%x}}" )" &> /dev/null && pwd)\n'
+            envstr += 'export ' + prefix_env_name + '="${scriptdir%"/' + os.path.dirname(name) + '"}"\n'
+            envstr += 'unset scriptdir\n'
+        else:
+            envstr += 'export %s="%s"\n' % (prefix_env_name, prefix)
         for e, v in env.items():
             envstr += 'export %s="%s"\n' % (e, v)
         try:

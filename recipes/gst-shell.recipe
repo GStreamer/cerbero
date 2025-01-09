@@ -16,11 +16,16 @@ class Recipe(recipe.Recipe):
         from cerbero.commands.gensdkshell import GenSdkShell
         name = self.files_shell[0]
         prefix = self.config.prefix
-        py_prefix = self.config.py_prefix
+        py_prefix = self.config.get_python_prefix().as_posix()
         output_dir = prefix
+        root_from_name = False
+        if self.config.target_platform in [Platform.LINUX, Platform.DARWIN]:
+            # add any platform which supports BASH_SOURCE[0] or the zsh version ${(%):-%x}}
+            root_from_name = True
         gensdkshell = GenSdkShell()
         gensdkshell.runargs(self.config, name, output_dir, prefix, self.config.libdir,
-                py_prefix)
+                py_prefix, root_from_name=root_from_name)
         name = self.files_shell[1]
+        # add root_from_name ?
         gensdkshell.runargs(self.config, name, output_dir, prefix, self.config.libdir,
                 py_prefix, cmd='')
