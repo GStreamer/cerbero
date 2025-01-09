@@ -4,14 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.6.44'
+    version = '1.6.45'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
     url = 'sf://'
-    tarball_checksum = '60c4da1d5b7f0aa8d158da48e8f8afa9773c1c8baa5d21974df61f1886b8ce8e'
+    tarball_checksum = '926485350139ffb51ef69760db35f78846c805fef3d59bfdcb2fba704663f370'
+
     licenses = [{License.LibPNG: ['LICENSE']}]
     deps = ['zlib']
     patches = [
