@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.80.0'
+    version = '2.80.1'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'd8f4f1aab213179ae3351617b59dab5de6bcc9e785021eee178998ebd4bb3acf'
+    tarball_checksum = 'b80e2874157cd55071f1b6710fa0b911d5ac5de106a9ee2a4c9c7bee61782f8e'
 
     # static_modules is now governed by default_library
     # https://gitlab.gnome.org/GNOME/glib-networking/-/commit/270d54a5ef9a3c9cb96997dbe0fbcb329dbf80e8
