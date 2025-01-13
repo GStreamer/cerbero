@@ -20,4 +20,14 @@ class Recipe(custom.GStreamer):
     files_validate = ['%(libdir)s/gst-validate-launcher/python/launcher/apps/geslaunch.py',
                       'share/gstreamer-1.0/validate/scenarios/ges-edit-clip-while-paused.scenario']
 
-    files_python = ["%(pydir)s/gi/overrides/GES.py"]
+    files_python = []
+
+    def prepare(self):
+        if self.config.variants.python:
+            self.files_python.append('%(pydir)s/gi/overrides/GES.py')
+            # There is no other way to insert the RPATH for Xcode's Python3.framework
+            if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+                framework_path = self.config.get_python_framework()
+                if framework_path:
+                    self.append_env('LDFLAGS', f'-Wl,-rpath,{framework_path}')
+            self.meson_options['python-exe'] = self.config.get_build_python_exe()
