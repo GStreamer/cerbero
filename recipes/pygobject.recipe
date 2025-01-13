@@ -8,11 +8,10 @@ class Recipe(recipe.Recipe):
     url = 'gnome://'
     licenses = [License.LGPLv2_1Plus]
 
-    deps = ['glib', 'gobject-introspection']
+    deps = ['pycairo', 'gobject-introspection', 'libffi']
     tarball_checksum = '0794aeb4a9be31a092ac20621b5f54ec280f9185943d328b105cdae6298ad1a7'
     meson_options = {
         'tests': False,
-        'pycairo': 'disabled',
     }
 
     files_python = [

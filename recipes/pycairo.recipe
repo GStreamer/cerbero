@@ -1,0 +1,28 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'pycairo'
+    version = '1.27.0'
+    stype = SourceType.TARBALL
+    url = f'https://github.com/pygobject/pycairo/archive/refs/tags/v{version}.tar.gz'
+    tarball_checksum = 'ce10721e4a5d74c53c8b7241e5ccfd4627fadb2830ecdae72524c077067ca247'
+    btype = BuildType.MESON
+    deps = ['cairo']
+    licenses = [License.LGPLv2_1Plus, {License.MPLv1_1: ['COPYING-MPL-1.1']}]
+    library_type = LibraryType.SHARED
+    files_python = [
+        f"%(pydir)s/pycairo-{version}.dist-info",
+        "%(pydir)s/cairo/__init__.py",
+        "%(pydir)s/cairo/__init__.pyi",
+        "%(pydir)s/cairo/_cairo%(pext)s",
+        "%(pydir)s/cairo/include/py3cairo.h",
+        "%(pydir)s/cairo/py.typed",
+        ]
+    files_devel = ['include/pycairo/py3cairo.h', '%(libdir)s/pkgconfig/py3cairo.pc']
+
+    def prepare(self):
+        python_exe = self.config.get_build_python_exe()
+        if python_exe:
+            self.meson_options['python'] = str(python_exe)
+        elif self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
+            self.meson_options['python'] = self.config.python_exe
