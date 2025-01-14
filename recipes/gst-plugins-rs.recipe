@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
     if GStreamer.tagged_for_release:
         commit = f'gstreamer-{GStreamer.version}'
     else:
-        commit = 'origin/main'
+        commit = 'origin/0.13'
     # Each plugin uses one or more of these licenses.
     licenses = [{
         License.Apachev2: ['LICENSE-APACHE'],
