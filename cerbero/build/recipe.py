@@ -27,7 +27,7 @@ from pathlib import Path
 from cerbero.enums import License, LicenseDescription
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalMergedFilesProvider
-from cerbero.config import Platform
+from cerbero.config import Distro, Platform
 from cerbero.errors import FatalError, CommandError
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
@@ -435,6 +435,28 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                         line = f'prefix={prefix_value}'
                     fo.write(line + '\n')
 
+    def relocate_debian_site_packages(self):
+        """
+        Relocate Python packages from the distro default of dist-packages
+        to the standard site-packages
+        """
+        extensions = self.extensions.copy()
+        extensions['pydir'] = Path(self.config.prefix, 'lib', 'python3', 'dist-packages').as_posix()
+        srcfiles = [Path(f % extensions) for f in self.files_python]
+
+        destdir = Path(self.config.prefix) / self.config.get_python_prefix()
+        destdir.mkdir(parents=True, exist_ok=True)
+        extensions['pydir'] = Path(self.config.prefix, self.config.get_python_prefix()).as_posix()
+        destfiles = [Path(f % extensions) for f in self.files_python]
+
+        for src, dest in zip(srcfiles, destfiles):
+            if src.is_file():
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, dest)
+            elif src.is_dir():
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(src, dest, dirs_exist_ok=True)
+
     def generate_gst_la_files(self):
         """
         Generate .la files for all libraries and plugins packaged by this Meson
@@ -709,6 +731,13 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         Runs post installation steps
         """
         self.install_licenses()
+        if (
+            self.config.variants.python
+            and self.config.target_distro == Distro.DEBIAN
+            and self.config.extra_properties.get('site-packages')
+            and hasattr(self, 'files_python')
+        ):
+            self.relocate_debian_site_packages()
         # FIXME: remove once 1.26 is published
         if self.name.startswith('gst') and self.config.target_platform == Platform.ANDROID:
             self.generate_gst_la_files()
