@@ -463,7 +463,7 @@ cerbero cross-android universal examples:
       - .git/**/*
 
 .cerbero macos arm64 image:
-  image: "registry.freedesktop.org/gstreamer/cerbero/macos-arm64/14-sonoma:2023-10-25.2"
+  image: "registry.freedesktop.org/gstreamer/cerbero/macos-arm64/15-sequoia:2024-10-28.2"
   tags:
     - gst-mac-arm
 

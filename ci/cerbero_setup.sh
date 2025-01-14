@@ -40,7 +40,7 @@ cerbero_package_and_check() {
         dlopen_plugins+=(msdk nvcodec qsv va vaapi)
     fi
 
-    $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     # Run gst-inspect-1.0 for some basic checks. Can't do this for cross-(android|ios)-universal, of course.
     if [[ $CONFIG != *universal* ]] && [[ $CONFIG != *cross-win* ]]; then
@@ -102,7 +102,7 @@ cerbero_script() {
         time rsync -aH "${CERBERO_HOME}/dist/${ARCH}/" "${CERBERO_OVERRIDDEN_DIST_DIR}"
     fi
 
-    $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
     fix_build_tools
 
     cerbero_package_and_check
@@ -132,9 +132,9 @@ cerbero_deps_script() {
     $CERBERO $CERBERO_ARGS show-config
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
     $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
-    $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
-    $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
-    $CERBERO $CERBERO_ARGS build --offline $more_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build --offline $more_deps
 
     if [[ -n ${CERBERO_OVERRIDDEN_DIST_DIR} ]]; then
         mkdir -p "${CERBERO_HOME}/dist/${ARCH}"

@@ -130,6 +130,12 @@ if (!(Is-Newer 'py' $python_req)) {
   choco install -y python3
 }
 
+# https://github.com/chocolatey/choco/issues/3524
+if ((Get-Command "wmic.exe" -ErrorAction SilentlyContinue) -eq $null) {
+  Write-Host "Windows Management Instrumentation Command-line not found, installing..."
+  DISM /Online /Add-Capability /CapabilityName:WMIC~~~~
+}
+
 if (!(Is-Newer "$env:WIX\bin\light" $wix_req)) {
   Write-Host "WiX >= $wix_req not found, installing..."
   choco install -y wixtoolset

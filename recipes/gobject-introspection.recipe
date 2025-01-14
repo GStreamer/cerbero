@@ -82,7 +82,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.platform == Platform.WINDOWS:
             # gobject-introspection forces a Python 3 interpreter named "python3",
-            # which on Windows matches the one provided by UCRT64. However, 
+            # which on Windows matches the one provided by UCRT64. However,
             # Meson's Python 3 interpreter is `python.exe`. Meson
             # can handle this for us, provided we either don't force the
             # naming, or supply the correct name to `find_installation` here.

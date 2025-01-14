@@ -427,16 +427,6 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
             f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} '
             '-Method Get -Uri %s',
         ]
-    elif shutil.which('wget2'):
-        cmd = ['wget2', '--user-agent', user_agent, '--tries=2', '--timeout=20', '-O', dest]
-        if not check_cert:
-            cmd += ['--no-check-certificate']
-        cmd += ['%s']
-    elif shutil.which('wget'):
-        cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20', '--progress=dot:giga', '-O', dest]
-        if not check_cert:
-            cmd += ['--no-check-certificate']
-        cmd += ['%s']
     elif shutil.which('curl'):
         cmd = [
             'curl',
@@ -454,6 +444,16 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         ]
         if not check_cert:
             cmd += ['-k']
+        cmd += ['%s']
+    elif shutil.which('wget2'):
+        cmd = ['wget2', '--user-agent', user_agent, '--tries=2', '--timeout=20', '-O', dest]
+        if not check_cert:
+            cmd += ['--no-check-certificate']
+        cmd += ['%s']
+    elif shutil.which('wget'):
+        cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20', '--progress=dot:giga', '-O', dest]
+        if not check_cert:
+            cmd += ['--no-check-certificate']
         cmd += ['%s']
     else:
         raise FatalError('Need either wget or curl to download things')
@@ -669,7 +669,7 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
             rc_tmp.write(shellrc)
             rc_tmp.flush()
             if 'zsh' in shell:
-                env['ZDOTDIR'] = tmp.name
+                env['ZDOTDIR'] = tmp
                 os.execlpe(shell, shell, env)
             else:
                 # Check if the shell supports passing the rcfile

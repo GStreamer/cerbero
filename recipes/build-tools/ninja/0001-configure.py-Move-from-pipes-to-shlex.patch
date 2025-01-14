@@ -1,0 +1,36 @@
+From 4b32663bf04a54818664081bb448b4c9d10c3371 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 31 Oct 2024 14:32:18 +0530
+Subject: [PATCH] configure.py: Move from pipes to shlex
+
+pipes.quote uses shlex.quote internally anyway, and pipes has been
+removed with Python 3.13
+---
+ configure.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.py b/configure.py
+index f5e5e3b..56f31fb 100755
+--- a/configure.py
++++ b/configure.py
+@@ -23,7 +23,7 @@ from __future__ import print_function
+ 
+ from optparse import OptionParser
+ import os
+-import pipes
++import shlex
+ import string
+ import subprocess
+ import sys
+@@ -268,7 +268,7 @@ n.variable('configure_args', ' '.join(configure_args))
+ env_keys = set(['CXX', 'AR', 'CFLAGS', 'CXXFLAGS', 'LDFLAGS'])
+ configure_env = dict((k, os.environ[k]) for k in os.environ if k in env_keys)
+ if configure_env:
+-    config_str = ' '.join([k + '=' + pipes.quote(configure_env[k])
++    config_str = ' '.join([k + '=' + shlex.quote(configure_env[k])
+                            for k in configure_env])
+     n.variable('configure_env', config_str + '$ ')
+ n.newline()
+-- 
+2.46.1
+
