@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from custom import GStreamer
+from custom import GStreamer, running_on_cerbero_ci
 from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
@@ -149,7 +149,7 @@ class Recipe(recipe.Recipe):
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version
         toml_version = self.get_cargo_toml_version()
-        if toml_version != self.version:
+        if toml_version != self.version and running_on_cerbero_ci():
             msg = f'{self.name} version {self.version} doesn\'t match Cargo.toml version {toml_version}'
             if GStreamer.tagged_for_release:
                 raise FatalError(msg)
