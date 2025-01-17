@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import os
+import shutil
 
 from fnmatch import fnmatch
 
@@ -27,6 +28,12 @@ class Recipe(recipe.Recipe):
 
     # No rule check
     make_check = None
+
+    async def configure(self):
+        autotools_dir = os.path.join(self.config._relative_path('data'), 'autotools')
+        shutil.copy(os.path.join(autotools_dir, 'config.guess'), os.path.join(self.config_src_dir, 'configure.guess'))
+        shutil.copy(os.path.join(autotools_dir, 'config.sub'), os.path.join(self.config_src_dir, 'configure.sub'))
+        await super().configure()
 
     def post_install(self):
         if self.config.target_platform == Platform.LINUX:
