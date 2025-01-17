@@ -13,6 +13,8 @@ class Package(custom.GStreamer, package.Package):
     files = ['ladspa:libs',
              'libltc:libs',
              'soundtouch:libs',
+             'qrencode:libs',
+             'json-glib:libs',
              'webrtc-audio-processing:libs',
              'gst-plugins-base-1.0:plugins_effects',
              'gst-plugins-good-1.0:plugins_effects',

@@ -9,7 +9,7 @@ class Recipe(custom.GStreamer):
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['ext/sctp/usrsctp/LICENSE.md']}]
     else:
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['subprojects/gst-plugins-bad/ext/sctp/usrsctp/LICENSE.md']}]
-    tarball_checksum = '35ad70de3d7cbca3089f33bb77c45750daad2ae93d79827fdbb469fa8aba84eb'
+    tarball_checksum = '9126c2b7053a5f059db958f43c6a5230d2e843ff9adff8c8c2477ea2457e3315'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'gpl': 'enabled',
@@ -31,6 +31,7 @@ class Recipe(custom.GStreamer):
                      'ladspa': 'auto', # lrdf is optional
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
+                     'qroverlay': 'enabled',
                      'opus': 'enabled',
                      'rtmp': 'enabled',
                      'rtmp2': 'enabled',
@@ -87,7 +88,7 @@ class Recipe(custom.GStreamer):
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
-            'srt', 'zbar', 'libltc']
+            'srt', 'zbar', 'libltc', 'qrencode', 'json-glib']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -182,6 +183,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstivtc%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstlegacyrawparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstproxy%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstqroverlay%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstremovesilence%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsegmentclip%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsmooth%(mext)s',

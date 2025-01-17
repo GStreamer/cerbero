@@ -21,6 +21,8 @@ class Recipe(recipe.Recipe):
     files_bins = ['x264']
     files_devel = ['%(libdir)s/pkgconfig/x264.pc', 'include/x264.h',
                    'include/x264_config.h']
+    # Can fail randomly due to races with generated files
+    allow_parallel_build = False
 
     def prepare(self):
         # clang x86-32 fails at generating proper asm PIC code
