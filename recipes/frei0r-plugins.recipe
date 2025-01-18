@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'frei0r-%(version)s'
     tarball_checksum = 'aeeefe3a9b44761b2cf110017d2b1dfa2ceeb873da96d283ba5157380c5d0ce5'
     configure_args = '-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON'
+    deps = ['cairo']
 
     files_plugins = ['%(libdir)s/frei0r-1']
     files_devel = [
