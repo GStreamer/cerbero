@@ -21,8 +21,4 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pycairo/py3cairo.h', '%(libdir)s/pkgconfig/py3cairo.pc']
 
     def prepare(self):
-        python_exe = self.config.get_build_python_exe()
-        if python_exe:
-            self.meson_options['python'] = str(python_exe)
-        elif self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
-            self.meson_options['python'] = self.config.python_exe
+        self.meson_options['python'] = self.config.get_build_python_exe()

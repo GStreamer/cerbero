@@ -1167,7 +1167,7 @@ class Config(object):
         path = self._get_build_python_path('scripts', py_name)
         if path:
             return path.joinpath(py_name)
-        return None
+        return self.python_exe
 
     def get_python_prefix(self):
         if self.target_platform == Platform.WINDOWS:
