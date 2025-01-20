@@ -17,6 +17,7 @@ class Recipe(recipe.Recipe):
         -DWITH_ASF=ON \
         -DBUILD_SHARED_LIBS=1 \
         -DBUILD_STATIC_LIBS=1 \
+        -DBUILD_TESTING=0 \
         -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
     deps = ['zlib']
 
