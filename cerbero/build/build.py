@@ -201,6 +201,9 @@ class ModifyEnvBase:
     def setup_toolchain_env_ops(self):
         if self.config.qt5_pkgconfigdir:
             self.append_env('PKG_CONFIG_LIBDIR', self.config.qt5_pkgconfigdir, sep=os.pathsep)
+        if self.config.use_ccache and isinstance(self, CMake):
+            self.set_env('CMAKE_C_COMPILER_LAUNCHER', 'ccache')
+            self.set_env('CMAKE_CXX_COMPILER_LAUNCHER', 'ccache')
         if self.config.target_platform != Platform.WINDOWS:
             return
 
@@ -667,7 +670,8 @@ class CMake(MakefilesBase):
         cxx = self.env.get('CXX', 'g++')
         cflags = self.env.get('CFLAGS', '')
         cxxflags = self.env.get('CXXFLAGS', '')
-        # FIXME: CMake doesn't support passing "ccache $CC"
+        # CMake doesn't support passing "ccache $CC", but we can use
+        # the CMAKE_<lang>_COMPILER_LAUNCHER environment variables.
         if self.config.use_ccache:
             cc = cc.replace('ccache', '').strip()
             cxx = cxx.replace('ccache', '').strip()
