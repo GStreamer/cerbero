@@ -31,17 +31,25 @@ jobs:
     steps:
       - name: Fetch source code
         uses: actions/checkout@v3.1.0
+      - name: Configure Cerbero
+        run: |
+          ANDROID_ARCH=${{ matrix.target }}
+          ANDROID_ARCH=${ANDROID_ARCH//_/-}
+          tee -a $GITHUB_ENV <<< "ANDROID_ARCH=$ANDROID_ARCH"
+          tee -a $GITHUB_ENV <<< "ANDROID_CONFIG=config/cross-android-$ANDROID_ARCH.cbc"
+          tee local.cbc <<EOF
+          use_ccache = True
+          local_sources = "$HOME/cerbero-sources"
+          home_dir = "$HOME/cerbero-build-$ANDROID_ARCH"
+          EOF
       - name: Bootstrap Cerbero
         run: |
-          ANDROID_CONFIG=${{ matrix.target }}
-          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
-          echo 'use_ccache = True' > local.cbc
-          ./cerbero-uninstalled -c local.cbc -c ./config/${ANDROID_CONFIG} bootstrap -y
+          ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
+            bootstrap -y --system no --toolchains yes --build-tools yes
       - name: Package dependencies
         run: |
-          ANDROID_CONFIG=${{ matrix.target }}
-          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
-          ./cerbero-uninstalled -c local.cbc -c ./config/${ANDROID_CONFIG} package -f wpewebkit
+          ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
+            package -f wpewebkit
       - name: Store packages
         uses: actions/upload-artifact@v4
         with:
