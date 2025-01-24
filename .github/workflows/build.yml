@@ -23,7 +23,7 @@ on:
 
 jobs:
   build:
-    if: ${{ (github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    if: ${{ (github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request') }}
     runs-on: self-hosted
     strategy:
       matrix:
@@ -57,7 +57,7 @@ jobs:
           path: ./wpewebkit-android-${{ matrix.target }}*
           if-no-files-found: error
       - name: Upload packages to wpewebkit.org
-        if: ${{ inputs.upload_packages == 'yes' || inputs.upload_packages == 'dry-run' || (github.event.pull_request.merged == true && inputs.upload_packages == 'on-merge') }}
+        if: ${{ inputs.upload_packages == 'yes' || inputs.upload_packages == 'dry-run' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && inputs.upload_packages == 'on-merge') }}
         run: |
           python3 ./.github/workflows/upload.py "./wpewebkit-android-${{ matrix.target }}*" || \
           echo "**:warning: WARNING :warning:** Cannot upload ./wpewebkit-android-${{ matrix.target }}... files to wpewebkit.org" >> $GITHUB_STEP_SUMMARY
