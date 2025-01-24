@@ -30,7 +30,7 @@ jobs:
         target: [arm64, x86_64]
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4
       - name: Configure Cerbero
         run: |
           ANDROID_ARCH=${{ matrix.target }}
