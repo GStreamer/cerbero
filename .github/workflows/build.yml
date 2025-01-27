@@ -35,12 +35,13 @@ jobs:
         run: |
           ANDROID_CONFIG=${{ matrix.target }}
           ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
-          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} bootstrap -y
+          echo 'use_ccache = True' > local.cbc
+          ./cerbero-uninstalled -c local.cbc -c ./config/${ANDROID_CONFIG} bootstrap -y
       - name: Package dependencies
         run: |
           ANDROID_CONFIG=${{ matrix.target }}
           ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
-          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} package -f wpewebkit
+          ./cerbero-uninstalled -c local.cbc -c ./config/${ANDROID_CONFIG} package -f wpewebkit
       - name: Store packages
         uses: actions/upload-artifact@v4
         with:
