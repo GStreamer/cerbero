@@ -83,16 +83,23 @@ cerbero_before_script() {
         gstpluginsrs_commit="${CI_GST_PLUGINS_RS_REF_NAME}"
         gstpluginsrs_remote="${CI_SERVER_URL}/${CI_GST_PLUGINS_RS_PATH}"
     elif [[ ${CI_PROJECT_NAMESPACE} != gstreamer ]]; then
-        echo "Cerbero merge request, checking for matching branches in user forks of gstreamer and gst-plugins-rs"
-        if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
-            gst_commit="${CI_COMMIT_REF_NAME}"
-            gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
-            echo "Found gstreamer branch ${gst_commit} in ${gst_remote}"
-        fi
-        if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gst-plugins-rs" "${CI_COMMIT_REF_NAME}"; then
-            gstpluginsrs_commit="${CI_COMMIT_REF_NAME}"
-            gstpluginsrs_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gst-plugins-rs"
-            echo "Found gst-plugins-rs branch ${gstpluginsrs_commit} in ${gstpluginsrs_remote}"
+        echo "Cerbero merge request"
+        # Using "main" as the branch name in the Cerbero PR's fork is valid,
+        # and in that case we should NOT look for a branch by the same name in
+        # the user's gstreamer / gst-plugins-rs forks because those will always
+        # exist and the user doesn't intend for us to use that outdated branch
+        if [[ ${CI_COMMIT_REF_NAME} != main ]]; then
+            echo "Checking for matching branches in user forks of gstreamer and gst-plugins-rs"
+            if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
+                gst_commit="${CI_COMMIT_REF_NAME}"
+                gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
+                echo "Found gstreamer branch ${gst_commit} in ${gst_remote}"
+            fi
+            if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gst-plugins-rs" "${CI_COMMIT_REF_NAME}"; then
+                gstpluginsrs_commit="${CI_COMMIT_REF_NAME}"
+                gstpluginsrs_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gst-plugins-rs"
+                echo "Found gst-plugins-rs branch ${gstpluginsrs_commit} in ${gstpluginsrs_remote}"
+            fi
         fi
     fi
 
