@@ -860,6 +860,9 @@ class Config(object):
         # Make sure we also include the default non-versioned path on
         # Windows in addition to the posix path.
         self.py_win_prefix = sysconfig.get_path('purelib', 'nt', vars=pyvars)
+        # And the system prefix for Xcode Python
+        # (making it relative as it's appended to the Cerbero root folder)
+        self.py_macos_prefix = os.path.splitdrive(sysconfig.get_path('purelib'))[1].lstrip('/')
 
         self.py_prefixes = [self.py_prefix, self.py_plat_prefix]
         if self.platform == Platform.WINDOWS:

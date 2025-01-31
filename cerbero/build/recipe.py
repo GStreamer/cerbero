@@ -435,13 +435,16 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                         line = f'prefix={prefix_value}'
                     fo.write(line + '\n')
 
-    def relocate_debian_site_packages(self):
+    def relocate_site_packages(self):
         """
-        Relocate Python packages from the distro default of dist-packages
+        Relocate Python packages from the distro default
         to the standard site-packages
         """
         extensions = self.extensions.copy()
-        extensions['pydir'] = Path(self.config.prefix, 'lib', 'python3', 'dist-packages').as_posix()
+        if self.config.target_distro == Distro.DEBIAN:
+            extensions['pydir'] = Path(self.config.prefix, 'lib', 'python3', 'dist-packages').as_posix()
+        else:
+            extensions['pydir'] = Path(self.config.prefix, self.config.py_macos_prefix).as_posix()
         srcfiles = [Path(f % extensions) for f in self.files_python]
 
         destdir = Path(self.config.prefix) / self.config.get_python_prefix()
@@ -731,13 +734,15 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         Runs post installation steps
         """
         self.install_licenses()
+        needs_debian_relocation = self.config.target_distro == Distro.DEBIAN and self.config.extra_properties.get(
+            'site-packages'
+        )
         if (
             self.config.variants.python
-            and self.config.target_distro == Distro.DEBIAN
-            and self.config.extra_properties.get('site-packages')
+            and (needs_debian_relocation or self.config.target_platform == Platform.DARWIN)
             and hasattr(self, 'files_python')
         ):
-            self.relocate_debian_site_packages()
+            self.relocate_site_packages()
         # FIXME: remove once 1.26 is published
         if self.name.startswith('gst') and self.config.target_platform == Platform.ANDROID:
             self.generate_gst_la_files()
