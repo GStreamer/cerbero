@@ -75,7 +75,6 @@ class PackageTest(unittest.TestCase):
         devfiles = [
             'include/gstreamer.h',
             '%(libdir)s/libgstreamer-0.10.a',
-            '%(libdir)s/libgstreamer-0.10.la',
         ]
 
         self.windevfiles = to_config_path(
@@ -83,7 +82,6 @@ class PackageTest(unittest.TestCase):
             devfiles
             + [
                 '%(libdir)s/libgstreamer-win32.a',
-                '%(libdir)s/libgstreamer-win32.la',
                 '%(libdir)s/libgstreamer-win32.dll.a',
                 '%(libdir)s/gstreamer-win32.lib',
                 '%(libdir)s/gstreamer-win32.def',
@@ -98,7 +96,6 @@ class PackageTest(unittest.TestCase):
             + [
                 '%(libdir)s/libgstreamer-0.10.so',
                 '%(libdir)s/libgstreamer-x11.a',
-                '%(libdir)s/libgstreamer-x11.la',
                 '%(libdir)s/libgstreamer-x11.so',
             ],
         )

@@ -486,8 +486,16 @@ class FilesProvider(object):
             # For plugins, the .la file is generated using the .pc file, but we
             # don't add the .pc to files_devel. It has the same name, so we can
             # add it using the .la entry.
-            if f.startswith(self.extensions['libdir'] + '/gstreamer-1.0/') and f.endswith('.la'):
+            if (
+                self.platform == Platform.ANDROID
+                and f.startswith(self.extensions['libdir'] + '/gstreamer-1.0/')
+                and f.endswith('.la')
+            ):
                 fs[self._get_plugin_pc(f)] = None
+
+        # And suppress .la files
+        if self.platform != Platform.ANDROID:
+            fs = {k: v for k, v in fs.items() if not k.endswith('.la')}
 
         return fs
 
@@ -634,7 +642,7 @@ class FilesProvider(object):
                 continue
 
             patterns = []
-            if self.library_type != LibraryType.NONE:
+            if self.library_type != LibraryType.NONE and self.platform == Platform.ANDROID:
                 patterns.append('%(libdir)s/%(f)s.la')
 
             if self.library_type in (LibraryType.BOTH, LibraryType.STATIC):

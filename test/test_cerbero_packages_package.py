@@ -106,21 +106,18 @@ class PackageTest(unittest.TestCase):
 
     def testDevelFilesList(self):
         add_files(self.tmp)
-        devfiles = ['lib/x86_64-linux-gnu/libgstreamer-0.10.a', 'lib/x86_64-linux-gnu/libgstreamer-0.10.la']
+        devfiles = ['lib/x86_64-linux-gnu/libgstreamer-0.10.a']
         linuxdevfiles = devfiles + [
             'lib/x86_64-linux-gnu/libgstreamer-0.10.so',
             'lib/x86_64-linux-gnu/libgstreamer-x11.a',
-            'lib/x86_64-linux-gnu/libgstreamer-x11.la',
             'lib/x86_64-linux-gnu/libgstreamer-x11.so',
         ]
         windevfiles = devfiles + [
             'lib/x86_64-linux-gnu/libgstreamer-win32.a',
             'lib/x86_64-linux-gnu/libgstreamer-win32.dll.a',
-            'lib/x86_64-linux-gnu/libgstreamer-win32.la',
             'lib/x86_64-linux-gnu/gstreamer-win32.lib',
             'lib/x86_64-linux-gnu/libtest.a',
             'lib/x86_64-linux-gnu/libtest.dll.a',
-            'lib/x86_64-linux-gnu/libtest.la',
             'lib/x86_64-linux-gnu/test.lib',
             'lib/x86_64-linux-gnu/libgstreamer-0.10.dll.a',
             'lib/x86_64-linux-gnu/gstreamer-0.10.lib',
