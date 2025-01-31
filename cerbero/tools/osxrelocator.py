@@ -125,7 +125,9 @@ class OSXRelocator(object):
         rpaths = list(set(rpaths))
         # Remove absolute RPATHs, we don't want or need these
         existing_rpaths = list(set(self.list_rpaths(object_file)))
-        for p in filter(lambda p: p.startswith('/'), self.list_rpaths(object_file)):
+        for p in filter(
+            lambda p: p.startswith('/') and not p.startswith('/Applications/Xcode.app'), self.list_rpaths(object_file)
+        ):
             cmd = [INT_CMD, '-delete_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
         # Add relative RPATHs
