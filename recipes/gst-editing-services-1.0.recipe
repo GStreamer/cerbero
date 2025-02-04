@@ -25,7 +25,7 @@ class Recipe(custom.GStreamer):
     def prepare(self):
         if self.config.variants.python:
             self.files_python.append('%(pydir)s/gi/overrides/GES.py')
-            # There is no other way to insert the RPATH for Xcode's Python3.framework
+            # g-ir-scanner cannot receive `-Wl,-rpath,/path` directly
             if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
                 framework_path = self.config.get_python_framework()
                 if framework_path:

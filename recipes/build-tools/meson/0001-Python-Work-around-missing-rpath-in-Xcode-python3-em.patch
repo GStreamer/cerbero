@@ -1,0 +1,71 @@
+From 6309e68776eac0bc3d8f80332e9173466e78e56d Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Tue, 21 Jan 2025 23:14:23 +0000
+Subject: [PATCH 1/2] Python: Work around missing rpath in Xcode python3-embed
+
+This enables generating Python bindings and linking against
+`python3-embed` without resorting to later `install_name_tool` changes,
+as the pkg-config module provided by Xcode doesn't say that
+Python3.framework requires a rpath entry:
+
+    $ otool -L /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Python3
+    /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Python3:
+                @rpath/Python3.framework/Versions/3.9/Python3 (compatibility version 3.9.0, current version 3.9.0)
+                /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1933.0.0)
+                /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
+
+(cherry picked from commit c616f1ed50ffcd8f513d888c2dace105476a9168)
+---
+ mesonbuild/dependencies/python.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/mesonbuild/dependencies/python.py b/mesonbuild/dependencies/python.py
+index 326e605d8..dbf65f656 100644
+--- a/mesonbuild/dependencies/python.py
++++ b/mesonbuild/dependencies/python.py
+@@ -327,6 +327,12 @@ class PythonPkgConfigDependency(PkgConfigDependency, _PythonDependencyBase):
+         if not self.link_libpython and mesonlib.version_compare(self.version, '< 3.8'):
+             self.link_args = []
+ 
++        # But not Apple, because it's a framework
++        if self.env.machines.host.is_darwin() and 'PYTHONFRAMEWORKPREFIX' in self.variables:
++            framework_prefix = self.variables['PYTHONFRAMEWORKPREFIX']
++            # Add rpath, will be de-duplicated if necessary
++            if framework_prefix.startswith('/Applications/Xcode.app/'):
++                self.link_args += ['-rpath,' + framework_prefix]
+ 
+ class PythonFrameworkDependency(ExtraFrameworkDependency, _PythonDependencyBase):
+ 
+-- 
+2.47.0.windows.2
+
+
+From 1639cd99b4089775e3462c0d9d6c1d24829ac303 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Fri, 31 Jan 2025 00:06:48 +0000
+Subject: [PATCH 2/2] Python: fix typo in the inserted workaround for missing
+ RPATH
+
+See #14169
+
+(cherry picked from commit f75e45887c86c8c73a38f387bd93467dda36df3c)
+---
+ mesonbuild/dependencies/python.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mesonbuild/dependencies/python.py b/mesonbuild/dependencies/python.py
+index dbf65f656..e53a3ea0d 100644
+--- a/mesonbuild/dependencies/python.py
++++ b/mesonbuild/dependencies/python.py
+@@ -332,7 +332,7 @@ class PythonPkgConfigDependency(PkgConfigDependency, _PythonDependencyBase):
+             framework_prefix = self.variables['PYTHONFRAMEWORKPREFIX']
+             # Add rpath, will be de-duplicated if necessary
+             if framework_prefix.startswith('/Applications/Xcode.app/'):
+-                self.link_args += ['-rpath,' + framework_prefix]
++                self.link_args += ['-Wl,-rpath,' + framework_prefix]
+ 
+ class PythonFrameworkDependency(ExtraFrameworkDependency, _PythonDependencyBase):
+ 
+-- 
+2.47.0.windows.2
+
