@@ -508,10 +508,6 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('msdk', 'codecs', 'intelmsdk')
         self.enable_plugin('va', 'codecs', 'vaapi')
 
-        # MediaFoundation and DirectShow can only be built with MSVC
-        self.enable_plugin('mediafoundation', 'sys', 'visualstudio')
-        self.enable_plugin('directshow', 'sys', 'visualstudio')
-
         self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
         self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
 
@@ -545,6 +541,8 @@ class Recipe(custom.GStreamer):
                 # Download webview2 nuget package
                 self.deps.append('webview2')
                 self.enable_plugin('webview2', 'sys')
+                # DirectShow can only be built with MSVC
+                self.enable_plugin('directshow', 'sys')
             else:
                 # mingw does not ship DirectXMath headers
                 self.deps += ['directxmath']
@@ -576,6 +574,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('dwrite', 'sys')
             self.enable_plugin('qt6d3d11', 'qt6', 'qt6')
             self.enable_plugin('asio', 'sys')
+            self.enable_plugin('mediafoundation', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
