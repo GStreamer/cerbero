@@ -58,58 +58,91 @@ cerbero_package_and_check() {
     show_ccache_sum
 }
 
+# Using "main" as the branch name in the Cerbero PR's fork is valid,
+# and in that case we should NOT look for a branch by the same name in
+# the user's gstreamer / gst-plugins-rs forks because those will always
+# exist and the user doesn't intend for us to use that outdated branch
+#
+# We also don't want to search for a stable branch name, such as 1.24
+can_search_branch_name() {
+    [[ $1 != main ]] && [[ $1 != ${GST_UPSTREAM_BRANCH} ]]
+}
+
 cerbero_before_script() {
     # Default: unset, use recipe defaults
     local gst_commit
     local gst_remote
     local gstpluginsrs_commit
     local gstpluginsrs_remote
-    local job_type="post-merge"
+    local user_branch
+    local user_ns
+    local job_type="other"
     pwd
     ls -lha
 
+
     # Three special cases in which we should build against a user-specific
     # branch of gstreamer or gst-plugins-rs:
-    # 1. We have been triggered by gstreamer monorepo CI
+    # 1. We have been triggered by gstreamer monorepo MR CI
     #    - ci/gitlab/trigger_cerbero_pipeline.py
-    # 2. We have been triggered by gst-plugins-rs CI
+    #    - job_type=gstreamer-mr
+    # 2. We have been triggered by gst-plugins-rs MR CI
     #    - ci/cerbero/trigger_cerbero_pipeline.py
+    #    - job_type=gstpluginsrs-mr
     # 3. We are running as part of CI for a cerbero merge request
+    #    - job_type=cerbero-mr
+    #
+    # We should skip that logic when:
+    # * We are running in post-merge CI pipeline
+    # * We are running in a scheduled pipeline
+    # job_type=other
     if [[ -n ${CI_GSTREAMER_PATH} ]]; then
-        echo "gstreamer trigger CI, using MR user branch"
-        gst_commit="${CI_GSTREAMER_REF_NAME}"
-        gst_remote="${CI_SERVER_URL}/${CI_GSTREAMER_PATH}"
+        echo "gstreamer MR trigger CI"
         job_type="gstreamer-mr"
+        if can_search_branch_name ${CI_GSTREAMER_REF_NAME}; then
+            echo "Using gstreamer MR user branch"
+            gst_commit="${CI_GSTREAMER_REF_NAME}"
+            gst_remote="${CI_SERVER_URL}/${CI_GSTREAMER_PATH}"
+            user_branch="${CI_GSTREAMER_REF_NAME}"
+            user_ns=$(dirname ${CI_GSTREAMER_PATH})
+        fi
     elif [[ -n ${CI_GST_PLUGINS_RS_PATH} ]]; then
-        echo "gst-plugins-rs trigger CI, using MR user branch"
-        gstpluginsrs_commit="${CI_GST_PLUGINS_RS_REF_NAME}"
-        gstpluginsrs_remote="${CI_SERVER_URL}/${CI_GST_PLUGINS_RS_PATH}"
+        echo "gst-plugins-rs MR trigger CI"
         job_type="gstpluginsrs-mr"
+        if can_search_branch_name ${CI_GST_PLUGINS_RS_REF_NAME}; then
+            echo "Using gst-plugins-rs MR user branch"
+            gstpluginsrs_commit="${CI_GST_PLUGINS_RS_REF_NAME}"
+            gstpluginsrs_remote="${CI_SERVER_URL}/${CI_GST_PLUGINS_RS_PATH}"
+            user_branch="${CI_GST_PLUGINS_RS_REF_NAME}"
+            user_ns=$(dirname ${CI_GST_PLUGINS_RS_PATH})
+        fi
     elif [[ ${CI_PROJECT_NAMESPACE} != gstreamer ]]; then
         echo "Cerbero merge request"
         job_type="cerbero-mr"
+        if can_search_branch_name ${CI_COMMIT_REF_NAME}; then
+            echo "Using cerbero MR user branch"
+            user_branch=${CI_COMMIT_REF_NAME}
+            user_ns=${CI_PROJECT_NAMESPACE}
+        fi
     fi
 
-    # Using "main" as the branch name in the Cerbero PR's fork is valid,
-    # and in that case we should NOT look for a branch by the same name in
-    # the user's gstreamer / gst-plugins-rs forks because those will always
-    # exist and the user doesn't intend for us to use that outdated branch
-    if [[ ${CI_COMMIT_REF_NAME} != main ]]; then
+    # Search for the specific branch in the user's forks
+    if [[ -n $user_branch ]]; then
         # If we're in a gst-plugins-rs MR or a cerbero MR, look for a matching
         # monorepo branch in the user's fork
         if [[ $job_type = "gstpluginsrs-mr" ]] || [[ $job_type = "cerbero-mr" ]]; then
-            if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gstreamer" "${CI_COMMIT_REF_NAME}"; then
-                gst_commit="${CI_COMMIT_REF_NAME}"
-                gst_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer"
+            if user_branch_exists_in "${user_ns}/gstreamer" "${user_branch}"; then
+                gst_commit="${user_branch}"
+                gst_remote="${CI_SERVER_URL}/${user_ns}/gstreamer"
                 echo "Found gstreamer branch ${gst_commit} in ${gst_remote}"
             fi
         fi
         # If we're in a gstreamer monorepo MR or a cerbero MR, look for
         # a matching gst-plugins-rs branch in the user's fork
         if [[ $job_type = "gstreamer-mr" ]] || [[ $job_type = "cerbero-mr" ]]; then
-            if user_branch_exists_in "${CI_PROJECT_NAMESPACE}/gst-plugins-rs" "${CI_COMMIT_REF_NAME}"; then
-                gstpluginsrs_commit="${CI_COMMIT_REF_NAME}"
-                gstpluginsrs_remote="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gst-plugins-rs"
+            if user_branch_exists_in "${user_ns}/gst-plugins-rs" "${user_branch}"; then
+                gstpluginsrs_commit="${user_branch}"
+                gstpluginsrs_remote="${CI_SERVER_URL}/${user_ns}/gst-plugins-rs"
                 echo "Found gst-plugins-rs branch ${gstpluginsrs_commit} in ${gstpluginsrs_remote}"
             fi
         fi
