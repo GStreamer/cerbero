@@ -9,6 +9,6 @@ class Package(custom.GStreamer, package.Package):
     uuid = '4befe092-e10a-4500-9ac9-d9c6d18072a1'
     deps = ['gstreamer-1.0-core', 'gstreamer-1.0-devtools']
 
-    files = ['gst-editing-services-1.0:bins:libs:typelibs:plugins_ges:python']
+    files = ['gst-editing-services-1.0:bins:libs:typelibs:plugins_ges']
     files_devel = ['gst-editing-services-1.0:plugins_ges_devel',
                    'gst-editing-services-1.0:devel']
