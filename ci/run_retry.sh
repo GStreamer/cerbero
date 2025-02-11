@@ -10,6 +10,8 @@ ERRORS=(
     # https://github.com/rust-lang/rust/issues/127883#issuecomment-2290594194
     "Access is denied (os error 5)"
     "LINK : fatal error LNK1104: cannot open file"
+    # Mono on Wine is flaky
+    "ShellExecuteEx failed"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
