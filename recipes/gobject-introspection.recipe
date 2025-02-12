@@ -89,6 +89,7 @@ class Recipe(recipe.Recipe):
         f'{name}/0008-giscanner-Do-not-split-paths-with-spaces.patch',
         f'{name}/0009-dumper-Do-not-use-Bash-script-with-MSVC.patch',
         f'{name}/0010-giscanner-Consider-UCRT64-and-CLANG64-as-mingw32-com.patch',
+        f'{name}/0001-girepository-Load-typelibs-from-a-relocatable-prefix.patch',
     ]
 
     def prepare(self):
