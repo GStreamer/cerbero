@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from pathlib import Path
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libdca'
@@ -18,3 +19,9 @@ class Recipe(recipe.Recipe):
         f'{name}/0002-Add-shared-library-support.patch',
         f'{name}/0003-Allow-building-with-MSVC.patch',
     ]
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libdca', None, None, None, self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()
