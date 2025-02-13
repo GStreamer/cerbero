@@ -134,6 +134,9 @@ class Recipe(recipe.Recipe):
         for each in components:
             self.cargo_features.append(f'gst{each}/v1_22')
         self.cargo_features.append('gst-plugin-webrtc/v1_22')
+        self.cargo_features.append('gst-plugin-webrtc/aws')
+        self.cargo_features.append('gst-plugin-webrtc/livekit')
+
 
         # The LIBRARY_PATH setting affects all invocations of GCC underneath
         # Cargo, in particular those that link build scripts (that are meant to
