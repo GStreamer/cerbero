@@ -47,20 +47,16 @@ build_android_examples() {
     mkdir ${GSTREAMER_ROOT_ANDROID}
     time tar -C ${GSTREAMER_ROOT_ANDROID} -xf gstreamer-1.0-android-universal-*.tar.*
 
-    # gst-examples - player
-    chmod +x ${EXAMPLES_HOME}/gst-examples/playback/player/android/gradlew
-    ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-examples/playback/player/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-examples/playback/player/android assembleDebug
-    cp ${EXAMPLES_HOME}/gst-examples/playback/player/android/app/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
+    # install tools
+    ./ci/run_retry.sh ${ANDROID_HOME}/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "cmake;3.18.1" "build-tools;30.0.3" "ndk;25.2.9519653" "platforms;android-32"
 
-    # gst-examples - vulkan
-    chmod +x ${EXAMPLES_HOME}/gst-examples/vulkan/android/gradlew
-    ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-examples/vulkan/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-examples/vulkan/android assembleDebug
-    cp ${EXAMPLES_HOME}/gst-examples/vulkan/android/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
-
-    # gst-docs android tutorials
-    chmod +x ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/gradlew
-    ./ci/run_retry.sh ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/gradlew --no-daemon --project-dir ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android assembleDebug
-    cp ${EXAMPLES_HOME}/gst-docs/examples/tutorials/android/android-tutorial-*/build/outputs/apk/debug/*.apk ${OUTPUT_DIR}
+    # build the examples
+    ./ci/generate_rules.py
+    CI_BASE_DIR=$PWD
+    mv build.ninja ${OUTPUT_DIR}/
+    pushd ${OUTPUT_DIR}
+    ${CI_BASE_DIR}/ci/run_retry.sh ${ANDROID_HOME}/cmake/3.18.1/bin/ninja
+    popd
 }
 
 build_ios_examples() {
