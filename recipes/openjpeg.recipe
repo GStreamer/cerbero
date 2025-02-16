@@ -5,7 +5,7 @@ import shutil
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
-    version = '2.5.2'
+    version = '2.5.3'
     name = 'openjpeg'
     licenses = [{License.BSD: ['LICENSE']}]
     stype = SourceType.TARBALL
@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/uclouvain/openjpeg/archive/refs/tags/v%(version)s.tar.gz'
-    tarball_checksum = '90e3896fed910c376aaf79cdd98bdfdaf98c6472efd8e1debf0a854938cbda6a'
+    tarball_checksum = '368fe0468228e767433c9ebdea82ad9d801a3ad1e4234421f352c8b06e7aa707'
     configure_options = ' -DBUILD_CODEC:bool=off '
 
     files_libs = ['libopenjp2']
@@ -27,7 +27,7 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         deps = ['-lm']
-        # https://github.com/uclouvain/openjpeg/blob/v2.5.2/CMakeLists.txt#L56
+        # https://github.com/uclouvain/openjpeg/blob/v2.5.3/CMakeLists.txt#L57
         libtool_la = LibtoolLibrary('openjp2', 7, None, None, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()
