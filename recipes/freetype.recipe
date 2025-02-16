@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'freetype'
-    version = '2.12.1'
+    version = '2.13.3'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'savannah://.tar.xz'
-    tarball_checksum = '4766f20157cc4cf0cd292f80bf917f92d1c439b243ac3018debf6b9140c41a7f'
+    tarball_checksum = '0550350666d427c74daeb85d5ac7bb353acba5f76956395995311a9c6f063289'
     licenses = [{License.FreeType: ['LICENSE.TXT']}, License.GPLv2Plus]
     deps = ['zlib', 'bzip2', 'libpng']
     meson_options = {'harfbuzz': 'disabled'}
