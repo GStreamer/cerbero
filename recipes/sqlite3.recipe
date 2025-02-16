@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'sqlite3'
-    version = '3460100'
+    version = '3490000'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = 'https://sqlite.org/2024/sqlite-amalgamation-%(version)s.zip'
+    url = 'https://sqlite.org/2025/sqlite-amalgamation-%(version)s.zip'
     tarball_dirname = 'sqlite-amalgamation-%(version)s'
-    tarball_checksum = '77823cb110929c2bcb0f5d48e4833b5c59a8a6e40cdea3936b99e199dbbe5784'
+    tarball_checksum = 'cb6851ebad74913672014c20f642bbd7883552c4747780583a54ee1cd493f13b'
     licenses = [License.PublicDomain]
 
     patches = ['sqlite3/0001-Add-meson-build-file-from-wrapdb.patch']
