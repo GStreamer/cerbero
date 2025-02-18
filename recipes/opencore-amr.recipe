@@ -20,6 +20,13 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/opencore-amrwb', 'include/opencore-amrnb',
         '%(libdir)s/pkgconfig/opencore-amrwb.pc', '%(libdir)s/pkgconfig/opencore-amrnb.pc']
 
+    def prepare(self):
+        # Needs -Wno-register otherwise with recent clang/gcc because
+        # of C++17
+        if not self.using_msvc():
+            self.meson_options['c_std'] = 'gnu99'
+            self.meson_options['cpp_std'] = 'gnu++11'
+
     def post_install(self):
         # Meson does not generate la files
         LibtoolLibrary('libopencore-amrnb', None, None, None, self.config.libdir, self.config.target_platform).save()

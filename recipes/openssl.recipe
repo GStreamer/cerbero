@@ -60,6 +60,8 @@ class Recipe(recipe.Recipe):
                 return 'android-x86'
             if self.config.target_arch == Architecture.X86_64:
                 return 'android-x86_64'
+            if self.config.target_arch == Architecture.RISCV64:
+                return 'android-riscv64'
             raise InvalidRecipeError(self, "Unknown Android platform")
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:

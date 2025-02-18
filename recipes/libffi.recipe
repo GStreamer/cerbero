@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     commit = 'meson-3.2.9999.3'
     licenses = [{License.MIT: ['LICENSE']}]
     btype = BuildType.MESON
+    patches = [name + '/Add-risc-v-target-support.patch']
 
     files_libs = ['libffi']
     files_devel = ['include/ffi*.h', '%(libdir)s/pkgconfig/libffi.pc']

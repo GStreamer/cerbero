@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             # Needed for codepage conversion support in subtitles
             self.deps.append('libiconv')
-        if self.config.target_arch == Architecture.ARMv7:
+        if self.config.target_arch in (Architecture.ARMv7, Architecture.RISCV64):
             # Not supported
             self.meson_options['asm'] = 'disabled'
         if self.config.target_platform == Platform.ANDROID and \

@@ -33,6 +33,9 @@ class Recipe(recipe.Recipe):
             self.meson_options['rtcd'] = 'disabled'
             if self.using_msvc():
                 self.meson_options['intrinsics'] = 'disabled'
+        elif self.config.target_arch == Architecture.RISCV64:
+            self.meson_options['rtcd'] = 'disabled'
+            self.meson_options['intrinsics'] = 'disabled'
 
     def post_install(self):
         major, minor, micro = get_libtool_versions(self.version)

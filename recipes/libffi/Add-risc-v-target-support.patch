@@ -1,0 +1,41 @@
+From 3c9b511f06b2980de5a233f7ec253561cc2edb19 Mon Sep 17 00:00:00 2001
+From: Mao Han <han_mao@linux.alibaba.com>
+Date: Tue, 11 Feb 2025 16:51:15 +0800
+Subject: [PATCH] Add risc-v target support
+
+---
+ include/ffi_noarch.h.meson | 2 ++
+ meson.build                | 5 +++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/include/ffi_noarch.h.meson b/include/ffi_noarch.h.meson
+index 23bcd9c..c31447a 100644
+--- a/include/ffi_noarch.h.meson
++++ b/include/ffi_noarch.h.meson
+@@ -16,6 +16,8 @@
+ #include "@HEADER@-powerpc.h"
+ #elif defined(__powerpc64__)
+ #include "@HEADER@-powerpc64.h"
++#elif defined(__riscv)
++#include "@HEADER@-riscv64.h"
+ #else
+ #error "Unsupported Architecture"
+ #endif
+diff --git a/meson.build b/meson.build
+index b4fe821..82ca85f 100644
+--- a/meson.build
++++ b/meson.build
+@@ -245,6 +245,11 @@ elif host_cpu_family == 'arm'
+   TARGET = 'ARM'
+   c_sources = ['ffi.c']
+   asm_sources = ['sysv.S']
++elif host_cpu_family == 'riscv64'
++  arch_subdir = 'riscv'
++  TARGET = 'RISCV'
++  c_sources = ['ffi.c']
++  asm_sources = ['sysv.S']
+ endif
+
+ if TARGET == ''
+--
+2.34.1

@@ -33,6 +33,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             # Newer MinGW requires this define for sscanf in stdio.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.RISCV64:
+                self.deps.append('libiconv')
 
     def post_install(self):
         # Meson does not generate la files
