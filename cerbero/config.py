@@ -49,6 +49,7 @@ RUST_TRIPLE_MAPPING = {
     (Platform.ANDROID, Architecture.ARMv7): 'armv7-linux-androideabi',
     (Platform.ANDROID, Architecture.X86): 'i686-linux-android',
     (Platform.ANDROID, Architecture.X86_64): 'x86_64-linux-android',
+    (Platform.ANDROID, Architecture.RISCV64): 'riscv64-linux-android',
     (Platform.LINUX, Architecture.ARM): 'arm-unknown-linux-gnueabi',
     (Platform.LINUX, Architecture.ARMv7): 'armv7-unknown-linux-gnueabihf',
     (Platform.LINUX, Architecture.ARM64): 'aarch64-unknown-linux-gnu',

@@ -68,6 +68,7 @@ class Architecture:
     ARMv7 = 'armv7'
     ARMv7S = 'armv7s'
     ARM64 = 'arm64'
+    RISCV64 = 'riscv64'
 
     @staticmethod
     def is_arm(arch):
@@ -196,6 +197,12 @@ class DistroVersion:
     ANDROID_OREO_MR1 = 'android_27_oreo_mr1'  # API Level 27
     ANDROID_PIE = 'android_28_pie'  # API Level 28
     ANDROID_Q = 'android_29_q'  # API Level 29
+    ANDROID_R = 'android_30_r'  # API Level 30
+    ANDROID_S = 'android_31_s'  # API Level 31
+    ANDROID_Sv2 = 'android_32_sv2'  # API Level 32
+    ANDROID_TIRAMISU = 'android_33_tiramisu'  # API Level 33
+    ANDROID_UPSIDEDOWNCAKE = 'android_34_upsidedowncake'  # API Level 34
+    ANDROID_VANILLAICECREAM = 'android_35_vanillaicecream'  # API Level 35
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
@@ -228,6 +235,18 @@ class DistroVersion:
             return 28
         elif version == DistroVersion.ANDROID_Q:
             return 29
+        elif version == DistroVersion.ANDROID_R:
+            return 30
+        elif version == DistroVersion.ANDROID_S:
+            return 31
+        elif version == DistroVersion.ANDROID_Sv2:
+            return 32
+        elif version == DistroVersion.ANDROID_TIRAMISU:
+            return 33
+        elif version == DistroVersion.ANDROID_UPSIDEDOWNCAKE:
+            return 34
+        elif version == DistroVersion.ANDROID_VANILLAICECREAM:
+            return 35
         else:
             raise FatalError('DistroVersion not supported')
 

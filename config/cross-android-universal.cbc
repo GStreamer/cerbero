@@ -8,12 +8,16 @@ target_distro_version = DistroVersion.ANDROID_NOUGAT
 target_arch = Architecture.UNIVERSAL
 
 universal_archs = {
-            # Path is relative to this file
-            Architecture.ARMv7:  "cross-android-armv7.cbc",
-            Architecture.ARM64:  "cross-android-arm64.cbc",
-            Architecture.X86:    "cross-android-x86.cbc",
-            Architecture.X86_64: "cross-android-x86-64.cbc",
-        }
+    # Path is relative to this file
+    Architecture.ARMv7:  "cross-android-armv7.cbc",
+    Architecture.ARM64:  "cross-android-arm64.cbc",
+    Architecture.X86:    "cross-android-x86.cbc",
+    Architecture.X86_64: "cross-android-x86-64.cbc",
+    # Can't enable by default because riscv64-linux-android is tier-3 support
+    # in Rust, which means no downloadable toolchain. That leads to differing
+    # deps, which our resolver doesn't like.
+    #Architecture.RISCV64: "cross-android-riscv64.cbc",
+}
 
 #variants.override('nodebug')
 allow_parallel_build = True
