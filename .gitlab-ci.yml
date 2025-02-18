@@ -233,7 +233,7 @@ ubuntu image:
   # Ensure that the runners it will be executed on
   # will have plenty of space for the cache
   tags: ['gstreamer']
-  timeout: '3h'
+  timeout: '1 hour 30 minutes'
   variables:
     CCACHE_COMPILERCHECK: "content"
     CCACHE_COMPRESS: "true"
