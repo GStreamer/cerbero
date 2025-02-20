@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.13.5'
+    version = '2.13.6'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '74fc163217a3964257d3be39af943e08861263c4231f9ef5b496b6f6d4c7b2b6'
+    tarball_checksum = 'f453480307524968f7a04ec65e64f2a83a825973bcd260a2e7691be82ae70c96'
     licenses = [{License.MIT: ['Copyright']}]
 
     # Note: Many options were converted to feature options post-2.13.1
