@@ -11,7 +11,7 @@
 		<Property Id="ARPURLINFOABOUT" Value="$(var.WebSiteName)" />
 		
 		<!-- UI -->
-		<SetProperty Id="INSTALLDIR" Value="[GSTINSTALLDIR]" Before="CostInitialize" Sequence="both" Condition="GSTINSTALLDIR"/>
+		<SetProperty Id="INSTALLDIR" Value="[GSTINSTALLDIR]" Before="CostInitialize" Sequence="both" Condition="GSTINSTALLDIR AND NOT INSTALLDIR"/>
 		<ui:WixUI Id="$(var.UIType)" InstallDirectory="INSTALLDIR"/>
 	</Package>
 </Wix>
