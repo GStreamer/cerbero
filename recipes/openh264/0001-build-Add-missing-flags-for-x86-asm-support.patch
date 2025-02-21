@@ -1,0 +1,47 @@
+From 2a6ed6d6031c3ec546a53e83a0fb99f233c30421 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 13 Nov 2024 08:41:58 -0300
+Subject: [PATCH] build: Add missing flags for x86 asm support
+
+---
+ meson.build | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 5dbefa43..6f13ffd3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -59,6 +59,13 @@ cpp_lib = '-lstdc++'
+ libm_dep = cpp.find_library('m', required : false)
+ deps += [libm_dep]
+ 
++# https://github.com/cisco/openh264/issues/2534
++if cpu_family == 'x86'
++  c_args += ['-DX86_32_PICASM']
++  cpp_args += ['-DX86_32_PICASM']
++  asm_args += ['-DX86_32_PICASM']
++endif
++
+ if ['linux', 'android', 'ios', 'darwin'].contains(system)
+   asm_format32 = 'elf'
+   asm_format64 = 'elf64'
+@@ -195,11 +202,15 @@ subdir ('test')
+ 
+ libopenh264 = library('openh264',
+   link_whole: [libcommon, libprocessing, libencoder, libdecoder],
++  # failsafe for ASM relocations
++  link_args: cpp.get_supported_link_arguments(['-Wl,-Bsymbolic', '-Wl,-z,notext']),
+   install: true,
+   soversion: major_version,
+   version: meson.project_version(),
+   vs_module_defs: 'openh264.def',
+-  dependencies: deps)
++  dependencies: deps,
++  pic: true
++)
+ 
+ openh264_dep = declare_dependency(
+   link_with: libopenh264,
+-- 
+2.47.0.windows.2
+
