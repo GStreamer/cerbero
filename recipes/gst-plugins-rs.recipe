@@ -48,6 +48,7 @@ class Recipe(recipe.Recipe):
         'mp4',
         'ndi',
         'onvif',
+        'originalbuffer',
         'quinn',
         'rav1e',
         'regex',
