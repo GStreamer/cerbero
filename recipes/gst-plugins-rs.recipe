@@ -111,15 +111,52 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
 
         plugin_files = {
-            'core': ['fallbackswitch', 'livesync', 'rsinter', 'rstracers',
-                     'threadshare', 'togglerecord'],
-            'net': ['aws', 'hlssink3', 'ndi', 'quinn', 'rsonvif', 'raptorq',
-                    'reqwest', 'rsrtp', 'rsrtsp', 'webrtchttp', 'rswebrtc'],
-            'effects': ['rsaudiofx', 'rsvideofx'],
-            'codecs': ['cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
-                       'fmp4', 'mp4', 'gif', 'hsv', 'lewton', 'rav1e', 'json',
-                       'rspng', 'regex', 'textwrap', 'textahead'],
-            'playback': ['uriplaylistbin'],
+            'core': [
+                'fallbackswitch',
+                'livesync',
+                'rsinter',
+                'rstracers',
+                'threadshare',
+                'togglerecord',
+            ],
+            'net': [
+                'aws',
+                'hlssink3',
+                'ndi',
+                'quinn',
+                'rsonvif',
+                'raptorq',
+                'reqwest',
+                'rsrtp',
+                'rsrtsp',
+                'webrtchttp',
+                'rswebrtc',
+            ],
+            'effects': [
+                'rsaudiofx',
+                'rsvideofx',
+            ],
+            'codecs': [
+                'cdg',
+                'claxon',
+                'dav1d',
+                'rsclosedcaption',
+                'ffv1',
+                'fmp4',
+                'mp4',
+                'gif',
+                'hsv',
+                'lewton',
+                'rav1e',
+                'json',
+                'rspng',
+                'regex',
+                'textwrap',
+                'textahead',
+            ],
+            'playback': [
+                'uriplaylistbin',
+            ],
         }
         for category, names in plugin_files.items():
             for name in names:
