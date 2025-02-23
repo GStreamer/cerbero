@@ -1,4 +1,4 @@
-From 6081263d131848842b916a6d2506c1a612be7f81 Mon Sep 17 00:00:00 2001
+From a56318811ea70ef5bcbfaf2a7b09c2dcde98a359 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 13 Jul 2023 07:28:52 +0530
 Subject: [PATCH] meson: Always write utf-8 files with LF newlines
@@ -15,23 +15,25 @@ src/fcobjshash.gperf:2: warning: junk after %} is ignored
 src/fcobjshash.gperf:3: junk after declaration
 ninja: build stopped: subcommand failed.
 ```
+
+https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/283
 ---
  src/cutout.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/cutout.py b/src/cutout.py
-index 6b46529..9fe46ce 100644
+index f172a97..2b2ff5d 100755
 --- a/src/cutout.py
 +++ b/src/cutout.py
-@@ -29,7 +29,7 @@ if __name__== '__main__':
+@@ -11,7 +11,7 @@ if __name__== '__main__':
+     args = parser.parse_args()
  
-     stdout = ret.stdout.decode('utf8')
- 
--    with open(args[0].output, 'w') as out:
-+    with open(args[0].output, 'w', encoding='utf-8', newline='\n') as out:
+     input_lines = Path(args.input).read_text(encoding='utf-8').splitlines()
+-    with Path(args.output).open('w', encoding='utf-8') as out:
++    with Path(args.output).open('w', encoding='utf-8', newline='\n') as out:
          write = True
-         for l in stdout.split('\n'):
-             l = l.strip('\r')
+         for l in input_lines:
+             if l.startswith('CUT_OUT_BEGIN'):
 -- 
-2.41.0
+2.47.2
 
