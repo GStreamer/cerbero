@@ -44,6 +44,7 @@ class Recipe(recipe.Recipe):
         f"{name}/0002-meson-Consider-native-dependencies-also-on-Linux.patch",
         # https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1068
         f"{name}/0003-cargo_wrapper-py-Allow-setting-the-optimization-leve.patch",
+        f"{name}/0004-meson-Do-not-forcibly-version-the-shared-library-nam.patch",
     ]
 
     def append_config_toml(self, s):
