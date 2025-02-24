@@ -57,7 +57,7 @@ class Recipe(recipe.Recipe):
 
     deps = ['bzip2', 'zlib']
 
-    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter', 'libpostproc', 'libswscale']
+    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter', 'libswscale']
     files_devel = []
 
     def prepare(self):
@@ -88,9 +88,6 @@ class Recipe(recipe.Recipe):
                        deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z'],
                        static_only=self.library_type == LibraryType.STATIC).save()
         LibtoolLibrary('avutil', None, None, None,
-                       self.config.libdir, self.config.target_platform,
-                       static_only=self.library_type == LibraryType.STATIC).save()
-        LibtoolLibrary('postproc', None, None, None,
                        self.config.libdir, self.config.target_platform,
                        static_only=self.library_type == LibraryType.STATIC).save()
         LibtoolLibrary('swresample', None, None, None,
