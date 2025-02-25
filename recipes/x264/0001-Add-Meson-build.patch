@@ -1,19 +1,25 @@
-From 2222f3c062907bd6504c123e3542ce468629b751 Mon Sep 17 00:00:00 2001
+From 1280d5645fc96750a6577bf8c52c4621f519d530 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 27 Mar 2024 00:13:16 +0000
-Subject: [PATCH 1/1] Add Meson build
+Subject: [PATCH 1/4] Add Meson build
 
 Source: https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/tree/164.3108-meson
 
-When updating, do
+When updating, if you want to do it from scratch, do
 
 > git checkout stable
 > git switch -c cerbero
-> git diff stable meson | git apply
-
-and skip .gitignore, .gitlab-ci.yml and cross/cross-x86-linux-gcc.txt.
+> git diff stable meson | git apply --exclude=.gitignore --exclude=.gitlab-ci.yml --exclude='cross/*'
 
 Don't forget to check that the Python scripts for win-nasm must be +x.
+
+If you're regenerating the patches, do
+
+> git switch -c cerbero
+> git diff stable e126e71c | git apply --exclude=.gitignore --exclude=.gitlab-ci.yml --exclude='cross/*' # replace hash with the base of the PR'd patchset
+> git cherry-pick -x e126e71c..meson
+
+and extract the result via git format-patch --stdout.
 ---
  README.meson                            |   45 +
  meson.build                             | 1051 +++++++++++++++++++++++
@@ -1470,5 +1476,152 @@ index 00000000..e3b3d8f8
 +    # print everything
 +    print('0.{0}.{1} {2}'.format(api_version, ver, head_commit))
 -- 
-2.44.0
+2.39.5 (Apple Git-154)
+
+
+From 90e2efb76cfd9754777896d8ef09e83bac9385d9 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 26 Mar 2024 19:50:31 -0300
+Subject: [PATCH 2/4] meson: Remove leftovers from config.mak port
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/26>
+(cherry picked from commit 02db27ca1321ddf3a3e56f1933bd405b162ddf6b)
+---
+ meson.build | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 400846da..8e6b6a51 100644
+--- a/meson.build
++++ b/meson.build
+@@ -663,10 +663,6 @@ elif host_cpu == 'arm'
+   endforeach
+ endif
+ 
+-config_mak='''
+-CFLAGS=-Wno-maybe-uninitialized -Wshadow -Wall -std=gnu99 -fomit-frame-pointer -fno-tree-vectorize
+-'''
+-
+ cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h') and cc.has_function('memalign'))
+ cdata.set10('HAVE_STRING_H', cc.has_header('string.h')) # getopt.c
+ cdata.set10('ARCH_X86_64', host_cpu == 'x86_64')
+-- 
+2.39.5 (Apple Git-154)
+
+
+From 6843d7a3befd4514949f2a0996a3a871fd555f71 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 27 Mar 2024 08:06:30 -0300
+Subject: [PATCH 3/4] meson: Fix HAVE_AS_FUNC setting with Meson < 1.2.0
+
+Fixes #11
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/27>
+(cherry picked from commit 633f97a11272cfaf8303b0f4ff73cc2cd624d204)
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 8e6b6a51..4cd117cd 100644
+--- a/meson.build
++++ b/meson.build
+@@ -436,7 +436,7 @@ if ['arm', 'aarch64'].contains(host_cpu)
+       output: '@0@.S'.format('conftest'),
+       capture: true,
+     )
+-    cdata.set('HAVE_AS_FUNC', cc.compiles(
++    cdata.set10('HAVE_AS_FUNC', cc.compiles(
+       f,
+       args: ['-x', 'assembler'],
+       name: 'The assembler supports .func (Clang 3.5 does not)'
+-- 
+2.39.5 (Apple Git-154)
+
+
+From e480762d478ec9848050bfe89c6255fd6c51abeb Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 26 Jul 2024 06:04:16 +0530
+Subject: [PATCH 4/4] meson: Do not use native: true for find_program
+
+All these usages are incorrect. find_program(..., native: true) is
+*not* the same as executable(..., native: true), etc. It does not
+select host vs target for the output or for running the program. It
+simply selects whether to search for the program using the native-file
+or the cross-file.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/28>
+(cherry picked from commit ecc833a37945073a779b42b1a9f20c4454a62fbb)
+---
+ meson.build | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 4cd117cd..49b7c936 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('x264', 'c',
+-  version: run_command(find_program('version.py', native: true), '--package-version', check: true).stdout().strip(),
++  version: run_command(find_program('version.py'), '--package-version', check: true).stdout().strip(),
+   default_options: ['optimization=2', 'c_std=c11'],
+   meson_version: '>= 0.52'
+ )
+@@ -7,7 +7,7 @@ project('x264', 'c',
+ x264_ver = meson.project_version()
+ x264_rev = meson.project_version().split('.')[2]
+ x264_build = meson.project_version().split('.')[1]
+-x264_commit = run_command(find_program('version.py', native: true), '--commit-hash', check: true).stdout().strip()
++x264_commit = run_command(find_program('version.py'), '--commit-hash', check: true).stdout().strip()
+ 
+ message('build: ' + x264_build)
+ message('commit: ' + x264_commit)
+@@ -179,10 +179,10 @@ endif
+ 
+ if ['x86', 'x86_64'].contains(host_cpu)
+   if not get_option('asm').disabled()
+-    nasm = find_program('nasm', native: true, required: false)
++    nasm = find_program('nasm', required: false)
+     if not nasm.found()
+       subproject('win-nasm')
+-      nasm = find_program('nasm', native: true, required: get_option('asm').enabled())
++      nasm = find_program('nasm', required: get_option('asm'))
+     endif
+   endif
+   if host_cpu == 'x86'
+@@ -241,25 +241,25 @@ elif host_cpu == 'aarch64'
+       asflags += ['-arch', 'arm64']
+     endif
+   elif host_system == 'windows'
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
+-    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
++    armasm = find_program('armasm', required: get_option('asm'))
+     if compiler_style == 'MS'
+       asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
+     endif
+   endif
+ elif host_cpu == 'arm'
+   if host_system == 'windows' and compiler_style == 'MS'
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
+-    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
++    armasm = find_program('armasm', required: get_option('asm'))
+     asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
+   elif host_system == 'windows'
+     # FIXME once Meson exposes the compiler command line
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
+     gcc = disabler()
+     if cc.get_id().contains('clang')
+-      gcc = find_program('clang', native: true, required: get_option('asm'))
++      gcc = find_program('clang', required: get_option('asm'))
+     else
+-      gcc = find_program('gcc', native: true, required: get_option('asm'))
++      gcc = find_program('gcc', required: get_option('asm'))
+     endif
+     asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
+   endif
+-- 
+2.39.5 (Apple Git-154)
 
