@@ -135,7 +135,7 @@ class Recipe(recipe.Recipe):
                 self.config.target_platform).save()
         # It's not actually needed for restricting the export list, but for
         # removing the bitcode from the static library
-        libraries = [f for f in self.devel_files_list()
+        libraries = [f for f in self.devel_files_list(only_existing=False)
                                 if f.endswith('.a')]
         for f in libraries:
             if self.config.target_platform in (Platform.IOS, Platform.DARWIN):
