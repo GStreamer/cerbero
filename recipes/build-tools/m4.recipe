@@ -22,4 +22,4 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             shutil.move(os.path.join(self.config.prefix, 'bin', 'm4.exe'),
                         os.path.join(self.config.prefix, 'bin', 'm4.exe.backup'))
- 
+        super().post_install()
