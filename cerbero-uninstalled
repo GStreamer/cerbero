@@ -24,7 +24,8 @@
 ARGS=$@
 SCRIPTDIR="`dirname $0`"
 
-if [ "$OSTYPE" = "msys" ]; then
+# https://www.msys2.org/news/#2025-02-14-moving-msys2-closer-to-cygwin
+if [ "$OSTYPE" = "msys" ] || [ "$OSTYPE" = "cygwin" ]; then
    if [ -f "/mingw/bin/mingw-get.exe" ]; then
        MSYS_VERSION=1
    elif  [ -f "/usr/bin/pacman" ]; then
