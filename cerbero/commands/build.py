@@ -31,7 +31,7 @@ class Build(Command):
 
     def __init__(self, force=None, no_deps=None, deps_only=False):
         args = [
-            ArgparseArgument('recipe', nargs='*', help=_('name of the recipe to build')),
+            ArgparseArgument('recipe', nargs='+', help=_('name of the recipe to build')),
             ArgparseArgument(
                 '--missing-files',
                 action='store_true',
@@ -62,7 +62,7 @@ class Build(Command):
             ArgparseArgument(
                 '--steps',
                 '-s',
-                nargs='*',
+                nargs='+',
                 action='store',
                 type=str,
                 help=_('List of steps to execute, instead of all build steps.'),
