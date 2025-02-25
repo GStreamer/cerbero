@@ -17,7 +17,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libltdl']
     files_share = ['share/libtool']
     files_aclocal = [
-        'share/aclocal/argz.m4',
         'share/aclocal/libtool.m4',
         'share/aclocal/ltdl.m4',
         'share/aclocal/ltoptions.m4',
