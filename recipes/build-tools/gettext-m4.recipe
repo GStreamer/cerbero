@@ -29,7 +29,6 @@ class Recipe(recipe.Recipe):
         'share/aclocal/lib-link.m4',
         'share/aclocal/lib-prefix.m4',
         'share/aclocal/nls.m4',
-        'share/aclocal/pkg.m4',
         'share/aclocal/po.m4',
         'share/aclocal/printf-posix.m4',
         'share/aclocal/progtest.m4',
