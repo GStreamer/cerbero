@@ -4,10 +4,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '5.7.0'
+    version = '5.8.1'
     stype = SourceType.TARBALL
-    url = 'https://www.wavpack.com/wavpack-%(version)s.tar.bz2'
-    tarball_checksum = '8944b237968a1b3976a1eb47cd556916e041a2aa8917495db65f82c3fcc2a225'
+    url = 'https://www.wavpack.com/wavpack-%(version)s.tar.xz'
+    tarball_checksum = '7322775498602c8850afcfc1ae38f99df4cbcd51386e873d6b0f8047e55c0c26'
     licenses = [{License.BSD_like: ['COPYING']}]
     library_type = LibraryType.STATIC
     btype = BuildType.CMAKE
@@ -40,6 +40,8 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS_EXITCODE=0'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS=TRUE'
+        if self.config.target_arch == Architecture.X86 and self.config.variants.mingw:
+            self.append_env('ASMFLAGS', '-m32')
 
     def post_install(self):
         deps = ['-lm']
