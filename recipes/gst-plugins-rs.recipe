@@ -258,7 +258,7 @@ class Recipe(recipe.Recipe):
                     # Skip undefined symbols
                     # Write pathname of the object file
                     manifest = shell.check_output(
-                        [self.get_llvm_tool("llvm-nm"), "-gjPUA", source.absolute()],
+                        [self.get_llvm_tool("llvm-nm"), "-gjPUA", "--quiet", source.absolute()],
                         env=self.env,
                     )
 
