@@ -663,16 +663,17 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
             bat_tpl = MSYSBAT
         else:
             bat_tpl = MSYS2BAT
-        msysbatdir = tempfile.mkdtemp()
-        msysbat = os.path.join(msysbatdir, 'msys.bat')
-        bashrc = os.path.join(msysbatdir, 'bash.rc')
-        with open(msysbat, 'w+') as f:
-            f.write(bat_tpl % bashrc)
-        with open(bashrc, 'w+') as f:
-            f.write(shellrc)
-        subprocess.check_call(msysbat, shell=True, env=env)
-        # We should remove the temporary directory
-        # but there is a race with the bash process
+        with tempfile.TemporaryDirectory() as msysbatdir:
+            bashrc = os.path.join(msysbatdir, 'bash.rc')
+            with open(bashrc, 'w+') as f:
+                f.write(shellrc)
+            if os.environ['MSYSTEM'] == 'UCRT64':
+                subprocess.check_call([os.environ['SHELL'], '--rcfile', bashrc], shell=False, env=env)
+            else:
+                msysbat = os.path.join(msysbatdir, 'msys.bat')
+                with open(msysbat, 'w+') as f:
+                    f.write(bat_tpl % bashrc)
+                subprocess.check_call(msysbat, shell=True, env=env)
     else:
         with tempfile.TemporaryDirectory() as tmp:
             rc_tmp = open(os.path.join(tmp, rc_file), 'w+')
