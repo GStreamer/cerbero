@@ -51,5 +51,10 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/pkgconfig/pygobject-3.0.pc',
     ]
 
+    patches = [
+        # https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/415
+        'pygobject/0001-gi-Call-os.add_dll_directory-on-Windows-when-possibl.patch',
+    ]
+
     def prepare(self):
         self.meson_options['python'] = self.config.get_build_python_exe()
