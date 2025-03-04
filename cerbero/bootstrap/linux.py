@@ -115,7 +115,8 @@ class DebianBootstrapper(UnixBootstrapper):
         'python3-setuptools',
         'libssl-dev',
         'libclang-dev',
-        'libcurl-dev',
+        'libcurl4-openssl-dev',
+        'curl',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -241,9 +242,6 @@ class RedHatBootstrapper(UnixBootstrapper):
         else:
             add_pkg(['perl'])
 
-        # Use curl if wget isn't found, because wget2 is not production-ready yet
-        add_pkg(['wget', 'curl'])
-
         # Try to get a better matching python3 library version
         ver = sys.version_info[1]
         add_pkg([f'python3{v}-devel' for v in [ver, f'.{ver}', '']])
@@ -287,7 +285,8 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         'Mesa-devel',
         'Mesa-libGLESv3-devel',
         'gperf',
-        'wget',
+        'curl',
+        'libcurl4-openssl-dev',
         'git',
         'ccache',
         'openssl-devel',

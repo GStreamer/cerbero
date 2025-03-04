@@ -46,3 +46,7 @@ class Package(custom.GStreamer, package.Package):
                 'gst-plugins-good-1.0:plugins_net', 'gst-plugins-ugly-1.0:plugins_net',
                 'gst-plugins-bad-1.0:plugins_net', 'gst-rtsp-server-1.0:libs:plugins_net',
             ]
+
+        if self.config.target_platform not in (Platform.IOS, Platform.ANDROID):
+            if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
+                self.files.append('curl:libs')
