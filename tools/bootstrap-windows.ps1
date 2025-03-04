@@ -10,7 +10,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 $cmake_req = '3.10.2'
 $git_req = '2.0' # placeholder
-$python_req = '3.7'
+$python_req = '3.10'
 $wix_req = '3.0' # placeholder
 $vs2019_url = 'https://aka.ms/vs/16/release/vs_buildtools.exe'
 $vs2022_url = 'https://aka.ms/vs/17/release/vs_buildtools.exe'

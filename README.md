@@ -21,7 +21,7 @@ minimum base to bootstrap on top of.
 
 ### Linux Setup
 
-On Linux, you will only need a distribution with python >= 3.7. Cerbero will
+On Linux, you will only need a distribution with python >= 3.10. Cerbero will
 use your package manager to install all other required packages during
 [bootstrap](#Bootstrap).
 
@@ -30,7 +30,7 @@ use your package manager to install all other required packages during
 On macOS you will need to have install the following software:
 
 * XCode
-* Python 3.7+ https://www.python.org/downloads/
+* Python 3.10+ https://www.python.org/downloads/
 
 Cerbero will build all other required packages during [bootstrap](#Bootstrap).
 
