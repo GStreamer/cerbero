@@ -242,6 +242,7 @@ class License:
     MPLv2 = LicenseDescription('MPL-2', 'Mozilla Public License Version 2.0')
     MIT = LicenseDescription('MIT', 'MIT License')
     OPENSSL = LicenseDescription('OpenSSL', 'OpenSSL License')
+    CURL = LicenseDescription('cURL', 'cURL License')
     Proprietary = LicenseDescription('Proprietary', 'Proprietary License')
     PublicDomain = LicenseDescription('PublicDomain', 'Public Domain')
     Misc = LicenseDescription('Misc', 'Miscellaneous license information')
