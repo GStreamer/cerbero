@@ -175,7 +175,7 @@ new file mode 100755
 index 0000000..2f457d0
 --- /dev/null
 +++ b/meson/makedef.py
-@@ -0,0 +1,188 @@
+@@ -0,0 +1,193 @@
 +#!/usr/bin/env python3
 +# Copyright (c) 2022 L. E. Segovia <amy@amyspark.me>
 +#
@@ -318,7 +318,9 @@ index 0000000..2f457d0
 +                universal_newlines=True,
 +                check=False,
 +            )
-+        if s.returncode != 0:
++        if s.returncode == 0:
++            dump = s.stdout.splitlines()
++        else:
 +            # -j was added only in Binutils 2.37
 +            s = subprocess.run(
 +                [args.nm, '--defined-only', '-g', libname_path_posix],
@@ -327,7 +329,10 @@ index 0000000..2f457d0
 +                universal_newlines=True,
 +                check=True,
 +            )
-+        dump = s.stdout.splitlines()
++            dump = s.stdout.splitlines()
++            # keep only symbol (as -j does)
++            dump =  [x.split(" ")[-1] for x in dump if ":" not in x]
++
 +        # Exclude lines with ':' (object name)
 +        dump = [x for x in dump if ":" not in x]
 +        # Exclude blank lines
@@ -597,6 +602,6 @@ index a8289e0..7a67f2d 100644
  
  #include <zbar.h>
  #include "error.h"
--- 
+--
 2.47.0.windows.2
 
