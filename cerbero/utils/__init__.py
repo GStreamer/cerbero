@@ -119,9 +119,25 @@ def determine_total_ram() -> int:
         ram_size_query = subprocess.run([shutil.which('sysctl'), '-n', 'hw.memsize'], stdout=subprocess.PIPE, text=True)
         if ram_size_query.returncode == 0:
             return int(ram_size_query.stdout.strip())
-    elif platform == Platform.WINDOWS:
+    elif platform == Platform.WINDOWS and shutil.which('wmic'):
         ram_size_query = subprocess.run(
             [shutil.which('wmic'), 'computersystem', 'get', 'totalphysicalmemory'], stdout=subprocess.PIPE, text=True
+        )
+        if ram_size_query.returncode == 0:
+            return int(ram_size_query.stdout.strip().splitlines()[-1])
+    elif platform == Platform.WINDOWS and shutil.which('powershell'):
+        ram_size_query = subprocess.run(
+            [
+                shutil.which('powershell'),
+                '(Get-CimInstance',
+                '-ClassName',
+                'Win32_ComputerSystem',
+                '-Property',
+                'TotalPhysicalMemory',
+                ').TotalPhysicalMemory',
+            ],
+            stdout=subprocess.PIPE,
+            text=True,
         )
         if ram_size_query.returncode == 0:
             return int(ram_size_query.stdout.strip().splitlines()[-1])
