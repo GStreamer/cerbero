@@ -1176,7 +1176,7 @@ class Config(object):
         if self.target_platform == Platform.WINDOWS:
             return Path(self.py_win_prefix)
         else:
-            return Path(self.py_prefix)
+            return Path(self.py_plat_prefix)
 
     def _get_build_python_path(self, path_name, testfile):
         py_version = self.get_python_version()
