@@ -1,0 +1,101 @@
+name: Install GStreamer with Cerbero on Windows
+description: Installs the GStreamer MSIs either from the URLs or local paths
+inputs:
+  runtime-installer-url:
+    description: 'URL of the GStreamer runtime installer'
+    required: false
+  development-installer-url:
+    description: 'URL of the GStreamer development installer'
+    required: false
+  runtime-installer-path:
+    description: 'Local path of the GStreamer runtime installer'
+    required: false
+  development-installer-path:
+    description: 'Local path of the GStreamer development installer'
+    required: false
+outputs:
+  install-dir:
+    description: 'GStreamer install directory'
+    value: ${{ steps.install-gstreamer.outputs.gstreamer-install-dir }}
+  plugin-dir:
+    description: 'GStreamer plugin directory'
+    value: ${{ steps.install-gstreamer.outputs.gstreamer-plugin-dir }}
+  bin-dir:
+    description: 'GStreamer bin directory'
+    value: ${{ steps.install-gstreamer.outputs.gstreamer-bin-dir }}
+
+runs:
+  using: "composite"
+  steps:
+    # Mutual exclusive -- either set url or path for each.  Error if both.
+    - if: ${{ inputs.runtime-installer-url && inputs.runtime-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        echo "Error: Cannot specify both runtime-installer-url and runtime-installer-path"
+        exit 1
+    - if: ${{ inputs.development-installer-url && inputs.development-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        echo "Error: Cannot specify both development-installer-url and development-installer-path"
+        exit 2
+
+    # If the URL is provided, download the MSI, set path.
+    - if: ${{ !inputs.runtime-installer-path }}
+      id: download-runtime
+      name: Download GStreamer Runtime MSI
+      shell: powershell
+      run: |
+        $msi_path = "$(( $pwd ))\gstreamer-runtime.msi"
+        Invoke-WebRequest -Uri "${{ inputs.runtime-installer-url }}" -OutFile "$msi_path"
+        echo "msi-path=$msi_path" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+    - if: ${{ !inputs.development-installer-path }}
+      id: download-development
+      name: Download GStreamer Development MSI
+      shell: powershell
+      run: |
+        $msi_path = "$(( $pwd ))\gstreamer-development.msi"
+        Invoke-WebRequest -Uri "${{ inputs.development-installer-url }}" -OutFile "$msi_path"
+        echo "msi-path=$msi_path" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    # Set the local paths favoring if the download happened
+    - id: msi-path
+      shell: powershell
+      run: |
+        # If the download happened, use the downloaded path, else use the input path
+        $runtime = "${{ steps.download-development.outputs.msi-path }}"
+        if ($runtime -eq "") {
+          $runtime = "${{ inputs.runtime-installer-path }}"
+        }
+        $development = "${{ steps.download-development.outputs.msi-path }}"
+        if ($development -eq "") {
+          $development = "${{ inputs.development-installer-path }}"
+        }
+        echo "runtime=$runtime" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+        echo "development=$development" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    - name: Install GStreamer
+      id: install-gstreamer
+      shell: powershell
+      env:
+        RUNTIME_MSI: ${{ steps.msi-path.outputs.runtime }}
+        DEVELOPMENT_MSI: ${{ steps.msi-path.outputs.development }}
+      run: |
+        $GSTREAMER_INSTALL_DIR="${{ runner.temp }}\gstreamer"
+        $GSTREAMER_ROOT="$GSTREAMER_INSTALL_DIR\1.0\msvc_x86_64"
+        $GSTREAMER_BIN="$GSTREAMER_ROOT\bin"
+        echo "$GSTREAMER_BIN" | Out-File -FilePath $Env:GITHUB_PATH -Append -Encoding utf8
+        echo "PKG_CONFIG_PATH=$GSTREAMER_ROOT\lib\pkgconfig;$env:PKG_CONFIG_PATH" | Out-File -FilePath $Env:GITHUB_ENV -Append -Encoding utf8
+
+        echo "gstreamer-bin-dir=$GSTREAMER_BIN" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+        echo "gstreamer-install-dir=$GSTREAMER_INSTALL_DIR" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+        echo "gstreamer-plugin-dir=$GSTREAMER_ROOT" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+
+        if ($RUNTIME_MSI) {
+          echo "Installing GStreamer Runtime"
+          Start-Process msiexec -ArgumentList '/i `"$RUNTIME_MSI`" ADDLOCAL=ALL INSTALLDIR=`"$GSTREAMER_INSTALL_DIR`" /qn' -NoNewWindow -PassThru -Wait
+
+          if ($DEVELOPMENT_MSI) {
+            echo "Installing GStreamer Development"
+            Start-Process msiexec -ArgumentList '/i `"$DEVELOPMENT_MSI`" ADDLOCAL=ALL INSTALLDIR=`"$GSTREAMER_INSTALL_DIR`" /qn' -NoNewWindow -PassThru -Wait
+          }
+        }

@@ -9,6 +9,10 @@ inputs:
     description: 'Ref to use for Cerbero'
     required: false
     default: ${{ github.action_ref || github.ref }}
+  cerbero-package-origin:
+    description: 'Package Origin to set in GStreamer Packages'
+    required: false
+    default: ''
   config:
     description: 'Name of the configuration file to use'
     required: false
@@ -48,13 +52,19 @@ inputs:
     description: 'Whether to disable restoring from cache'
     required: false
     default: 'false'
-outputs:
   gstreamer-version:
     description: 'GStreamer version'
-    value: ${{ steps.version-info.outputs.gstreamer-version }}
-  cerbero-short-sha:
-    description: 'Short SHA of the Cerbero checkout'
-    value: ${{ steps.version-info.outputs.cerbero-short-sha }}
+    required: true
+    default: ''
+  runtime-msi-filename:
+    description: 'Filename to use for the GStreamer Runtime MSI'
+    required: false
+    default: 'gstreamer-1.0-msvc-x86_64.msi'
+  dev-msi-filename:
+    description: 'Filename to use for the GStreamer Development MSI'
+    required: false
+    default: 'gstreamer-1.0-devel-msvc-x86_64.msi'
+outputs:
   cerbero-path:
     description: 'Path to the Cerbero checkout'
     value: ${{ inputs.cleanup != 'true' && 'cerbero' }}
@@ -73,106 +83,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-
-    - id: setup-msys2
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: UCRT64
-        path-type: inherit
-        release: false
-        install: >-
-          mingw-w64-ucrt-x86_64-jq
-          m4
-          mingw-w64-ucrt-x86_64-gcc-libs
-          mingw-w64-ucrt-x86_64-libwinpthread-git
-          bison
-          mingw-w64-ucrt-x86_64-diffutils
-          flex
-          mingw-w64-ucrt-x86_64-gperf
-          mingw-w64-ucrt-x86_64-make
-          mingw-w64-ucrt-x86_64-ninja
-          mingw-w64-ucrt-x86_64-perl
-
-    - shell: msys2 -eo pipefail {0}
-      run: git config --global core.autocrlf false
-
-    - id: get-cerbero
-      name: Get Cerbero
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ inputs.cerbero-repo }}
-        path: cerbero
-        ref: ${{ inputs.cerbero-ref }}
-
-    - id: version-info
-      shell: msys2 -eo pipefail {0}
-      working-directory: cerbero
-      env:
-        CI_PROJECT_NAME: cerbero
-      run: |
-        # Get GStreamer/cerbero version info and installer filenames
-        gstreamer_version=$(./cerbero-uninstalled packageinfo gstreamer-1.0 | awk '/Version:/ {print $2}')
-        echo "gstreamer-version=${gstreamer_version}" | tee -a $GITHUB_OUTPUT
-
-        cerbero_short_sha=$(git -C cerbero rev-parse --short HEAD)
-        echo "cerbero-short-sha=${cerbero_short_sha}" | tee -a $GITHUB_OUTPUT
-
-        echo "runtime-msi-filename=gstreamer-1.0-msvc-x86_64-${gstreamer_version}-${cerbero_short_sha}.msi" | tee -a $GITHUB_OUTPUT
-        echo "dev-msi-filename=gstreamer-1.0-devel-msvc-x86_64-${gstreamer_version}-${cerbero_short_sha}.msi" | tee -a $GITHUB_OUTPUT
-
-    - id: check-installer-exists
-      if: ${{ inputs.force != 'true' && inputs.s3-download-paths }}
-      shell: msys2 -eo pipefail {0}
-      continue-on-error: true
-      env:
-        RUNTIME_MSI_FILENAME: ${{ steps.version-info.outputs.runtime-msi-filename }}
-        DEV_MSI_FILENAME: ${{ steps.version-info.outputs.dev-msi-filename }}
-        S3_DOWNLOAD_PATHS: ${{ inputs.s3-download-paths }}
-      run: |
-        # Check installer already exists in S3
-
-        runtime_msi="null"
-        dev_msi="null"
-
-        for download_path in ${S3_DOWNLOAD_PATHS}; do
-          echo "Checking for installers under ${download_path}"
-
-          bucket=$(echo ${download_path} | cut -d/ -f3)
-          prefix=$(echo ${download_path} | cut -d/ -f4-)
-
-          if [ "$runtime_msi" = "null" ]; then
-            echo "Checking for runtime installer under s3://${bucket}/${prefix}/"
-            runtime_msi=$(aws s3api list-objects-v2 --bucket "${bucket}" --prefix "${prefix}/" --query 'Contents[].Key' | jq -r 'if type!="array" then [] else . end | sort_by(length) | map(select(endswith("'"${RUNTIME_MSI_FILENAME}"'"))) | .[0]')
-            if [ "$runtime_msi" != "null" ]; then
-              echo "runtime-msi=s3://${bucket}/${runtime_msi}" | tee -a $GITHUB_OUTPUT
-            fi
-          fi
-
-          if [ "$dev_msi" = "null" ]; then
-            echo "Checking for development installer under s3://${bucket}/${prefix}/"
-            dev_msi=$(aws s3api list-objects-v2 --bucket "${bucket}" --prefix "${prefix}/" --query 'Contents[].Key' | jq -r 'if type!="array" then [] else . end | sort_by(length) | map(select(endswith("'"${DEV_MSI_FILENAME}"'"))) | .[0]')
-            if [ "$dev_msi" != "null" ]; then
-              echo "dev-msi=s3://${bucket}/${dev_msi}" | tee -a $GITHUB_OUTPUT
-            fi
-          fi
-
-          if [ "$runtime_msi" != "null" ] && [ "$dev_msi" != "null" ]; then
-            break
-          fi
-        done
-
-    - name: Set variables
-      id: variables
-      shell: msys2 -eo pipefail {0}
-      run: |
-        # Set variables for later steps
-        if [ -z "${{ steps.check-installer-exists.outputs.runtime-msi }}" ] ||
-          [ -z "${{ steps.check-installer-exists.outputs.dev-msi }}" ];
-        then
-          echo "do-build=true" >> $GITHUB_OUTPUT
-        fi
-
-    - if: ${{ steps.variables.outputs.do-build && inputs.bootstrap-system == 'true' }}
+    - if: ${{ inputs.bootstrap-system == 'true' }}
       shell: msys2 -eo pipefail {0}
       working-directory: cerbero
       run: |
@@ -180,7 +91,6 @@ runs:
         powershell.exe ./tools/bootstrap-windows.ps1
 
     - id: cerbero-config
-      if: ${{ steps.variables.outputs.do-build }}
       working-directory: cerbero
       shell: msys2 -eo pipefail {0}
       env:
@@ -190,7 +100,7 @@ runs:
         CERBERO: "./cerbero-uninstalled -c config/${{ inputs.config }} -c localconf.cbc"
         CERBERO_ARGS: ${{ inputs.cerbero-args }}
         CERBERO_PACKAGE_ARGS: ${{ inputs.cerbero-package-args }}
-        CERBERO_PACKAGE_ORIGIN: ${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.version-info.outputs.cerbero-short-sha }}
+        CERBERO_PACKAGE_ORIGIN: ${{ inputs.cerbero-package-origin }}
         GST_PLUGINS_RS_SOURCE: ${{ inputs.gst-plugins-rs-repo }}
         GST_PLUGINS_RS_REF: ${{ inputs.gst-plugins-rs-ref }}
       run: |
@@ -225,27 +135,27 @@ runs:
         echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
 
     - id: restore-cerbero-sources-cache
-      if: ${{ steps.variables.outputs.do-build && inputs.no-cache != 'true' }}
+      if: ${{ inputs.no-cache != 'true' }}
       uses: actions/cache/restore@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
         key: |
-          cerbero-sources-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}
+          cerbero-sources-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}
         restore-keys: |
-          cerbero-sources-${{ steps.version-info.outputs.gstreamer-version }}-
+          cerbero-sources-${{ inputs.gstreamer-version }}-
           cerbero-sources-
 
     - id: restore-cerbero-deps-cache
-      if: ${{ steps.variables.outputs.do-build && inputs.no-cache != 'true' }}
+      if: ${{ inputs.no-cache != 'true' }}
       uses: actions/cache/restore@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
         key: |
-          ${{ runner.os }}-cerbero-deps-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-${{ runner.name }}
+          ${{ runner.os }}-cerbero-deps-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-${{ runner.name }}
         restore-keys: |
-          ${{ runner.os }}-cerbero-deps-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-
+          ${{ runner.os }}-cerbero-deps-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-
 
-    - if: ${{ steps.variables.outputs.do-build && steps.restore-cerbero-deps-cache.outputs.cache-matched-key }}
+    - if: ${{ steps.restore-cerbero-deps-cache.outputs.cache-matched-key }}
       shell: msys2 -eo pipefail {0}
       run: |
         # Restore Cerbero dependencies
@@ -262,7 +172,6 @@ runs:
         echo "::endgroup::"
 
     - id: bootstrap-cerbero
-      if: ${{ steps.variables.outputs.do-build }}
       working-directory: cerbero
       shell: msys2 -eo pipefail {0}
       env:
@@ -310,7 +219,6 @@ runs:
         key: ${{ steps.restore-cerbero-deps-cache.outputs.cache-primary-key }}
 
     - id: build-packages
-      if: ${{ steps.variables.outputs.do-build }}
       working-directory: cerbero
       shell: msys2 -eo pipefail {0}
       env:
@@ -333,12 +241,12 @@ runs:
       run: |
         echo "::group::Upload packages"
 
-        upload_path="${{ inputs.s3-upload-path }}/${{ steps.version-info.outputs.runtime-msi-filename }}"
+        upload_path="${{ inputs.s3-upload-path }}/${{ inputs.runtime-msi-filename }}"
         aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.runtime-msi }}')" "${upload_path}"
         echo "::notice title=GStreamer Runtime Installer Uploaded to S3::Location: ${upload_path}"
         echo "runtime-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
 
-        upload_path="${{ inputs.s3-upload-path }}/${{ steps.version-info.outputs.dev-msi-filename }}"
+        upload_path="${{ inputs.s3-upload-path }}/${{ inputs.dev-msi-filename }}"
         aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.dev-msi }}')" "${upload_path}"
         echo "::notice title=GStreamer Development Installer Uploaded to S3::Location: ${upload_path}"
         echo "dev-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
@@ -367,8 +275,3 @@ runs:
       with:
         name: cerbero-logs
         path: ${{ steps.cerbero-config.outputs.cerbero-home }}\logs
-
-    - name: Cleanup Cerbero
-      if: ${{ always() && inputs.cleanup == 'true' && steps.get-cerbero.outcome != 'skipped' }}
-      shell: msys2 -eo pipefail {0}
-      run: rm -rf "cerbero"
