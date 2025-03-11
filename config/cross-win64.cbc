@@ -4,7 +4,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 target_platform=Platform.WINDOWS
 target_arch=Architecture.X86_64
 target_distro=Distro.WINDOWS
-target_distro_version=DistroVersion.WINDOWS_7
+target_distro_version=DistroVersion.WINDOWS_10
 build = 'x86_64-linux-gnu'
 
 variants.override(['mingw'])
