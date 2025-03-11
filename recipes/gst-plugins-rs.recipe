@@ -18,7 +18,6 @@ class Recipe(recipe.Recipe):
     if GStreamer.tagged_for_release:
         commit = f'gstreamer-{GStreamer.version}'
     else:
-        # For 1.26 we'll track the main branch until it branches for 0.14
         commit = 'origin/main'
     # Each plugin uses one or more of these licenses.
     licenses = [{
