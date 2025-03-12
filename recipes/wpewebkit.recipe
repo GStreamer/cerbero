@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.46.3'
+    version = '2.46.6'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '56709f8cf113650d8cc30dc22f2b69cb6f74e651731f12e1db52ecce12ab86f2'
+    tarball_checksum = '2f8f8447b9c7b0578f7d751ca27c682a2c180b5abb91542af52a96e8a24a6262'
     deps = [
         'icu',
         'cairo',
@@ -196,7 +196,6 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0003-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
                 'wpewebkit/0004-Use-ASharedMemory-instead-of-shm.patch',
                 'wpewebkit/0005-Compile-WebDriver-as-a-library.patch',
-                'wpewebkit/0006-Remove-Float16Array-from-WebInspectorUI.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

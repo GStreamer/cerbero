@@ -1,8 +1,7 @@
-From 290b3245adbe0ac63d8e4377c84d9c8bc437f627 Mon Sep 17 00:00:00 2001
+From f6482eaf7b05cc3067286bc75e1f8535ebcfe92c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH 2/6] Implement Android WebProcess and NetworkProcess entry
- points
+Subject: Implement Android WebProcess and NetworkProcess entry points
 
 ---
  .../NetworkProcess/soup/NetworkProcessMainSoup.cpp  | 13 +++++++++++++
@@ -65,5 +64,5 @@ index 52848c533dbd..a063b509164a 100644
    *;
  };
 -- 
-2.43.0
+2.48.1
 
