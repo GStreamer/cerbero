@@ -1,5 +1,7 @@
 # vim: set sts=2 sw=2 et :
 
+#Requires -RunAsAdministrator
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
 
 . "$PSScriptRoot\common.ps1"
