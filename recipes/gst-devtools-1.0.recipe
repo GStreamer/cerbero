@@ -34,6 +34,12 @@ class Recipe(custom.GStreamer):
             # validatedefaultinjection plugin isn't built on Windows
             self.files_gst_validate_plugins = ['%(libdir)s/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
 
+        if self.config.variants.rust and self.config.prefix_is_executable():
+            self.meson_options['dots_viewer'] = 'enabled'
+            self.files_bins.append('gst-dots-viewer')
+        else:
+            self.meson_options['dots_viewer'] = 'disabled'
+
     def post_install(self):
         super().post_install()
 
