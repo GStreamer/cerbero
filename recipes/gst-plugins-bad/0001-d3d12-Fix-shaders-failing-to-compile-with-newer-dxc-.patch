@@ -1,0 +1,50 @@
+From 41504330a05792a0e3e56d86bac99b97775aac7d Mon Sep 17 00:00:00 2001
+From: Monty C <montyc1999@gmail.com>
+Date: Thu, 9 Jan 2025 16:13:44 -0500
+Subject: [PATCH] d3d12: Fix shaders failing to compile with newer dxc versions
+
+Newer dxc versions enable HLSL 2021 by default, which disallows implicit casting of structs.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/8274>
+---
+ sys/d3d12/hlsl/VSMain_color.hlsl | 2 +-
+ sys/d3d12/hlsl/VSMain_coord.hlsl | 2 +-
+ sys/d3d12/hlsl/VSMain_pos.hlsl   | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sys/d3d12/hlsl/VSMain_color.hlsl b/sys/d3d12/hlsl/VSMain_color.hlsl
+index c9e2f631ee..d245d7348f 100644
+--- a/sys/d3d12/hlsl/VSMain_color.hlsl
++++ b/sys/d3d12/hlsl/VSMain_color.hlsl
+@@ -31,5 +31,5 @@ struct VS_OUTPUT
+ 
+ VS_OUTPUT VSMain_color (VS_INPUT input)
+ {
+-  return input;
++  return VS_OUTPUT(input);
+ }
+diff --git a/sys/d3d12/hlsl/VSMain_coord.hlsl b/sys/d3d12/hlsl/VSMain_coord.hlsl
+index 06d41d6e18..7fa301e112 100644
+--- a/sys/d3d12/hlsl/VSMain_coord.hlsl
++++ b/sys/d3d12/hlsl/VSMain_coord.hlsl
+@@ -31,5 +31,5 @@ struct VS_OUTPUT
+ 
+ VS_OUTPUT VSMain_coord (VS_INPUT input)
+ {
+-  return input;
++  return VS_OUTPUT(input);
+ }
+diff --git a/sys/d3d12/hlsl/VSMain_pos.hlsl b/sys/d3d12/hlsl/VSMain_pos.hlsl
+index df069fd5de..a910d99235 100644
+--- a/sys/d3d12/hlsl/VSMain_pos.hlsl
++++ b/sys/d3d12/hlsl/VSMain_pos.hlsl
+@@ -29,5 +29,5 @@ struct VS_OUTPUT
+ 
+ VS_OUTPUT VSMain_pos (VS_INPUT input)
+ {
+-  return input;
++  return VS_OUTPUT(input);
+ }
+-- 
+2.48.1.windows.1
+
