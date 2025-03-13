@@ -2,7 +2,7 @@
 
 import glob
 import shutil
-from pathlib import PurePath
+from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
@@ -41,9 +41,9 @@ class Recipe(recipe.Recipe):
             scriptsdir = os.path.join(prefix, 'Scripts')
             bindir = os.path.join(prefix, 'bin')
             os.makedirs(bindir, exist_ok=True)
-            for f in glob.glob('*', root_dir=scriptsdir):
-                tof = os.path.join(bindir, f)
+            for f in Path(scriptsdir).glob('*'):
+                tof = os.path.join(bindir, f.name)
                 if os.path.isfile(tof):
                     os.remove(tof)
-                shutil.move(os.path.join(scriptsdir, f), tof)
+                shutil.move(f, tof)
             os.rmdir(scriptsdir)
