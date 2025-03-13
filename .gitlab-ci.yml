@@ -64,7 +64,7 @@ default:
 
 .fedora image:
   variables:
-    FDO_DISTRIBUTION_TAG: "$FEDORA_TAG"
+    FDO_DISTRIBUTION_TAG: "$FEDORA_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: '40'
     FDO_DISTRIBUTION_PACKAGES: "sudo git-core lbzip2 rsync wine which xorg-x11-server-Xvfb python3-distro python3-distro-info python3-setuptools"
     FDO_DISTRIBUTION_EXEC: ci/docker_setup.sh
@@ -72,7 +72,7 @@ default:
 
 .checks fedora image:
   variables:
-    FDO_DISTRIBUTION_TAG: "$CHECKS_FEDORA_TAG"
+    FDO_DISTRIBUTION_TAG: "$CHECKS_FEDORA_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: '40'
     FDO_DISTRIBUTION_PACKAGES: "git-core python3-pip"
     FDO_DISTRIBUTION_EXEC: ci/checks_setup.sh
@@ -81,6 +81,7 @@ default:
 
 .android fedora image:
   variables:
+    # FIXME: add $GST_UPSTREAM_BRANCH suffix when android image is bumped
     FDO_DISTRIBUTION_TAG: "$ANDROID_FEDORA_TAG"
     FDO_DISTRIBUTION_VERSION: '40'
     FDO_DISTRIBUTION_PACKAGES: "file git-core java-11-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz python3-setuptools"
@@ -92,7 +93,7 @@ default:
 
 .ubuntu image:
   variables:
-    FDO_DISTRIBUTION_TAG: "$UBUNTU_TAG"
+    FDO_DISTRIBUTION_TAG: "$UBUNTU_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: "22.04"
     FDO_DISTRIBUTION_PACKAGES: >-
       bash
@@ -112,7 +113,7 @@ default:
 
 .tests ubuntu image:
   variables:
-    FDO_DISTRIBUTION_TAG: "$TESTS_UBUNTU_TAG"
+    FDO_DISTRIBUTION_TAG: "$TESTS_UBUNTU_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: "22.04"
     FDO_DISTRIBUTION_PACKAGES: >-
       bash
