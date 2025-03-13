@@ -184,6 +184,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'openssl-devel',
         'alsa-lib-devel',
         'perl-IPC-Cmd',
+        'libatomic',
     ]
 
     def __init__(self, config, offline, assume_yes):
