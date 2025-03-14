@@ -4,16 +4,16 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
-    version = '5.3.1'
+    version = '10.4.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '4a6ce097b75a8121facc4ba83b5b083bfec657f45b003cd5a3424f2ae6b4434d'
+    tarball_checksum = '480b6d25014169300669aa1fc39fb356c142d5028324ea52b3a27648b9beaad8'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib']
     meson_options = {'icu': 'disabled',
                      'glib': 'enabled',
-                     'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
+                     'cairo': 'enabled',  # needed for hb-view
                      'gobject': 'enabled',
                      'icu_builtin': 'false',
                      'tests': 'disabled'}
@@ -28,11 +28,6 @@ class Recipe(recipe.Recipe):
     files_typelibs = ['HarfBuzz-0.0']
 
     def prepare(self):
-        # Disable werror from pragmas. Currently fails building on macOS 12.3
-        # and should actually be controlled by the build system.
-        self.append_env('CFLAGS', '-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR')
-        self.append_env('CXXFLAGS', '-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR')
-
         if self.config.target_platform == Platform.DARWIN:
             self.meson_options['coretext'] = 'enabled'
 
