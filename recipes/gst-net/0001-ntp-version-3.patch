@@ -1,0 +1,25 @@
+From 311903f3f0066ad56f2f9a199ca3af4d153a5f0d Mon Sep 17 00:00:00 2001
+From: Lyra McMillan <lyra.mcmillan@laerdal.com>
+Date: Tue, 11 Mar 2025 13:33:18 -0400
+Subject: [PATCH] Testing ntp 3
+
+---
+ libs/gst/net/gstntppacket.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libs/gst/net/gstntppacket.c b/libs/gst/net/gstntppacket.c
+index a9f694afd6..53fd12e8f3 100644
+--- a/libs/gst/net/gstntppacket.c
++++ b/libs/gst/net/gstntppacket.c
+@@ -104,7 +104,7 @@ gst_ntp_packet_new (const guint8 * buffer, GError ** error)
+     guint8 stratum = buffer[1];
+     gint8 poll_interval = buffer[2];
+
+-    if (version != 4) {
++    if (version < 3 || version > 4) {
+       g_set_error (error, GST_NTP_ERROR, GST_NTP_ERROR_WRONG_VERSION,
+           "Invalid NTP version %d", version);
+       return NULL;
+--
+2.34.1
+
