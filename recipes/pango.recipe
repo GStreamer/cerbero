@@ -3,26 +3,18 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.54.0'
+    version = '1.56.2'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '8a9eed75021ee734d7fc0fdf3a65c3bba51dfefe4ae51a9b414a60c70b2d1ed8'
+    tarball_checksum = '03b7afd7ed730bef651155cbfb5320556b8ef92b0dc04abbb9784dcd4057afe7'
     licenses = [License.LGPLv2Plus]
     deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'harfbuzz']
-    patches = [
-      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/673 (merged after 1.54.0)
-      'pango/0001-pango-layout-fix-build-with-Android-s-bionic-libc.patch',
-      # TODO: propose upstream for merging
-      'pango/0002-utils-Check-that-help2man-can-run-if-found.patch',
-      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/749
-      'pango/0003-win32-Don-t-un-define-STRICT.patch',
-      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/768
-      'pango/0004-win32-Define-_WIN32_WINNT-globally.patch',
-      'pango/0005-win32-Require-Windows-10.patch',
-      'pango/0006-win32-Require-dwrite_3.h.patch',
-      'pango/0007-win32-Clean-up-directwrite-code.patch',
-   ]
+    meson_options = {
+        'build-testsuite': 'false',
+        'build-examples': 'false',
+    }
+    patches = []
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0']
     files_bins = ['pango-view']
