@@ -196,6 +196,16 @@ cerbero_before_script() {
     time git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
 }
 
+cerbero_bootstrap() {
+    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
+}
+
+cerbero_test() {
+    $CERBERO $CERBERO_ARGS show-config
+    cerbero_bootstrap
+}
+
 cerbero_script() {
     show_ccache_sum
 

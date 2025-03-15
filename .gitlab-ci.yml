@@ -123,11 +123,13 @@ default:
     FDO_DISTRIBUTION_VERSION: "22.04"
     FDO_DISTRIBUTION_PACKAGES: >-
       bash
+      build-essential
       ca-certificates
       curl
       file
       git
       lbzip2
+      libssl-dev
       pkg-config
       python3-distro
       python3-distro-info
@@ -139,6 +141,7 @@ default:
       ssh-client
       sudo
       xz-utils
+    FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
     FDO_UPSTREAM_REPO: gstreamer/cerbero
     FDO_REPO_SUFFIX: tests
 
@@ -344,17 +347,21 @@ pre-commit checks:
 
 tests:
   extends:
+    - '.cerbero'
     - .tests ubuntu image
     - .fdo.suffixed-image@ubuntu
   needs:
     - "tests ubuntu image"
   stage: 'tests'
   script:
-    python3 -m xmlrunner --output-file tests.xml discover -s test
+    - ci/cerbero_setup.sh cerbero_test
+    - python3 -m xmlrunner --output-file tests.xml discover -s test
   variables:
     CERBERO_UNINSTALLED: 1
     PYTHONPATH: ':./test:./cerbero'
-  tags: [ 'placeholder-job' ]
+    CONFIG: "linux.config"
+    ARCH: "linux_x86_64"
+  tags: ['gstreamer']
   artifacts:
     when: always
     paths:
