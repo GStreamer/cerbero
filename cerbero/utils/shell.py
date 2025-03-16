@@ -332,6 +332,8 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
 
         if sys.stdout.encoding:
             output = output.decode(sys.stdout.encoding, errors='replace')
+        elif isinstance(output, bytes):
+            output = output.decode()
 
         if proc.returncode != 0:
             raise CommandError(output, cmd, proc.returncode)
