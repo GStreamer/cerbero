@@ -8,6 +8,10 @@ class Recipe(custom.GStreamer):
     deps = ['glib']
     bash_completions = ['gst-inspect-1.0', 'gst-launch-1.0']
 
+    patches = [
+        'gst-net/0001-ntp-version-3.patch'
+    ]
+
     files_bins = ['gst-inspect-1.0',
                   'gst-typefind-1.0',
                   'gst-launch-1.0']
