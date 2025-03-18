@@ -27,7 +27,8 @@ outputs:
 runs:
   using: "composite"
   steps:
-    # Mutual exclusive -- either set url or path for each.  Error if both.
+    # Mutual exclusive -- either set url or path for each.  Error if both or neither
+    # are set.  If path is set, verify the file exists.
     - if: ${{ inputs.runtime-installer-url && inputs.runtime-installer-path }}
       shell: msys2 -eo pipefail {0}
       run: |
@@ -38,8 +39,33 @@ runs:
       run: |
         echo "Error: Cannot specify both development-installer-url and development-installer-path"
         exit 2
+    - if: ${{ !inputs.runtime-installer-url && !inputs.runtime-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        echo "Error: Must specify either runtime-installer-url or runtime-installer-path"
+        exit 3
+    - if: ${{ !inputs.development-installer-url && !inputs.development-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        echo "Error: Must specify either development-installer-url or development-installer-path"
+        exit 4
+    - if: ${{ inputs.runtime-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        if [[ ! -f "${{ inputs.runtime-installer-path }}" ]]; then
+          echo "Error: Runtime installer path does not exist: ${{ inputs.runtime-installer-path }}"
+          exit 5
+        fi
+    - if: ${{ inputs.development-installer-path }}
+      shell: msys2 -eo pipefail {0}
+      run: |
+        if [[ ! -f "${{ inputs.development-installer-path }}" ]]; then
+          echo "Error: Development installer path does not exist: ${{ inputs.development-installer-path }}"
+          exit 6
+        fi
 
     # If the URL is provided, download the MSI, set path.
+    # This will error out if the file is missing.
     - if: ${{ !inputs.runtime-installer-path }}
       id: download-runtime
       name: Download GStreamer Runtime MSI
