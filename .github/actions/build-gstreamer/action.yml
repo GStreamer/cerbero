@@ -71,15 +71,9 @@ outputs:
   runtime-installer-path:
     description: 'Location of the GStreamer runtime installer'
     value: ${{ steps.build-packages.outputs.runtime-msi }}
-  runtime-installer-url:
-    description: 'Presigned S3 URL of the GStreamer runtime installer if s3-upload-path is set'
-    value: ${{ steps.presign-urls.outputs.runtime-url }}
   devel-installer-path:
     description: 'Location of the GStreamer development installer'
     value: ${{ steps.build-packages.outputs.dev-msi }}
-  devel-installer-url:
-    description: 'Presigned S3 URL of the GStreamer development installer if s3-upload-path is set'
-    value: ${{ steps.presign-urls.outputs.dev-url }}
 runs:
   using: "composite"
   steps:
@@ -233,33 +227,6 @@ runs:
 
         find ~+ -maxdepth 1 -name 'gstreamer-1.0-msvc*.msi' -exec sh -c 'echo runtime-msi=$(cygpath -aw "{}") >> $GITHUB_OUTPUT' \;
         find ~+ -maxdepth 1 -name 'gstreamer-1.0-devel*.msi' -exec sh -c 'echo dev-msi=$(cygpath -aw "{}") >> $GITHUB_OUTPUT' \;
-
-    - id: upload-packages
-      if: ${{ steps.build-packages.outcome == 'success' && inputs.s3-upload-path }}
-      shell: msys2 -eo pipefail {0}
-      working-directory: cerbero
-      run: |
-        echo "::group::Upload packages"
-
-        upload_path="${{ inputs.s3-upload-path }}/${{ inputs.runtime-msi-filename }}"
-        aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.runtime-msi }}')" "${upload_path}"
-        echo "::notice title=GStreamer Runtime Installer Uploaded to S3::Location: ${upload_path}"
-        echo "runtime-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
-
-        upload_path="${{ inputs.s3-upload-path }}/${{ inputs.dev-msi-filename }}"
-        aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.dev-msi }}')" "${upload_path}"
-        echo "::notice title=GStreamer Development Installer Uploaded to S3::Location: ${upload_path}"
-        echo "dev-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
-
-        echo "::endgroup::"
-
-    - id: presign-urls
-      if: ${{ (steps.check-installer-exists.outputs.runtime-msi && steps.check-installer-exists.outputs.dev-msi) || steps.upload-packages.outcome == 'success' }}
-      shell: bash
-      run: |
-        # Presign URLs for installers
-        echo "runtime-url=$(aws s3 presign '${{ steps.check-installer-exists.outputs.runtime-msi || steps.upload-packages.outputs.runtime-msi }}')" | tee -a $GITHUB_OUTPUT
-        echo "dev-url=$(aws s3 presign '${{ steps.check-installer-exists.outputs.dev-msi || steps.upload-packages.outputs.dev-msi }}')" | tee -a $GITHUB_OUTPUT
 
     - uses: actions/upload-artifact@v4
       if: ${{ steps.build-packages.outputs.runtime-msi || steps.build-packages.outputs.dev-msi }}
