@@ -191,3 +191,7 @@ runs:
         runtime-installer-path: ${{ steps.build-packages.outputs.runtime-installer-path  || steps.check-installer-exists.outputs.runtime-path }}
         development-installer-path: ${{ steps.build-packages.outputs.devel-installer-path || steps.check-installer-exists.outputs.dev-path }}
 
+    - name: Cleanup Cerbero
+      if: ${{ always() && inputs.cleanup == 'true' && steps.get-cerbero.outcome != 'skipped'}}
+      shell: msys2 -eo pipefail {0}
+      run: rm -rf cerbero
