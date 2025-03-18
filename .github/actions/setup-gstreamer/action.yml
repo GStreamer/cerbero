@@ -183,13 +183,22 @@ runs:
 
         echo "::endgroup::"
 
+    - id: select-path
+      shell: msys2 -eo pipefail {0}
+      env:
+        RUNTIME_PATH: ${{ steps.build-packages.outputs.runtime-installer-path || steps.check-installer-exists.outputs.runtime-path }}
+        DEV_PATH: ${{ steps.build-packages.outputs.devel-installer-path || steps.check-installer-exists.outputs.dev-path }}
+      run: |
+        echo "runtime-installer-path=${RUNTIME_PATH}" | tee -a $GITHUB_OUTPUT
+        echo "development-installer-path=${DEV_PATH}" | tee -a $GITHUB_OUTPUT
+
       # Install the gstreamer MSIs
     - id: install
       name: Install GStreamer on Windows
       uses: ./.github/actions/install-gstreamer
       with:
-        runtime-installer-path: ${{ steps.build-packages.outputs.runtime-installer-path  || steps.check-installer-exists.outputs.runtime-path }}
-        development-installer-path: ${{ steps.build-packages.outputs.devel-installer-path || steps.check-installer-exists.outputs.dev-path }}
+        runtime-installer-path: ${{ steps.select-path.outputs.runtime-installer-path }}
+        development-installer-path: ${{ steps.select-path.outputs.development-installer-path }}
 
     - name: Cleanup Cerbero
       if: ${{ always() && inputs.cleanup == 'true' && steps.get-cerbero.outcome != 'skipped'}}
