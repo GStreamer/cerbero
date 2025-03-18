@@ -110,6 +110,8 @@ runs:
       continue-on-error: true
       env:
         S3_DOWNLOAD_PATHS: ${{ inputs.s3-download-paths }}
+        RUNTIME_MSI_FILENAME: ${{ steps.version-info.outputs.runtime-msi-filename }}
+        DEV_MSI_FILENAME: ${{ steps.version-info.outputs.dev-msi-filename }}
       run: |
         # Check installer already exists in S3
 
