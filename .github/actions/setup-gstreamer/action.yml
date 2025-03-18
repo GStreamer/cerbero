@@ -128,7 +128,7 @@ runs:
             echo "Checking for runtime installer under s3://${bucket}/${prefix}/"
             runtime_msi=$(aws s3api list-objects-v2 --bucket "${bucket}" --prefix "${prefix}/" --query 'Contents[].Key' | jq -r 'if type!="array" then [] else . end | sort_by(length) | map(select(endswith("'"${RUNTIME_MSI_FILENAME}"'"))) | .[0]')
             if [ "$runtime_msi" != "null" ]; then
-              aws s3 cp "s3://${bucket}/${runtime_msi}" "cerbero/$(basename ${runtime_msi})"
+              aws s3 cp --no-progress "s3://${bucket}/${runtime_msi}" "cerbero/$(basename ${runtime_msi})"
               echo "runtime-path=cerbero/$(basename ${runtime_msi})" | tee -a $GITHUB_OUTPUT
             fi
           fi
@@ -137,7 +137,7 @@ runs:
             echo "Checking for development installer under s3://${bucket}/${prefix}/"
             dev_msi=$(aws s3api list-objects-v2 --bucket "${bucket}" --prefix "${prefix}/" --query 'Contents[].Key' | jq -r 'if type!="array" then [] else . end | sort_by(length) | map(select(endswith("'"${DEV_MSI_FILENAME}"'"))) | .[0]')
             if [ "$dev_msi" != "null" ]; then
-              aws s3 cp "s3://${bucket}/${dev_msi}" "cerbero/$(basename ${dev_msi})"
+              aws s3 cp --no-progress "s3://${bucket}/${dev_msi}" "cerbero/$(basename ${dev_msi})"
               echo "dev-path=cerbero/$(basename ${dev_msi})" | tee -a $GITHUB_OUTPUT
             fi
           fi
