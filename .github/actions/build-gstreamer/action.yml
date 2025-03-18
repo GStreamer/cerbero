@@ -1,14 +1,6 @@
 name: Build GStreamer with Cerbero on Windows
 description: Uses the GStreamer Cerbero build aggregator to build GStreamer MSI packages on the local toolchain
 inputs:
-  cerbero-repo:
-    description: 'Repository to use for Cerbero'
-    required: false
-    default: ${{ github.action_repository || github.repository }}
-  cerbero-ref:
-    description: 'Ref to use for Cerbero'
-    required: false
-    default: ${{ github.action_ref || github.ref }}
   cerbero-package-origin:
     description: 'Package Origin to set in GStreamer Packages'
     required: false
@@ -29,9 +21,6 @@ inputs:
     description: 'Whether to bootstrap the system'
     required: false
     default: 'false'
-  s3-download-paths:
-    description: 'S3 paths to download from'
-    required: false
   s3-upload-path:
     description: 'S3 path to upload to'
     required: false
@@ -41,13 +30,6 @@ inputs:
   gst-plugins-rs-ref:
     description: 'Ref/tag to use for gst-plugins-rs'
     required: false
-  force:
-    description: 'Whether to force the build'
-    required: false
-  cleanup:
-    description: 'Whether to clean the Cerbero build directory'
-    required: false
-    default: 'true'
   no-cache:
     description: 'Whether to disable restoring from cache'
     required: false
@@ -56,18 +38,7 @@ inputs:
     description: 'GStreamer version'
     required: true
     default: ''
-  runtime-msi-filename:
-    description: 'Filename to use for the GStreamer Runtime MSI'
-    required: false
-    default: 'gstreamer-1.0-msvc-x86_64.msi'
-  dev-msi-filename:
-    description: 'Filename to use for the GStreamer Development MSI'
-    required: false
-    default: 'gstreamer-1.0-devel-msvc-x86_64.msi'
 outputs:
-  cerbero-path:
-    description: 'Path to the Cerbero checkout'
-    value: ${{ inputs.cleanup != 'true' && 'cerbero' }}
   runtime-installer-path:
     description: 'Location of the GStreamer runtime installer'
     value: ${{ steps.build-packages.outputs.runtime-msi }}
@@ -128,15 +99,18 @@ runs:
         config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}${GST_PLUGINS_RS_SOURCE}${GST_PLUGINS_RS_REF}" | sha256sum | cut -d' ' -f1)
         echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
 
+        # Get GStreamer version from cerbero
+        echo "version=$(./cerbero-uninstalled packageinfo gstreamer-1.0 | awk '/Version:/ {print $2}')" >> $GITHUB_OUTPUT
+
     - id: restore-cerbero-sources-cache
       if: ${{ inputs.no-cache != 'true' }}
       uses: actions/cache/restore@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
         key: |
-          cerbero-sources-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}
+          cerbero-sources-${{ steps.cerbero-config.outputs.version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}
         restore-keys: |
-          cerbero-sources-${{ inputs.gstreamer-version }}-
+          cerbero-sources-${{ steps.cerbero-config.outputs.version }}-
           cerbero-sources-
 
     - id: restore-cerbero-deps-cache
@@ -145,9 +119,9 @@ runs:
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
         key: |
-          ${{ runner.os }}-cerbero-deps-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-${{ runner.name }}
+          ${{ runner.os }}-cerbero-deps-${{ steps.cerbero-config.outputs.version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-${{ runner.name }}
         restore-keys: |
-          ${{ runner.os }}-cerbero-deps-${{ inputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-
+          ${{ runner.os }}-cerbero-deps-${{ steps.cerbero-config.outputs.version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-
 
     - if: ${{ steps.restore-cerbero-deps-cache.outputs.cache-matched-key }}
       shell: msys2 -eo pipefail {0}

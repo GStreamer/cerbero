@@ -160,10 +160,6 @@ runs:
         bootstrap-system: ${{ inputs.bootstrap-system }}
         gst-plugins-rs-repo: ${{ inputs.gst-plugins-rs-repo }}
         gst-plugins-rs-ref: ${{ inputs.gst-plugins-rs-ref }}
-        runtime-msi-filename: ${{ steps.version-info.outputs.runtime-msi-filename }}
-        dev-msi-filename: ${{ steps.version-info.outputs.dev-msi-filename }}
-        force: ${{ inputs.force }}
-        cleanup: ${{ inputs.cleanup }}
         no-cache: ${{ inputs.no-cache }}
 
       # If the build ran, upload the result (if possible).
