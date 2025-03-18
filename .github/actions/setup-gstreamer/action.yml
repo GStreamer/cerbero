@@ -168,15 +168,18 @@ runs:
       name: Upload newly-built GStreamer installers to S3
       shell: msys2 -eo pipefail {0}
       working-directory: cerbero
+      env:
+        RUNTIME_MSI_FILENAME: ${{ steps.version-info.outputs.runtime-msi-filename }}
+        DEV_MSI_FILENAME: ${{ steps.version-info.outputs.dev-msi-filename }}
       run: |
         echo "::group::Upload packages"
 
-        upload_path="${{ inputs.s3-upload-path }}/$(basename '${{ steps.build-packages.outputs.runtime-installer-path }}')"
+        upload_path="${{ inputs.s3-upload-path }}/${RUNTIME_MSI_FILENAME}"
         aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.runtime-installer-path }}')" "${upload_path}"
         echo "::notice title=GStreamer Runtime Installer Uploaded to S3::Location: ${upload_path}"
         echo "runtime-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
 
-        upload_path="${{ inputs.s3-upload-path }}/$(basename '${{ steps.build-packages.outputs.devel-installer-path }}')"
+        upload_path="${{ inputs.s3-upload-path }}/${DEV_MSI_FILENAME}"
         aws s3 cp --no-progress "$(cygpath -u '${{ steps.build-packages.outputs.devel-installer-path }}')" "${upload_path}"
         echo "::notice title=GStreamer Development Installer Uploaded to S3::Location: ${upload_path}"
         echo "dev-msi=${upload_path}" | tee -a $GITHUB_OUTPUT
