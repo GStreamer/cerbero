@@ -83,6 +83,11 @@ class Recipe(custom.GStreamer):
                      'win32ipc': 'disabled',
                      'wildmidi': 'disabled',
                     }
+
+    patches = [
+        'gst-plugins-bad/0001-d3d12-Fix-shaders-failing-to-compile-with-newer-dxc-.patch',
+    ]
+
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',

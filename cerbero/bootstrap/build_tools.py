@@ -119,7 +119,8 @@ class BuildTools(BootstrapperBase, Fetch):
                 if os.path.isfile(tof):
                     os.remove(tof)
                 shutil.move(os.path.join(scriptsdir, f), tof)
-            os.rmdir(scriptsdir)
+            if os.path.exists(scriptsdir):
+                os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         shell.new_call([python, '-m', 'pip', 'install', 'setuptools', 'packaging'])
 

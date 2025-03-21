@@ -1,0 +1,1474 @@
+From 2222f3c062907bd6504c123e3542ce468629b751 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 27 Mar 2024 00:13:16 +0000
+Subject: [PATCH 1/1] Add Meson build
+
+Source: https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/tree/164.3108-meson
+
+When updating, do
+
+> git checkout stable
+> git switch -c cerbero
+> git diff stable meson | git apply
+
+and skip .gitignore, .gitlab-ci.yml and cross/cross-x86-linux-gcc.txt.
+
+Don't forget to check that the Python scripts for win-nasm must be +x.
+---
+ README.meson                            |   45 +
+ meson.build                             | 1051 +++++++++++++++++++++++
+ meson_options.txt                       |   56 ++
+ subprojects/win-nasm/.gitignore         |    2 +
+ subprojects/win-nasm/download-binary.py |   76 ++
+ subprojects/win-nasm/meson.build        |   41 +
+ subprojects/win-nasm/patch_nasm.py      |   15 +
+ version.py                              |  102 +++
+ 8 files changed, 1388 insertions(+)
+ create mode 100644 README.meson
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 subprojects/win-nasm/.gitignore
+ create mode 100755 subprojects/win-nasm/download-binary.py
+ create mode 100644 subprojects/win-nasm/meson.build
+ create mode 100755 subprojects/win-nasm/patch_nasm.py
+ create mode 100755 version.py
+
+diff --git a/README.meson b/README.meson
+new file mode 100644
+index 00000000..75d547cc
+--- /dev/null
++++ b/README.meson
+@@ -0,0 +1,45 @@
++# x264 Meson Build
++
++This is an experimental port of libx264 to the [Meson build system](http://mesonbuild.com/).
++
++It is primarily for development purposes, e.g. use as subproject in gst-build.
++
++## Getting started
++
++### Install meson and ninja
++
++Meson 0.52 or newer is required.
++
++You should get meson through your package manager or using:
++
++```
++python3 -m pip install meson --user
++```
++
++This will install meson into ~/.local/bin which may or may not be included
++automatically in your PATH by default.
++
++If you are building on Windows, do not use the Meson MSI installer since it is
++experimental and will likely not work.
++
++You can also run meson directly from a meson git checkout if you like.
++
++You should get `ninja` using your package manager (dnf, pacman, brew, ..) on
++Linux and MacOS or download the [official release](https://github.com/ninja-build/ninja/releases)
++and put it in your PATH.
++
++### Build x264 with Meson
++
++This uses `build` as build directory, but you can specify any other name and
++location as well of course:
++
++```
++meson build && ninja -C build
++```
++
++You can pass options (see `meson_options.txt`), e.g.
++```
++meson -Dcli=false -Dasm=disabled build && ninja -C build
++```
++
++Known to build on Debian, Windows (with MSVC) and MacOS High Sierra.
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 00000000..400846da
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,1051 @@
++project('x264', 'c',
++  version: run_command(find_program('version.py', native: true), '--package-version', check: true).stdout().strip(),
++  default_options: ['optimization=2', 'c_std=c11'],
++  meson_version: '>= 0.52'
++)
++
++x264_ver = meson.project_version()
++x264_rev = meson.project_version().split('.')[2]
++x264_build = meson.project_version().split('.')[1]
++x264_commit = run_command(find_program('version.py', native: true), '--commit-hash', check: true).stdout().strip()
++
++message('build: ' + x264_build)
++message('commit: ' + x264_commit)
++message('version: ' + x264_ver)
++message('revision: ' + x264_rev)
++
++# list of all preprocessor HAVE values we can define
++have_list = [
++  'malloc_h',
++  'altivec',
++  'altivec_h',
++  'mmx',
++  'armv6',
++  'armv6t2',
++  'neon',
++  'aarch64',
++  'beosthread',
++  'posixthread',
++  'win32thread',
++  'thread',
++  'log2f',
++  'swscale',
++  'lavf',
++  'ffms',
++  'gpac',
++  'avs',
++  'gpl',
++  'vectorext',
++  'interlaced',
++  'cpu_count',
++  'opencl',
++  'thp',
++  'lsmash',
++  'x86_inline_asm',
++  'as_func',
++  'intel_dispatcher',
++  'msa',
++  'mmap',
++  'winrt',
++  'vsx',
++  'arm_inline_asm',
++  'strtok_r',
++  'clock_gettime',
++  'bitdepth8',
++  'bitdepth10',
++]
++
++cdata = configuration_data()
++configinc = []
++configinc += include_directories('.')
++
++cc = meson.get_compiler('c')
++host_system = host_machine.system()
++host_cpu = host_machine.cpu_family()
++
++python3 = import('python').find_installation()
++
++libm = cc.find_library('m', required: false)
++
++# Threads. https://github.com/mesonbuild/meson/issues/553
++threads = dependency('threads', required: false)
++requests_pthread = host_system == 'windows' and not  get_option('win32thread')
++if host_system == 'windows' and requests_pthread and get_option('gpl')
++  warning('pthread-win32 is LGPL and is therefore not supported with --disable-gpl')
++  threads = disabler()
++elif threads.found()
++  cdata.set10('HAVE_THREAD', true)
++  cdata.set10('HAVE_BEOSTHREAD', false)
++  if host_system == 'windows'
++    cdata.set10('HAVE_WIN32THREAD', threads.found())
++  else
++    cdata.set10('HAVE_POSIXTHREAD', cc.has_header_symbol('pthread.h', 'pthread_create', dependencies: threads))
++  endif
++endif
++
++compiler_style = 'GNU'
++
++# test for use of compilers that require specific handling
++if cc.get_argument_syntax() == 'msvc'
++  compiler_style = 'MS'
++endif
++
++if compiler_style == 'GNU'
++  # Amyspark: combine the C99 POSIX standard requirement
++  # with the _BSD_SOURCE macro (also taking care of its deprecation)
++  # and the _GNU_SOURCE macro for GNU extensions (for CPU_COUNT)
++  # Unfortunately, using _POSIX_C_SOURCE triggers the requirement to use
++  # _DARWIN_C_SOURCE too
++  add_project_arguments(['-D_POSIX_C_SOURCE=200112L'], language: 'c')
++  if ['darwin', 'ios'].contains(host_system)
++    add_project_arguments(['-D_DARWIN_C_SOURCE'], language: 'c')
++  else
++    add_project_arguments(['-D_GNU_SOURCE', '-D_DEFAULT_SOURCE'], language: 'c')
++  endif
++endif
++
++if ['windows', 'cygwin'].contains(host_system)
++  msvc_version = cc.get_define('_MSC_VER')
++  # cl, intel-cl, intel-llvm-cl, etc.
++  if cc.get_argument_syntax() == 'msvc'
++    configinc += include_directories('extras')
++  endif
++  if cc.get_id() == 'intel-cl'
++    if not msvc_version.version_compare('>= 1400')
++      error('Windows Intel Compiler support requires Visual Studio 2005 or newer')
++    endif
++
++    add_project_arguments('-Qdiag-error:10006,10157', language: 'c')
++  elif msvc_version != ''
++    msvc_full_version = cc.get_define('_MSC_FULL_VER')
++    if not msvc_version.version_compare('> 1800') and not msvc_full_version.version_compare('>= 180030324')
++      error('Microsoft Visual Studio support requires Visual Studio 2013 Update 2 or newer')
++    endif
++  else
++    # MinGW uses broken pre-VS2015 Microsoft printf functions
++    # unless it's told to use the POSIX ones.
++    add_project_arguments('-D_POSIX_C_SOURCE=200112L', language: 'c')
++  endif
++
++  add_project_arguments('-D_CRT_INTERNAL_NONSTDC_NAMES', language: 'c')
++endif
++
++# Ignore several spurious warnings for things we do a lot in the code.
++# If a warning is completely useless and spammy, use '/wdXXXX' to suppress it
++# If a warning is harmless but hard to fix, use '/woXXXX' so it's shown once
++# NOTE: Only add warnings here if you are sure they're spurious
++if compiler_style == 'MS'
++  add_project_arguments(
++      '/wd4018', # implicit signed/unsigned conversion
++      '/wd4146', # unary minus on unsigned (beware INT_MIN)
++      '/wd4244', # lossy type conversion (e.g. double -> int)
++      '/wd4305', # truncating type conversion (e.g. double -> float)
++      language : 'c')
++else
++  add_project_arguments(cc.get_supported_arguments([
++        '-Wno-unused-parameter',
++        '-Wno-sign-compare',
++        '-Wno-old-style-declaration',
++        '-Werror=unknown-warning-option',
++        '-Werror=unknown-attributes',
++        '-Werror=attributes',
++        '-Werror=ignored-attributes',
++        '-fno-tree-vectorize',
++        '-Wshadow',
++        '-Wno-maybe-uninitialized',
++        ]), language : 'c')
++endif
++
++stack_alignment = 4
++asflags = []
++nasm = disabler()
++
++if get_option('b_staticpic')
++  add_project_arguments('-DPIC', language: 'c')
++  asflags += ['-DPIC']
++else
++  add_project_arguments('-UPIC', language: 'c')
++  asflags += ['-UPIC']
++endif
++
++# Assembly has to be told when the symbols have to be prefixed with _
++if cc.symbols_have_underscore_prefix()
++  add_project_arguments('-DPREFIX', language: 'c')
++  asflags += ['-DPREFIX']
++else
++  add_project_arguments('-UPREFIX', language: 'c')
++  asflags += ['-UPREFIX']
++endif
++
++if ['x86', 'x86_64'].contains(host_cpu)
++  if not get_option('asm').disabled()
++    nasm = find_program('nasm', native: true, required: false)
++    if not nasm.found()
++      subproject('win-nasm')
++      nasm = find_program('nasm', native: true, required: get_option('asm').enabled())
++    endif
++  endif
++  if host_cpu == 'x86'
++    if compiler_style == 'GNU'
++      has_sse2_math = cc.get_define('__SSE2_MATH__') != ''
++      has_sse2 = cc.get_define('__SSE2__') != ''
++      has_sse = cc.get_define('__SSE__') != ''
++      if not (has_sse2_math and has_sse2 and has_sse)
++        add_project_arguments('-mfpmath=sse', '-msse', '-msse2', language: 'c')
++      endif
++    endif
++    asflags += ['-DARCH_X86_64=0']
++    if host_system == 'windows'
++      asflags += ['-f', 'win32']
++    elif ['darwin', 'ios'].contains(host_system)
++      asflags += ['-f', 'macho32']
++    elif host_system.endswith('bsd')
++      asflags += ['-f', 'aoutb']
++    else
++      asflags += ['-f', 'elf32']
++    endif
++  elif host_cpu == 'x86_64'
++    asflags += ['-DARCH_X86_64=1']
++    stack_alignment = 16
++    if host_system == 'windows'
++      asflags += ['-f', 'win64']
++    elif ['darwin', 'ios'].contains(host_system)
++      asflags += ['-f', 'macho64']
++    elif host_system.endswith('bsd')
++      asflags += ['-f', 'aoutb']
++    else
++      asflags += ['-f', 'elf64']
++    endif
++  endif
++elif host_cpu.startswith('ppc')
++  cdata.set10('altivec', true)
++
++  if host_system == 'darwin'
++    add_project_arguments('-faltivec', '-fastf', '-mcpu=G4', language: 'c')
++  else
++    add_project_arguments('-maltivec', '-mabi=altivec', language: 'c')
++    cdata.set10('altivec_h', true)
++  endif
++
++  if not get_option('vsx').disabled()
++    if cc.has_argument('-mvsx')
++      add_project_arguments('-mvsx', language: 'c')
++      cdata.set10('vsx', true)
++    endif
++  endif
++elif host_cpu == 'aarch64'
++  stack_alignment = 16
++
++  if ['darwin', 'ios'].contains(host_system)
++    if cc.has_argument('-arch arm64')
++      asflags += ['-arch', 'arm64']
++    endif
++  elif host_system == 'windows'
++    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    if compiler_style == 'MS'
++      asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
++    endif
++  endif
++elif host_cpu == 'arm'
++  if host_system == 'windows' and compiler_style == 'MS'
++    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
++  elif host_system == 'windows'
++    # FIXME once Meson exposes the compiler command line
++    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    gcc = disabler()
++    if cc.get_id().contains('clang')
++      gcc = find_program('clang', native: true, required: get_option('asm'))
++    else
++      gcc = find_program('gcc', native: true, required: get_option('asm'))
++    endif
++    asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
++  endif
++endif
++
++if get_option('b_staticpic') and ['arm', 'x86'].contains(host_cpu)
++  # Text relocations are required for all 32-bit objects. We
++  # must disable the warning to allow linking with lld. Unlike gold, ld which
++  # will silently allow text relocations, lld support must be explicit.
++  #
++  # See https://crbug.com/911658#c19 for more information. See also
++  # https://trac.ffmpeg.org/ticket/7878
++  if cc.has_link_argument('-Wl,-z,notext')
++    add_project_link_arguments('-Wl,-z,notext', language: 'c')
++  endif
++endif
++
++if host_system == 'windows'
++  if cc.compiles('''#include <winapifamily.h>
++    #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
++    #error "not winrt"
++    #endif''', name: 'building for WinRT')
++    cdata.set10('HAVE_WINRT', true)
++  endif
++endif
++
++cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h'))
++
++if (host_cpu == 'x86' or host_cpu == 'x86_64') and cc.compiles('__attribute__((force_align_arg_pointer)) void foo (void) { }', name: 'force_align_arg_pointer func attribute')
++  if cc.get_id() == 'gcc'
++    if cc.has_argument('-mpreferred-stack-boundary=6')
++      add_project_arguments('-mpreferred-stack-boundary=6', language: 'c')
++      stack_alignment = 64
++    elif cc.has_argument('-mstack-alignment=64')
++      add_project_arguments('-mstack-alignment=64', language: 'c')
++      stack_alignment = 64
++    elif stack_alignment < 16
++      if cc.has_argument('-mpreferred-stack-boundary=4')
++        add_project_arguments('-mpreferred-stack-boundary=4', language: 'c')
++        stack_alignment = 16
++      elif cc.has_argument('-mpreferred-stack-boundary=16')
++        add_project_arguments('-mpreferred-stack-boundary=16', language: 'c')
++        stack_alignment = 16
++      endif
++    endif
++  elif cc.get_id() == 'intel' and host_cpu == 'x86'
++    # icc on linux has various degrees of mod16 stack support
++    if host_system == 'linux' 
++      # >= 12 defaults to a mod16 stack
++      intel_compiler_version = cc.get_define('__INTEL_COMPILER')
++      if intel_compiler_version.version_compare('>= 1200')
++        stack_alignment = 16
++      # 11 <= x < 12 is capable of keeping a mod16 stack, but defaults to not doing so.
++      elif intel_compiler_version.version_compare('>= 1100')
++        add_project_arguments('-falign-stack=assume-16-byte', language: 'c')
++        stack_alignment = 16
++      endif
++      # < 11 is completely incapable of keeping a mod16 stack
++    endif
++  endif
++endif
++
++inline_asm_check = 'int main (void) { @0@ return 0; }'
++
++if host_cpu == 'x86' or host_cpu == 'x86_64'
++  asm_allowed = not get_option('asm').disabled()
++
++  cpp_cond = '''
++#include <@0@>
++
++#if !(@1@)
++#error "unsatisfied condition: @1@"
++#endif
++
++int main(void) {
++  return 0;
++}
++'''
++
++  is_broken_android_api = cc.links(cpp_cond.format('android/api-level.h', '__ANDROID_API__ < 24'), name: 'compiling for Android API <24')
++
++  # x264 upstream doesn't know that EBP is always unavailable
++  # under Clang if stack realignment is used. This is probably
++  # because the only compilers still supporting the architecture
++  # are the Android NDK and MSYS CLANG32.
++  # See:
++  # - https://github.com/android/ndk/issues/693
++  # - https://bugs.llvm.org/show_bug.cgi?id=37542
++  if is_broken_android_api and host_cpu == 'x86'
++    warning('''x86 targets prior to Android Nougat (API 24) need
++      -mstackrealign to properly align stack for global constructors.
++      See https://github.com/android-ndk/ndk/issues/635''')
++    add_project_arguments('-mstackrealign', language: 'c')
++
++    # Disable ASM ipso facto, as there are not enough registers for
++    # x264_predictor_clip_mmx2 and x264_predictor_roundclip_mmx2.
++    # See: https://github.com/android/ndk/issues/690
++    if asm_allowed
++      warning('Disabling inline assembly, there are not enough registers.')
++      asm_allowed = false
++    endif
++  endif
++
++  if asm_allowed
++    nasm_ok = nasm.found()
++    nasm_version = 'no assembler'
++
++    if nasm_ok
++      f = configure_file(
++        command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format('vmovdqa32 [eax]{k1}{z}, zmm0')],
++        input: 'configure',
++        output: '@0@.asm'.format('conftest'),
++        capture: true,
++      )
++
++      result = run_command(nasm, asflags, '-o', meson.current_build_dir() / '@0@.o'.format('conftest'), f, check: false)
++
++      if result.returncode() != 0
++        nasm_ok = false
++        out = run_command(nasm, '-v', capture: true, check: true).stdout().strip()
++        out = out.split()
++        nasm_version = out[2]
++      endif
++    endif
++
++    if not nasm_ok
++      error('Found @0@, minimum Nasm version is 2.13. If you really want to compile without asm, configure with -Dasm=disabled.'.format(nasm_version))
++    endif
++
++    # Amyspark: MSVC in C mode takes '__asm__' as a forward defined function
++    if cc.links(inline_asm_check.format('__asm__("pabsw %xmm0, %xmm0");'),
++                   name: 'Compiler supports gcc-style inline assembly')
++      cdata.set10('HAVE_X86_INLINE_ASM', true)
++    endif
++    cdata.set10('HAVE_MMX', true)
++  endif
++elif host_cpu == 'arm'
++  cdata.set10('HAVE_ARM_INLINE_ASM', cc.links(inline_asm_check.format('__asm__("add r0, r1, r2");'), name: 'Compiler supports gcc-style inline assembly'))
++  if compiler_style != 'MS'
++    add_project_arguments('-mcpu=cortex-a8', '-mfpu=neon', language: 'c')
++  endif
++
++  if cc.links(inline_asm_check.format('__asm__("rev ip, ip");'), name: 'ARMv6')
++    cdata.set10('HAVE_ARMV6', true)
++    cdata.set10('HAVE_ARMV6T2', cc.links(inline_asm_check.format('__asm__("movt r0, #0");'), name: 'ARMv6T2'))
++    cdata.set10('HAVE_NEON', cc.links(inline_asm_check.format('__asm__("vadd.i16 q0, q0, q0");'), name: 'NEON'))
++  else
++    error('You specified a pre-ARMv6 or Thumb-1 CPU in your CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
++  endif
++elif host_cpu == 'aarch64'
++  if compiler_style == 'MS' and (cc.get_define('_M_ARM64') != '')
++    cdata.set10('HAVE_AARCH64', true)
++    cdata.set10('HAVE_NEON', true)
++  elif cc.links(inline_asm_check.format('__asm__("cmeq v0.8h, v0.8h, #0");'), name: 'AArch64')
++    cdata.set10('HAVE_AARCH64', true)
++    cdata.set10('HAVE_NEON', true)
++  else
++    error('No NEON support, try adding -mfpu=neon to CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
++  endif
++endif
++
++if ['arm', 'aarch64'].contains(host_cpu)
++  # check if the assembler supports '.func' (clang 3.5 does not)
++  # It is possible to run compile checks on generated files, however,
++  # Meson versions earlier than 1.2.0 do not set the lookup path
++  # correctly, causing Python to fail opening it.
++  # https://github.com/mesonbuild/meson/issues/11983
++  if meson.version().version_compare('>= 1.2.0')
++    as_func = '''.func test
++    .endfunc'''
++    f = configure_file(
++      command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(as_func)],
++      input: 'configure',
++      output: '@0@.S'.format('conftest'),
++      capture: true,
++    )
++    cdata.set('HAVE_AS_FUNC', cc.compiles(
++      f,
++      args: ['-x', 'assembler'],
++      name: 'The assembler supports .func (Clang 3.5 does not)'
++    ))
++  else
++    cdata.set10('HAVE_AS_FUNC', false)
++  endif
++endif
++
++if host_cpu.startswith('mips')
++  add_project_arguments('-mmsa', '-mfp64', '-mhard-float', language: 'c')
++
++  if cc.links(inline_asm_check.format('__asm__("addvi.b $w0, $w1, 1");'), name: 'MSA')
++    cdata.set10('HAVE_MSA', true)
++  else
++    error('You specified a pre-MSA CPU in your CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
++  endif
++endif
++
++opencl = get_option('opencl')
++opt_bitdepth = get_option('bit-depth')
++have_bitdepth8 = opt_bitdepth == 'all' or opt_bitdepth == '8'
++have_bitdepth10 = opt_bitdepth == 'all' or opt_bitdepth == '10'
++cdata.set10('HAVE_BITDEPTH8', have_bitdepth8)
++cdata.set10('HAVE_BITDEPTH10', have_bitdepth10)
++
++depths = []
++if have_bitdepth8
++  depths += [8]
++endif
++if have_bitdepth10
++  depths += [10]
++  opencl = false
++endif
++
++if ['intel', 'intelcl'].contains(cc.get_id())
++  cdata.set10('HAVE_INTEL_DISPATCHER', cc.links('''
++  #include <extras/intel_dispatcher.h>
++  int main() {
++    x264_intel_dispatcher_override();
++    return 0;
++  }''', args: ['-I@0@'.format(meson.current_source_dir())], name: 'Can use the ICL CPU dispatcher'))
++endif
++
++# FIXME this needs communicating to x264, also port cltostr.sh
++# if opencl
++#   opencl = false
++#   if host_system == 'windows' or (host_system == 'cygwin' and cc.has_function('LoadLibraryW', prefix: '#include <windows.h>'))
++#     opengl = true
++#     cdata.set_quoted('HAVE_OPENCL', '(BIT_DEPTH==8)')
++#   elif ['linux', 'darwin'].contains(host_system)
++#     opengl = true
++#     cdata.set_quoted('HAVE_OPENCL', '(BIT_DEPTH==8)')
++#     libdl_dep += cc.find_library('dl', required: true)
++#   endif
++# endif
++
++# avs
++have_avs = false
++avs_deps = []
++if not get_option('avs').disabled()
++  if host_system == 'windows' or (host_system == 'cygwin' and cc.has_function('LoadLibraryW', prefix: '#include <windows.h>'))
++    have_avs = true
++  elif ['linux', 'darwin', 'ios'].contains(host_system)
++    dl_dep = cc.find_library('dl', required: get_option('avs'))
++    have_avs = dl_dep.found()
++    avs_deps = [dl_dep]
++  elif ['freebsd', 'openbsd', 'netbsd', 'haiku'].contains(host_system)
++    have_avs = true
++    # dlopen is exported from libc on both *BSD and Haiku
++  endif
++  if have_avs
++    cdata.set10('HAVE_AVS', have_avs)
++  endif
++endif
++
++if meson.version().version_compare('>= 1.1.0')
++  cdata.set10('HAVE_VECTOREXT', cc.has_function_attribute('vector_size'))
++else
++  cdata.set10('HAVE_VECTOREXT', cc.compiles('''#include <stdint.h>
++    int main() {
++      uint32_t test_vec __attribute__ ((vector_size (16))) = {0,1,2,3};
++      return 0;
++    }''', name: 'Has function attribute vector_size'))
++endif 
++
++# the DEBUG macro is only used by RC
++if not get_option('debug')
++  if compiler_style == 'MS'
++    add_project_arguments('-fp:fast', language: 'c')
++  else
++    add_project_arguments('-ffast-math', language: 'c')
++  endif
++endif
++
++asm_gen_objs = []
++if ['x86', 'x86_64'].contains(host_cpu) and nasm.found()
++  outputname = '@BASENAME@.o'
++  if host_system == 'windows'
++    outputname = '@BASENAME@.obj'
++  endif
++
++  if host_cpu == 'x86' or host_cpu == 'x86_64'
++    if host_cpu == 'x86'
++      asm_x = files('common/x86/dct-32.asm',
++                    'common/x86/pixel-32.asm')
++    elif host_cpu == 'x86_64'
++      asm_x = files('common/x86/dct-64.asm',
++                    'common/x86/trellis-64.asm')
++    endif
++
++    asm_x += files('common/x86/bitstream-a.asm',
++                   'common/x86/const-a.asm',
++                   'common/x86/cabac-a.asm',
++                   'common/x86/dct-a.asm',
++                   'common/x86/deblock-a.asm',
++                   'common/x86/mc-a.asm',
++                   'common/x86/mc-a2.asm',
++                   'common/x86/pixel-a.asm',
++                   'common/x86/predict-a.asm',
++                   'common/x86/quant-a.asm')
++  endif
++
++  asflags += ['-DSTACK_ALIGNMENT=@0@'.format(stack_alignment)]
++
++  if get_option('b_staticpic')
++    asflags += ['-DPIC']
++
++    # resolve textrels in the x86 asm
++    add_project_link_arguments(
++      cc.get_supported_link_arguments('-Wl,-Bsymbolic'),
++      language: 'c'
++    )
++  endif
++
++  asm_incdir = meson.current_source_dir() / 'common' / 'x86'
++
++  foreach d : depths
++    asm_gen = generator(nasm,
++      output: outputname,
++      arguments: ['-I@0@'.format(asm_incdir),
++                  asflags,
++                  '-o', '@OUTPUT@',
++                  '@INPUT@',
++                  '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                  '-DBIT_DEPTH=@0@'.format(d),
++                  '-Dprivate_prefix=x264_@0@'.format(d)])
++    asm_genx_objs = [asm_gen.process(asm_x)]
++    # These two are high and low bit-depth in separate files instead of in the
++    # same file and selected with -DBIT_DEPTH
++    if d == 8
++      asm_genx_objs += asm_gen.process('common/x86/sad-a.asm')
++    endif
++    if d == 10
++      asm_genx_objs += asm_gen.process('common/x86/sad16-a.asm')
++    endif
++    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
++  endforeach
++
++  asm_gen = generator(nasm,
++    output: outputname,
++    arguments: ['-I@0@'.format(asm_incdir),
++                asflags,
++                '-o', '@OUTPUT@',
++                '@INPUT@'])
++  asm_gen_objs = asm_gen.process('common/x86/cpu-a.asm')
++elif host_cpu == 'aarch64'
++  asm_x = files(
++    'common/aarch64/bitstream-a.S',
++    'common/aarch64/cabac-a.S',
++    'common/aarch64/dct-a.S',
++    'common/aarch64/deblock-a.S',
++    'common/aarch64/mc-a.S',
++    'common/aarch64/pixel-a.S',
++    'common/aarch64/predict-a.S',
++    'common/aarch64/quant-a.S',
++  )
++
++  foreach d : depths
++    asm_genx_objs = []
++    if nasm.found()
++      asm_gen = generator(nasm,
++        output: outputname,
++        arguments: [asflags,
++                    '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                    '-DBIT_DEPTH=@0@'.format(d),
++                    '-o', '@OUTPUT@',
++                    '@INPUT@',])
++      asm_genx_objs = asm_gen.process(asm_x)
++    else
++      asm_genx_objs = asm_x
++    endif
++    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
++  endforeach
++elif host_cpu == 'arm'
++  asm_gen_objs += files(
++    'common/arm/cpu-a.S'
++  )
++
++  asm_x =  files(
++    'common/arm/bitstream-a.S',
++    'common/arm/dct-a.S',
++    'common/arm/deblock-a.S',
++    'common/arm/mc-a.S',
++    'common/arm/pixel-a.S',
++    'common/arm/predict-a.S',
++    'common/arm/quant-a.S',
++  )
++  foreach d : depths
++    asm_genx_objs = []
++    if nasm.found()
++      asm_gen = generator(nasm,
++        output: outputname,
++        arguments: [asflags,
++                    '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                    '-DBIT_DEPTH=@0@'.format(d),
++                    '-o', '@OUTPUT@',
++                    '@INPUT@',])
++      asm_genx_objs = asm_gen.process(asm_x)
++    else
++      asm_genx_objs = asm_x
++    endif
++    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
++  endforeach
++endif
++
++config_mak='''
++CFLAGS=-Wno-maybe-uninitialized -Wshadow -Wall -std=gnu99 -fomit-frame-pointer -fno-tree-vectorize
++'''
++
++cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h') and cc.has_function('memalign'))
++cdata.set10('HAVE_STRING_H', cc.has_header('string.h')) # getopt.c
++cdata.set10('ARCH_X86_64', host_cpu == 'x86_64')
++cdata.set10('ARCH_X86', host_cpu == 'x86')
++cdata.set('STACK_ALIGNMENT', stack_alignment)
++cdata.set10('HAVE_CPU_COUNT',
++  cc.has_header_symbol('sched.h', 'CPU_COUNT', args: '-D_GNU_SOURCE'))
++cdata.set10('HAVE_LOG2F',
++  cc.has_function('log2f', dependencies: libm))
++cdata.set10('HAVE_STRTOK_R',
++  cc.has_function('strtok_r'))
++cdata.set10('HAVE_CLOCK_GETTIME',
++  cc.has_function('clock_gettime'))
++cdata.set10('HAVE_MMAP', host_system != 'windows'
++  and cc.has_header_symbol('sys/mman.h', 'MAP_PRIVATE'))
++cdata.set10('HAVE_THP', host_system == 'linux'
++  and (host_cpu == 'x86' or host_cpu == 'x86_64')
++  and cc.has_header_symbol('sys/mman.h', 'MADV_HUGEPAGE'))
++
++if cc.has_function('fseeko')
++  cdata.set('fseek', 'fseeko')
++  cdata.set('ftell', 'ftello')
++elif cc.has_function('fseeko64')
++  cdata.set('fseek', 'fseeko64')
++  cdata.set('ftell', 'ftello64')
++elif cc.has_function('_fseeki64')
++  cdata.set('fseek', '_fseeki64')
++  cdata.set('ftell', '_ftelli64')
++endif
++
++if host_system == 'bsd' # one to rule them all apparently
++  cdata.set10('SYS_FREEBSD', true)
++elif ['darwin', 'ios'].contains(host_system)
++  cdata.set10('SYS_MACOSX', true)
++elif host_system == 'sunos' or host_system == 'solaris'
++  cdata.set10('SYS_SunOS', true)
++else
++  cdata.set10('SYS_' + host_system.to_upper(), true)
++endif
++
++swscale_deps = []
++lavf_deps = []
++ffms_deps = []
++gpac_deps = []
++lsmash_deps = []
++
++have_swscale = false
++have_lavf = false
++have_ffms = false
++have_gpac = false
++have_lsmash = false
++
++if get_option('cli')
++  # swscale
++  swscale_dep = dependency('libswscale', required: get_option('swscale'),
++                           fallback: ['FFmpeg', 'libswscale_dep'])
++  avutil_dep = dependency('libavutil', required: get_option('swscale'),
++                          fallback: ['FFmpeg', 'libavutil_dep'])
++  have_swscale = swscale_dep.found() and avutil_dep.found()
++  swscale_deps = [swscale_dep, avutil_dep]
++
++  # lavf
++  avformat_dep = dependency('libavformat', required: get_option('lavf'),
++                            fallback: ['FFmpeg', 'libavformat_dep'])
++  avcodec_dep = dependency('libavcodec', required: get_option('lavf'),
++                            fallback: ['FFmpeg', 'libavcodec_dep'])
++  avutil_dep = dependency('libavutil', required: get_option('lavf'),
++                            fallback: ['FFmpeg', 'libavutil_dep'])
++  have_lavf = avformat_dep.found() and avcodec_dep.found() and avutil_dep.found()
++  lavf_deps = [avformat_dep, avcodec_dep, avutil_dep]
++
++  have_lsmash = not get_option('lsmash').disabled()
++
++  # ffms
++  ffms_dep = dependency('ffms2', version: '>= 2.21.0', required: get_option('ffms'))
++  swscale_dep = dependency('libswscale', required: get_option('ffms'),
++                           fallback: ['FFmpeg', 'libswscale_dep'])
++  have_ffms = ffms_dep.found() and swscale_dep.found()
++  ffms_deps = [ffms_dep, swscale_dep]
++
++  # gpac
++  if not get_option('gpac').disabled()
++    if cc.has_header('gpac/isomedia.h')
++      gpac_lib = cc.find_library('gpac', required: get_option('gpac'))
++      have_gpac = gpac_lib.found()
++      gpac_deps = [gpac_lib]
++    endif
++  endif
++
++  # lsmash
++  lsmash_dep = dependency('liblsmash', required: get_option('lsmash'))
++  have_lsmash = lsmash_dep.found()
++  lsmash_deps = [lsmash_dep]
++endif
++
++cdata.set10('HAVE_SWSCALE', have_swscale)
++cdata.set10('HAVE_LAVF', have_lavf)
++cdata.set10('HAVE_GPL', get_option('gpl'))
++cdata.set10('HAVE_INTERLACED', get_option('interlaced'))
++cdata.set10('HAVE_FFMS', have_ffms)
++cdata.set10('HAVE_GPAC', have_gpac)
++cdata.set10('HAVE_LSMASH', have_lsmash)
++
++foreach var : have_list
++  entry = 'HAVE_@0@'.format(var.to_upper())
++  if not cdata.has(entry)
++    cdata.set10(entry, false)
++  endif
++endforeach
++
++# write config.h
++configure_file(output : 'config.h', configuration : cdata)
++
++# x264_config.h
++x264_config = configuration_data()
++x264_config.set('X264_BIT_DEPTH', depths[0])
++x264_config.set('X264_GPL', cdata.get('HAVE_GPL'))
++x264_config.set('X264_INTERLACED', cdata.get('HAVE_INTERLACED'))
++x264_config.set_quoted('X264_VERSION', ' r@0@ @1@'.format(x264_rev, x264_commit))
++x264_config.set_quoted('X264_POINTVER', x264_ver)
++
++chroma_format_opt = get_option('chroma-format')
++if chroma_format_opt == 'all'
++  x264_config.set('X264_CHROMA_FORMAT', 0)
++else
++  x264_config.set('X264_CHROMA_FORMAT', 'X264_CSP_I' + chroma_format_opt)
++endif
++
++configure_file(output : 'x264_config.h',
++  configuration : x264_config,
++  install_dir: get_option('includedir'))
++install_headers('x264.h')
++
++# Depth-agnostic sources
++sources = [
++  'common/osdep.c',
++  'common/base.c',
++  'common/cpu.c',
++  'common/tables.c',
++  'encoder/api.c',
++]
++
++# These need to be compiled once for each bit depth
++sources_x = [
++  'common/mc.c',
++  'common/predict.c',
++  'common/pixel.c',
++  'common/macroblock.c',
++  'common/frame.c',
++  'common/dct.c',
++  'common/cabac.c',
++  'common/common.c',
++  'common/rectangle.c',
++  'common/set.c',
++  'common/quant.c',
++  'common/deblock.c',
++  'common/vlc.c',
++  'common/mvpred.c',
++  'common/bitstream.c',
++  'encoder/analyse.c',
++  'encoder/me.c',
++  'encoder/ratecontrol.c',
++  'encoder/set.c',
++  'encoder/macroblock.c',
++  'encoder/cabac.c',
++  'encoder/cavlc.c',
++  'encoder/encoder.c',
++  'encoder/lookahead.c',
++]
++
++if not get_option('asm').disabled()
++  if ['x86', 'x86_64'].contains(host_cpu)
++    sources_x += files(
++      'common/x86/mc-c.c',
++      'common/x86/predict-c.c',
++    )
++  elif host_cpu == 'arm'
++    sources_x += files(
++      'common/arm/mc-c.c',
++      'common/arm/predict-c.c',
++    )
++  elif host_cpu == 'aarch64'
++    sources_x += files(
++      'common/aarch64/asm-offsets.c',
++      'common/aarch64/mc-c.c',
++      'common/aarch64/predict-c.c',
++    )
++  elif host_cpu.startswith('ppc')
++    sources_x += files(
++      'common/ppc/dct.c',
++      'common/ppc/debloc4k.c',
++      'common/ppc/mc.c',
++      'common/ppc/pixel.c',
++      'common/ppc/predict.c',
++      'common/ppc/quant.c',
++    )
++  elif host_cpu.startswith('mips') and conf.get('HAVE_MSA')
++    sources_x += files(
++      'common/mips/dct-c.c',
++      'common/mips/deblock-c.c',
++      'common/mips/mc-c.c',
++      'common/mips/pixel-c.c',
++      'common/mips/predict-c.c',
++      'common/mips/quant-c.c',
++    )
++  endif
++endif
++
++cli_incs = []
++
++# Depth-agnostic cli sources
++cli_sources = [
++  'x264.c',
++  'autocomplete.c',
++  'input/input.c',
++  'input/timecode.c',
++  'input/raw.c',
++  'input/y4m.c',
++  'output/raw.c',
++  'output/matroska.c',
++  'output/matroska_ebml.c',
++  'output/flv.c',
++  'output/flv_bytestream.c',
++  'filters/filters.c',
++  'filters/video/video.c',
++  'filters/video/source.c',
++  'filters/video/internal.c',
++  'filters/video/resize.c',
++  'filters/video/fix_vfr_pts.c',
++  'filters/video/select_every.c',
++  'filters/video/crop.c'
++]
++
++# These need to be compiled once for each bit depth
++cli_sources_x = [
++  'filters/video/cache.c',
++  'filters/video/depth.c',
++]
++
++# Optional module sources
++if threads.found()
++  sources_x += ['common/threadpool.c']
++  cli_sources_x += ['input/thread.c']
++
++  if host_system == 'windows'
++    sources += ['common/win32thread.c']
++  endif
++endif
++
++# GPL-only files
++if get_option('gpl')
++  cli_sources += []
++endif
++
++# Optional module sources
++cli_deps = []
++if have_avs
++  cli_sources += ['input/avs.c']
++  cli_deps += avs_deps
++endif
++
++if have_swscale
++  cli_deps += swscale_deps
++endif
++
++if have_lavf
++  cli_sources += ['input/lavf.c']
++  cli_deps += lavf_deps
++endif
++
++if have_ffms
++  cli_sources += ['input/ffms.c']
++  cli_deps += ffms_deps
++endif
++
++if have_gpac
++  cli_sources += ['output/mp4.c']
++  cli_deps += gpac_deps
++endif
++
++if have_lsmash
++  cli_sources += ['output/mp4_lsmash.c']
++  cli_deps += lsmash_deps
++endif
++
++win_res_objs = []
++if host_system == 'windows'
++  win = import('windows')
++  win_res_objs = win.compile_resources('x264res.rc',
++      include_directories: configinc)
++endif
++
++if not cc.has_function('getopt_long') or not cc.has_header('getopt.h')
++  cli_sources += ['extras/getopt.c']
++  cli_incs = include_directories('extras')
++endif
++
++# x264 lib
++
++bsymbolic_args = []
++sym_export_args = []
++sym_import_args = []
++default_library = get_option('default_library')
++if default_library != 'static'
++  if cc.get_id() != 'msvc'
++    bsymbolic_args = cc.get_supported_link_arguments('-Wl,-Bsymbolic')
++  endif
++  sym_export_args = ['-DX264_API_EXPORTS']
++  sym_import_args = ['-DX264_API_IMPORTS']
++endif
++
++x_libs = []
++foreach depth : depths
++  high_bit_depth = depth > 8 ? 1 : 0
++  asm_genx_objs = get_variable('asm_gen@0@_objs'.format(depth), [])
++  x_libs += static_library('x264-@0@'.format(depth), sources_x, asm_genx_objs,
++    c_args: ['-DHIGH_BIT_DEPTH=@0@'.format(high_bit_depth),
++             '-DBIT_DEPTH=@0@'.format(depth)] + sym_export_args,
++    dependencies: [threads, libm],
++    install: false)
++endforeach
++
++libx264 = library('x264',
++  sources, asm_gen_objs, win_res_objs,
++  c_args: sym_export_args,
++  version: x264_build,
++  dependencies: [threads, libm],
++  link_whole: x_libs,
++  link_args: bsymbolic_args,
++  gnu_symbol_visibility: 'hidden',
++  pic: get_option('b_staticpic'),
++  install: true)
++
++libx264_dep = declare_dependency(link_with: libx264,
++                                 compile_args: sym_import_args,
++                                 include_directories: configinc)
++
++pkgconfig = import('pkgconfig')
++pkgconfig.generate(libx264,
++  extra_cflags: sym_import_args,
++  version: x264_ver.split('+')[0],
++  description: 'H.264 (MPEG4 AVC) encoder library')
++
++# x264 command line interface
++
++if get_option('cli')
++  cli_x_libs = []
++  foreach depth : depths
++    high_bit_depth = depth > 8 ? 1 : 0
++    cli_x_libs += static_library('cli-@0@'.format(depth), cli_sources_x,
++      c_args: ['-DHIGH_BIT_DEPTH=@0@'.format(high_bit_depth),
++               '-DBIT_DEPTH=@0@'.format(depth)],
++      install: false)
++  endforeach
++
++  x264_cli = executable('x264',
++    cli_sources,
++    c_args: ['-DHAVE_STRING_H'], # for getopt.c
++    include_directories: cli_incs,
++    dependencies: [libx264_dep, threads, libm, cli_deps],
++    link_with: [cli_x_libs],
++    gnu_symbol_visibility: 'hidden',
++    install: true)
++
++  # Hack for build target aliases
++  run_target('cli', command: [python3, '-c', 'exit'], depends: x264_cli)
++
++  # install tools/bash-autocomplete.sh somewhere? (x264 build doesn't)
++endif
++
++executable('example', 'example.c',
++  dependencies: [libx264_dep, threads, libm],
++  gnu_symbol_visibility: 'hidden',
++  install: false)
++
++# and another time but link against static lib, if both are built
++if default_library == 'both'
++  executable('example-static', 'example.c',
++    dependencies: [threads, libm],
++    link_with: libx264.get_static_lib(),
++    install: false)
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 00000000..a1bd0a52
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,56 @@
++# Configuration options
++
++option('bashcompletion', type: 'boolean', value: true, description: 'Install bash-completion script')
++
++option('cli', type: 'boolean', value: true,
++       description: 'Build x264 command line application')
++
++option('opencl', type: 'boolean', value: false, # FIXME: true by default
++       description: 'Enable OpenCL features')
++
++option('gpl', type: 'boolean', value: true,
++       description: 'Enable GPL-only features')
++
++option('thread', type: 'boolean', value: true,
++       description: 'Enable multithreaded encoding')
++
++option('win32thread', type: 'boolean', value: true,
++       description: 'Enable win32threads (windows only)')
++
++option('interlaced', type: 'boolean', value: true,
++       description: 'Enable interlaced encoding support')
++
++option('bit-depth', type: 'combo', choices: ['8', '10', 'all'], value: 'all',
++       description: 'Supported output bit depth(s)')
++
++option('chroma-format', type: 'combo', choices: ['400', '420', '422', '444', 'all'], value: 'all',
++       description: 'Supported output chroma format(s)')
++
++# Advanced options
++
++option('asm', type: 'feature', value: 'auto',
++       description: 'Enable platform-specific assembly optimizations')
++
++option('gprof', type: 'feature', value: 'disabled', description: 'enable gprof profiling instrumentation (add -pg)')
++
++option('vsx', type: 'feature', value: 'auto', description: 'enable PowerPC VSX')
++
++# External library support for command line utility
++
++option('avs', type: 'feature', value: 'disabled',
++       description: 'cli avisynth support')
++
++option('swscale', type: 'feature', value: 'disabled',
++       description: 'cli swscale support')
++
++option('lavf', type: 'feature', value: 'disabled',
++       description: 'cli libavformat support')
++
++option('ffms', type: 'feature', value: 'disabled',
++       description: 'cli ffmpegsource support')
++
++option('gpac', type: 'feature', value: 'disabled',
++       description: 'cli gpac support')
++
++option('lsmash', type: 'feature', value: 'disabled',
++       description: 'cli lsmash support')
+diff --git a/subprojects/win-nasm/.gitignore b/subprojects/win-nasm/.gitignore
+new file mode 100644
+index 00000000..12f23723
+--- /dev/null
++++ b/subprojects/win-nasm/.gitignore
+@@ -0,0 +1,2 @@
++nasm-*/
++nasm-*.zip
+diff --git a/subprojects/win-nasm/download-binary.py b/subprojects/win-nasm/download-binary.py
+new file mode 100755
+index 00000000..047ae7bd
+--- /dev/null
++++ b/subprojects/win-nasm/download-binary.py
+@@ -0,0 +1,76 @@
++#!/usr/bin/env python3
++# SPDX-FileCopyrightText: 2020 Nirbheek Chauhan <nirbheek@centricular.com>
++# SPDX-FileCopyrightText: 2023 L. E. Segovia <amy@centricular.com>
++# SPDX-License-Ref: LGPL-2.1-or-later
++
++import os
++import sys
++import ssl
++import zipfile
++import hashlib
++import urllib.request
++import urllib.error
++
++# Disable certificate checking because it always fails on Windows
++# We verify the checksum anyway.
++ctx = ssl.create_default_context()
++ctx.check_hostname = False
++ctx.verify_mode = ssl.CERT_NONE
++
++BASENAME = 'nasm-{}-{}.zip'
++UPSTREAM_URL = 'https://www.nasm.us/pub/nasm/releasebuilds/{}/{}/{}'
++GSTREAMER_URL = 'https://gstreamer.freedesktop.org/src/mirror/{}'
++
++version = sys.argv[1]
++if sys.argv[2] == 'darwin':
++    arch = 'macosx'
++elif sys.argv[2] == 'x86_64':
++    arch = 'win64'
++else:
++    arch = 'win32'
++zip_sha256 = sys.argv[3]
++source_dir = os.path.join(os.environ['MESON_SOURCE_ROOT'], os.environ['MESON_SUBDIR'])
++dest = BASENAME.format(version, arch)
++dest_path = os.path.join(source_dir, dest)
++
++def get_sha256(zipf):
++    hasher = hashlib.sha256()
++    with open(zipf, 'rb') as f:
++        hasher.update(f.read())
++    return hasher.hexdigest()
++
++if os.path.isfile(dest_path):
++    found_sha256 = get_sha256(dest_path)
++    if found_sha256 == zip_sha256:
++        print('{} already downloaded'.format(dest))
++    else:
++        os.remove(dest)
++        print('{} checksum mismatch, redownloading'.format(dest), file=sys.stderr)
++
++if not os.path.isfile(dest_path):
++    for url in (GSTREAMER_URL.format(dest), UPSTREAM_URL.format(version, arch, dest)):
++        print('Downloading {} to {}'.format(url, dest))
++        try:
++            with open(dest_path, 'wb') as d:
++                f = urllib.request.urlopen(url, context=ctx)
++                d.write(f.read())
++            break
++        except BaseException as ex:
++            print(ex, file=sys.stderr)
++            print('Failed to download from {!r}, trying mirror...'.format(url), file=sys.stderr)
++            continue
++    else:
++        curdir = os.path.dirname(sys.argv[0])
++        print('Couldn\'t download {!r}! Try downloading it manually and '
++            'placing it into {!r}'.format(dest, curdir), file=sys.stderr)
++        sys.exit(1)
++
++found_sha256 = get_sha256(dest_path)
++if found_sha256 != zip_sha256:
++    print('SHA256 of downloaded file {} was {} instead of {}'
++          ''.format(dest, found_sha256, zip_sha256), file=sys.stderr)
++    sys.exit(1)
++
++print('Extracting {}'.format(dest))
++zf = zipfile.ZipFile(dest_path, "r")
++zf.extractall(path=source_dir)
+diff --git a/subprojects/win-nasm/meson.build b/subprojects/win-nasm/meson.build
+new file mode 100644
+index 00000000..ef796103
+--- /dev/null
++++ b/subprojects/win-nasm/meson.build
+@@ -0,0 +1,41 @@
++project('nasm', version : '2.16.01')
++
++download_binary = find_program(meson.current_source_dir() / 'download-binary.py')
++
++arch = host_machine.system()
++
++if not ['windows', 'darwin'].contains(arch)
++  warning('Can only download nasm for Windows or macOS, sorry')
++  subdir_done()
++endif
++
++message('Downloading and extracting nasm binaries for @0@...'.format(arch))
++
++if arch == 'windows'
++  arch = host_machine.cpu_family()
++  if arch == 'x86_64'
++    zip_hash = '029eed31faf0d2c5f95783294432cbea6c15bf633430f254bb3c1f195c67ca3a'
++  else
++    zip_hash = 'e289fa70c88594b092c916344bb8bfcd6896b604bfab284ab57b1372997c820c'
++  endif
++else
++  # macOS binaries are only identified as architecture "macosx"
++  zip_hash = 'd53c9a1bc9cd92d22e37924d31e9c68413fa03104fd165a6e7b7faf8800a1822'
++endif
++
++download = run_command(download_binary, meson.project_version(), arch, zip_hash)
++
++if download.returncode() != 0
++  warning('Download failed: @0@'.format(download.stderr().strip()))
++  subdir_done()
++endif
++
++nasm_path = meson.current_source_dir() / 'nasm-@0@'.format(meson.project_version())
++
++if host_machine.system() != 'windows'
++  # Fix ZIP permissions -- zipfile doesn't support this extended format
++  patch_nasm = find_program('patch_nasm.py', required: true)
++  run_command(patch_nasm, nasm_path, check: true)
++endif
++
++meson.override_find_program('nasm', find_program(nasm_path / 'nasm'))
+diff --git a/subprojects/win-nasm/patch_nasm.py b/subprojects/win-nasm/patch_nasm.py
+new file mode 100755
+index 00000000..36689214
+--- /dev/null
++++ b/subprojects/win-nasm/patch_nasm.py
+@@ -0,0 +1,15 @@
++#!/usr/bin/env python3
++
++# SPDX-FileCopyrightText: 2023 L. E. Segovia <amy@amyspark.me>
++# SPDX-License-Identifier: BSD-3-Clause
++
++from pathlib import Path
++import os
++import stat
++from argparse import ArgumentParser
++
++if __name__ == '__main__':
++    parser = ArgumentParser(description='Make Nasm executable')
++    parser.add_argument('dir', type=Path, help='Source directory')
++    args = parser.parse_args()
++    os.chmod(args.dir / "nasm", stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IWUSR)
+diff --git a/version.py b/version.py
+new file mode 100755
+index 00000000..e3b3d8f8
+--- /dev/null
++++ b/version.py
+@@ -0,0 +1,102 @@
++#!/usr/bin/env python3
++#
++# x264 version.py
++#
++# Extracts versions for build:
++#  - api version based on X264_BUILD in x264.h
++#  - revision based on git rev-list | wc -l
++#  - commit hash
++#
++# Usage:
++# version.py [--build | --revision | --commit-hash | --package-version]
++import argparse
++import subprocess
++import os
++import sys
++import shutil
++
++if __name__ == '__main__':
++    arg_parser = argparse.ArgumentParser(description='Extract x264 version, revision or commit hash')
++    group = arg_parser.add_mutually_exclusive_group()
++    group.add_argument('--build', action='store_true')
++    group.add_argument('--revision', action='store_true')
++    group.add_argument('--commit-hash', action='store_true')
++    group.add_argument('--package-version', action='store_true')
++    args = arg_parser.parse_args()
++
++    srcroot = os.path.dirname(__file__)
++
++    # API version
++    api_version = None
++    with open(os.path.join(srcroot, 'x264.h'), 'r') as f:
++        for line in f.readlines():
++            if line.startswith('#define X264_BUILD '):
++                api_version = line[19:].strip()
++            if api_version:
++                break
++
++    if not api_version:
++        raise RuntimeError(f'Could not extract API version from X264_BUILD in x264.h in {srcroot}')
++
++    if args.build:
++        print(api_version)
++        exit()
++
++    ver = 0
++    head_commit = 'x'
++
++    # check if git checkout
++    git_dir = os.path.join(srcroot, '.git')
++    is_git = os.path.isdir(git_dir) or os.path.isfile(git_dir)
++    have_git = shutil.which('git') is not None
++
++    # revision
++    if is_git and have_git:
++       git_cmd = subprocess.run(['git', '--git-dir=' + git_dir, 'rev-list', 'HEAD'], stdout=subprocess.PIPE, text=True, check=True)
++       output = git_cmd.stdout.strip().splitlines()
++       localver = len(output)
++       head_commit = output[0][0:7]
++
++       if localver > 1:
++           git_cmd = subprocess.run(['git', '--git-dir=' + git_dir, 'rev-list', 'origin/master..HEAD'], stdout=subprocess.PIPE, text=True)
++           ver_diff = len(git_cmd.stdout.strip().splitlines())
++           ver = localver - ver_diff
++
++           if ver_diff != 0:
++               ver = '{0}+{1}'.format(ver,ver_diff)
++           else:
++               ver = '{0}'.format(ver)
++
++           # locally modified?
++           git_cmd = subprocess.run(['git', '--git-dir=' + git_dir, 'status'], stdout=subprocess.PIPE, text=True, check=True)
++           if git_cmd.stdout.find('modified:') >= 0:
++               ver += 'M'
++
++    elif os.path.isfile(os.path.join(srcroot, 'x264_config.h')): # version config shipped in tarball
++        with open(os.path.join(srcroot, 'x264_config.h'), 'r') as f:
++            for line in f.readlines():
++                if line.startswith('#define X264_VERSION '):
++                    head_commit = line[21:].strip().strip('"').strip().split()[-1]
++                    ver = line[21:].strip().strip('"').strip().split()[0][1:]
++
++    else: # not git, and no version config in tarball
++       print('Warning: Could not extract versions via git rev-list or x264_config.h', file=sys.stderr)
++       if is_git and not have_git:
++         print('Warning: git repository but git command not available!', file=sys.stderr)
++       print('0.{0}.999'.format(api_version))
++       exit(-1)
++
++    if args.revision:
++       print(ver)
++       exit()
++
++    if args.commit_hash:
++       print(head_commit)
++       exit()
++
++    if args.package_version:
++       print('0.{0}.{1}'.format(api_version, ver))
++       exit()
++
++    # print everything
++    print('0.{0}.{1} {2}'.format(api_version, ver, head_commit))
+-- 
+2.44.0
+

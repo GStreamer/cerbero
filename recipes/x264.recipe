@@ -3,19 +3,27 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
-    version = '20191217-2245'
+    version = '0.164.3108+git31e19f9'
     name = 'x264'
-    licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
-    configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
-                    "--libdir=%(libdir)s"
-    configure_options = '--enable-shared --enable-static --enable-pic ' \
-                        '--disable-strip --disable-lavf'
-    url = 'https://download.videolan.org/pub/x264/snapshots/x264-snapshot-%(version)s-stable.tar.bz2'
-    tarball_dirname= 'x264-snapshot-%(version)s-stable'
-    tarball_checksum = 'b2495c8f2930167d470994b1ce02b0f4bfb24b3317ba36ba7f112e9809264160'
+    btype = BuildType.MESON
+    # The snapshotting service is discontinued.
+    # However, there's no pinned tag for each stable commit.
+    # See https://download.videolan.org/pub/x264/snapshots/x264-snapshot-20191218-README.txt
+    # Patch and tarball must match the below port (keeping it for reference)
+    # remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/meson-ports/%(name)s.git'}
+    # commit = 'origin/164.3108-meson'
+    # Source url = 'https://deb.debian.org/debian/pool/main/x/x264/x264_%(version)s.orig.tar.gz'
+    url = 'https://gstreamer.freedesktop.org/src/mirror/%(name)s_%(version)s.orig.tar.gz'
+    tarball_checksum = '41606cb8e788a7f8c4514290646d4ba5c7bc68d9e1ccd1a73f446a90546913eb'
 
-    patches = ['x264/0001-configure-Force-pkgconfig-file-to-have-relative-valu.patch']
+    licenses = [License.GPLv2Plus]
+
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
+
+    meson_options = {}
 
     files_libs = ['libx264']
     files_bins = ['x264']
@@ -25,48 +33,11 @@ class Recipe(recipe.Recipe):
     allow_parallel_build = False
 
     def prepare(self):
-        # clang x86-32 fails at generating proper asm PIC code
-        # See bug https://bugzilla.gnome.org/show_bug.cgi?id=727079
-        enable_asm = True
-        AS = ['nasm']
-
-        arch = self.config.target_arch
-        if self.config.target_arch == Architecture.X86:
-            arch = 'i686'
-        if Architecture.is_arm(self.config.target_arch):
-            cc = self.get_env('CC')
-            if cc:
-                AS = [cc]
-            else:
-                AS = []
-        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
-            if Architecture.is_arm(self.config.target_arch):
-                # x264 ships its own gas-preprocessor.pl
-                AS = ['tools/' + self.get_env('GAS')]
-            elif self.config.target_arch == Architecture.X86:
-                enable_asm = False
-
         if self.config.target_platform == Platform.ANDROID:
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            # Don't build the cli on Android, it fails with NDK 16
-            self.configure_options += ' --disable-cli'
+            self.meson_options['cli'] = 'false'
             self.files_bins.remove('x264')
-            if self.config.target_arch in [Architecture.X86_64]:
-                # Fails linking into an android application
-                enable_asm = False
-            elif self.config.target_arch in [Architecture.X86] and v < 24:
-                # passing -mstackrealign consumes an extra register and will
-                # fail compliation.
-                # https://github.com/android-ndk/ndk/issues/690
-                # https://github.com/android-ndk/ndk/issues/693
-                enable_asm = False
-
-        self.set_env('AS', *AS)
-        if enable_asm is False:
-            self.configure_options += ' --disable-asm '
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('x264', 148, None, None, self.config.libdir,
-                self.config.target_platform)
-        libtool_la.save()
+        LibtoolLibrary('x264', 164, None, None, self.config.libdir,
+                self.config.target_platform).save()
         super().post_install()
