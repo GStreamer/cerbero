@@ -202,6 +202,7 @@ runs:
         find ~+ -maxdepth 1 -name 'gstreamer-1.0-devel*.msi' -exec sh -c 'echo dev-msi=$(cygpath -aw "{}") >> $GITHUB_OUTPUT' \;
 
     - name: Annotate workflow run with GStreamer version
+      shell: msys2 -eo pipefail {0}
       run: |
         echo "::notice title=Built GStreamer version ${{ steps.cerbero-config.outputs.version }}::Created installer with Cerbero short sha ${{ steps.cerbero-config.outputs.cerbero-sha }}"
 
