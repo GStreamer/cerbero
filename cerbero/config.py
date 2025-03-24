@@ -839,6 +839,8 @@ class Config(object):
         self.build_tools_config.build_tools_cache = self.build_tools_cache
         self.build_tools_config.system_build_tools = self.system_build_tools
         self.build_tools_config.external_recipes = self.external_recipes
+        self.build_tools_config.recipes_remotes = self.recipes_remotes
+        self.build_tools_config.recipes_commits = self.recipes_commits
         self.build_tools_config.extra_mirrors = self.extra_mirrors
         self.build_tools_config.cached_sources = self.cached_sources
         self.build_tools_config.vs_install_path = self.vs_install_path
