@@ -34,7 +34,7 @@ inputs:
     description: 'Whether to disable restoring from cache'
     required: false
     default: 'false'
-outputs:outputs:
+outputs:
   gstreamer-version:
     description: 'GStreamer version built'
     value: ${{ steps.cerbero-config.outputs.version }}
