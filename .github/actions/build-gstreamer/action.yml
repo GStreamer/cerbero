@@ -34,11 +34,10 @@ inputs:
     description: 'Whether to disable restoring from cache'
     required: false
     default: 'false'
+outputs:outputs:
   gstreamer-version:
-    description: 'GStreamer version'
-    required: true
-    default: ''
-outputs:
+    description: 'GStreamer version built'
+    value: ${{ steps.cerbero-config.outputs.version }}
   runtime-installer-path:
     description: 'Location of the GStreamer runtime installer'
     value: ${{ steps.build-packages.outputs.runtime-msi }}
