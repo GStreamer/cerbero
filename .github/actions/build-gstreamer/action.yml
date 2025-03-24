@@ -201,6 +201,10 @@ runs:
         find ~+ -maxdepth 1 -name 'gstreamer-1.0-msvc*.msi' -exec sh -c 'echo runtime-msi=$(cygpath -aw "{}") >> $GITHUB_OUTPUT' \;
         find ~+ -maxdepth 1 -name 'gstreamer-1.0-devel*.msi' -exec sh -c 'echo dev-msi=$(cygpath -aw "{}") >> $GITHUB_OUTPUT' \;
 
+    - name: Annotate workflow run with GStreamer version
+      run: |
+        echo "::notice title=Built GStreamer version ${{ steps.cerbero-config.outputs.version }}::Created installer with Cerbero short sha ${{ steps.cerbero-config.outputs.cerbero-sha }}"
+
     - uses: actions/upload-artifact@v4
       if: ${{ steps.build-packages.outputs.runtime-msi || steps.build-packages.outputs.dev-msi }}
       with:

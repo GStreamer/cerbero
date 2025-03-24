@@ -74,6 +74,7 @@ runs:
         $msi_path = "$(( $pwd ))\gstreamer-runtime.msi"
         Invoke-WebRequest -Uri "${{ inputs.runtime-installer-url }}" -OutFile "$msi_path"
         echo "msi-path=$msi_path" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+        echo "::notice title=GStreamer runtime installer downloaded::Downloaded GStreamer runtime installer from ${{ inputs.runtime-installer-url }}"
     - if: ${{ !inputs.development-installer-path }}
       id: download-development
       name: Download GStreamer Development MSI
@@ -82,6 +83,7 @@ runs:
         $msi_path = "$(( $pwd ))\gstreamer-development.msi"
         Invoke-WebRequest -Uri "${{ inputs.development-installer-url }}" -OutFile "$msi_path"
         echo "msi-path=$msi_path" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+        echo "::notice title=GStreamer development installer downloaded::Downloaded GStreamer development installer from ${{ inputs.development-installer-url }}"  
 
     # Set the local paths favoring if the download happened
     - id: msi-path
