@@ -168,7 +168,7 @@ fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
-  tags: [ 'placeholder-job' ]
+  tags: [ 'kvm' ]
 
 checks fedora image:
   stage: "build docker"
@@ -178,7 +178,7 @@ checks fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
-  tags: [ 'placeholder-job' ]
+  tags: [ 'kvm' ]
 
 tests ubuntu image:
   stage: "build docker"
@@ -187,7 +187,7 @@ tests ubuntu image:
     - .fdo.container-build@ubuntu
   variables:
     GIT_STRATEGY: none
-  tags: [ 'placeholder-job' ]
+  tags: [ 'kvm' ]
 
 android fedora image:
   stage: "build docker"
@@ -197,7 +197,7 @@ android fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
-  tags: [ 'placeholder-job' ]
+  tags: [ 'kvm' ]
 
 ubuntu image:
   stage: "build docker"
@@ -207,7 +207,7 @@ ubuntu image:
     - .fdo.container-build@ubuntu
   variables:
     GIT_STRATEGY: none
-  tags: [ 'placeholder-job' ]
+  tags: [ 'kvm' ]
 
 # Rules for when to use a specific job
 
