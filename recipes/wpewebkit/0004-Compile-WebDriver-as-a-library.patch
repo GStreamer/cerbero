@@ -1,4 +1,4 @@
-From 447e75dca9b400af16226f96aecc96389c66a25a Mon Sep 17 00:00:00 2001
+From 31d8e2d6a4bdc8c2578d547b605ca1bde34462b7 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Mon, 23 Sep 2024 13:51:10 +0300
 Subject: Compile WebDriver as a library.
@@ -82,5 +82,5 @@ index 38ac0c471add..359906540cc8 100644
      set(CMAKE_POSITION_INDEPENDENT_CODE True)
  
 -- 
-2.48.1
+2.49.0
 

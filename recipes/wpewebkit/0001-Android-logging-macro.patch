@@ -1,4 +1,4 @@
-From 33e71b9c0c9610c3c128ff0d6dff4a66559c5829 Mon Sep 17 00:00:00 2001
+From 359721be4f88b3eb2719971986a04c3efbe31f3f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 15:32:57 +0200
 Subject: Android logging macro
@@ -19,5 +19,5 @@ index 03f33943875e..cf0a70bcce8a 100644
 +#include <android/log.h>
 +#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WPEDebug", __VA_ARGS__)
 -- 
-2.48.1
+2.49.0
 

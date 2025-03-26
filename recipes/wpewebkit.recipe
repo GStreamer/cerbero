@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.46.6'
+    version = '2.46.7'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '2f8f8447b9c7b0578f7d751ca27c682a2c180b5abb91542af52a96e8a24a6262'
+    tarball_checksum = 'cf3e47638595d86de96abdb94db69a836c8aa509fc063be714f52c5a24bb5cd5'
     deps = [
         'icu',
         'cairo',
@@ -192,10 +192,9 @@ class Recipe(recipe.Recipe):
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
                 'wpewebkit/0001-Android-logging-macro.patch',
-                'wpewebkit/0002-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
-                'wpewebkit/0003-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
-                'wpewebkit/0004-Use-ASharedMemory-instead-of-shm.patch',
-                'wpewebkit/0005-Compile-WebDriver-as-a-library.patch',
+                'wpewebkit/0002-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
+                'wpewebkit/0003-Use-ASharedMemory-instead-of-shm.patch',
+                'wpewebkit/0004-Compile-WebDriver-as-a-library.patch',
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

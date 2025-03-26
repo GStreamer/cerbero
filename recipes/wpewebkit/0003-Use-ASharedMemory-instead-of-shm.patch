@@ -1,4 +1,4 @@
-From 7543c9a98bea72748057c04a13cced08f20e1f64 Mon Sep 17 00:00:00 2001
+From 49412844251a3104a2dce77ded70b7d3862c548e Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 28 Sep 2022 15:13:08 +0300
 Subject: Use ASharedMemory instead of shm
@@ -125,5 +125,5 @@ index e4a63f02f3da..75036fc8a95d 100644
  }
  
 -- 
-2.48.1
+2.49.0
 

@@ -1,4 +1,4 @@
-From 5aa3bf061a1b784134b5ef956ef2db9559984269 Mon Sep 17 00:00:00 2001
+From c0236a2e03a40a8ffdb50b0e988f2190a295a7b6 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Thu, 24 Mar 2022 09:41:17 +0200
 Subject: Allow setting injected bundle and inspector lib paths in non dev mode
@@ -45,5 +45,5 @@ index 65cf0eb2b99a..f34220b0e762 100644
      static const char* injectedBundlePath = PKGLIBDIR G_DIR_SEPARATOR_S "injected-bundle" G_DIR_SEPARATOR_S;
      return injectedBundlePath;
 -- 
-2.48.1
+2.49.0
 
