@@ -649,6 +649,9 @@ class Recipe(custom.GStreamer):
                 # self.enable_plugin('svt-jpeg-xs', 'codecs', dep='svt-jpeg-xs')
                 self.deps.append('svt-jpeg-xs')
 
+        if self.config.target_platform != Platform.WINDOWS:
+            self.enable_plugin('unixfd', 'effects')
+
     def post_install(self):
         LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gstreamer-1.0', 'gstbase-1.0']).save()
