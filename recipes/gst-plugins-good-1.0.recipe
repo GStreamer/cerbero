@@ -133,7 +133,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstwavpack%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstwavparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstxingmux%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgsty4menc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsty4m%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
@@ -166,7 +166,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstwavpack.a', '%(libdir)s/gstreamer-1.0/libgstwavpack.la',
              '%(libdir)s/gstreamer-1.0/libgstwavparse.a', '%(libdir)s/gstreamer-1.0/libgstwavparse.la',
              '%(libdir)s/gstreamer-1.0/libgstxingmux.a', '%(libdir)s/gstreamer-1.0/libgstxingmux.la',
-             '%(libdir)s/gstreamer-1.0/libgsty4menc.a', '%(libdir)s/gstreamer-1.0/libgsty4menc.la',
+             '%(libdir)s/gstreamer-1.0/libgsty4m.a', '%(libdir)s/gstreamer-1.0/libgsty4m.la',
     ]
 
     files_plugins_net = [
