@@ -59,12 +59,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            .github/actions/build-gstreamer-for-windows
+            .github/actions/**
           sparse-checkout-cone-mode: false
 
-      - id: build-gstreamer
-        name: Build GStreamer
-        uses: ./.github/actions/build-gstreamer-for-windows
+      - id: setup-gstreamer
+        name: Setup GStreamer
+        uses: ./.github/actions/setup-gstreamer
         with:
           cerbero-repo: ${{ inputs.cerbero-repo || github.repository }}
           cerbero-ref: ${{ inputs.cerbero-ref || github.ref }}
@@ -79,8 +79,3 @@ jobs:
             ${{ vars.GSTREAMER_S3_UPLOAD_BUCKET && steps.s3-prefix.outcome != 'skipped' && format('s3://{0}/{1}', vars.GSTREAMER_S3_UPLOAD_BUCKET, steps.s3-prefix.outputs.prefix) || '' }}
           s3-upload-path: >-
             ${{ vars.GSTREAMER_S3_UPLOAD_BUCKET && vars.GSTREAMER_S3_UPLOAD_PREFIX && format('s3://{0}/{1}', vars.GSTREAMER_S3_UPLOAD_BUCKET, vars.GSTREAMER_S3_UPLOAD_PREFIX) || '' }}
-
-      - name: Annotate workflow run with GStreamer version
-        if: steps.build-gstreamer.outputs.gstreamer-version
-        run: |
-          echo "::notice title=Built GStreamer version ${{ steps.build-gstreamer.outputs.gstreamer-version }}::Created installer with Cerbero short sha ${{ steps.build-gstreamer.outputs.cerbero-short-sha }}"
