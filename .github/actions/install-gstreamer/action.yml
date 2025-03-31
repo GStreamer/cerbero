@@ -113,6 +113,7 @@ runs:
         $GSTREAMER_BIN="$GSTREAMER_ROOT\bin"
         echo "$GSTREAMER_BIN" | Out-File -FilePath $Env:GITHUB_PATH -Append -Encoding utf8
         echo "PKG_CONFIG_PATH=$GSTREAMER_ROOT\lib\pkgconfig;$env:PKG_CONFIG_PATH" | Out-File -FilePath $Env:GITHUB_ENV -Append -Encoding utf8
+        echo "GSTREAMER_1_0_ROOT_MSVC_X86_64=$GSTREAMER_ROOT" | Out-File -FilePath $Env:GITHUB_ENV -Append -Encoding utf8
 
         echo "gstreamer-bin-dir=$GSTREAMER_BIN" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
         echo "gstreamer-install-dir=$GSTREAMER_INSTALL_DIR" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
