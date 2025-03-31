@@ -55,6 +55,15 @@ outputs:
   cerbero-short-sha:
     description: 'Short SHA of the Cerbero checkout'
     value: ${{ steps.version-info.outputs.cerbero-short-sha }}
+  install-dir:
+    description: 'GStreamer install directory'
+    value: ${{ steps.install.outputs.install-dir }}
+  plugin-dir:
+    description: 'GStreamer plugin directory'
+    value: ${{ steps.install.outputs.plugin-dir }}
+  bin-dir:
+    description: 'GStreamer bin directory'
+    value: ${{ steps.install.outputs.bin-dir }}
 
 runs:
   using: "composite"
