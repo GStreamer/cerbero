@@ -41,6 +41,7 @@ class BuildTools(BootstrapperBase, Fetch):
         BootstrapperBase.__init__(self, config, offline, None)
 
         if self.config.variants.rust:
+            self.BUILD_TOOLS.append('bindgen-cli')
             self.BUILD_TOOLS.append('cargo-c')
 
         if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):

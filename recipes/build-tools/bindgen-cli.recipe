@@ -1,0 +1,35 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from pathlib import Path
+import tempfile
+
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'bindgen-cli'
+    version = '0.71.1'
+    stype = SourceType.TARBALL
+    btype = BuildType.CARGO
+    url = 'https://github.com/rust-lang/rust-bindgen/releases/download/v%(version)s/source.tar.gz'
+    tarball_checksum = '3730f24bd448bfbaac5bee6e314ce904cd7877ac8007c79821ce5fa721599262'
+    tarball_dirname = '%(name)s-%(version)s'
+
+    # The bindgen repo is a workspace for both bindgen (the crate)
+    # and bindgen-cli (the CLI), we need only the CLI
+    workspace_member = 'bindgen-cli'
+
+    files_bins = ['bindgen']
+
+    def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            self.deps.append('libclang')
+            self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
+
+    def post_install(self):
+        bin = os.path.join(self.config.build_tools_prefix, 'bin', 'bindgen')
+        with tempfile.TemporaryDirectory() as tmp:
+            demo_header = Path(tmp) / 'foo.h'
+            with demo_header.open('w', encoding='utf-8') as f:
+                f.write('#include <stdio.h>\n#include <stdint.h>\n\nint32_t foo(int32_t bar);\n')
+            shell.new_call([bin, demo_header], cmd_dir=tmp, logfile=self.logfile, env=self.env)
+        super().post_install()

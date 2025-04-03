@@ -1251,6 +1251,7 @@ class Cargo(Build, ModifyEnvBase):
     can_msvc = True
     cargo_features = None
     cargo_packages = None
+    workspace_member = None
 
     def __init__(self):
         self.cargo_features = self.cargo_features or []
@@ -1382,11 +1383,15 @@ class Cargo(Build, ModifyEnvBase):
     @modify_environment
     async def install(self):
         self.maybe_add_system_libs(step='configure+install')
+        if self.workspace_member:
+            path = os.path.join(self.config_src_dir, self.workspace_member)
+        else:
+            path = self.config_src_dir
         cmd = [
             self.cargo,
             'install',
             '--path',
-            self.config_src_dir,
+            path,
             '--root',
             self.config.prefix,
         ] + self.get_cargo_args()
