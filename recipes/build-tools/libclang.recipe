@@ -1,0 +1,38 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+from pathlib import Path
+import shutil
+
+# Created by manually unpacking bin/libclang.dll from
+# https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.2/LLVM-20.1.2-win32.exe
+# https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.2/LLVM-20.1.2-win64.exe
+# 0a47463d3be7301e4803388f7bbee468687e277577b6dd6358aa501c87cfa8a7 *LLVM-20.1.2-win32.exe
+# 210bfb78034addb7b1162bb9bbc9c907cc8aec4fda95cc64e6a1f068718d8197 *LLVM-20.1.2-win64.exe
+# 8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee *libclang-20.1.2/LICENSE.TXT
+# b7ebb5c124169fd7d294b3c5bd8e389b60d35e64db16e6dd14ca00d63f1ef579 *libclang-20.1.2/x64/bin/libclang.dll
+# 24fd453155745c4b1a47156f68de5ae4e6c81488c9d969c0819c01b72ecb2109 *libclang-20.1.2/x86/bin/libclang.dll
+# We extract these because the two .exe files are 706MB total, while the xz
+# compressed tarball with just libclang is 37MB
+
+class Recipe(recipe.Recipe):
+    name = 'libclang'
+    version = '20.1.2'
+    licenses = [{License.Apachev2: ['LICENSE.txt']}]
+    btype = BuildType.CUSTOM
+    stype = SourceType.TARBALL
+    url = 'https://gstreamer.freedesktop.org/data/src/mirror/libclang-%(version)s.tar.xz'
+    tarball_checksum = '4c2452e44defe4147d0502eee36ceef9eeb9e6ef7baf27554b1a9bc3d033805d'
+    library_type = LibraryType.SHARED
+
+    files_libs = ['libclang']
+
+    can_msvc = True
+
+    async def install(self):
+        bindir = os.path.join(self.config.build_tools_prefix, 'bin')
+        os.makedirs(bindir, exist_ok=True)
+        if self.config.arch == Architecture.X86:
+            src = Path(self.config_src_dir) / 'x86' / 'bin' / 'libclang.dll'
+        else:
+            src = Path(self.config_src_dir) / 'x64' / 'bin' / 'libclang.dll'
+        shutil.copy(src, bindir)

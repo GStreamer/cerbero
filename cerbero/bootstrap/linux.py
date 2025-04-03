@@ -115,6 +115,7 @@ class DebianBootstrapper(UnixBootstrapper):
         'ccache',
         'python3-setuptools',
         'libssl-dev',
+        'libclang-dev',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -185,6 +186,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'alsa-lib-devel',
         'perl-IPC-Cmd',
         'libatomic',
+        'clang-devel',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -288,6 +290,7 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         'git',
         'ccache',
         'openssl-devel',
+        'clang',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -325,6 +328,7 @@ class ArchBootstrapper(UnixBootstrapper):
         'alsa-lib',
         'which',
         'libpulse',
+        'clang',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -368,6 +372,7 @@ class GentooBootstrapper(UnixBootstrapper):
         'net-misc/wget',
         'dev-libs/openssl',
         'media-libs/alsa-lib',
+        'sys-devel/clang',
     ]
 
     def __init__(self, config, offline, assume_yes):
