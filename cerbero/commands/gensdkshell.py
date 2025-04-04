@@ -89,7 +89,7 @@ class GenSdkShell(Command):
         if isinstance(py_prefixes, str):
             python_path = os.path.join(prefix_env, py_prefixes)
         elif isinstance(py_prefixes, list):
-            python_path = os.pathsep.join(py_prefixes)
+            python_path = os.pathsep.join([os.path.join(prefix_env, x) for x in py_prefixes])
         else:
             python_path = ''
         self._putvar('PATH', '%s/bin${PATH:+:$PATH}' % prefix_env)
