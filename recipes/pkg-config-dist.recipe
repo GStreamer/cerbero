@@ -1,0 +1,37 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from pathlib import Path
+import shutil
+
+
+class Recipe(recipe.Recipe):
+    name = 'pkg-config-dist'
+    version = '20260328'
+    stype = SourceType.TARBALL
+    btype = BuildType.CUSTOM
+    # This is built from our pkg-config meson port, with the build scripts used
+    # in CI: https://gitlab.freedesktop.org/gstreamer/meson-ports/pkg-config
+    # https://gitlab.freedesktop.org/gstreamer/meson-ports/pkg-config/-/packages/1061
+    url = 'https://gstreamer.freedesktop.org/data/src/mirror/%(name)s/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'bcc6bafcea419f4d397eb340dc039cf288a87d999dd899106eff8f3b12819eff'
+
+    files_devel = [
+        'share/gst-android/ndk-build/tools/windows/pkg-config.exe',
+        'share/gst-android/ndk-build/tools/macos/pkg-config',
+    ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.ANDROID:
+            raise InvalidRecipeError(self, "Invalid platform")
+
+    async def install(self):
+        src_dir = Path(self.config_src_dir)
+        src_windows = src_dir / 'win64' / 'pkg-config.exe'
+        src_macos = src_dir / 'macos' / 'pkg-config'
+        dst_dir = Path(self.config.prefix)
+        dst_windows = dst_dir / self.files_devel[0]
+        dst_windows.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src_windows, dst_windows)
+        dst_macos = dst_dir / self.files_devel[1]
+        dst_macos.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src_macos, dst_macos)
