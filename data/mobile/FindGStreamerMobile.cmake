@@ -128,7 +128,7 @@ if(ANDROID)
     if(NOT DEFINED GStreamer_NDK_BUILD_PATH AND DEFINED GSTREAMER_NDK_BUILD_PATH)
         set(GStreamer_NDK_BUILD_PATH "${GSTREAMER_NDK_BUILD_PATH}")
     elseif(NOT DEFINED GStreamer_NDK_BUILD_PATH)
-        set(GStreamer_NDK_BUILD_PATH  "${GStreamer_ROOT}/share/gst-android/ndk-build/")
+        set(GStreamer_NDK_BUILD_PATH  "${GStreamer_ROOT_DIR}/share/gst-android/ndk-build/")
     endif()
 endif()
 
@@ -155,7 +155,7 @@ if(ANDROID)
     if(NOT DEFINED GStreamer_NDK_BUILD_PATH AND DEFINED GSTREAMER_NDK_BUILD_PATH)
         set(GStreamer_NDK_BUILD_PATH "${GSTREAMER_NDK_BUILD_PATH}")
     elseif(NOT DEFINED GStreamer_NDK_BUILD_PATH)
-        set(GStreamer_NDK_BUILD_PATH  "${GStreamer_ROOT}/share/gst-android/ndk-build/")
+        set(GStreamer_NDK_BUILD_PATH  "${GStreamer_ROOT_DIR}/share/gst-android/ndk-build/")
     endif()
 elseif(IOS)
     if(NOT DEFINED GStreamer_ASSETS_DIR AND DEFINED GStreamer_ASSETS_DIR)
@@ -350,6 +350,11 @@ if (GSTREAMER_IS_MOBILE)
     # libraries listing.
     # If pkgconf is available, replace all PC_GStreamer_ entries with
     # PC_GStreamer_NoDeps and uncomment the code block above.
+    if (ANDROID AND CMAKE_HOST_WIN32)
+        # Prevent visibility inconsistencies between glib and others wrt.
+        # libintl
+        list(REMOVE_DUPLICATES PC_GStreamer_LIBRARIES)
+    endif()
     foreach(LOCAL_LIB IN LISTS PC_GStreamer_LIBRARIES)
         # list(TRANSFORM REPLACE) is of no use here
         # https://gitlab.kitware.com/cmake/cmake/-/issues/16899
