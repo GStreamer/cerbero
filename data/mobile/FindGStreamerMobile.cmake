@@ -168,6 +168,10 @@ elseif(IOS)
     endif()
 endif()
 
+if (ANDROID AND CMAKE_HOST_WIN32)
+    set(PKG_CONFIG_EXECUTABLE "${GStreamer_NDK_BUILD_PATH}/tools/windows/pkg-config.exe")
+endif()
+
 if (ANDROID)
     file(READ "${GStreamer_NDK_BUILD_PATH}/GStreamer.java" JAVA_INPUT)
 endif()
