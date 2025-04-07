@@ -5,14 +5,14 @@ variables:
   # If you are hacking on them or need a them to rebuild, its enough
   # to change any part of the string of the image you want.
   ###
-  FEDORA_TAG:  '2025-03-13.0'
+  FEDORA_TAG:  '2025-04-08.0'
 
   CHECKS_FEDORA_TAG: '2025-03-13.0'
 
   # FIXME: needs a rebuild (also add suffix to FDO_DISTRIBUTION_TAG in .gitlab-ci.yml then)
   ANDROID_FEDORA_TAG: '2024-11-01.0'
 
-  UBUNTU_TAG: '2025-03-13.0'
+  UBUNTU_TAG: '2025-04-08.0'
 
   TESTS_UBUNTU_TAG: '2025-03-13.0'
 
