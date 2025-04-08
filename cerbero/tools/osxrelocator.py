@@ -89,7 +89,7 @@ class OSXRelocator(object):
         # assert that it's already rpath'd
         dylib_id = self.get_dylib_id(object_file)
         is_dylib = dylib_id is not None
-        is_framework = is_dylib and not object_file.endswith('.dylib')
+        is_framework = is_dylib and not any([object_file.endswith(i) for i in ('.dylib', '.so')])
         if not is_framework:
             self.change_id(object_file, id='@rpath/{}'.format(os.path.basename(original_file)))
         elif '@rpath' not in dylib_id:
