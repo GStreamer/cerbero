@@ -26,6 +26,12 @@ variables:
   # CI_GSTREAMER_* variables are set by gstreamer's CI when it triggers cerbero CI.
   CI_GSTREAMER_TRIGGERED: 'false'
   GST_UPSTREAM_BRANCH: 'main'
+  # Our gitlab instance and runner are using a proxy and have
+  # trouble with the normal fetch. git itself handles the proxy
+  # more reliably.
+  #
+  # https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --clocktime
