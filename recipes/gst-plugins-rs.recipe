@@ -1,12 +1,13 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer, running_on_cerbero_ci
+from cerbero.enums import DistroVersion
 from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
 from pathlib import Path
 import re
-import shlex
 import shutil
+import subprocess
 import tempfile
 
 
@@ -198,6 +199,24 @@ class Recipe(recipe.Recipe):
             self.set_env('LDFLAGS')
             self.set_env('LIBRARY_PATH')
 
+        if self.config.platform == Platform.WINDOWS:
+            # For bindgen if it's needed
+            self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
+            # For aws-lc-rs -- uses CMake in the background
+            if self.using_msvc():
+                # MSVC is already set up
+                self.set_env('CMAKE_GENERATOR', 'Ninja')
+            else:
+                self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}')
+        elif self.config.target_platform == Platform.ANDROID:
+            # For aws-lc-rs
+            self.set_env('ANDROID_NDK_ROOT', self.config.env['ANDROID_NDK_HOME'])
+            # https://github.com/rust-lang/cmake-rs/issues/140
+            self.set_env("CMAKE_TOOLCHAIN_FILE", f"{self.config_src_dir}/toolchain.cmake")
+            self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
+            self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
+            self.set_env('CMAKE_GENERATOR', 'Ninja')
+
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version
         toml_version = self.get_cargo_toml_version()
@@ -207,6 +226,20 @@ class Recipe(recipe.Recipe):
                 raise FatalError(msg)
             else:
                 m.warning(msg)
+        # For aws-lc-rs/bindgen -- libclang does no introspection when using
+        # external compilers to build
+        if self.config.target_platform == Platform.ANDROID:
+            # For aws-lc-rs
+            # https://github.com/rust-lang/cmake-rs/issues/140
+            arch = self.config.target_arch
+            if self.config.target_arch == Architecture.ARMv7:
+                arch = 'armeabi-v7a'
+            elif self.config.target_arch == Architecture.ARM64:
+                arch = 'arm64-v8a'
+            with open(f'{self.config_src_dir}/toolchain.cmake', 'w') as f:
+                f.write(f'set(ANDROID_ABI {arch})\n')
+                f.write(f'set(ANDROID_PLATFORM android-{DistroVersion.get_android_api_version(self.config.target_distro_version)})\n')
+                f.write(f"include({self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake)")
         await super().configure()
 
     def post_install(self):
