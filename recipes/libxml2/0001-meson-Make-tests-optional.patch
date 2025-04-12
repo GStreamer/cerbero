@@ -1,55 +1,44 @@
-From aa11bb42e8ad33522a429fbf8154da0292bf2709 Mon Sep 17 00:00:00 2001
+From a1c3a1aa10e6477fbe97a5b1bf4c63c13c8d7901 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Tue, 13 Aug 2024 17:28:13 +0000
-Subject: [PATCH 1/2] meson: Make tests optional
+Subject: [PATCH] meson: Make tests optional
 
 ---
- meson.build       | 24 +++++++++++++-----------
- meson_options.txt |  6 ++++++
- 2 files changed, 19 insertions(+), 11 deletions(-)
+ meson.build       | 6 ++++--
+ meson_options.txt | 6 ++++++
+ 2 files changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 37ea80c..9536840 100644
+index 988d7ec..5cea50b 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -735,17 +735,19 @@ checks = [
-     'testrecurse',
- ]
+@@ -542,7 +542,8 @@ checks = {
+     'testrecurse': [],
+ }
  
--foreach check : checks
--    exe = executable(
--        check,
--        files(check + '.c'),
--        dependencies: [threads_dep, xml_dep],
--        include_directories: config_dir,
--    )
--    if check != 'testlimits'
--        test(check, exe, timeout: 0, workdir: meson.current_source_dir())
--    endif
--endforeach
+-foreach check, deps : checks
 +if get_option('tests')
-+    foreach check : checks
-+        exe = executable(
-+            check,
-+            files(check + '.c'),
-+            dependencies: [threads_dep, xml_dep],
-+            include_directories: config_dir,
-+        )
-+        if check != 'testlimits'
-+            test(check, exe, timeout: 0, workdir: meson.current_source_dir())
-+        endif
-+    endforeach
++  foreach check, deps : checks
+     exe = executable(
+         check,
+         files(check + '.c'),
+@@ -552,7 +553,8 @@ foreach check, deps : checks
+     if check != 'testlimits'
+         test(check, exe, timeout: 0, workdir: meson.current_source_dir())
+     endif
+-endforeach
++  endforeach
 +endif
  
- subdir('example')
- subdir('doc')
+ sh = find_program('sh', required: false)
+ 
 diff --git a/meson_options.txt b/meson_options.txt
-index 4d61f3d..22262be 100644
+index 0bfbebb..e8feb0a 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
-@@ -251,3 +251,9 @@ option('minimum',
+@@ -204,3 +204,9 @@ option('minimum',
    value: false,
-   description: 'build a minimally sized library (default=false)'
+   description: 'build a minimally sized library'
  )
 +
 +option('tests',
@@ -58,5 +47,5 @@ index 4d61f3d..22262be 100644
 +  description: 'build tests'
 +)
 -- 
-2.46.0
+2.49.0
 
