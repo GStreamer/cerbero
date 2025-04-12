@@ -3,22 +3,25 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.13.6'
+    version = '2.14.1'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'f453480307524968f7a04ec65e64f2a83a825973bcd260a2e7691be82ae70c96'
+    tarball_checksum = '310df85878b65fa717e5e28e0d9e8f6205fd29d883929303a70a4f2fc4f6f1f2'
     licenses = [{License.MIT: ['Copyright']}]
 
-    # Note: Many options were converted to feature options post-2.13.1
     # Tests require API level 28 on Android
-    meson_options = {'python': 'false', 'zlib': 'enabled', 'tests': 'false'}
+    meson_options = {
+        'python': 'disabled',
+        'zlib': 'enabled',
+        'iconv': 'disabled',
+        'tests': 'false'
+    }
 
     deps = [ 'zlib' ]
 
     patches = [
         f'{name}/0001-meson-Make-tests-optional.patch',
-        f'{name}/0002-meson-Fix-subdirs-missing-in-the-pkg-config-module.patch',
     ]
 
     files_libs = ['libxml2']
