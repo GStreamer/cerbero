@@ -162,6 +162,8 @@ cerbero_before_script() {
         # Visual Studio 2022 build tools install path
         echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
         echo 'vs_install_version = "vs17"' >> localconf.cbc
+        # Evade PATH_MAX
+        echo "sources = f'{home_dir}/s'" >> localconf.cbc
     fi
     if [[ "x${FDO_CI_CONCURRENT}" != "x" ]]; then
         echo "num_of_cpus = ${FDO_CI_CONCURRENT}" >> localconf.cbc
