@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.14.1'
+    version = '2.14.2'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '310df85878b65fa717e5e28e0d9e8f6205fd29d883929303a70a4f2fc4f6f1f2'
+    tarball_checksum = '353f3c83535d4224a4e5f1e88c90b5d4563ea8fec11f6407df640fd28fc8b8c6'
     licenses = [{License.MIT: ['Copyright']}]
 
     # Tests require API level 28 on Android
