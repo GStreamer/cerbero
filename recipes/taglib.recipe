@@ -25,6 +25,7 @@ class Recipe(recipe.Recipe):
 
     patches = [
         'taglib/0002-Build-a-static-and-non-static-version.patch',
+        'taglib/0003-Require-CMake-version-3.5-1148.patch',
     ]
 
     files_libs = ['libtag']

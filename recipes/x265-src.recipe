@@ -17,4 +17,6 @@ class Recipe(recipe.Recipe):
         'x265/0003-cmake-Use-GNUInstallDirs-to-remove-uncertainty.patch',
         'x265/0004-cmake-Use-the-Meson-convention-for-exporting-static-.patch',
         'x265/0005-cmake-Disable-version-detection-using-git.patch',
+        'x265/0006-Fix-CMake-build-error-with-latest-CMake-4.0-release.patch',
+        'x265/0007-Fix-for-CMake-Build-Errors-in-MacOS.patch',
     ]

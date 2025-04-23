@@ -16,7 +16,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'da448ed4f52aba6bcb0cd48cac0dd51b8692bccc4cd127431402fca6f8171e8e'
 
     # WITH_TOOLS needs getopt
-    configure_options = ' -DWITH_TOOLS=OFF -DWITHOUT_PNG=ON '
+    # compatibility is set to 3.1.0
+    configure_options = ' -DWITH_TOOLS=OFF -DWITHOUT_PNG=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
 
     files_libs = ['libqrencode']
     files_devel = ['include/qrencode.h', '%(libdir)s/pkgconfig/libqrencode.pc']

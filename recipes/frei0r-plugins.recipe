@@ -23,5 +23,6 @@ class Recipe(recipe.Recipe):
     ]
 
     patches = [
-        f'{name}/0001-cmake-Fix-c99-standard-flag-wiping-out-cross-compila.patch'
+        f'{name}/0001-cmake-Fix-c99-standard-flag-wiping-out-cross-compila.patch',
+        f'{name}/0002-Fix-configuring-with-CMake-version-4.patch',
     ]

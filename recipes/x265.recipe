@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = ' -DENABLE_CLI=OFF -DLINKED_10BIT=ON -DLINKED_12BIT=ON '
+    configure_options = ' -DENABLE_CLI=OFF -DLINKED_10BIT=ON -DLINKED_12BIT=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
     deps = ['x265-10bit', 'x265-12bit']
 
     files_libs = ['libx265']
