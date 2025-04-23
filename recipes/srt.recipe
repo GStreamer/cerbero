@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
 
 from cerbero.tools.libtool import LibtoolLibrary
 
@@ -13,8 +12,8 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'
     can_msvc = False
-    # CXX11 builds stuff we don't need, and causes a build failure on mingw
-    configure_options = '-DUSE_ENCLIB=openssl -DENABLE_CXX11=OFF'
+    # compatibility is set to 2.8.12
+    configure_options = '-DUSE_ENCLIB=openssl -DENABLE_APPS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
     # openssl on Linux
     use_system_libs = True
 
