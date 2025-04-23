@@ -1,0 +1,30 @@
+From 836848dd8c389f0fab94ff570485626afe08bb92 Mon Sep 17 00:00:00 2001
+From: nmariusp <107675943+nmariusp@users.noreply.github.com>
+Date: Sun, 17 Sep 2023 06:00:22 +0300
+Subject: [PATCH 3/3] Require CMake version 3.5 (#1148)
+
+Fix issue "CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.".
+
+(cherry picked from commit 967aaf7af2f4aa2e9fed0edb2cbaca98b737eebe)
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 832af866..4dc7fe29 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+ 
+ project(taglib)
+ 
+-- 
+2.47.0.windows.2
+
