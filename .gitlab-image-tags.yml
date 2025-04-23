@@ -15,4 +15,4 @@ variables:
 
   TESTS_UBUNTU_TAG: '2025-05-14'
 
-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2025-02-23.0-main'
+  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2025-07-18.0-main'
