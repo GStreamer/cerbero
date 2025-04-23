@@ -1,0 +1,28 @@
+From 52df4168d3e8761c05802245d7681d0c4301ac53 Mon Sep 17 00:00:00 2001
+From: Dan Dennedy <dan@dennedy.org>
+Date: Wed, 2 Apr 2025 14:04:17 -0700
+Subject: [PATCH 1/1] Fix configuring with CMake version 4
+
+See https://cmake.org/cmake/help/latest/release/4.0.html#deprecated-and-
+removed-features
+
+> Compatibility with versions of CMake older than 3.5 has been removed.
+
+(cherry picked from commit 31efba74b26c161125c6c41d381dcf3f6207a728)
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 96d4c85..0054c64 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required (VERSION 3.1)
++cmake_minimum_required (VERSION 3.5)
+ 
+ list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+ 
+-- 
+2.47.0.windows.2
+
