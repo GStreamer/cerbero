@@ -13,41 +13,18 @@ class Recipe(recipe.Recipe):
     name = 'cdparanoia'
     version = '10.2'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'xiph://%(name)s/%(name)s-III-%(version)s.src.tgz'
     tarball_dirname = '%(name)s-III-%(version)s'
     tarball_checksum = '005db45ef4ee017f5c32ec124f913a0546e77014266c6a1c50df902a55fe64df'
-    autoreconf = True
     # binaries are GPL and we don't distribute them
     licenses = [License.LGPLv2_1Plus]
-    allow_parallel_build = False
-    config_sh = 'CFLAGS="$CFLAGS -fPIC" ./configure'
-    patches = ['cdparanoia/0001-configure.in-Always-use-AC_PROG_CC.patch']
+    patches = ['cdparanoia/0001-Add-Meson-build.patch']
 
     files_libs = ['libcdda_paranoia', 'libcdda_interface']
     files_devel = ['include/cdda_interface.h', 'include/cdda_paranoia.h', 'include/utils.h']
 
-    # No rule check
-    make_check = None
-
-    async def configure(self):
-        autotools_dir = os.path.join(self.config._relative_path('data'), 'autotools')
-        shutil.copy(os.path.join(autotools_dir, 'config.guess'), os.path.join(self.config_src_dir, 'configure.guess'))
-        shutil.copy(os.path.join(autotools_dir, 'config.sub'), os.path.join(self.config_src_dir, 'configure.sub'))
-        await super().configure()
-
     def post_install(self):
-        if self.config.target_platform == Platform.LINUX:
-            # Fix the libs permissions to 0755 to make the rpm packaging happy.
-            # Setting for all linux distros as this may affect suse as well.
-            # It will not affect debian packaging as it will run dh_fixperms
-            # which does the right thing for debian.
-            libs = self.files_list_by_category(FilesProvider.LIBS_CAT)
-            for lib in libs:
-                f = os.path.join(self.config.prefix, lib)
-                if os.path.isfile(f) and not os.path.islink(f) and \
-                   fnmatch(f, '*.so.*'):
-                    os.chmod(f, 0o755)
-
         LibtoolLibrary('cdda_interface', None, None, None,
                        self.config.libdir, self.config.target_platform).save()
         LibtoolLibrary('cdda_paranoia', None, None, None,
