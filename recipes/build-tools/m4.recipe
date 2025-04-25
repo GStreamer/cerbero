@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
-        self.append_env('CFLAGS', '-Wno-error=cast-align')
+        self.append_env('CFLAGS', '-Wno-error=cast-align', '-std=gnu17')
 
     def post_install(self):
         # HACK m4 build fails in Windows gmp build:
