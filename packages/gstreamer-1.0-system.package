@@ -40,3 +40,10 @@ class Package(custom.GStreamer, package.Package):
         if self.config.target_platform == Platform.ANDROID:
             self.files += ['tinyalsa:libs']
             self.files_devel += ['tinyalsa:files-devel']
+
+        # webview2 is linked statically into the corresponding plugin, so we
+        # don't want to distribute any files belonging to the package. However,
+        # we must include an empty file category here so that fetch-package
+        # works correctly.
+        if self.config.target_platform == Platform.WINDOWS:
+            self.files_devel += ['webview2:files_devel']
