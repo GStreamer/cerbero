@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 from pathlib import Path
+import shlex
 import tempfile
 
 from cerbero.utils import shell
@@ -24,6 +25,19 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             self.deps.append('libclang')
             self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
+
+    async def configure(self):
+        if self.config.platform == Platform.DARWIN: 
+            link_args = []
+            # We need to extract necessary linker flags from LDFLAGS which is
+            # passed to the compiler
+            for arg in shlex.split(self.get_env('RUSTC_LDFLAGS', self.get_env('LDFLAGS'))):
+                link_args += ['-C', f"link-arg={arg}"]
+            s = f'[target.{self.target_triple}]\n' \
+                f'rustflags = {link_args!r}\n'
+            self.append_config_toml(s)
+
+        await super().configure()
 
     def post_install(self):
         bin = os.path.join(self.config.build_tools_prefix, 'bin', 'bindgen')

@@ -2,6 +2,7 @@
 from cerbero.utils import shell
 from cerbero.tools.libtool import LibtoolLibrary
 
+
 class Recipe(custom.GStreamer):
     name = 'gst-devtools-1.0'
     btype = BuildType.MESON
@@ -37,6 +38,8 @@ class Recipe(custom.GStreamer):
         if self.config.variants.rust and self.config.prefix_is_executable():
             self.meson_options['dots_viewer'] = 'enabled'
             self.files_bins.append('gst-dots-viewer')
+            if self.config.platform == Platform.DARWIN:
+                self.set_env('RUSTFLAGS', "-C link-args=-Wl,-headerpad_max_install_names")
         else:
             self.meson_options['dots_viewer'] = 'disabled'
 
