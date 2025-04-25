@@ -80,8 +80,9 @@ class BuildTools(BootstrapperBase, Fetch):
         if self.config.platform in (Platform.LINUX, Platform.DARWIN):
             tools.update(
                 {
-                    # need cmake > 3.10.2 for out-of-source-tree builds.
-                    'cmake': ('3.10.2', None),
+                    # need cmake >=3.10.2 for out-of-source-tree builds and
+                    # <4.0.0 for avoiding API breakage
+                    'cmake': (('3.10.2', '4.0.0'), None),
                     # dav1d requires nasm >=2.13.02
                     'nasm': ('2.13.02', '-v'),
                 }

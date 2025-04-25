@@ -729,8 +729,13 @@ def check_tool_version(tool_name, needed, env, version_arg=None):
         return None, False, False
     m = re.search(r'([0-9]+\.[0-9]+(\.[0-9]+)?)', out)
     if m:
-        found = m.groups()[0]
-        newer = split_version(found) >= split_version(needed)
+        found = split_version(m.groups()[0])
+        if isinstance(needed, tuple):
+            newer = found >= split_version(needed[0])
+            if newer:
+                newer = found < split_version(needed[1])
+        else:
+            newer = found >= split_version(needed)
 
     return tool, found, newer
 
