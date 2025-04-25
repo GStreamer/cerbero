@@ -39,7 +39,7 @@ class Package(custom.GStreamer, package.Package):
 
         if self.config.target_platform == Platform.ANDROID:
             self.files += ['tinyalsa:libs']
-            self.files_devel += ['tinyalsa:files-devel']
+            self.files_devel += ['tinyalsa:files_devel']
 
         # webview2 is linked statically into the corresponding plugin, so we
         # don't want to distribute any files belonging to the package. However,
