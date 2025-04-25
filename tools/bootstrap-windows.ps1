@@ -112,7 +112,7 @@ if (!$?) {
 
 if (!(Is-Newer 'cmake' $cmake_req)) {
   Write-Host "CMake >= $cmake_req not found, installing..."
-  choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+  choco install -y cmake --version=3.31.7 --installargs 'ADD_CMAKE_TO_PATH=System'
 }
 
 if (!(Is-Newer 'git' $git_req)) {
