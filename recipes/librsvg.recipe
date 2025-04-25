@@ -13,13 +13,14 @@ import tempfile
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.59.2'
+    version = '2.60.0'
     licenses = [License.LGPLv2Plus]
     deps = ['gdk-pixbuf', 'pango', 'cairo', 'libxml2']
     btype = BuildType.MESON
+    stype = SourceType.GIT
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'ecd293fb0cc338c170171bbc7bcfbea6725d041c95f31385dc935409933e4597'
+    tarball_checksum = '0b6ffccdf6e70afc9876882f5d2ce9ffcf2c713cbaaf1ad90170daa752e1eec3'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
@@ -36,16 +37,6 @@ class Recipe(recipe.Recipe):
         'vala': 'disabled',
         'tests': 'false',
     }
-
-    patches = [
-        # https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1067
-        f"{name}/0001-makedef-rework-flags-to-work-with-Ubuntu-and-Fedora.patch",
-        # https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1066
-        f"{name}/0002-meson-Consider-native-dependencies-also-on-Linux.patch",
-        # https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1068
-        f"{name}/0003-cargo_wrapper-py-Allow-setting-the-optimization-leve.patch",
-        f"{name}/0004-meson-Do-not-forcibly-version-the-shared-library-nam.patch",
-    ]
 
     def append_config_toml(self, s):
         dot_cargo = Path(self.config_src_dir) / '.cargo'
