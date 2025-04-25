@@ -2,14 +2,17 @@
 
 class Recipe(recipe.Recipe):
     name = 'flex'
-    version = '2.6.2'
+    version = '2.6.4'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
     url = 'https://github.com/westes/flex/releases/download/v{0}/flex-{0}.tar.gz'.format(version)
-    tarball_checksum = '9a01437a1155c799b7dc2508620564ef806ba66250c36bf5f9034b1c207cb2c9'
+    tarball_checksum = 'e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995'
     deps = ['automake', 'autoconf']
     override_libtool = False
     # Don't build documentation
     make_install = ['make', 'install-exec-recursive']
+
+    # https://github.com/Homebrew/homebrew-core/blob/f5edcef29ca09d3a207b4aa10ffd63f006bca1a1/Formula/f/flex.rb#L11-L15
+    patches = ['flex/0001-Add-generic-configure-patches-for-the-libtool-flat_n.patch']
 
     files_bins = ['flex', 'flex++']

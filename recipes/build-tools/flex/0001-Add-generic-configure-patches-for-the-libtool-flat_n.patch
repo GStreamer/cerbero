@@ -1,0 +1,38 @@
+From 8455e9f2021035b2911889094e6fe652e197e3f6 Mon Sep 17 00:00:00 2001
+From: Bo Anderson <mail@boanderson.me>
+Date: Thu, 21 Oct 2021 23:01:52 +0100
+Subject: [PATCH 1/1] Add generic configure patches for the libtool
+ -flat_namespace issue.
+
+---
+ configure | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/configure b/configure
+index d88c47c..fc4b851 100755
+--- a/configure
++++ b/configure
+@@ -6833,16 +6833,11 @@ $as_echo "$lt_cv_ld_force_load" >&6; }
+       _lt_dar_allow_undefined='$wl-undefined ${wl}suppress' ;;
+     darwin1.*)
+       _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
+-    darwin*) # darwin 5.x on
+-      # if running on 10.5 or later, the deployment target defaults
+-      # to the OS version, if on x86, and 10.4, the deployment
+-      # target defaults to 10.4. Don't you love it?
+-      case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
+-	10.0,*86*-darwin8*|10.0,*-darwin[91]*)
+-	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
+-	10.[012][,.]*)
++    darwin*)
++      case ${MACOSX_DEPLOYMENT_TARGET},$host in
++	10.[012],*|,*powerpc*)
+ 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
+-	10.*)
++	*)
+ 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
+       esac
+     ;;
+-- 
+2.39.5
+
