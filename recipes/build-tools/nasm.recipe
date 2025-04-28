@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'nasm'
-    version = '2.14.02'
+    version = '2.16.03'
     licenses = [{License.BSD_like: ['LICENSE']}]
     stype = SourceType.TARBALL
-    url = 'https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.xz'
-    tarball_checksum = 'e24ade3e928f7253aa8c14aa44726d1edf3f98643f87c9d72ec1df44b26be8f5'
+    url = 'https://www.nasm.us/pub/nasm/releasebuilds/%(version)s/nasm-%(version)s.tar.xz'
+    tarball_checksum = '1412a1c760bbd05db026b6c0d1657affd6631cd0a63cddb6f73cc6d4aa616148'
 
     files_bins = ['nasm']
