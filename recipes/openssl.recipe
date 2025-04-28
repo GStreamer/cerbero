@@ -11,11 +11,11 @@ class Recipe(recipe.Recipe):
     # Note: openssl helpfully moves tarballs somewhere else (old/x.y.z/)
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
-    version = '3.4.0'
+    version = '3.5.0'
     licenses = [License.Apachev2]
     stype = SourceType.TARBALL
     url = 'https://github.com/openssl/openssl/releases/download/openssl-%(version)s/openssl-%(version)s.tar.gz'
-    tarball_checksum = 'e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf'
+    tarball_checksum = '344d0a79f1a9b08029b0744e2cc401a43f9c90acd1044d09a530b4885a8e9fc0'
     deps = ['ca-certificates', 'zlib']
     # Configure script is perl, not shell
     config_sh_needs_shell = False
@@ -27,9 +27,6 @@ class Recipe(recipe.Recipe):
         'openssl/0001-Load-ca-certificate.crt-from-PREFIX-etc-ssl-on-macOS.patch',
         # MSVC and UWP support
         'openssl/0002-windows-makefile.tmpl-Generate-and-install-pkgconfig.patch',
-        # quicserver is a test utility that is not qualified as such
-        'openssl/0003-util-Disable-quicserver-with-no-tests.patch',
-        #'openssl/0003-windows-makefile.tmpl-Do-not-prefix-import-libraries.patch',
     ]
 
     files_libs = ['libcrypto', 'libssl']
@@ -118,8 +115,6 @@ class Recipe(recipe.Recipe):
         ldflags = self.get_env('LDFLAGS')
 
         if self.using_msvc():
-            # https://github.com/openssl/openssl/issues/25774
-            self.patches += ['openssl/0004-Fix-build-with-NASM-on-Windows.patch']
             # Gets converted to C:/MinGW/msys/1.0/utf-8 by MSYS somehow, so
             # just remove it. We only need this for gstreamer sources anyway.
             cflags = cflags.replace('/utf-8', '')
@@ -181,9 +176,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.IOS:
             self.library_type = LibraryType.STATIC
         if self.config.target_platform == Platform.ANDROID:
-            self.patches += [
-                'openssl/0004-Android-fix-relocation-of-OPENSSL_armcap_P.patch',
-            ]
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
             self.set_env('ANDROID_NDK_ROOT', self.get_env('ANDROID_NDK_HOME'))
 
