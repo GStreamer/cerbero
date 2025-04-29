@@ -12,6 +12,11 @@ on:
           - 'dry-run'
           - 'skip'
           - 'yes'
+      clean_build_tools:
+        description: 'Clean build-tools'
+        required: true
+        type: boolean
+        default: false
   pull_request:
     types:
       - opened
@@ -42,6 +47,11 @@ jobs:
           local_sources = "$HOME/cerbero-sources"
           home_dir = "$HOME/cerbero-build-$ANDROID_ARCH"
           EOF
+      - name: Clean build tools
+        if: ${{ inputs.clean_build_tools }}
+        run: |
+          ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
+            wipe --keep-sources --build-tools --force
       - name: Bootstrap Cerbero
         run: |
           ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
