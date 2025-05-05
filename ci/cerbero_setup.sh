@@ -116,13 +116,13 @@ cerbero_before_script() {
             user_branch="${CI_GST_PLUGINS_RS_REF_NAME}"
             user_ns=$(dirname ${CI_GST_PLUGINS_RS_PATH})
         fi
-    elif [[ ${CI_PROJECT_NAMESPACE} != gstreamer ]]; then
+    elif [[ -n ${CI_MERGE_REQUEST_SOURCE_PROJECT_PATH} ]]; then
         echo "Cerbero merge request"
         job_type="cerbero-mr"
         if can_search_branch_name ${CI_COMMIT_REF_NAME}; then
             echo "Using cerbero MR user branch"
             user_branch=${CI_COMMIT_REF_NAME}
-            user_ns=${CI_PROJECT_NAMESPACE}
+            user_ns=$(dirname ${CI_MERGE_REQUEST_SOURCE_PROJECT_PATH})
         fi
     fi
 
