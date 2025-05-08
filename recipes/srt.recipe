@@ -14,7 +14,9 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
     can_msvc = False
     # CXX11 builds stuff we don't need, and causes a build failure on mingw
-    configure_options = '-DUSE_ENCLIB=openssl -DENABLE_CXX11=OFF'
+    configure_options = '-DUSE_ENCLIB=openssl \
+        -DENABLE_CXX11=OFF \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     # openssl on Linux
     use_system_libs = True
 

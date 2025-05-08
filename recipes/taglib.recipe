@@ -18,7 +18,8 @@ class Recipe(recipe.Recipe):
         -DBUILD_SHARED_LIBS=1 \
         -DBUILD_STATIC_LIBS=1 \
         -DBUILD_TESTING=0 \
-        -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
+        -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     deps = ['zlib']
 
     can_msvc = True

@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libWPEBackend-android']
     files_devel = ['include/wpe-android']
 
-    configure_options = '-DCMAKE_BUILD_TYPE=Release'
+    configure_options = '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
 
     def prepare(self):
         if self.config.target_platform != Platform.ANDROID:

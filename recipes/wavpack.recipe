@@ -18,7 +18,8 @@ class Recipe(recipe.Recipe):
         -DWAVPACK_BUILD_DOCS=OFF \
         -DWAVPACK_BUILD_PROGRAMS=OFF \
         -DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF \
-        -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF'
+        -DWAVPACK_BUILD_WINAMP_PLUGIN=OFF \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     can_msvc = True
     cmake_generator = 'ninja'
 
