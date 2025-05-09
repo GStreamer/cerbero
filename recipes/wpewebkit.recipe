@@ -191,10 +191,13 @@ class Recipe(recipe.Recipe):
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
-                'wpewebkit/0001-Android-logging-macro.patch',
-                'wpewebkit/0002-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
-                'wpewebkit/0003-Use-ASharedMemory-instead-of-shm.patch',
-                'wpewebkit/0004-Compile-WebDriver-as-a-library.patch',
+                'wpewebkit/0001-Make-UnixFileDescriptor-noncopyable-again.patch',
+                'wpewebkit/0002-WPE-Use-ASharedMemory-when-targeting-Android.patch',
+                'wpewebkit/0003-Introduce-OS-ANDROID-to-simplify-preprocessor-guards.patch',
+                'wpewebkit/0004-Android-Build-WebDriver-as-a-library.patch',
+                'wpewebkit/0005-Android-Declare-namespace-when-building-WebDriver-as.patch',
+                'wpewebkit/0006-WPE-Android-build-WebDriver-as-a-shared-library.patch',
+                'wpewebkit/0007-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

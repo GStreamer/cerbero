@@ -1,0 +1,76 @@
+From 726d18b313f64fc079e00518a1277f5ce58767b3 Mon Sep 17 00:00:00 2001
+From: Adrian Perez de Castro <aperez@igalia.com>
+Date: Fri, 11 Apr 2025 15:09:35 -0700
+Subject: [PATCH 4/7] [Android] Build WebDriver as a library
+ https://bugs.webkit.org/show_bug.cgi?id=290921
+
+Reviewed by Michael Catanzaro.
+
+On Android processes are spawned from the Java side, which dynamically
+loads the libWebDriver.so shared object and calls into its entry point
+from Java through JNI. Therefore, setup the CMake build to build a
+shared library, and rename the entry point to WebKit::WebDriverProcessMain.
+
+* Source/WebDriver/CMakeLists.txt: Arrange to compile the WebDriver
+target as a shared library when building the WPE port for Android.
+* Source/WebDriver/WebDriverMain.cpp:
+(main): Use WebKit::WebDriverProcessMain as entry point name under OS(ANDROID).
+
+Canonical link: https://commits.webkit.org/293601@main
+---
+ Source/WebDriver/CMakeLists.txt    | 10 ++++++++--
+ Source/WebDriver/WebDriverMain.cpp | 11 +++++++++++
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/Source/WebDriver/CMakeLists.txt b/Source/WebDriver/CMakeLists.txt
+index 2ce0c46d4086..d2339c975b5b 100644
+--- a/Source/WebDriver/CMakeLists.txt
++++ b/Source/WebDriver/CMakeLists.txt
+@@ -60,13 +60,19 @@ MAKE_JS_FILE_ARRAYS(
+ )
+ list(APPEND WebDriver_SOURCES ${WebDriver_DERIVED_SOURCES_DIR}/WebDriverAtoms.cpp)
+ 
+-WEBKIT_EXECUTABLE_DECLARE(WebDriver)
++if (ANDROID AND (PORT STREQUAL WPE))
++    set(WebDriver_TARGET_TYPE LIBRARY)
++else ()
++    set(WebDriver_TARGET_TYPE EXECUTABLE)
++endif ()
++
++cmake_language(CALL "WEBKIT_${WebDriver_TARGET_TYPE}_DECLARE" WebDriver)
+ 
+ add_dependencies(WebDriver JavaScriptCoreSharedScripts)
+ 
+ WEBKIT_INCLUDE_CONFIG_FILES_IF_EXISTS()
+ 
+-WEBKIT_EXECUTABLE(WebDriver)
++cmake_language(CALL "WEBKIT_${WebDriver_TARGET_TYPE}" WebDriver)
+ 
+ install(TARGETS WebDriver
+     RUNTIME DESTINATION "${EXEC_INSTALL_DIR}"
+diff --git a/Source/WebDriver/WebDriverMain.cpp b/Source/WebDriver/WebDriverMain.cpp
+index cbe30a6f434a..df15263697a4 100644
+--- a/Source/WebDriver/WebDriverMain.cpp
++++ b/Source/WebDriver/WebDriverMain.cpp
+@@ -29,7 +29,18 @@
+ #include <wtf/MainThread.h>
+ #include <wtf/Threading.h>
+ 
++//
++// On Android, WebDriver is built as a shared library, and the process is spawned
++// from the Java side, which calls into a C++ function using JNI, and that in turn
++// jumps into the entry point. The mangled name is used directly, from the code at
++// https://github.com/Igalia/wpe-android/blob/b918e3f8b86eda406436cb251c2e7b10a529008c/wpeview/src/main/cpp/Service/EntryPoint.cpp#L55
++//
++#if OS(ANDROID)
++__attribute__((visibility("default")))
++int WebKit::WebDriverProcessMain(int argc, char** argv)
++#else
+ int main(int argc, char** argv)
++#endif
+ {
+     WebDriver::WebDriverService::platformInit();
+ 
+-- 
+2.43.0
+
