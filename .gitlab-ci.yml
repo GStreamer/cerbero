@@ -544,8 +544,10 @@ cerbero cross-android universal examples:
       - "*/sources/**/b/meson-logs/meson-log.txt"
       - "*/sources/**/b/CMakeFiles/CMakeError.log"
       - "*/sources/**/b/CMakeFiles/CMakeLog.log"
-      - "gstreamer-1.0-1.*.pkg"
-      - "gstreamer-1.0-devel-1.*.pkg"
+      # Skip uploading these (rather large) build artefacts until fdo
+      # infrastructure gets fixed or we find another workaround
+      # - "gstreamer-1.0-1.*.pkg"
+      # - "gstreamer-1.0-devel-1.*.pkg"
     exclude:
       - .git
       - .git/**/*
@@ -674,7 +676,9 @@ cerbero cross-ios universal examples arm64-host:
       - "*/sources/**/b/meson-logs/meson-log.txt"
       - "*/sources/**/b/CMakeFiles/CMakeError.log"
       - "*/sources/**/b/CMakeFiles/CMakeLog.log"
-      - "*.msi"
+      # Skip uploading these (rather large) build artefacts until fdo
+      # infrastructure gets fixed or we find another workaround
+      # - "*.msi"
     exclude:
       - .git
       - .git/**/*
