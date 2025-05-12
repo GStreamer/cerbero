@@ -948,13 +948,15 @@ class Config(object):
             for f in filenames:
                 # Check if the config specified is a complete path, else search
                 # in the user config directory
-                if not os.path.exists(f):
-                    f = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
-
                 if os.path.exists(f):
                     self._parse(f, reset=False)
                 else:
-                    raise ConfigurationError(_("Configuration file %s doesn't " 'exist') % f)
+                    uf = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
+
+                    if os.path.exists(uf):
+                        self._parse(uf, reset=False)
+                    else:
+                        raise ConfigurationError(_('Configuration file %s or fallback %s not found') % (f, uf))
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' % self.target_platform)
