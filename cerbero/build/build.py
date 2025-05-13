@@ -792,6 +792,8 @@ class CMake(MakefilesBase):
             with open(f'{self.src_dir}/toolchain.cmake', 'w') as f:
                 f.write(f'set(CMAKE_SYSTEM_NAME {system_name})\n')
                 f.write(f'set(CMAKE_SYSTEM_PROCESSOR {self.config.target_arch})\n')
+                if self.config.variants.mingw:
+                    f.write(f'set(CMAKE_SYSROOT {self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot)\n')
             self.configure_options += [f'-DCMAKE_TOOLCHAIN_FILE={self.src_dir}/toolchain.cmake']
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options += [
