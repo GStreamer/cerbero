@@ -183,7 +183,6 @@ class Recipe(recipe.Recipe):
                       '-plugin-tracers', '-rtp', '-sdp', '-utils', '-video', '-webrtc')
         for each in components:
             self.cargo_features.append(f'gst{each}/v1_22')
-        self.cargo_features.append('gst-plugin-webrtc/v1_22')
         self.cargo_features.append('gst-plugin-webrtc/aws')
         self.cargo_features.append('gst-plugin-webrtc/livekit')
 
