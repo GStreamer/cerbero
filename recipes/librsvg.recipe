@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 from cerbero.tools.libtool import LibtoolLibrary
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, to_winpath
 from pathlib import Path
@@ -70,8 +70,11 @@ class Recipe(recipe.Recipe):
             if self.config.platform != self.config.target_platform:
                 self.set_env('LDFLAGS')
                 self.set_env('LIBRARY_PATH')
-        self.target_triple = self.config.rust_triple(self.config.target_arch,
-            self.config.target_platform, self.using_msvc())
+        try:
+            self.target_triple = self.config.rust_triple(self.config.target_arch,
+                self.config.target_platform, self.using_msvc())
+        except FatalError as e:
+            raise InvalidRecipeError(self, e.msg)
         self.meson_options['triplet'] = self.target_triple
 
     async def configure(self):
