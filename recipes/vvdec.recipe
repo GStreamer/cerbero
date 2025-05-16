@@ -1,0 +1,45 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.tools.libtool import LibtoolLibrary
+
+
+class Recipe(recipe.Recipe):
+    name = 'vvdec'
+    version = '3.0.0'
+    stype = SourceType.TARBALL
+    url = 'https://github.com/fraunhoferhhi/vvdec/archive/refs/tags/v%(version)s.tar.gz'
+    tarball_checksum = '090688c2f9beebd4e8a2ec197a5b9429803498cd3c91fbec62fe7718a8268114'
+    licenses = [{License.BSD_like: ['LICENSE.txt']}]
+
+    patches = [
+        'vvdec/0001-Do-not-set-_WIN32_WINNT-in-CMake.patch',
+        'vvdec/0002-Remove-include-stdio.h-from-sei.h.patch'
+    ]
+
+    btype = BuildType.CMAKE
+    configure_options = ['-DVVDEC_TOPLEVEL_OUTPUT_DIRS=OFF']
+
+    files_libs = ['libvvdec']
+    files_devel = ['include/vvdec', '%(libdir)s/pkgconfig/libvvdec.pc']
+
+    def prepare(self):
+        # We only want static libs on iOS and Android
+        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+            self.library_type = LibraryType.STATIC
+        else:
+            self.library_type = LibraryType.SHARED
+
+        if self.config.target_platform == Platform.ANDROID:
+            # VVdeC uses exceptions internally
+            self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
+
+            # No NEON on ARMv7
+            if self.config.target_arch == Architecture.ARMv7:
+                self.configure_options.append('-DVVDEC_ENABLE_ARM_SIMD=OFF')
+
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('vvdec', None, None, None, self.config.libdir,
+                                    self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

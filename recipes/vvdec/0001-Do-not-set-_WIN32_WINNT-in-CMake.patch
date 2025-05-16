@@ -1,0 +1,31 @@
+From 9c22050143c489d103c440f4263c018dce6b33f0 Mon Sep 17 00:00:00 2001
+From: Carlos Bentzen <cadubentzen@igalia.com>
+Date: Fri, 16 May 2025 14:57:56 +0200
+Subject: [PATCH] Do not set _WIN32_WINNT in CMake
+
+Cerbero sets this value already so we don't need to redefine it and can
+case redefinition errors.
+---
+ CMakeLists.txt | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 48564d9..f44755b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -223,12 +223,6 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
+ # Enable multithreading
+ find_package( Threads REQUIRED )
+ 
+-# set _WIN32_WINNT
+-if( WIN32 )
+-  # set _WIN32_WINT version global
+-  add_definitions( -D_WIN32_WINNT=0x0600 )
+-endif()
+-
+ # enable parallel build for Visual Studio
+ if( MSVC )
+   # add compile options
+-- 
+2.43.0
+

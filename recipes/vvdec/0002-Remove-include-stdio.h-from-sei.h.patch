@@ -1,0 +1,39 @@
+From bfa55fde4f2eb4eb4d2801e6dcd88096a3f3295c Mon Sep 17 00:00:00 2001
+From: Carlos Bentzen <cadubentzen@igalia.com>
+Date: Fri, 16 May 2025 16:40:53 +0200
+Subject: [PATCH] Remove #include <stdio.h> from sei.h
+
+The include isn't used and causes a build failure in vvdec-sys
+building with MinGW x86_64. We then need stdarg.h in vvdec.h.
+---
+ include/vvdec/sei.h   | 1 -
+ include/vvdec/vvdec.h | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/vvdec/sei.h b/include/vvdec/sei.h
+index 8dbf9d0..9a3a12e 100644
+--- a/include/vvdec/sei.h
++++ b/include/vvdec/sei.h
+@@ -43,7 +43,6 @@ POSSIBILITY OF SUCH DAMAGE.
+ #ifndef VVDEC_SEI_H
+ #define VVDEC_SEI_H
+ 
+-#include <stdio.h>
+ #include <stdint.h>
+ 
+ typedef enum
+diff --git a/include/vvdec/vvdec.h b/include/vvdec/vvdec.h
+index a8b751e..8762025 100644
+--- a/include/vvdec/vvdec.h
++++ b/include/vvdec/vvdec.h
+@@ -46,6 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
+ 
+ #include <stdint.h>
+ #include <stdbool.h>
++#include <stdarg.h>
+ 
+ #include "vvdec/sei.h"
+ 
+-- 
+2.43.0
+

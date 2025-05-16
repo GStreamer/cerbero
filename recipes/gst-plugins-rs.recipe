@@ -45,6 +45,7 @@ class Recipe(recipe.Recipe):
         'hsv',
         'inter',
         'json',
+        'vvdec',
         'livesync',
         'lewton',
         'mpegtslive',
@@ -86,7 +87,7 @@ class Recipe(recipe.Recipe):
     # Needed for openssl
     use_system_libs = True
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'pango', 'cairo',
-        'gst-plugins-bad-1.0', 'dav1d']
+            'gst-plugins-bad-1.0', 'dav1d', 'vvdec']
 
     def enable_plugin(self, name, category):
         if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
@@ -164,6 +165,9 @@ class Recipe(recipe.Recipe):
                 'regex',
                 'textwrap',
                 'textahead',
+            ],
+            'codecs_restricted': [
+                'vvdec',
             ],
             'playback': [
                 'uriplaylistbin',
@@ -366,7 +370,7 @@ class Recipe(recipe.Recipe):
 
                         # With the stripping done, all files now need to be rearchived
                         dest = Path(tmp) / source.name
-                        m.log(f"Repacking library to {dest.absolute()}", self.logfile) 
+                        m.log(f"Repacking library to {dest.absolute()}", self.logfile)
 
                         libtool = shutil.which("libtool")
 
@@ -386,7 +390,7 @@ class Recipe(recipe.Recipe):
 
                         # And now we paper over
                         os.replace(dest.absolute(), source.absolute())
-                elif self.config.target_platform in (Platform.LINUX, Platform.ANDROID): 
+                elif self.config.target_platform in (Platform.LINUX, Platform.ANDROID):
                     # This is a very similar approach, however Clang
                     # will itself do a really bad job if one supplies
                     # a LD version script -- that'll suppress 99% of
