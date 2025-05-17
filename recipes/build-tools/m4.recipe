@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     url = 'gnu://'
     tarball_checksum = 'e236ea3a1ccf5f6c270b1c4bb60726f371fa49459a8eaaebc90b216b328daf2b'
     files_bins = ['m4']
+    patches = ['m4/0001-build-disable-documentation-build.patch']
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
