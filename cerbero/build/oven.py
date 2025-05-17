@@ -294,6 +294,7 @@ class Oven(object):
                 recipe = recipe_d.recipe
                 step = recipe_d.step
                 count = recipe_d.count
+                skip = False
 
                 if step == 'init':
                     counter.i += 1
@@ -333,9 +334,13 @@ class Oven(object):
                     step = 'init'
                 except SkipRecipeError:
                     step = None
+                    skip = True
 
                 if step is None:
-                    self._cook_finish_recipe(recipe, counter.i)
+                    if skip:
+                        self._build_status_printer.remove_recipe(recipe.name)
+                    else:
+                        self._cook_finish_recipe(recipe, counter.i)
                     add_buildable_recipes(recipe)
                     next_queue = None
                 else:
