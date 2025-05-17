@@ -1,0 +1,28 @@
+From 9ed10387772ff8b93451f0d8372e64d5ab3f026c Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Sat, 17 May 2025 11:31:51 +0200
+Subject: [PATCH] build: disable documentation build
+
+m4 does not support --disable-maintainer-mode and an
+update of the .texi files is triggered requiring makeinfo
+which might not be installed on the build host.
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index bd6f0d8..71e03a6 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -2460,7 +2460,7 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = . examples lib src doc checks po tests
++SUBDIRS = . examples lib src checks po tests
+ EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
+ 	.prev-version .version m4/gnulib-cache.m4 ChangeLog-2014
+ 
+-- 
+2.39.2
+
