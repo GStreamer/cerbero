@@ -25,7 +25,6 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
-            self.configure_options += ' -DBUILD_SHARED_LIBS=OFF '
             self.library_type = LibraryType.STATIC
 
         if self.config.target_arch in (Architecture.X86, Architecture.X86_64):

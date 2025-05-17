@@ -758,6 +758,10 @@ class CMake(MakefilesBase):
             '-DLIB_SUFFIX=' + self.config.lib_suffix,
         ]
 
+        static = 'ON' if self.library_type in [LibraryType.STATIC, LibraryType.BOTH] else 'OFF'
+        shared = 'ON' if self.library_type in [LibraryType.SHARED, LibraryType.BOTH] else 'OFF'
+        self.configure_options += [f'-DBUILD_SHARED_LIBS={shared}', f'-DBUILD_STATIC_LIBS={static}']
+
         cmake_cache = os.path.join(self.make_dir, 'CMakeCache.txt')
         cmake_files = os.path.join(self.make_dir, 'CMakeFiles')
         if os.path.exists(cmake_cache):

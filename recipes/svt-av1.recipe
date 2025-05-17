@@ -35,7 +35,6 @@ class Recipe(recipe.Recipe):
 
         # We only want static libs on iOS and Android
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
-            self.configure_options += ' -DBUILD_SHARED_LIBS=OFF '
             self.library_type = LibraryType.STATIC
 
     def post_install(self):

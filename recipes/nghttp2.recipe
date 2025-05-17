@@ -27,7 +27,6 @@ class Recipe(recipe.Recipe):
         # Although it can build both types of library, the static ones
         # have the `_static` suffix and throw off FilesProvider
         if self.using_msvc():
-            self.configure_options += ' -DBUILD_SHARED_LIBS=OFF '
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.BOTH
