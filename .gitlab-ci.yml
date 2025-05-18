@@ -685,7 +685,9 @@ cerbero deps msvc x86_64 msi package:
       - "*/sources/*/*/b/meson-logs/meson-log.txt"
       - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
-      - "*.msi"
+      # Skip uploading these (rather large) build artefacts until fdo
+      # infrastructure gets fixed or we find another workaround
+      # - "*.msi"
     exclude:
       - .git
       - .git/**/*
