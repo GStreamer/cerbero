@@ -12,7 +12,9 @@ class Recipe(recipe.Recipe):
     url = 'https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v%(version)s/SVT-AV1-v%(version)s.tar.bz2'
     tarball_checksum = 'a1d95875f7539d49f7c8fdec0623fbf984804a168da6289705d53268e3b38412'
     tarball_dirname = 'SVT-AV1-v%(version)s'
-    configure_options = ' -DBUILD_APPS=OFF'
+    configure_options = [
+        '-DBUILD_APPS=OFF'
+    ]
     # svt-av1 handles BUILD_SHARED_LIBS itself and is ON by default
     library_type = LibraryType.SHARED
 
@@ -27,7 +29,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             compiler_driver = self.env.get('RUSTC_LINKER', '')
-            self.configure_options += f' -DCMAKE_ASM_COMPILER={compiler_driver}'
+            self.configure_options.append(f'-DCMAKE_ASM_COMPILER={compiler_driver}')
             self.remove_env('CFLAGS', '-Wa,--noexecstack')
             self.remove_env('CXXFLAGS', '-Wa,--noexecstack')
             # https://gitlab.kitware.com/cmake/cmake/-/issues/18277

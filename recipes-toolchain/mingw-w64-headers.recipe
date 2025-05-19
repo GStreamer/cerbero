@@ -5,7 +5,10 @@ class Recipe(recipe.Recipe):
     version = 'v12.0.0'
     licenses = [{License.BSD_like: ['../COPYING']}]
     stype = SourceType.CUSTOM
-    configure_options=' --enable-sdk=all --with-default-msvcrt=ucrt '
+    configure_options = [
+        '--enable-sdk=all',
+        '--with-default-msvcrt=ucrt'
+    ]
     add_host_build_target = False
     deps = ['mingw-w64-sources']
     can_msvc = False
@@ -16,10 +19,10 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self)
         self.host = 'x86_64-w64-mingw32'
         self._sysroot = f'{self.config.prefix}/{self.host}/sysroot'
-        self.configure_options += f' --with-sysroot={self._sysroot}'
+        self.configure_options.append(f'--with-sysroot={self._sysroot}')
         if self.config.target_platform != self.config.platform:
-            self.configure_options += ' --host=%s' % self.host
-            self.configure_options += ' --target=%s' % self.host
+            self.configure_options.append(f'--host={self.host}')
+            self.configure_options.append(f'--target={self.host}')
         self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)
         self.make_install += [f'DESTDIR={self._sysroot}']
         self.build_dir = os.path.join(self.config_src_dir, "cerbero-build-dir")

@@ -42,7 +42,7 @@ class Recipe(recipe.Recipe):
         libdir = "/usr/%s/lib32" % self.host
         # i686 is always a cross build
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, host, host, ' '.join(self.configure_options)),
                 self.build_dir_32, logfile=self.logfile, env=self.env)
 
         Path(self.build_dir_64).mkdir(exist_ok=True)
@@ -51,7 +51,7 @@ class Recipe(recipe.Recipe):
         host = 'x86_64-w64-mingw32'
         libdir = "/usr/%s/lib" % self.host
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, host, host, ' '.join(self.configure_options)),
                 self.build_dir_64, logfile=self.logfile, env=self.env)
 
     async def compile(self):

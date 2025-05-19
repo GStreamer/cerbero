@@ -14,7 +14,10 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
     tarball_checksum = '9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93'
 
-    configure_options = ' -DWITH_JPEG8=ON -DWITH_TURBOJPEG=ON '
+    configure_options = [
+        '-DWITH_JPEG8=ON',
+        '-DWITH_TURBOJPEG=ON'
+    ]
 
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',

@@ -209,7 +209,7 @@ class Recipe(recipe.Recipe):
                 # Disable mac OS X specifics
                 extra_flags = ['-DGST_SDK_IOS=1']
                 # XXX: Why did we disable these for iOS?
-                #self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
+                #self.configure_options += ['--disable-carbon', '--disable-modular-tests', '--disable-cocoa']
             self.append_env('CFLAGS', *extra_flags)
 
         elif self.config.target_platform == Platform.LINUX:

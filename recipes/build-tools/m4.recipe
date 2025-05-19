@@ -10,9 +10,9 @@ class Recipe(recipe.Recipe):
     url = 'gnu://'
     tarball_checksum = '63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96'
     files_bins = ['m4']
+    configure_options = ['--disable-gcc-warnings']
 
     def prepare(self):
-        self.configure_options += " --disable-gcc-warnings"
         self.append_env('CFLAGS', '-Wno-error=cast-align', '-std=gnu17')
 
     def post_install(self):
@@ -20,6 +20,8 @@ class Recipe(recipe.Recipe):
         # m4  -DHAVE_CONFIG_H -D__GMP_WITHIN_GMP -DOPERATION_invert_limb_table -DWINVER=0x0600 -D_WIN32_WINNT=0x0600 -DDLL_EXPORT -DPIC invert_limb_table.asm >tmp-invert_limb_table.s
         # m4.exe: write error: Invalid argument
         if self.config.platform == Platform.WINDOWS:
-            shutil.move(os.path.join(self.config.prefix, 'bin', 'm4.exe'),
-                        os.path.join(self.config.prefix, 'bin', 'm4.exe.backup'))
+            shutil.move(
+                os.path.join(self.config.prefix, 'bin', 'm4.exe'),
+                os.path.join(self.config.prefix, 'bin', 'm4.exe.backup'),
+            )
         super().post_install()

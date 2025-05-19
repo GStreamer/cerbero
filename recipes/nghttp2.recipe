@@ -13,7 +13,13 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'aa7594c846e56a22fbf3d6e260e472268808d3b49d5e0ed339f589e9cc9d484c'
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = ' -DENABLE_LIB_ONLY=ON -DENABLE_DOC=OFF -DWITH_LIBXML2=OFF -DWITH_JEMALLOC=OFF -DBUILD_STATIC_LIBS=ON '
+    configure_options = [
+        '-DENABLE_LIB_ONLY=ON',
+        '-DENABLE_DOC=OFF',
+        '-DWITH_LIBXML2=OFF',
+        '-DWITH_JEMALLOC=OFF',
+        '-DBUILD_STATIC_LIBS=ON'
+    ]
     library_type = LibraryType.STATIC
 
     files_libs = ['libnghttp2']

@@ -13,9 +13,11 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
 
     btype = BuildType.CMAKE
-    configure_options = '-DWITH_MP4=ON \
-        -DWITH_ASF=ON \
-        -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
+    configure_options = [
+        '-DWITH_MP4=ON',
+        '-DWITH_ASF=ON',
+        '-DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
+    ]
     deps = ['zlib']
 
     can_msvc = True
@@ -31,11 +33,11 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' -DWIN32=1'
+            self.configure_options.append('-DWIN32=1')
         if self.config.target_platform == Platform.ANDROID:
             # configure for android
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
-        self.configure_options += ' -DZLIB_ROOT=%s ' % self.config.prefix
+        self.configure_options.append(f'-DZLIB_ROOT={self.config.prefix}')
 
     async def install(self):
         await super(recipe.Recipe, self).install()

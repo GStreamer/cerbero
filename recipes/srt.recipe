@@ -13,7 +13,11 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
     can_msvc = False
     # compatibility is set to 2.8.12
-    configure_options = '-DUSE_ENCLIB=openssl -DENABLE_APPS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
+    configure_options = [
+        '-DUSE_ENCLIB=openssl',
+        '-DENABLE_APPS=OFF',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
+    ]
     # openssl on Linux
     use_system_libs = True
 

@@ -10,12 +10,14 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'aa54850ebda5064c72cd4ec2d9b056c294252991486350d9a97ab2a6dfdfaf12'
     stype = SourceType.TARBALL
     autoreconf = True
-    configure_options = '--enable-ld=yes ' \
-                        '--enable-gold=no ' \
-                        '--disable-sim ' \
-                        '--disable-gdb ' \
-                        '--disable-nls ' \
-                        '--enable-multilib '
+    configure_options = [
+        '--enable-ld=yes',
+        '--enable-gold=no',
+        '--disable-sim',
+        '--disable-gdb',
+        '--disable-nls',
+        '--enable-multilib'
+    ]
     add_host_build_target = False
     files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',
                   'elfedit', 'gprof', 'ld', 'ld.bfd', 'nm', 'objcopy',
@@ -64,10 +66,10 @@ class Recipe(recipe.Recipe):
         if self.config.target_arch == Architecture.X86:
             raise InvalidRecipeError(self)
         self.target = 'x86_64-w64-mingw32'
-        self.configure_options += ' --target=%s ' % self.target
-        self.configure_options += f' --with-sysroot={self.config.prefix}/{self.target}/sysroot'
+        self.configure_options.append(f'--target={self.target}')
+        self.configure_options.append(f'--with-sysroot={self.config.prefix}/{self.target}/sysroot')
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --host=%s' % self.target
+            self.configure_options.append(f'--host={self.target}')
 
         # Append the host prefix to the binaries
         self.files_bins = ['%s-%s' % (self.target, x) for x in self.files_bins]

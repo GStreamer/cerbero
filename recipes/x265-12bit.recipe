@@ -12,7 +12,14 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.STATIC
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = ' -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DHIGH_BIT_DEPTH=ON -DMAIN12=ON -DEXPORT_C_API=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
+    configure_options = [
+        '-DENABLE_SHARED=OFF',
+        '-DENABLE_CLI=OFF',
+        '-DHIGH_BIT_DEPTH=ON',
+        '-DEXPORT_C_API=OFF',
+        '-DMAIN12=ON',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
+    ]
     deps = ['x265-src']
 
     # files_libs = ['libx265-12bit']
@@ -22,13 +29,13 @@ class Recipe(recipe.Recipe):
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
             if self.config.target_arch != Architecture.X86_64:
                 # Arm64 assembly is completely incompatible
-                self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+                self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         # x265 ignores CCASFLAGS
         elif self.config.target_platform == Platform.IOS:
-            self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+            self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         elif self.config.target_arch == Architecture.X86:
             # on x86 it tries to use the high bank of AVX
-            self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+            self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')
         self.build_dir = os.path.join(self.config_src_dir, 'b-12bit')
         self.make_dir = self.config_src_dir

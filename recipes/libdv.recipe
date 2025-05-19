@@ -40,7 +40,7 @@ class Recipe(recipe.Recipe):
     # FIXME: asm probably works fine on x86/x86_64 with mingw or clang?
     def prepare(self):
         #if self.config.variants.nox11:
-        #    self.configure_options += ' --disable-xv --without-x'
+        #    self.configure_options += ['--disable-xv', '--without-x']
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['asm'] = 'disabled'
         elif self.config.target_platform == Platform.DARWIN:

@@ -16,7 +16,12 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = ' -DENABLE_CLI=OFF -DLINKED_10BIT=ON -DLINKED_12BIT=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 '
+    configure_options = [
+        '-DENABLE_CLI=OFF',
+        '-DLINKED_10BIT=ON',
+        '-DLINKED_12BIT=ON',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
+    ]
     deps = ['x265-10bit', 'x265-12bit']
 
     files_libs = ['libx265']
@@ -25,18 +30,18 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
             # Doesn't use GNUInstallDirs so prefix must be manually fixed
-            self.configure_options += f' -DLIB_INSTALL_DIR={self.config.libdir} '
+            self.configure_options.append(f'-DLIB_INSTALL_DIR={self.config.libdir}')
         if self.config.target_platform == Platform.ANDROID:
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
             if self.config.target_arch != Architecture.X86_64:
                 # Arm64 assembly is completely incompatible
-                self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+                self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         # x265 ignores CCASFLAGS
         elif self.config.target_platform == Platform.IOS:
-            self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+            self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         elif self.config.target_arch == Architecture.X86:
             # on x86 it tries to use the high bank of AVX
-            self.configure_options += ' -DENABLE_ASSEMBLY=OFF '
+            self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')
         self.build_dir = os.path.join(self.config_src_dir, 'b')
         self.make_dir = self.config_src_dir
@@ -45,7 +50,7 @@ class Recipe(recipe.Recipe):
         prefix = '' if self.using_msvc() else 'lib'
         self.hdr10lib = Path(self.config_src_dir) / 'b-10bit' / f'{prefix}x265-10bit.a'
         self.hdr12lib = Path(self.config_src_dir) / 'b-12bit' / f'{prefix}x265-12bit.a'
-        self.configure_options += f' -DEXTRA_LIB={self.hdr10lib.as_posix()};{self.hdr12lib.as_posix()} '
+        self.configure_options.append(f'-DEXTRA_LIB={self.hdr10lib.as_posix()};{self.hdr12lib.as_posix()}')
 
     def post_install(self):
         # Craft a wholearchive of 8-, 10- and 12-bit x265

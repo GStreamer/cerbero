@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
                'libiconv/0002-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
 
-    configure_options = '--disable-nls --enable-static'
+    configure_options = ['--disable-nls', '--enable-static']
     autoreconf_sh = './autogen.sh --skip-gnulib && autoreconf -fiv'
 
     files_bins = ['iconv', ]

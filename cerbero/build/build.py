@@ -424,8 +424,8 @@ class MakefilesBase(Build, ModifyEnvBase):
     """
 
     config_sh = ''
-    configure_tpl = ''
-    configure_options = ''
+    configure_tpl = None
+    configure_options = None
     make = None
     make_install = None
     make_check = None
@@ -440,6 +440,7 @@ class MakefilesBase(Build, ModifyEnvBase):
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
+        self._init_options()
         self.setup_toolchain_env_ops()
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
@@ -486,19 +487,17 @@ class MakefilesBase(Build, ModifyEnvBase):
             'make_dir': self.make_dir,
         }
 
+        configure_cmd = []
         # Construct a command list when possible
         if not self.config_sh_needs_shell:
-            configure_cmd = []
-            for arg in self.configure_tpl.split():
+            for arg in self.configure_tpl:
                 if arg == '%(options)s':
-                    options = self.configure_options
-                    if isinstance(options, str):
-                        options = options.split()
-                    configure_cmd += options
+                    for opt in self.configure_options:
+                        configure_cmd.append(opt % substs)
                 else:
                     configure_cmd.append(arg % substs)
         else:
-            configure_cmd = self.configure_tpl % substs
+            configure_cmd = ' '.join(self.configure_tpl) % substs
 
         self.maybe_add_system_libs(step='configure')
 
@@ -525,6 +524,18 @@ class MakefilesBase(Build, ModifyEnvBase):
             self.maybe_add_system_libs(step='check')
             shell.new_call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
 
+    def _init_options(self):
+        if isinstance(self.configure_tpl, str):
+            m.deprecation(f'{self.name}: `configure_tpl` should be a list instead of a string')
+            self.configure_tpl = self.configure_tpl.split()
+
+        if not self.configure_options:
+            self.configure_options = []
+
+        if isinstance(self.configure_options, str):
+            m.deprecation(f'{self.name}: `configure_options` should be a list instead of a string')
+            self.configure_options = self.configure_options.split()
+
 
 class Makefile(MakefilesBase):
     """
@@ -548,7 +559,7 @@ class Autotools(MakefilesBase):
     autoreconf = False
     autoreconf_sh = 'autoreconf -f -i'
     config_sh = './configure'
-    configure_tpl = '%(config-sh)s --prefix %(prefix)s ' '--libdir %(libdir)s'
+    configure_tpl = ['%(config-sh)s', '--prefix %(prefix)s', '--libdir %(libdir)s']
     add_host_build_target = True
     can_use_configure_cache = True
     supports_cache_variables = True
@@ -562,22 +573,23 @@ class Autotools(MakefilesBase):
     @modify_environment
     async def configure(self):
         # Build with PIC for static linking
-        self.configure_tpl += ' --with-pic '
+        self.configure_tpl.append('--with-pic')
         # Disable automatic dependency tracking, speeding up one-time builds
-        self.configure_tpl += ' --disable-dependency-tracking '
+        self.configure_tpl.append('--disable-dependency-tracking')
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.config_src_dir, 'configure.in')) or os.path.exists(
             os.path.join(self.config_src_dir, 'configure.ac')
         ):
-            self.configure_tpl += ' --disable-maintainer-mode '
-            self.configure_tpl += ' --disable-silent-rules '
+            self.configure_tpl.append('--disable-maintainer-mode')
+            self.configure_tpl.append('--disable-silent-rules')
             # Never build gtk-doc documentation
-            self.configure_tpl += ' --disable-gtk-doc '
+            self.configure_tpl.append('--disable-gtk-doc')
 
+        # Enable or disable introspection based on configuration
         if self.config.variants.gi and not self.disable_introspection and self.use_gobject_introspection():
-            self.configure_tpl += ' --enable-introspection '
+            self.configure_tpl.append('--enable-introspection')
         else:
-            self.configure_tpl += ' --disable-introspection '
+            self.configure_tpl.append('--disable-introspection')
 
         if self.autoreconf:
             await shell.async_call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
@@ -608,15 +620,15 @@ class Autotools(MakefilesBase):
             # configure and autogen.sh
             for k, v in self.env.items():
                 if k[2:6] == '_cv_':
-                    self.configure_tpl += ' %s="%s"' % (k, v)
+                    self.configure_tpl.append('%s="%s"' % (k, v))
 
         if self.add_host_build_target:
             if self.config.host is not None:
-                self.configure_tpl += ' --host=%(host)s'
+                self.configure_tpl.append('--host=%(host)s')
             if self.config.build is not None:
-                self.configure_tpl += ' --build=%(build)s'
+                self.configure_tpl.append('--build=%(build)s')
             if self.config.target is not None:
-                self.configure_tpl += ' --target=%(target)s'
+                self.configure_tpl.append('--target=%(target)s')
 
         use_configure_cache = self.config.use_configure_cache
         if self.use_system_libs and self.config.allow_system_libs:
@@ -627,10 +639,11 @@ class Autotools(MakefilesBase):
 
         if use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.sources, '.configure.cache')
-            self.configure_tpl += ' --cache-file=%s' % cache
+            self.configure_tpl.append('--cache-file=%s' % cache)
 
         # Add at the very end to allow recipes to override defaults
-        self.configure_tpl += '  %(options)s '
+        for opt in self.configure_options:
+            self.configure_tpl.append(opt)
 
         await MakefilesBase.configure(self)
 
@@ -643,23 +656,25 @@ class CMake(MakefilesBase):
     cmake_generator = 'make'
     config_sh_needs_shell = False
     config_sh = None
-    configure_tpl = (
-        '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '
-        '-H%(make_dir)s '
-        '-B%(build_dir)s '
-        '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s '
-        '-DCMAKE_INSTALL_BINDIR=bin '
-        '-DCMAKE_INSTALL_INCLUDEDIR=include '
-        '%(options)s -DCMAKE_BUILD_TYPE=Release '
-        '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
-        '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true '
-    )
+    configure_tpl = [
+        '%(config-sh)s',
+        '-DCMAKE_INSTALL_PREFIX=%(prefix)s',
+        '-H%(make_dir)s',
+        '-B%(build_dir)s',
+        '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s',
+        '-DCMAKE_INSTALL_BINDIR=bin',
+        '-DCMAKE_INSTALL_INCLUDEDIR=include',
+        '%(options)s',
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX',
+        '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true',
+    ]
 
     def __init__(self):
         MakefilesBase.__init__(self)
         self.build_dir = os.path.join(self.build_dir, 'b')
         self.config_sh = 'cmake'
-        self.configure_tpl += f'-DCMAKE_INSTALL_LIBDIR={self.config.rel_libdir} '
+        self.configure_tpl.append(f'-DCMAKE_INSTALL_LIBDIR={self.config.rel_libdir}')
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
             self.config_sh = shutil.which('cmake', path=shell.get_path_minus_msys(self.env['PATH']))
@@ -677,11 +692,6 @@ class CMake(MakefilesBase):
             cxx = cxx.replace('ccache', '').strip()
         cc = cc.split(' ')[0]
         cxx = cxx.split(' ')[0]
-
-        if self.configure_options:
-            self.configure_options = self.configure_options.split()
-        else:
-            self.configure_options = []
 
         if self.cmake_generator == 'ninja' or self.using_msvc():
             self.configure_options += ['-G', 'Ninja']

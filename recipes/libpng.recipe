@@ -20,14 +20,14 @@ class Recipe(recipe.Recipe):
         f'{name}/0003-cmake-Fix-naming-convention-breaking-rustc-library-l.patch',
     ]
 
-    configure_options = ' -DPNG_TESTS=OFF '
+    configure_options = ['-DPNG_TESTS=OFF']
 
     files_libs = ['libpng16']
     files_devel = ['include/libpng16', 'bin/libpng16-config',
                    '%(libdir)s/pkgconfig/libpng16.pc', '%(libdir)s/pkgconfig/libpng.pc']
 
     def prepare(self):
-        self.configure_options += ' -DZLIB_ROOT=%s ' % self.config.prefix
+        self.configure_options.append(f'-DZLIB_ROOT={self.config.prefix}')
 
     def post_install(self):
         # Meson does not generate la files

@@ -9,22 +9,23 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     licenses = [License.GPLv3Plus]
     override_libtool = False
-    configure_options = '--disable-maintainer-mode ' \
-                        '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\' ' \
-                        '--disable-shared ' \
-                        '--disable-libgomp ' \
-                        '--disable-libquadmath ' \
-                        '--disable-libquadmath-support ' \
-                        '--disable-libmudflap ' \
-                        '--disable-libmpx ' \
-                        '--disable-libssp ' \
-                        '--disable-nls ' \
-                        '--enable-threads=no ' \
-                        '--enable-__cxa_atexit ' \
-                        '--enable-lto ' \
-                        '--enable-languages=c,c++,lto ' \
-                        '--enable-multiarch ' \
-                        ''
+    configure_options = [
+        '--disable-maintainer-mode',
+        '--with-host-libstdcxx=-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm',
+        '--disable-shared',
+        '--disable-libgomp',
+        '--disable-libquadmath',
+        '--disable-libquadmath-support',
+        '--disable-libmudflap',
+        '--disable-libmpx',
+        '--disable-libssp',
+        '--disable-nls',
+        '--enable-threads=no',
+        '--enable-__cxa_atexit',
+        '--enable-lto',
+        '--enable-languages=c,c++,lto',
+        '--enable-multiarch'
+    ]
     requires_non_src_build = True
     use_system_libs = True
     add_host_build_target = False
@@ -35,12 +36,12 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self)
         self._target = 'x86_64-w64-mingw32'
         self.sysroot = f'{self.config.prefix}/{self._target}/sysroot'
-        self.configure_options += f' --with-sysroot={self.sysroot} '
-        self.configure_options += f' --with-local-prefix={self.sysroot} '
-        self.configure_options += f' --with-native-system-header-dir=/usr/{self._target}/include '
-        self.configure_options += ' --target=%s' % self._target
+        self.configure_options.append(f'--with-sysroot={self.sysroot}')
+        self.configure_options.append(f'--with-local-prefix={self.sysroot}')
+        self.configure_options.append(f'--with-native-system-header-dir=/usr/{self._target}/include')
+        self.configure_options.append(f'--target={self._target}')
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --host=%s' % self._target
+            self.configure_options.append(f'--host={self._target}')
         self.config_src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
         self.build_dir = os.path.join(self.config_src_dir, 'gcc_build_core')
         self.make_dir = self.build_dir

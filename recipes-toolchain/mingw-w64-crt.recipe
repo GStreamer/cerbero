@@ -4,7 +4,9 @@ class Recipe(recipe.Recipe):
     licenses = [{License.BSD_like: ['../COPYING']}]
     stype = SourceType.CUSTOM
     add_host_build_target = False
-    configure_options = ' --with-default-msvcrt=ucrt '
+    configure_options = [
+        '--with-default-msvcrt=ucrt'
+    ]
     deps = ['mingw-w64-sources', 'binutils']
     requires_non_src_build = True
     # Race condition in onecoreuap
@@ -24,11 +26,11 @@ class Recipe(recipe.Recipe):
             self.set_env(v)
         self.host = 'x86_64-w64-mingw32'
         self.sysroot = f'{self.config.prefix}/{self.host}/sysroot'
-        self.configure_options += f' --with-sysroot={self.sysroot} '
+        self.configure_options.append(f'--with-sysroot={self.sysroot}')
         self.make_install += [f'DESTDIR={self.sysroot}']
-        self.configure_options += ' --host=%s' % self.host
+        self.configure_options.append(f'--host={self.host}')
         if self.config.platform == self.config.target_platform:
-            self.configure_options += ' --build=%s' % self.host
+            self.configure_options.append(f'--build={self.host}')
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s/lib %%(options)s" % {'host': self.host}
         self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)

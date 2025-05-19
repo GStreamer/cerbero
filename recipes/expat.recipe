@@ -12,7 +12,13 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '354552544b8f99012e5062f7d570ec77f14b412a3ff5c7d8d0dae62c0d217c30'
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = '-DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_PKGCONFIG=ON'
+    configure_options = [
+        '-DEXPAT_BUILD_EXAMPLES=OFF',
+        '-DEXPAT_BUILD_TESTS=OFF',
+        '-DEXPAT_BUILD_DOCS=OFF',
+        '-DEXPAT_BUILD_FUZZERS=OFF',
+        '-DEXPAT_BUILD_PKGCONFIG=ON'
+    ]
 
     files_libs = ['libexpat']
     files_devel = ['include/expat.h', 'include/expat_external.h', '%(libdir)s/pkgconfig/expat.pc']

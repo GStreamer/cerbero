@@ -18,38 +18,39 @@ class Recipe(recipe.Recipe):
     # Note: on 8.2.0, the --disable-maintainer-mode flag was improperly
     # spaced, that meant we've been shipping --enable-shared all along!
     # For consistency I'm explicitly enabling it with 14.1.0+
-    configure_options = '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\' ' \
-                        '--disable-maintainer-mode ' \
-                        '--enable-shared ' \
-                        '--disable-libgomp ' \
-                        '--disable-libquadmath ' \
-                        '--disable-libquadmath-support ' \
-                        '--disable-libmudflap ' \
-                        '--disable-libmpx ' \
-                        '--disable-libssp ' \
-                        '--disable-libstdcxx-pch ' \
-                        '--disable-rpath ' \
-                        '--disable-win32-registry ' \
-                        '--disable-nls ' \
-                        '--disable-werror ' \
-                        '--disable-symvers ' \
-                        '--enable-bootstrap' \
-                        '--enable-checking=release ' \
-                        '--enable-static ' \
-                        '--enable-libatomic ' \
-                        '--enable-threads=posix ' \
-                        '--enable-__cxa_atexit ' \
-                        '--enable-graphite ' \
-                        '--enable-fully-dynamic-string ' \
-                        '--enable-libstdcxx-filesystem-ts ' \
-                        '--enable-libstdcxx-time ' \
-                        '--enable-lto ' \
-                        '--enable-plugin ' \
-                        '--enable-multiarch ' \
-                        '--enable-languages=c,c++,lto ' \
-                        '--with-pkgversion="Built by GStreamer" ' \
-                        '--with-bugurl="https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues" ' \
-                        ''
+    configure_options = [
+        '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\'',
+        '--disable-maintainer-mode',
+        '--enable-shared',
+        '--disable-libgomp',
+        '--disable-libquadmath',
+        '--disable-libquadmath-support',
+        '--disable-libmudflap',
+        '--disable-libmpx',
+        '--disable-libssp',
+        '--disable-libstdcxx-pch',
+        '--disable-rpath',
+        '--disable-win32-registry',
+        '--disable-nls',
+        '--disable-werror',
+        '--disable-symvers',
+        '--enable-bootstrap',
+        '--enable-checking=release',
+        '--enable-static',
+        '--enable-libatomic',
+        '--enable-threads=posix',
+        '--enable-__cxa_atexit',
+        '--enable-graphite',
+        '--enable-fully-dynamic-string',
+        '--enable-libstdcxx-filesystem-ts',
+        '--enable-libstdcxx-time',
+        '--enable-lto',
+        '--enable-plugin',
+        '--enable-multiarch',
+        '--enable-languages=c,c++,lto',
+        '--with-pkgversion="Built by GStreamer"',
+        '--with-bugurl="https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues"'
+    ]
 
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
@@ -57,13 +58,13 @@ class Recipe(recipe.Recipe):
         self.set_env ('CPP')
         self._target = 'x86_64-w64-mingw32'
         self.sysroot = f'{self.config.prefix}/{self._target}/sysroot'
-        self.configure_options += f' --with-sysroot={self.sysroot} '
-        self.configure_options += f' --with-local-prefix={self.sysroot} '
-        self.configure_options += ' --target=%s' % self._target
+        self.configure_options.append(f'--with-sysroot={self.sysroot}')
+        self.configure_options.append(f'--with-local-prefix={self.sysroot}')
+        self.configure_options.append(f'--target={self._target}')
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --host=%s' % self._target
+            self.configure_options.append(f'--host={self._target}')
         # Point to mingw-w64-headers's sysroot (see configure_tpl)
-        self.configure_options += f' --with-native-system-header-dir=/usr/{self._target}/include '
+        self.configure_options.append(f'--with-native-system-header-dir=/usr/{self._target}/include')
         self.config_src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
         self.build_dir = os.path.join(self.config_src_dir, 'gcc_build_final')
         self.make_dir = self.build_dir
@@ -71,7 +72,7 @@ class Recipe(recipe.Recipe):
         self.make_install = ['install-strip' if i == 'install' else i for i in self.make_install]
         # Describe version for future reference
         version = shell.check_output([GIT, 'describe'], cmd_dir=Path(__file__).parent, logfile=self.logfile, env=self.env, quiet=True).strip()
-        self.configure_options = self.configure_options.replace('GStreamer', f'GStreamer ({version})')
+        self.configure_options = [opt.replace('GStreamer', f'GStreamer ({version})') for opt in self.configure_options]
 
     async def configure(self):
         Path(self.make_dir).mkdir(exist_ok=True)

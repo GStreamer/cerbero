@@ -45,7 +45,7 @@ class Recipe(recipe.Recipe):
             self.set_env(v)
         self.host = 'x86_64-w64-mingw32'
         self.sysroot = f'{self.config.prefix}/{self.host}/sysroot'
-        self.configure_options += f' --with-sysroot={self.sysroot}'
+        self.configure_options.append(f'--with-sysroot={self.sysroot}')
         self.make_install += [f'DESTDIR={self.sysroot}']
         self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-libraries', 'winpthreads')
         self.build_dir = self.config_src_dir
@@ -67,7 +67,7 @@ class Recipe(recipe.Recipe):
         libdir = "/usr/%s/lib32" % self.host
         # i686 is always a cross build
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, host, host, ' '.join(self.configure_options)),
                 self.build_dir_32, logfile=self.logfile, env=self.env)
 
         Path(self.build_dir_64).mkdir(exist_ok=True)
@@ -76,7 +76,7 @@ class Recipe(recipe.Recipe):
         host = 'x86_64-w64-mingw32'
         libdir = "/usr/%s/lib" % self.host
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, host, host, ' '.join(self.configure_options)),
                 self.build_dir_64, logfile=self.logfile, env=self.env)
 
     async def compile(self):

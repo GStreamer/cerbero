@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
 
     add_host_build_target = False
     config_sh = './bootstrap'
-    configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
+    configure_tpl = ['%(config-sh)s', '--prefix=%(prefix)s']
     can_use_configure_cache = False
 
     files_bins = ['cmake', 'cpack', 'ctest']
@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86_64:
                 # Setting SYSTEM_NAME sets CMAKE_CROSSCOMPILING and the
                 # binutils such as ar and ranlib are prefixed correctly
-                self.configure_tpl += ' -- -DCMAKE_SYSTEM_NAME="Windows"'
+                self.configure_tpl.append('--DCMAKE_SYSTEM_NAME="Windows"')
 
     async def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
