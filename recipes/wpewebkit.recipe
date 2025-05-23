@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.46.7'
+    version = '2.48.2'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = 'cf3e47638595d86de96abdb94db69a836c8aa509fc063be714f52c5a24bb5cd5'
+    tarball_checksum = '539c6c19b4be1630341a9e9582c25378a1e64eaab7818772ef6c09648ad9584c'
     deps = [
         'icu',
         'cairo',
@@ -37,6 +37,7 @@ class Recipe(recipe.Recipe):
         -DENABLE_INTROSPECTION=OFF \
         -DENABLE_JOURNALD_LOG=OFF \
         -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+        -DENABLE_SPEECH_SYNTHESIS=OFF \
         -DUSE_ATK=OFF \
         -DUSE_LCMS=OFF \
         -DUSE_AVIF=OFF \
@@ -44,6 +45,7 @@ class Recipe(recipe.Recipe):
         -DUSE_LIBDRM=OFF \
         -DUSE_JPEGXL=OFF \
         -DUSE_LIBBACKTRACE=OFF \
+        -DUSE_SKIA_OPENTYPE_SVG=OFF \
         -DUSE_SYSPROF_CAPTURE=OFF \
         -DENABLE_WEBDRIVER=ON \
         -DENABLE_WPE_PLATFORM=OFF \
@@ -57,8 +59,11 @@ class Recipe(recipe.Recipe):
     ]
 
     files_misc = [
-        'lib/wpe-webkit-2.0/libWPEWebInspectorResources.so',
         'lib/wpe-webkit-2.0/injected-bundle/libWPEInjectedBundle.so'
+    ]
+
+    files_shared = [
+        'share/wpe-webkit-2.0/inspector.gresource',
     ]
 
     files_devel = [
@@ -159,13 +164,21 @@ class Recipe(recipe.Recipe):
         'libexec/wpe-webkit-2.0/WPEWebProcess',
     ]
 
+    patches = [
+        'wpewebkit/0001-Revert-Use-UnixFileDescriptor-in-IPC-and-ProcessLaun.patch',
+    ]
+
     def prepare(self):
+        from os import path
+        glib_compile_resources_path = \
+            path.join(self.config.build_tools_prefix, 'bin', 'glib-compile-resources')
         self.configure_options += f' \
             -DICU_ROOT={self.config.prefix} \
             -DZLIB_ROOT={self.config.prefix} \
             -DFREETYPE_LIBRARY={self.config.prefix}/lib/libfreetype.so \
             -DFREETYPE_INCLUDE_DIR_ft2build={self.config.prefix}/include/freetype2 \
             -DFREETYPE_INCLUDE_DIR_freetype2={self.config.prefix}/include/freetype2 \
+            -DGLIB_COMPILE_RESOURCES_EXECUTABLE={glib_compile_resources_path} \
             -DJPEG_LIBRARY={self.config.prefix}/lib/libjpeg.so \
             -DJPEG_INCLUDE_DIR={self.config.prefix}/include \
             -DPNG_LIBRARY={self.config.prefix}/lib/libpng.so \
@@ -177,24 +190,11 @@ class Recipe(recipe.Recipe):
                 arch_src_name = 'arm'
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
             self.configure_options += ' -DANDROID=1'
-            self.append_env('LDFLAGS', '-landroid -llog -lm -lintl -lc++_shared -O2')
             # Android libc does not have bcmp()
             self.append_env('CXXFLAGS', ' -Dbcmp=memcmp ')
             self.append_env('CFLAGS', ' -Dbcmp=memcmp ')
-            # XXX: CMake fails to check for this properly
-            self.append_env('CXXFLAGS', ' -DHAVE_MISSING_STD_FILESYSTEM_PATH_CONSTRUCTOR=1')
-            self.append_env('CXXFLAGS', ' -DWPE_ENABLE_PROCESS=1 -Dis_android=1 -DLOG_DISABLED=1 -D__ANDROID__=1 -DANDROID=1')
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
-            self.patches += [
-                'wpewebkit/0001-Make-UnixFileDescriptor-noncopyable-again.patch',
-                'wpewebkit/0002-WPE-Use-ASharedMemory-when-targeting-Android.patch',
-                'wpewebkit/0003-Introduce-OS-ANDROID-to-simplify-preprocessor-guards.patch',
-                'wpewebkit/0004-Android-Build-WebDriver-as-a-library.patch',
-                'wpewebkit/0005-Android-Declare-namespace-when-building-WebDriver-as.patch',
-                'wpewebkit/0006-WPE-Android-build-WebDriver-as-a-shared-library.patch',
-                'wpewebkit/0007-Allow-setting-injected-bundle-and-inspector-lib-path.patch',
-            ]
         else:
             self.append_env('LDFLAGS', '-lrt')
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + self.config.target_arch
