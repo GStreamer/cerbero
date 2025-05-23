@@ -1,4 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
+import shutil
 
 class Recipe(recipe.Recipe):
     version = '1.611.0'
@@ -6,8 +8,22 @@ class Recipe(recipe.Recipe):
     licenses = [{License.MIT: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
+    library_type = LibraryType.STATIC
     url = 'https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = 'edb8b52b1379f841df5d0d5e11dde08e0c3912508179fb3711f163382e88865c'
     tarball_dirname = 'DirectX-Headers-%(version)s'
 
     files_devel = []
+    files_libs = ['libd3dx12-format-properties', 'libDirectX-Guids']
+
+    def post_install(self):
+        # g-ir-scanner expects import libraries to end in .lib when
+        # building a gir for "internal" (same project) libraries
+        if self.using_msvc() and self.config.variants.gi:
+            prefix = Path(self.config.libdir)
+            for f in ['libd3dx12-format-properties.a', 'libDirectX-Guids.a']:
+                src = prefix / f
+                dst = src.with_stem(src.stem.replace('lib', '')).with_suffix('.lib')
+                dst.unlink(missing_ok=True)
+                shutil.copyfile(src, dst)
+        super().post_install()
