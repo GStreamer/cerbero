@@ -1,0 +1,1498 @@
+From ea158e812abe9990c971b095a13d35c9bfae4cc7 Mon Sep 17 00:00:00 2001
+From: Steve Lhomme <robux4@ycbcr.xyz>
+Date: Thu, 18 Aug 2022 14:44:33 +0200
+Subject: [PATCH] ifo_types: avoid forcing a higher length in bitfield
+ structures
+
+LLVM ends up using the size of an unsigned int if it's used in the bitfield.
+In other places the bitfields are using unsigned char which always uses the
+proper size in the packed structures.
+
+* multichannel_ext_t would end up having a size of 27 instead of 24
+* cell_playback_t would end up having a size of 26 instead of 24
+* pgci_srp_t would end up having a size of 11 instead of 8
+* playback_type_t would end up having a size of 4 instead of 1
+---
+ src/dvdread/ifo_types.h | 146 ++++++++++++++++++++--------------------
+ 1 file changed, 73 insertions(+), 73 deletions(-)
+
+diff --git a/src/dvdread/ifo_types.h b/src/dvdread/ifo_types.h
+index fca1b8b..9293ce7 100644
+--- a/src/dvdread/ifo_types.h
++++ b/src/dvdread/ifo_types.h
+@@ -132,29 +132,29 @@ typedef struct {
+  * MultiChannel Extension
+  */
+ typedef struct {
+-  unsigned int zero1      : 7;
+-  unsigned int ach0_gme   : 1;
+-
+-  unsigned int zero2      : 7;
+-  unsigned int ach1_gme   : 1;
+-
+-  unsigned int zero3      : 4;
+-  unsigned int ach2_gv1e  : 1;
+-  unsigned int ach2_gv2e  : 1;
+-  unsigned int ach2_gm1e  : 1;
+-  unsigned int ach2_gm2e  : 1;
+-
+-  unsigned int zero4      : 4;
+-  unsigned int ach3_gv1e  : 1;
+-  unsigned int ach3_gv2e  : 1;
+-  unsigned int ach3_gmAe  : 1;
+-  unsigned int ach3_se2e  : 1;
+-
+-  unsigned int zero5      : 4;
+-  unsigned int ach4_gv1e  : 1;
+-  unsigned int ach4_gv2e  : 1;
+-  unsigned int ach4_gmBe  : 1;
+-  unsigned int ach4_seBe  : 1;
++  unsigned char zero1      : 7;
++  unsigned char ach0_gme   : 1;
++
++  unsigned char zero2      : 7;
++  unsigned char ach1_gme   : 1;
++
++  unsigned char zero3      : 4;
++  unsigned char ach2_gv1e  : 1;
++  unsigned char ach2_gv2e  : 1;
++  unsigned char ach2_gm1e  : 1;
++  unsigned char ach2_gm2e  : 1;
++
++  unsigned char zero4      : 4;
++  unsigned char ach3_gv1e  : 1;
++  unsigned char ach3_gv2e  : 1;
++  unsigned char ach3_gmAe  : 1;
++  unsigned char ach3_se2e  : 1;
++
++  unsigned char zero5      : 4;
++  unsigned char ach4_gv1e  : 1;
++  unsigned char ach4_gv2e  : 1;
++  unsigned char ach4_gmBe  : 1;
++  unsigned char ach4_seBe  : 1;
+   uint8_t zero6[19];
+ } ATTRIBUTE_PACKED multichannel_ext_t;
+ 
+@@ -207,16 +207,16 @@ typedef uint8_t pgc_program_map_t;
+  * Cell Playback Information.
+  */
+ typedef struct {
+-  unsigned int block_mode       : 2;
+-  unsigned int block_type       : 2;
+-  unsigned int seamless_play    : 1;
+-  unsigned int interleaved      : 1;
+-  unsigned int stc_discontinuity: 1;
+-  unsigned int seamless_angle   : 1;
+-  unsigned int zero_1           : 1;
+-  unsigned int playback_mode    : 1;  /**< When set, enter StillMode after each VOBU */
+-  unsigned int restricted       : 1;  /**< ?? drop out of fastforward? */
+-  unsigned int cell_type        : 5;  /** for karaoke, reserved otherwise */
++  unsigned char block_mode       : 2;
++  unsigned char block_type       : 2;
++  unsigned char seamless_play    : 1;
++  unsigned char interleaved      : 1;
++  unsigned char stc_discontinuity: 1;
++  unsigned char seamless_angle   : 1;
++  unsigned char zero_1           : 1;
++  unsigned char playback_mode    : 1;  /**< When set, enter StillMode after each VOBU */
++  unsigned char restricted       : 1;  /**< ?? drop out of fastforward? */
++  unsigned char cell_type        : 5;  /** for karaoke, reserved otherwise */
+   uint8_t still_time;
+   uint8_t cell_cmd_nr;
+   dvd_time_t playback_time;
+@@ -247,35 +247,35 @@ typedef struct {
+  * User Operations.
+  */
+ typedef struct {
+-  unsigned int zero                           : 7; /* 25-31 */
+-  unsigned int video_pres_mode_change         : 1; /* 24 */
+-
+-  unsigned int karaoke_audio_pres_mode_change : 1; /* 23 */
+-  unsigned int angle_change                   : 1;
+-  unsigned int subpic_stream_change           : 1;
+-  unsigned int audio_stream_change            : 1;
+-  unsigned int pause_on                       : 1;
+-  unsigned int still_off                      : 1;
+-  unsigned int button_select_or_activate      : 1;
+-  unsigned int resume                         : 1; /* 16 */
+-
+-  unsigned int chapter_menu_call              : 1; /* 15 */
+-  unsigned int angle_menu_call                : 1;
+-  unsigned int audio_menu_call                : 1;
+-  unsigned int subpic_menu_call               : 1;
+-  unsigned int root_menu_call                 : 1;
+-  unsigned int title_menu_call                : 1;
+-  unsigned int backward_scan                  : 1;
+-  unsigned int forward_scan                   : 1; /* 8 */
+-
+-  unsigned int next_pg_search                 : 1; /* 7 */
+-  unsigned int prev_or_top_pg_search          : 1;
+-  unsigned int time_or_chapter_search         : 1;
+-  unsigned int go_up                          : 1;
+-  unsigned int stop                           : 1;
+-  unsigned int title_play                     : 1;
+-  unsigned int chapter_search_or_play         : 1;
+-  unsigned int title_or_time_play             : 1; /* 0 */
++  unsigned char zero                           : 7; /* 25-31 */
++  unsigned char video_pres_mode_change         : 1; /* 24 */
++
++  unsigned char karaoke_audio_pres_mode_change : 1; /* 23 */
++  unsigned char angle_change                   : 1;
++  unsigned char subpic_stream_change           : 1;
++  unsigned char audio_stream_change            : 1;
++  unsigned char pause_on                       : 1;
++  unsigned char still_off                      : 1;
++  unsigned char button_select_or_activate      : 1;
++  unsigned char resume                         : 1; /* 16 */
++
++  unsigned char chapter_menu_call              : 1; /* 15 */
++  unsigned char angle_menu_call                : 1;
++  unsigned char audio_menu_call                : 1;
++  unsigned char subpic_menu_call               : 1;
++  unsigned char root_menu_call                 : 1;
++  unsigned char title_menu_call                : 1;
++  unsigned char backward_scan                  : 1;
++  unsigned char forward_scan                   : 1; /* 8 */
++
++  unsigned char next_pg_search                 : 1; /* 7 */
++  unsigned char prev_or_top_pg_search          : 1;
++  unsigned char time_or_chapter_search         : 1;
++  unsigned char go_up                          : 1;
++  unsigned char stop                           : 1;
++  unsigned char title_play                     : 1;
++  unsigned char chapter_search_or_play         : 1;
++  unsigned char title_or_time_play             : 1; /* 0 */
+ } ATTRIBUTE_PACKED user_ops_t;
+ 
+ /**
+@@ -312,9 +312,9 @@ typedef struct {
+  */
+ typedef struct {
+   uint8_t  entry_id;
+-  unsigned int block_mode : 2;
+-  unsigned int block_type : 2;
+-  unsigned int zero_1   : 4;
++  unsigned char block_mode : 2;
++  unsigned char block_type : 2;
++  unsigned char zero_1   : 4;
+   uint16_t ptl_id_mask;
+   uint32_t pgc_start_byte;
+   pgc_t *pgc;
+@@ -440,14 +440,14 @@ typedef struct {
+ } ATTRIBUTE_PACKED vmgi_mat_t;
+ 
+ typedef struct {
+-  unsigned int zero_1                    : 1;
+-  unsigned int multi_or_random_pgc_title : 1; /* 0: one sequential pgc title */
+-  unsigned int jlc_exists_in_cell_cmd    : 1;
+-  unsigned int jlc_exists_in_prepost_cmd : 1;
+-  unsigned int jlc_exists_in_button_cmd  : 1;
+-  unsigned int jlc_exists_in_tt_dom      : 1;
+-  unsigned int chapter_search_or_play    : 1; /* UOP 1 */
+-  unsigned int title_or_time_play        : 1; /* UOP 0 */
++  unsigned char zero_1                    : 1;
++  unsigned char multi_or_random_pgc_title : 1; /* 0: one sequential pgc title */
++  unsigned char jlc_exists_in_cell_cmd    : 1;
++  unsigned char jlc_exists_in_prepost_cmd : 1;
++  unsigned char jlc_exists_in_button_cmd  : 1;
++  unsigned char jlc_exists_in_tt_dom      : 1;
++  unsigned char chapter_search_or_play    : 1; /* UOP 1 */
++  unsigned char title_or_time_play        : 1; /* UOP 0 */
+ } ATTRIBUTE_PACKED playback_type_t;
+ 
+ /**
+-- 
+2.49.0
+
+From f3c27767e28452731a6445fdbc183f8d456100b7 Mon Sep 17 00:00:00 2001
+From: Steve Lhomme <robux4@ycbcr.xyz>
+Date: Mon, 22 Aug 2022 08:13:06 +0200
+Subject: [PATCH] nav_types: avoid forcing a higher length in bitfield
+ structures
+
+LLVM ends up using the size of an unsigned int if it's used in the bitfield.
+In other places the bitfields are using unsigned char which always uses the
+proper size in the packed structures.
+
+/!\ btni_t fields are kept with unsigned int as unsigned char cannot hold
+10 bits. btni_t is not actually read as a packed structure. So we keep the
+current format for backward compatibility.
+---
+ src/dvdread/nav_types.h | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/src/dvdread/nav_types.h b/src/dvdread/nav_types.h
+index f6a500f..3debbee 100644
+--- a/src/dvdread/nav_types.h
++++ b/src/dvdread/nav_types.h
+@@ -77,14 +77,14 @@ typedef struct {
+   uint32_t hli_s_ptm;              /**< start ptm of hli */
+   uint32_t hli_e_ptm;              /**< end ptm of hli */
+   uint32_t btn_se_e_ptm;           /**< end ptm of button select */
+-  unsigned int zero1 : 2;          /**< reserved */
+-  unsigned int btngr_ns : 2;       /**< number of button groups 1, 2 or 3 with 36/18/12 buttons */
+-  unsigned int zero2 : 1;          /**< reserved */
+-  unsigned int btngr1_dsp_ty : 3;  /**< display type of subpic stream for button group 1 */
+-  unsigned int zero3 : 1;          /**< reserved */
+-  unsigned int btngr2_dsp_ty : 3;  /**< display type of subpic stream for button group 2 */
+-  unsigned int zero4 : 1;          /**< reserved */
+-  unsigned int btngr3_dsp_ty : 3;  /**< display type of subpic stream for button group 3 */
++  unsigned char zero1 : 2;          /**< reserved */
++  unsigned char btngr_ns : 2;       /**< number of button groups 1, 2 or 3 with 36/18/12 buttons */
++  unsigned char zero2 : 1;          /**< reserved */
++  unsigned char btngr1_dsp_ty : 3;  /**< display type of subpic stream for button group 1 */
++  unsigned char zero3 : 1;          /**< reserved */
++  unsigned char btngr2_dsp_ty : 3;  /**< display type of subpic stream for button group 2 */
++  unsigned char zero4 : 1;          /**< reserved */
++  unsigned char btngr3_dsp_ty : 3;  /**< display type of subpic stream for button group 3 */
+   uint8_t btn_ofn;     /**< button offset number range 0-255 */
+   uint8_t btn_ns;      /**< number of valid buttons  <= 36/18/12 (low 6 bits) */
+   uint8_t nsl_btn_ns;  /**< number of buttons selectable by U_BTNNi (low 6 bits)   nsl_btn_ns <= btn_ns */
+-- 
+2.49.0
+
+From ba2227bb8619724c2bfadcc4d8f25d741a3398ac Mon Sep 17 00:00:00 2001
+From: Vasyl Gello <vasek.gello@gmail.com>
+Date: Fri, 14 Oct 2022 15:56:39 +0000
+Subject: [PATCH] Add missing stream callback functionality
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+After the split of libdvdcss from libdvdread,
+the stream callback code was moved to libdvdcss.
+
+This went largely unnoticed because most consumers
+played their DVD‌ ISO images on the systems with libdvdcss
+installed.
+
+However, I tested Kodi by playing unencrypted DVD‌ ISO
+and noticed the inability to play it.
+
+This code is inspired by stream_* functions in libdvdcss.
+
+Signed-off-by: Vasyl Gello <vasek.gello@gmail.com>
+---
+ src/dvd_input.c | 100 +++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 82 insertions(+), 18 deletions(-)
+
+diff --git a/src/dvd_input.c b/src/dvd_input.c
+index d7dad87..26b6928 100644
+--- a/src/dvd_input.c
++++ b/src/dvd_input.c
+@@ -93,16 +93,21 @@ static int open_win32(const char *path, int flags)
+ }
+ #endif
+ 
+-/* The DVDinput handle, add stuff here for new input methods. */
++/* The DVDinput handle, add stuff here for new input methods.
++ * NOTE: All members of this structure must be initialized in dvd_input_New
++ */
+ struct dvd_input_s {
+   /* libdvdcss handle */
+   dvdcss_t dvdcss;
+   /* */
+   void *priv;
+   dvd_logger_cb *logcb;
++  off_t ipos;
+ 
+   /* dummy file input */
+   int fd;
++  /* stream input */
++  dvd_reader_stream_cb *stream_cb;
+ };
+ 
+ static dvd_input_t dvd_input_New(void *priv, dvd_logger_cb *logcb)
+@@ -112,6 +117,12 @@ static dvd_input_t dvd_input_New(void *priv, dvd_logger_cb *logcb)
+   {
+       dev->priv = priv;
+       dev->logcb = logcb;
++      dev->ipos = 0;
++
++      /* Initialize all inputs to safe defaults */
++      dev->dvdcss = NULL;
++      dev->fd = -1;
++      dev->stream_cb = NULL;
+   }
+   return dev;
+ }
+@@ -199,12 +210,10 @@ static int css_close(dvd_input_t dev)
+  */
+ static dvd_input_t file_open(void *priv, dvd_logger_cb *logcb,
+                              const char *target,
+-                             dvd_reader_stream_cb *stream_cb UNUSED)
++                             dvd_reader_stream_cb *stream_cb)
+ {
+   dvd_input_t dev;
+ 
+-  if(target == NULL)
+-    return NULL;
+   /* Allocate the library structure */
+   dev = dvd_input_New(priv, logcb);
+   if(dev == NULL) {
+@@ -213,7 +222,23 @@ static dvd_input_t file_open(void *priv, dvd_logger_cb *logcb,
+     return NULL;
+   }
+ 
++  /* Initialize with stream callback if it is specified */
++  if (stream_cb) {
++    if (!stream_cb->pf_read || !stream_cb->pf_seek) {
++      DVDReadLog(priv, logcb, DVD_LOGGER_LEVEL_ERROR,
++                 "Stream callback provided but lacks of pf_read or pf_seek methods.");
++      free(dev);
++      return NULL;
++    }
++    dev->stream_cb = stream_cb;
++    return dev;
++  }
++
+   /* Open the device */
++  if(target == NULL) {
++    free(dev);
++    return NULL;
++  }
+ #if defined(_WIN32)
+   dev->fd = open_win32(target, O_RDONLY | O_BINARY);
+ #elif defined(__OS2__)
+@@ -254,14 +279,38 @@ static dvd_input_t file_open(void *priv, dvd_logger_cb *logcb,
+  */
+ static int file_seek(dvd_input_t dev, int blocks)
+ {
+-  off_t pos;
++  off_t pos = -1;
++
++  if(dev->ipos == blocks)
++  {
++    /* We are already in position */
++    return blocks;
++  }
++
++  if (dev->stream_cb) {
++    /* Returns 0 on successful completion and -1 on error */
++    pos = dev->stream_cb->pf_seek(dev->priv, (off_t)blocks * (off_t)DVD_VIDEO_LB_LEN);
++
++    if (!pos) {
++      dev->ipos = blocks;
++    }
++  } else {
++    /* Returns position as the number of bytes from beginning of file
++     * or -1 on error
++     */
++    pos = lseek(dev->fd, (off_t)blocks * (off_t)DVD_VIDEO_LB_LEN, SEEK_SET);
++
++    if (pos >= 0) {
++      dev->ipos = pos / DVD_VIDEO_LB_LEN;
++    }
++  }
+ 
+-  pos = lseek(dev->fd, (off_t)blocks * (off_t)DVD_VIDEO_LB_LEN, SEEK_SET);
+   if(pos < 0) {
+     return pos;
+   }
++
+   /* assert pos % DVD_VIDEO_LB_LEN == 0 */
+-  return (int) (pos / DVD_VIDEO_LB_LEN);
++  return (int) dev->ipos;
+ }
+ 
+ /**
+@@ -278,36 +327,48 @@ static int file_title(dvd_input_t dev UNUSED, int block UNUSED)
+ static int file_read(dvd_input_t dev, void *buffer, int blocks,
+ 		     int flags UNUSED)
+ {
+-  size_t len, bytes;
++  size_t len, bytes, blocks_read;
+ 
+   len = (size_t)blocks * DVD_VIDEO_LB_LEN;
+   bytes = 0;
++  blocks_read = 0;
+ 
+   while(len > 0) {
+-    ssize_t ret = read(dev->fd, ((char*)buffer) + bytes, len);
++    ssize_t ret = -1;
++
++    /* Perform read based on the input type */
++    if (dev->stream_cb) {
++      /* Returns the number of bytes read or -1 on error */
++      ret = dev->stream_cb->pf_read(dev->priv, ((char*)buffer) + bytes, len);
++    } else {
++      /* Returns the number of bytes read or -1 on error */
++      ret = read(dev->fd, ((char*)buffer) + bytes, len);
++    }
+ 
+     if(ret < 0) {
+       /* One of the reads failed, too bad.  We won't even bother
+        * returning the reads that went OK, and as in the POSIX spec
+        * the file position is left unspecified after a failure. */
++      dev->ipos = -1;
+       return ret;
+     }
+ 
+     if(ret == 0) {
+       /* Nothing more to read.  Return all of the whole blocks, if any.
+        * Adjust the file position back to the previous block boundary. */
+-      off_t over_read = -(bytes % DVD_VIDEO_LB_LEN);
+-      off_t pos = lseek(dev->fd, over_read, SEEK_CUR);
+-      if(pos % 2048 != 0)
+-          DVDReadLog(dev->priv, dev->logcb, DVD_LOGGER_LEVEL_WARN,
+-                     "lseek not multiple of 2048! Something is wrong!");
+-      return (int) (bytes / DVD_VIDEO_LB_LEN);
++      ret = file_seek(dev, dev->ipos + blocks_read);
++      if(ret < 0)
++        return ret;
++
++      return (int) blocks_read;
+     }
+ 
+     len -= ret;
+     bytes += ret;
++    blocks_read = bytes / DVD_VIDEO_LB_LEN;
+   }
+ 
++  dev->ipos += blocks_read;
+   return blocks;
+ }
+ 
+@@ -316,16 +377,19 @@ static int file_read(dvd_input_t dev, void *buffer, int blocks,
+  */
+ static int file_close(dvd_input_t dev)
+ {
+-  int ret;
++  int ret = 0;
+ 
+-  ret = close(dev->fd);
++  /* close file if it was open */
++
++  if (dev->fd >= 0) {
++    ret = close(dev->fd);
++  }
+ 
+   free(dev);
+ 
+   return ret;
+ }
+ 
+-
+ /**
+  * Setup read functions with either libdvdcss or minimal DVD access.
+  */
+-- 
+2.49.0
+
+From 3e209ec010327b6efc6a167689e47a6f8f84b399 Mon Sep 17 00:00:00 2001
+From: robxnano <robxnanocode@outlook.com>
+Date: Sat, 12 Apr 2025 20:32:06 +0100
+Subject: [PATCH] Add symbol visibility attributes
+
+---
+ Makefile.am              |  4 +--
+ configure.ac             |  3 ++
+ src/dvdread/attributes.h | 33 ++++++++++++++++++++
+ src/dvdread/bitreader.h  |  6 ++--
+ src/dvdread/dvd_reader.h | 36 +++++++++++-----------
+ src/dvdread/dvd_udf.h    |  9 +++---
+ src/dvdread/ifo_print.h  |  8 +++--
+ src/dvdread/ifo_read.h   | 65 ++++++++++++++++++++--------------------
+ src/dvdread/ifo_types.h  |  3 +-
+ src/dvdread/nav_print.h  |  8 +++--
+ src/dvdread/nav_read.h   |  7 +++--
+ src/dvdread/nav_types.h  |  4 ++-
+ src/logger.h             |  4 ++-
+ 13 files changed, 121 insertions(+), 69 deletions(-)
+ create mode 100644 src/dvdread/attributes.h
+
+diff --git a/Makefile.am b/Makefile.am
+index f2849b8..da71813 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -36,11 +36,11 @@ libdvdread_la_SOURCES = \
+ 
+ libdvdread_la_LIBADD = $(CSS_LIBS)
+ 
+-libdvdread_la_LDFLAGS = -version-info $(DVDREAD_LTVERSION) \
+-	-export-symbols-regex "(^dvdread.*|^nav.*|^ifo.*|^DVD.*|^UDF.*)"
++libdvdread_la_LDFLAGS = -version-info $(DVDREAD_LTVERSION)
+ 
+ pkgincludedir = $(includedir)/dvdread
+ pkginclude_HEADERS = \
++	src/dvdread/attributes.h \
+ 	src/dvdread/bitreader.h \
+ 	src/dvdread/dvd_reader.h \
+ 	src/dvdread/dvd_udf.h \
+diff --git a/configure.ac b/configure.ac
+index a60ef0c..84cc8d4 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -96,6 +96,9 @@ AC_SUBST([CSS_REQUIRES])
+ 
+ CC_CHECK_CFLAGS_APPEND([-Wall -Wsign-compare -Wextra])
+ 
++dnl Symbol visibility
++CC_CHECK_CFLAGS_APPEND([-fvisibility=hidden])
++CPPFLAGS="${CPPFLAGS} -DDVDREAD_API_EXPORT"
+ 
+ AC_ARG_ENABLE([apidoc],
+   AS_HELP_STRING([--disable-apidoc], [Disable building (with Doxygen) and installing API documentation @<:@default=auto@:@>]))
+diff --git a/src/dvdread/attributes.h b/src/dvdread/attributes.h
+new file mode 100644
+index 0000000..1e272fe
+--- /dev/null
++++ b/src/dvdread/attributes.h
+@@ -0,0 +1,33 @@
++/*
++ * This file is part of libdvdread
++ * Copyright (C) 2010-2025 hpi1 and VideoLAN
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library. If not, see
++ * <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef LIBDVDREAD_ATTRIBUTES_H
++#define LIBDVDREAD_ATTRIBUTES_H
++
++#ifdef DVDREAD_API_EXPORT
++#  if defined(_WIN32)
++#    define DVDREAD_API  __declspec(dllexport)
++#  elif defined(__GNUC__) && __GNUC__ >= 4
++#    define DVDREAD_API  __attribute__((visibility("default")))
++#  endif
++#else
++#  define DVDREAD_API
++#endif
++
++#endif /* LIBDVDREAD_ATTRIBUTES_H */
+diff --git a/src/dvdread/bitreader.h b/src/dvdread/bitreader.h
+index 801e3a9..b58c477 100644
+--- a/src/dvdread/bitreader.h
++++ b/src/dvdread/bitreader.h
+@@ -25,14 +25,16 @@
+ extern "C" {
+ #endif
+ 
++#include <dvdread/attributes.h>
++
+ typedef struct {
+   const uint8_t *start;
+   uint32_t byte_position;
+   uint32_t bit_position;
+ } getbits_state_t;
+ 
+-int dvdread_getbits_init(getbits_state_t *state, const uint8_t *start);
+-uint32_t dvdread_getbits(getbits_state_t *state, uint32_t number_of_bits);
++DVDREAD_API int dvdread_getbits_init(getbits_state_t *state, const uint8_t *start);
++DVDREAD_API uint32_t dvdread_getbits(getbits_state_t *state, uint32_t number_of_bits);
+ 
+ #ifdef __cplusplus
+ };
+diff --git a/src/dvdread/dvd_reader.h b/src/dvdread/dvd_reader.h
+index 54ef5dd..2bcdcc7 100644
+--- a/src/dvdread/dvd_reader.h
++++ b/src/dvdread/dvd_reader.h
+@@ -34,6 +34,8 @@
+ #include <inttypes.h>
+ #include <stdarg.h>
+ 
++#include <dvdread/attributes.h>
++
+ /**
+  * The DVD access interface.
+  *
+@@ -136,8 +138,8 @@ typedef struct {
+  * dvd = DVDOpen(path);
+  * dvd = DVDOpenStream(stream, &stream_cb);
+  */
+-dvd_reader_t *DVDOpen( const char * );
+-dvd_reader_t *DVDOpenStream( void *, dvd_reader_stream_cb * );
++DVDREAD_API dvd_reader_t *DVDOpen( const char * );
++DVDREAD_API dvd_reader_t *DVDOpenStream( void *, dvd_reader_stream_cb * );
+ 
+ /**
+  * Same as DVDOpen, but with private handle to be passed back on callbacks
+@@ -151,8 +153,8 @@ dvd_reader_t *DVDOpenStream( void *, dvd_reader_stream_cb * );
+  * dvd = DVDOpen2(priv, logcb, path);
+  * dvd = DVDOpenStream2(priv, logcb, &stream_cb);
+  */
+-dvd_reader_t *DVDOpen2( void *, const dvd_logger_cb *, const char * );
+-dvd_reader_t *DVDOpenStream2( void *, const dvd_logger_cb *, dvd_reader_stream_cb * );
++DVDREAD_API dvd_reader_t *DVDOpen2( void *, const dvd_logger_cb *, const char * );
++DVDREAD_API dvd_reader_t *DVDOpenStream2( void *, const dvd_logger_cb *, dvd_reader_stream_cb * );
+ 
+ /**
+  * Closes and cleans up the DVD reader object.
+@@ -163,7 +165,7 @@ dvd_reader_t *DVDOpenStream2( void *, const dvd_logger_cb *, dvd_reader_stream_c
+  *
+  * DVDClose(dvd);
+  */
+-void DVDClose( dvd_reader_t * );
++DVDREAD_API void DVDClose( dvd_reader_t * );
+ 
+ /**
+  *
+@@ -202,7 +204,7 @@ typedef enum {
+  *
+  * int DVDFileStat(dvd, titlenum, domain, stat);
+  */
+-int DVDFileStat(dvd_reader_t *, int, dvd_read_domain_t, dvd_stat_t *);
++DVDREAD_API int DVDFileStat(dvd_reader_t *, int, dvd_read_domain_t, dvd_stat_t *);
+ 
+ /**
+  * Opens a file on the DVD given the title number and domain.
+@@ -217,7 +219,7 @@ int DVDFileStat(dvd_reader_t *, int, dvd_read_domain_t, dvd_stat_t *);
+  * @return If successful a a file read handle is returned, otherwise 0.
+  *
+  * dvd_file = DVDOpenFile(dvd, titlenum, domain); */
+-dvd_file_t *DVDOpenFile( dvd_reader_t *, int, dvd_read_domain_t );
++DVDREAD_API dvd_file_t *DVDOpenFile( dvd_reader_t *, int, dvd_read_domain_t );
+ 
+ /**
+  * Closes a file and frees the associated structure.
+@@ -226,7 +228,7 @@ dvd_file_t *DVDOpenFile( dvd_reader_t *, int, dvd_read_domain_t );
+  *
+  * DVDCloseFile(dvd_file);
+  */
+-void DVDCloseFile( dvd_file_t * );
++DVDREAD_API void DVDCloseFile( dvd_file_t * );
+ 
+ /**
+  * Reads block_count number of blocks from the file at the given block offset.
+@@ -243,7 +245,7 @@ void DVDCloseFile( dvd_file_t * );
+  *
+  * blocks_read = DVDReadBlocks(dvd_file, offset, block_count, data);
+  */
+-ssize_t DVDReadBlocks( dvd_file_t *, int, size_t, unsigned char * );
++DVDREAD_API ssize_t DVDReadBlocks( dvd_file_t *, int, size_t, unsigned char * );
+ 
+ /**
+  * Seek to the given position in the file.  Returns the resulting position in
+@@ -257,7 +259,7 @@ ssize_t DVDReadBlocks( dvd_file_t *, int, size_t, unsigned char * );
+  *
+  * offset_set = DVDFileSeek(dvd_file, seek_offset);
+  */
+-int32_t DVDFileSeek( dvd_file_t *, int32_t );
++DVDREAD_API int32_t DVDFileSeek( dvd_file_t *, int32_t );
+ 
+ /**
+  * Reads the given number of bytes from the file.  This call can only be used
+@@ -271,7 +273,7 @@ int32_t DVDFileSeek( dvd_file_t *, int32_t );
+  *
+  * bytes_read = DVDReadBytes(dvd_file, data, bytes);
+  */
+-ssize_t DVDReadBytes( dvd_file_t *, void *, size_t );
++DVDREAD_API ssize_t DVDReadBytes( dvd_file_t *, void *, size_t );
+ 
+ /**
+  * Returns the file size in blocks.
+@@ -281,7 +283,7 @@ ssize_t DVDReadBytes( dvd_file_t *, void *, size_t );
+  *
+  * blocks = DVDFileSize(dvd_file);
+  */
+-ssize_t DVDFileSize( dvd_file_t * );
++DVDREAD_API ssize_t DVDFileSize( dvd_file_t * );
+ 
+ /**
+  * Get a unique 128 bit disc ID.
+@@ -296,7 +298,7 @@ ssize_t DVDFileSize( dvd_file_t * );
+  *               have room for 128 bits (16 chars).
+  * @return 0 on success, -1 on error.
+  */
+-int DVDDiscID( dvd_reader_t *, unsigned char * );
++DVDREAD_API int DVDDiscID( dvd_reader_t *, unsigned char * );
+ 
+ /**
+  * Get the UDF VolumeIdentifier and VolumeSetIdentifier
+@@ -316,10 +318,10 @@ int DVDDiscID( dvd_reader_t *, unsigned char * );
+  * @param volsetid_size At most volsetid_size bytes will be copied to volsetid.
+  * @return 0 on success, -1 on error.
+  */
+-int DVDUDFVolumeInfo( dvd_reader_t *, char *, unsigned int,
++DVDREAD_API int DVDUDFVolumeInfo( dvd_reader_t *, char *, unsigned int,
+                       unsigned char *, unsigned int );
+ 
+-int DVDFileSeekForce( dvd_file_t *, int offset, int force_size);
++DVDREAD_API int DVDFileSeekForce( dvd_file_t *, int offset, int force_size);
+ 
+ /**
+  * Get the ISO9660 VolumeIdentifier and VolumeSetIdentifier
+@@ -342,7 +344,7 @@ int DVDFileSeekForce( dvd_file_t *, int offset, int force_size);
+  * @param volsetid_size At most volsetid_size bytes will be copied to volsetid.
+  * @return 0 on success, -1 on error.
+  */
+-int DVDISOVolumeInfo( dvd_reader_t *, char *, unsigned int,
++DVDREAD_API int DVDISOVolumeInfo( dvd_reader_t *, char *, unsigned int,
+                       unsigned char *, unsigned int );
+ 
+ /**
+@@ -357,7 +359,7 @@ int DVDISOVolumeInfo( dvd_reader_t *, char *, unsigned int,
+  *
+  * @return The level of caching.
+  */
+-int DVDUDFCacheLevel( dvd_reader_t *, int );
++DVDREAD_API int DVDUDFCacheLevel( dvd_reader_t *, int );
+ 
+ #ifdef __cplusplus
+ };
+diff --git a/src/dvdread/dvd_udf.h b/src/dvdread/dvd_udf.h
+index 91d5de6..ffbe316 100644
+--- a/src/dvdread/dvd_udf.h
++++ b/src/dvdread/dvd_udf.h
+@@ -33,7 +33,8 @@
+ 
+ #include <inttypes.h>
+ 
+-#include "dvdread/dvd_reader.h"
++#include <dvdread/attributes.h>
++#include <dvdread/dvd_reader.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -46,11 +47,11 @@ extern "C" {
+  * '/VIDEO_TS/VTS_01_1.IFO'.  On success, filesize will be set to the size of
+  * the file in bytes.
+  */
+-uint32_t UDFFindFile( dvd_reader_t *, const char *filename, uint32_t *size );
++DVDREAD_API uint32_t UDFFindFile( dvd_reader_t *, const char *filename, uint32_t *size );
+ 
+-int UDFGetVolumeIdentifier(dvd_reader_t *,
++DVDREAD_API int UDFGetVolumeIdentifier(dvd_reader_t *,
+                            char *volid, unsigned int volid_size);
+-int UDFGetVolumeSetIdentifier(dvd_reader_t *,
++DVDREAD_API int UDFGetVolumeSetIdentifier(dvd_reader_t *,
+                               uint8_t *volsetid, unsigned int volsetid_size);
+ 
+ #ifdef __cplusplus
+diff --git a/src/dvdread/ifo_print.h b/src/dvdread/ifo_print.h
+index c3068cb..1776e16 100644
+--- a/src/dvdread/ifo_print.h
++++ b/src/dvdread/ifo_print.h
+@@ -20,9 +20,11 @@
+ #define LIBDVDREAD_IFO_PRINT_H
+ 
+ #include <inttypes.h>
+-#include "ifo_types.h"
+ 
+-void ifo_print(dvd_reader_t *dvd, int title);
+-void dvdread_print_time(dvd_time_t *dtime);
++#include <dvdread/attributes.h>
++#include <dvdread/ifo_types.h>
++
++DVDREAD_API void ifo_print(dvd_reader_t *dvd, int title);
++DVDREAD_API void dvdread_print_time(dvd_time_t *dtime);
+ 
+ #endif /* LIBDVDREAD_IFO_PRINT_H */
+diff --git a/src/dvdread/ifo_read.h b/src/dvdread/ifo_read.h
+index df538a8..83d37d5 100644
+--- a/src/dvdread/ifo_read.h
++++ b/src/dvdread/ifo_read.h
+@@ -22,8 +22,9 @@
+ #ifndef LIBDVDREAD_IFO_READ_H
+ #define LIBDVDREAD_IFO_READ_H
+ 
+-#include "ifo_types.h"
+-#include "dvdread/dvd_reader.h"
++#include <dvdread/ifo_types.h>
++#include <dvdread/attributes.h>
++#include <dvdread/dvd_reader.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -36,7 +37,7 @@ extern "C" {
+  * given title.  If title 0 is given, the video manager IFO file is read.
+  * Returns a handle to a completely parsed structure.
+  */
+-ifo_handle_t *ifoOpen(dvd_reader_t *, int );
++DVDREAD_API ifo_handle_t *ifoOpen(dvd_reader_t *, int );
+ 
+ /**
+  * handle = ifoOpenVMGI(dvd);
+@@ -45,7 +46,7 @@ ifo_handle_t *ifoOpen(dvd_reader_t *, int );
+  * together with the calls below to read in each segment of the IFO file on
+  * demand.
+  */
+-ifo_handle_t *ifoOpenVMGI(dvd_reader_t *);
++DVDREAD_API ifo_handle_t *ifoOpenVMGI(dvd_reader_t *);
+ 
+ /**
+  * handle = ifoOpenVTSI(dvd, title);
+@@ -54,14 +55,14 @@ ifo_handle_t *ifoOpenVMGI(dvd_reader_t *);
+  * together with the calls below to read in each segment of the IFO file on
+  * demand.
+  */
+-ifo_handle_t *ifoOpenVTSI(dvd_reader_t *, int);
++DVDREAD_API ifo_handle_t *ifoOpenVTSI(dvd_reader_t *, int);
+ 
+ /**
+  * ifoClose(ifofile);
+  * Cleans up the IFO information.  This will free all data allocated for the
+  * substructures.
+  */
+-void ifoClose(ifo_handle_t *);
++DVDREAD_API void ifoClose(ifo_handle_t *);
+ 
+ /**
+  * The following functions are for reading only part of the VMGI/VTSI files.
+@@ -76,7 +77,7 @@ void ifoClose(ifo_handle_t *);
+  * located in the video manager information file.  This fills the
+  * ifofile->ptl_mait structure and all its substructures.
+  */
+-int ifoRead_PTL_MAIT(ifo_handle_t *);
++DVDREAD_API int ifoRead_PTL_MAIT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_VTS_ATRT(ifofile);
+@@ -86,7 +87,7 @@ int ifoRead_PTL_MAIT(ifo_handle_t *);
+  * video manager information file.  This fills in the ifofile->vts_atrt
+  * structure and all its substructures.
+  */
+-int ifoRead_VTS_ATRT(ifo_handle_t *);
++DVDREAD_API int ifoRead_VTS_ATRT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_TT_SRPT(ifofile);
+@@ -95,7 +96,7 @@ int ifoRead_VTS_ATRT(ifo_handle_t *);
+  * structure and its substructures.  This data is only located in the video
+  * manager information file.  This structure is mandatory in the IFO file.
+  */
+-int ifoRead_TT_SRPT(ifo_handle_t *);
++DVDREAD_API int ifoRead_TT_SRPT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_VTS_PTT_SRPT(ifofile);
+@@ -105,7 +106,7 @@ int ifoRead_TT_SRPT(ifo_handle_t *);
+  * located in the video title set information file.  This structure is
+  * mandatory, and must be included in the VTSI file.
+  */
+-int ifoRead_VTS_PTT_SRPT(ifo_handle_t *);
++DVDREAD_API int ifoRead_VTS_PTT_SRPT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_FP_PGC(ifofile);
+@@ -114,7 +115,7 @@ int ifoRead_VTS_PTT_SRPT(ifo_handle_t *);
+  * ifofile->first_play_pgc structure.  This data is only located in the video
+  * manager information file (VMGI).  This structure is optional.
+  */
+-int ifoRead_FP_PGC(ifo_handle_t *);
++DVDREAD_API int ifoRead_FP_PGC(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_PGCIT(ifofile);
+@@ -125,7 +126,7 @@ int ifoRead_FP_PGC(ifo_handle_t *);
+  * the video title set information file.  This structure is mandatory, and must
+  * be included in the VTSI file.
+  */
+-int ifoRead_PGCIT(ifo_handle_t *);
++DVDREAD_API int ifoRead_PGCIT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_PGCI_UT(ifofile);
+@@ -137,7 +138,7 @@ int ifoRead_PGCIT(ifo_handle_t *);
+  * fills the ifofile->vmgi_pgci_ut structure and all its substructures.  For
+  * VTSI files, this fills the ifofile->vtsm_pgci_ut structure.
+  */
+-int ifoRead_PGCI_UT(ifo_handle_t *);
++DVDREAD_API int ifoRead_PGCI_UT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_VTS_TMAPT(ifofile);
+@@ -147,7 +148,7 @@ int ifoRead_PGCI_UT(ifo_handle_t *);
+  * and all its substructures.  When present enables VOBU level time-based
+  * seeking for One_Sequential_PGC_Titles.
+  */
+-int ifoRead_VTS_TMAPT(ifo_handle_t *);
++DVDREAD_API int ifoRead_VTS_TMAPT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_C_ADT(ifofile);
+@@ -159,7 +160,7 @@ int ifoRead_VTS_TMAPT(ifo_handle_t *);
+  * fills the ifofile->vmgm_c_adt structure and all its substructures.  For VTSI
+  * files, this fills the ifofile->vtsm_c_adt structure.
+  */
+-int ifoRead_C_ADT(ifo_handle_t *);
++DVDREAD_API int ifoRead_C_ADT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_TITLE_C_ADT(ifofile);
+@@ -169,7 +170,7 @@ int ifoRead_C_ADT(ifo_handle_t *);
+  * file.  This structure is mandatory, and must be included in the VTSI file.
+  * This call fills the ifofile->vts_c_adt structure and its substructures.
+  */
+-int ifoRead_TITLE_C_ADT(ifo_handle_t *);
++DVDREAD_API int ifoRead_TITLE_C_ADT(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_VOBU_ADMAP(ifofile);
+@@ -181,7 +182,7 @@ int ifoRead_TITLE_C_ADT(ifo_handle_t *);
+  * fills the ifofile->vmgm_vobu_admap structure and all its substructures.  For
+  * VTSI files, this fills the ifofile->vtsm_vobu_admap structure.
+  */
+-int ifoRead_VOBU_ADMAP(ifo_handle_t *);
++DVDREAD_API int ifoRead_VOBU_ADMAP(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_TITLE_VOBU_ADMAP(ifofile);
+@@ -191,7 +192,7 @@ int ifoRead_VOBU_ADMAP(ifo_handle_t *);
+  * mandatory, and must be included in the VTSI file.  Fills the
+  * ifofile->vts_vobu_admap structure and its substructures.
+  */
+-int ifoRead_TITLE_VOBU_ADMAP(ifo_handle_t *);
++DVDREAD_API int ifoRead_TITLE_VOBU_ADMAP(ifo_handle_t *);
+ 
+ /**
+  * okay = ifoRead_TXTDT_MGI(ifofile);
+@@ -201,7 +202,7 @@ int ifoRead_TITLE_VOBU_ADMAP(ifo_handle_t *);
+  * manager information file.  This structure is mandatory, and must be included
+  * in the VMGI file.
+  */
+-int ifoRead_TXTDT_MGI(ifo_handle_t *);
++DVDREAD_API int ifoRead_TXTDT_MGI(ifo_handle_t *);
+ 
+ /**
+  * The following functions are used for freeing parsed sections of the
+@@ -209,19 +210,19 @@ int ifoRead_TXTDT_MGI(ifo_handle_t *);
+  * below are safe:  they will not mind if you attempt to free part of an IFO
+  * file which was not read in or which does not exist.
+  */
+-void ifoFree_PTL_MAIT(ifo_handle_t *);
+-void ifoFree_VTS_ATRT(ifo_handle_t *);
+-void ifoFree_TT_SRPT(ifo_handle_t *);
+-void ifoFree_VTS_PTT_SRPT(ifo_handle_t *);
+-void ifoFree_FP_PGC(ifo_handle_t *);
+-void ifoFree_PGCIT(ifo_handle_t *);
+-void ifoFree_PGCI_UT(ifo_handle_t *);
+-void ifoFree_VTS_TMAPT(ifo_handle_t *);
+-void ifoFree_C_ADT(ifo_handle_t *);
+-void ifoFree_TITLE_C_ADT(ifo_handle_t *);
+-void ifoFree_VOBU_ADMAP(ifo_handle_t *);
+-void ifoFree_TITLE_VOBU_ADMAP(ifo_handle_t *);
+-void ifoFree_TXTDT_MGI(ifo_handle_t *);
++DVDREAD_API void ifoFree_PTL_MAIT(ifo_handle_t *);
++DVDREAD_API void ifoFree_VTS_ATRT(ifo_handle_t *);
++DVDREAD_API void ifoFree_TT_SRPT(ifo_handle_t *);
++DVDREAD_API void ifoFree_VTS_PTT_SRPT(ifo_handle_t *);
++DVDREAD_API void ifoFree_FP_PGC(ifo_handle_t *);
++DVDREAD_API void ifoFree_PGCIT(ifo_handle_t *);
++DVDREAD_API void ifoFree_PGCI_UT(ifo_handle_t *);
++DVDREAD_API void ifoFree_VTS_TMAPT(ifo_handle_t *);
++DVDREAD_API void ifoFree_C_ADT(ifo_handle_t *);
++DVDREAD_API void ifoFree_TITLE_C_ADT(ifo_handle_t *);
++DVDREAD_API void ifoFree_VOBU_ADMAP(ifo_handle_t *);
++DVDREAD_API void ifoFree_TITLE_VOBU_ADMAP(ifo_handle_t *);
++DVDREAD_API void ifoFree_TXTDT_MGI(ifo_handle_t *);
+ 
+ #ifdef __cplusplus
+ };
+diff --git a/src/dvdread/ifo_types.h b/src/dvdread/ifo_types.h
+index 9293ce7..c3f54c1 100644
+--- a/src/dvdread/ifo_types.h
++++ b/src/dvdread/ifo_types.h
+@@ -23,7 +23,8 @@
+ #define LIBDVDREAD_IFO_TYPES_H
+ 
+ #include <inttypes.h>
+-#include "dvdread/dvd_reader.h"
++
++#include <dvdread/dvd_reader.h>
+ 
+ 
+ #undef ATTRIBUTE_PACKED
+diff --git a/src/dvdread/nav_print.h b/src/dvdread/nav_print.h
+index 4960615..103be09 100644
+--- a/src/dvdread/nav_print.h
++++ b/src/dvdread/nav_print.h
+@@ -22,7 +22,9 @@
+ #ifndef LIBDVDREAD_NAV_PRINT_H
+ #define LIBDVDREAD_NAV_PRINT_H
+ 
+-#include "nav_types.h"
++
++#include <dvdread/attributes.h>
++#include <dvdread/nav_types.h>
+ 
+ /**
+  * Pretty printing of the NAV packets, PCI and DSI structs.
+@@ -37,14 +39,14 @@ extern "C" {
+  *
+  * @param pci Pointer to the PCI data structure to be printed.
+  */
+-void navPrint_PCI(pci_t *);
++DVDREAD_API void navPrint_PCI(pci_t *);
+ 
+ /**
+  * Prints information contained in the DSI to stdout.
+  *
+  * @param dsi Pointer to the DSI data structure to be printed.
+  */
+-void navPrint_DSI(dsi_t *);
++DVDREAD_API void navPrint_DSI(dsi_t *);
+ 
+ #ifdef __cplusplus
+ };
+diff --git a/src/dvdread/nav_read.h b/src/dvdread/nav_read.h
+index 256fadb..2192ecc 100644
+--- a/src/dvdread/nav_read.h
++++ b/src/dvdread/nav_read.h
+@@ -21,7 +21,8 @@
+ #ifndef LIBDVDREAD_NAV_READ_H
+ #define LIBDVDREAD_NAV_READ_H
+ 
+-#include "nav_types.h"
++#include <dvdread/attributes.h>
++#include <dvdread/nav_types.h>
+ 
+ /**
+  * Parsing of NAV data, PCI and DSI parts.
+@@ -37,7 +38,7 @@ extern "C" {
+  * @param pci Pointer to the PCI data structure to be filled in.
+  * @param buffer Pointer to the buffer of the on disc PCI data.
+  */
+-void navRead_PCI(pci_t *, unsigned char *);
++DVDREAD_API void navRead_PCI(pci_t *, unsigned char *);
+ 
+ /**
+  * Reads the DSI packet data pointed to into dsi struct.
+@@ -45,7 +46,7 @@ void navRead_PCI(pci_t *, unsigned char *);
+  * @param dsi Pointer to the DSI data structure to be filled in.
+  * @param buffer Pointer to the buffer of the on disc DSI data.
+  */
+-void navRead_DSI(dsi_t *, unsigned char *);
++DVDREAD_API void navRead_DSI(dsi_t *, unsigned char *);
+ 
+ #ifdef __cplusplus
+ };
+diff --git a/src/dvdread/nav_types.h b/src/dvdread/nav_types.h
+index 3debbee..a6d4f1a 100644
+--- a/src/dvdread/nav_types.h
++++ b/src/dvdread/nav_types.h
+@@ -29,7 +29,9 @@
+ #define LIBDVDREAD_NAV_TYPES_H
+ 
+ #include <inttypes.h>
+-#include "ifo_types.h" /* only dvd_time_t, vm_cmd_t and user_ops_t */
++
++#include <dvdread/attributes.h>
++#include <dvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
+ 
+ /* The length including the substream id byte. */
+ #define PCI_BYTES 0x3d4
+diff --git a/src/logger.h b/src/logger.h
+index ea3245c..671db51 100644
+--- a/src/logger.h
++++ b/src/logger.h
+@@ -19,7 +19,9 @@
+ #ifndef LIBDVDREAD_LOGGER_H
+ #define LIBDVDREAD_LOGGER_H
+ 
+-void DVDReadLog( void *priv, const dvd_logger_cb *logcb,
++#include "dvdread/attributes.h"
++
++DVDREAD_API void DVDReadLog( void *priv, const dvd_logger_cb *logcb,
+                  dvd_logger_level_t level, const char *fmt, ... );
+ 
+ #define LOG(ctx, level, ...) \
+-- 
+2.49.0
+
+From fae9d394a8508e0c03b415dbb20a56d4654e9c3c Mon Sep 17 00:00:00 2001
+From: robxnano <robxnanocode@outlook.com>
+Date: Sat, 12 Apr 2025 20:40:34 +0100
+Subject: [PATCH] meson: Add Meson build support
+
+---
+ doc/doxygen.cfg.in      |  14 ++--
+ doc/meson.build         |  31 +++++++++
+ meson.build             | 148 ++++++++++++++++++++++++++++++++++++++++
+ meson_options.txt       |  22 ++++++
+ src/dvdread/meson.build |  25 +++++++
+ src/meson.build         |  54 +++++++++++++++
+ 6 files changed, 287 insertions(+), 7 deletions(-)
+ create mode 100644 doc/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 src/dvdread/meson.build
+ create mode 100644 src/meson.build
+
+diff --git a/doc/doxygen.cfg.in b/doc/doxygen.cfg.in
+index 8a89a30..bdf8fec 100644
+--- a/doc/doxygen.cfg.in
++++ b/doc/doxygen.cfg.in
+@@ -25,20 +25,20 @@ DOXYFILE_ENCODING      = UTF-8
+ # The PROJECT_NAME tag is a single word (or a sequence of words surrounded
+ # by quotes) that should identify the project.
+ 
+-PROJECT_NAME           = @PACKAGE_NAME
++PROJECT_NAME           = @PROJECT_NAME@
+ 
+ # The PROJECT_NUMBER tag can be used to enter a project or revision number.
+ # This could be handy for archiving the generated documentation or
+ # if some version control system is used.
+ 
+-PROJECT_NUMBER         = @PACKAGE_VERSION@
++PROJECT_NUMBER         = @PROJECT_VERSION@
+ 
+ # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
+ # base path where the generated documentation will be put.
+ # If a relative path is entered, it will be relative to the location
+ # where doxygen was started. If left blank the current directory will be used.
+ 
+-OUTPUT_DIRECTORY       = @top_builddir@/doc
++OUTPUT_DIRECTORY       = @OUTPUT_DIRECTORY@
+ 
+ # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
+ # 4096 sub-directories (in 2 levels) under the output directory of each output
+@@ -114,7 +114,7 @@ FULL_PATH_NAMES        = NO
+ # If left blank the directory from which doxygen is run is used as the
+ # path to strip.
+ 
+-STRIP_FROM_PATH        =
++STRIP_FROM_PATH        = @STRIP_FROM_PATH@
+ 
+ # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of
+ # the path mentioned in the documentation of a class, which tells
+@@ -521,7 +521,7 @@ WARN_LOGFILE           =
+ # directories like "/usr/src/myproject". Separate the files or directories
+ # with spaces.
+ 
+-INPUT                  = @top_srcdir@/src
++INPUT                  = @INPUT@
+ 
+ # This tag can be used to specify the character encoding of the source files
+ # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
+@@ -729,13 +729,13 @@ HTML_FILE_EXTENSION    = .html
+ # each generated HTML page. If it is left blank doxygen will generate a
+ # standard header.
+ 
+-HTML_HEADER            = @top_srcdir@/doc/header.html
++HTML_HEADER            =
+ 
+ # The HTML_FOOTER tag can be used to specify a personal HTML footer for
+ # each generated HTML page. If it is left blank doxygen will generate a
+ # standard footer.
+ 
+-HTML_FOOTER            = @top_srcdir@/doc/footer.html
++HTML_FOOTER            = @INPUT_DIRECTORY@/footer.html
+ 
+ # The HTML_STYLESHEET tag can be used to specify a user-defined cascading
+ # style sheet that is used by each HTML page. It can be used to
+diff --git a/doc/meson.build b/doc/meson.build
+new file mode 100644
+index 0000000..70e35d2
+--- /dev/null
++++ b/doc/meson.build
+@@ -0,0 +1,31 @@
++# Copyright (C) 2025 Rob Hall
++# SPDX-License-Identifier: MIT
++
++if not get_option('enable_docs')
++    subdir_done()
++endif
++
++doxygen = find_program('doxygen', required: true)
++
++doxyfile_conf = configuration_data()
++doxyfile_conf.set('INPUT', f'@dvdread_src_root@/src/dvdread \\\n @dvdread_build_root@/src/dvdread')
++doxyfile_conf.set('PROJECT_NAME', 'libdvdread')
++doxyfile_conf.set('STRIP_FROM_PATH', f'@dvdread_src_root@/src \\\n @dvdread_build_root@/src')
++doxyfile_conf.set('OUTPUT_DIRECTORY', meson.current_build_dir())
++doxyfile_conf.set('INPUT_DIRECTORY', meson.current_source_dir())
++doxyfile_conf.set('PROJECT_VERSION', meson.project_version())
++
++doxyfile = configure_file(
++    input: 'doxygen.cfg.in',
++    output: 'Doxyfile',
++    configuration: doxyfile_conf,
++)
++
++custom_target('docs',
++    depend_files: dvdread_api_headers,
++    command: [doxygen, '-q', doxyfile],
++    output: ['html'],
++    install: true,
++    install_dir: get_option('datadir') / 'doc/libdvdread',
++    install_tag: 'doc',
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..239e60c
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,148 @@
++# Copyright (C) 2025 Rob Hall
++# SPDX-License-Identifier: MIT
++
++project('libdvdread', 'c',
++    version: '6.2.0',
++    meson_version: '>= 0.60.0',
++    default_options: ['buildtype=debugoptimized',
++                      'c_std=c11',
++                      'default_library=both',
++                      'warning_level=2'])
++
++dvdread_src_root = meson.current_source_dir()
++dvdread_build_root = meson.current_build_dir()
++cc = meson.get_compiler('c')
++
++# Configuration data for config.h
++cdata = configuration_data()
++
++# Include directories
++dvdread_inc_dirs = include_directories('.', 'src', 'src/dvdread')
++
++# The version number for the shared library
++dvdread_soname_version = '8.0.0'
++
++dvdread_version = meson.project_version()
++dvdread_version_split = dvdread_version.split('.')
++cdata.set_quoted('PACKAGE_VERSION', dvdread_version)
++
++#
++# OS/Compiler checks and defines
++#
++
++# Arguments in test_args will be used even on feature tests
++test_args = ['-D_DEFAULT_SOURCE']
++
++optional_arguments = []
++optional_link_arguments = []
++extra_dependencies = []
++
++if host_machine.system() == 'sunos'
++    test_args += '-D__EXTENSIONS__'
++endif
++
++# Header checks
++
++check_headers = [
++    'sys/param.h',
++    'limits.h',
++]
++
++foreach h : check_headers
++    if cc.has_header(h, args: test_args)
++        cdata.set('HAVE_' + h.underscorify().to_upper(), 1)
++    endif
++endforeach
++
++cdata.set('UNUSED', cc.has_function_attribute('unused') ? '__attribute__((unused))' : '')
++
++if host_machine.endian() == 'big'
++  cdata.set('WORDS_BIGENDIAN', 1)
++endif
++
++if host_machine.system() == 'windows'
++# dvdread_headers += files('msvc/contrib/win32_cs.h')
++    if cc.has_function('gettimeofday', prefix: '#include <sys/time.h>', args: test_args)
++        cdata.set('HAVE_GETTIMEOFDAY', 1)
++    endif
++elif host_machine.system() == 'linux'
++    if cc.has_function('getmntent_r', prefix: '#include <mntent.h>', args: test_args)
++        cdata.set('HAVE_GETMNTENT_R', 1)
++    endif
++endif
++
++if cc.has_function('strerror_r', prefix: '#include <string.h>', args: test_args)
++    cdata.set('HAVE_STRERROR_R', 1)
++    cdata.set('HAVE_DECL_STRERROR_R', 1)
++elif cc.has_function('strerror_s', prefix: '#include <string.h>', args: test_args)
++    cdata.set('HAVE_STRERROR_S', 1)
++endif
++
++
++# External dependencies and libraries
++
++# libdvdcss is loaded dynamically if it is not found or requested
++libdl_dependency = []
++libdvdcss_dependency = dependency('libdvdcss',
++    version: '>= 1.2', method: 'pkg-config', required: get_option('libdvdcss'))
++if libdvdcss_dependency.found()
++    cdata.set('HAVE_DVDCSS_DVDCSS_H', 1)
++elif host_machine.system() == 'windows'
++    if get_option('dlfcn') in ['external', 'auto']
++        # Using MinGW dlfcn wrapper
++        libdl_dependency = cc.find_library('dl', required: get_option('dlfcn') == 'external')
++        if libdl_dependency.found()
++            cdata.set('HAVE_DLFCN_H', 1)
++        endif
++    endif
++    if not cdata.has('HAVE_DLFCN')
++        cdata.set('USING_BUILTIN_DLFCN', 1)
++    endif
++else
++    # Using builtin dlfcn (may require linking to libdl depending on the system)
++    if not cc.has_function('dlopen', prefix: '#include <dlfcn.h>', args: test_args)
++        libdl_dependency = cc.find_library('dl')
++    endif
++    cdata.set('HAVE_DLFCN_H', 1)
++endif
++
++# Compiler flag tests
++
++# Compiler flags that should be set
++# But when the compiler does not supports them
++# it is not an error and silently tolerated
++
++if get_option('warning_level') in ['2', '3', 'everything']
++    optional_arguments += '-Wsign-compare'
++endif
++
++add_project_arguments(cc.get_supported_arguments(optional_arguments), language: 'c')
++add_project_link_arguments(cc.get_supported_link_arguments(optional_link_arguments), language: 'c')
++add_project_arguments(test_args, language: 'c')
++
++# Generate config.h
++config_h_target = configure_file(output: 'config.h', configuration: cdata)
++
++install_data(['AUTHORS', 'COPYING', 'NEWS', 'README.md', 'TODO'],
++    install_dir: get_option('datadir') / 'doc/libdvdread',
++    install_tag: 'doc')
++
++if import('fs').is_file('.git/logs/HEAD')
++    git_exe = find_program('git', required: false, disabler: true)
++    custom_target('ChangeLog', output: 'ChangeLog',
++        depend_files: '.git/logs/HEAD',
++        command: ['git', 'log'], capture: true,
++        install: true,
++        install_dir: get_option('datadir') / 'doc/libdvdread',
++        install_tag: 'doc')
++endif
++
++# Include subdir meson.build files
++# The order is important!
++
++subdir('src/dvdread')
++
++subdir('src')
++
++subdir('doc')
++
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..9985555
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,22 @@
++# Copyright (C) 2025 Rob Hall
++# SPDX-License-Identifier: MIT
++
++# General options
++
++option('enable_docs',
++    type: 'boolean',
++    value: false,
++    description: 'Build (with Doxygen) and install API documentation')
++
++# Optional dependencies to be found on the system
++
++option('libdvdcss',
++    type: 'feature',
++    value: 'auto',
++    description: 'Link directly against libdvdcss')
++
++option('dlfcn',
++    type: 'combo',
++    choices: ['external', 'builtin', 'auto'],
++    value: 'auto',
++    description: 'Use external dlfcn for MinGW')
+diff --git a/src/dvdread/meson.build b/src/dvdread/meson.build
+new file mode 100644
+index 0000000..2619bb5
+--- /dev/null
++++ b/src/dvdread/meson.build
+@@ -0,0 +1,25 @@
++# Copyright (C) 2025 Rob Hall
++# SPDX-License-Identifier: MIT
++
++dvdread_api_headers = files(
++    'attributes.h',
++    'bitreader.h',
++    'dvd_reader.h',
++    'dvd_udf.h',
++    'ifo_print.h',
++    'ifo_read.h',
++    'ifo_types.h',
++    'nav_print.h',
++    'nav_read.h',
++    'nav_types.h',
++)
++
++dvdread_api_headers += configure_file(input: 'version.h.in',
++    output: 'version.h',
++    configuration: {'DVDREAD_VERSION_MAJOR': dvdread_version_split[0],
++                    'DVDREAD_VERSION_MINOR': dvdread_version_split[1],
++                    'DVDREAD_VERSION_MICRO': dvdread_version_split[2]})
++
++# Install headers
++install_headers(dvdread_api_headers,
++                subdir: 'dvdread')
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..3443dd3
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,54 @@
++# Copyright (C) 2025 Rob Hall
++# SPDX-License-Identifier: MIT
++
++# libdvdread source files
++dvdread_src = files(
++    'bitreader.c',
++    'dvd_input.c',
++    'dvd_reader.c',
++    'dvd_udf.c',
++    'ifo_print.c',
++    'ifo_read.c',
++    'logger.c',
++    'md5.c',
++    'nav_print.c',
++    'nav_read.c',
++)
++
++#
++# Library definitions
++#
++
++if host_machine.system() == 'windows' and get_option('default_library') == 'static'
++    api_export_flags = []
++else
++    api_export_flags = '-DDVDREAD_API_EXPORT'
++endif
++
++# The final libdvdread library
++libdvdread = library('dvdread', dvdread_src,
++    include_directories: dvdread_inc_dirs,
++    dependencies: [
++        libdvdcss_dependency,
++        libdl_dependency,
++    ],
++    c_args: [api_export_flags],
++    gnu_symbol_visibility: 'hidden',
++    version: dvdread_soname_version,
++    install: true,
++)
++
++# Make the library usable as a dependency in this and other projects
++dvdread_dep = declare_dependency(link_with: libdvdread,
++    include_directories: include_directories('.'))
++
++meson.override_dependency('dvdread', dvdread_dep)
++
++# Generate pkg-config .pc file
++pkg_mod = import('pkgconfig')
++pkg_mod.generate(libraries: libdvdread,
++    version: meson.project_version(),
++    filebase: 'dvdread',
++    name: 'libdvdread',
++    description: 'Low level DVD access library',
++)
+-- 
+2.49.0
+
