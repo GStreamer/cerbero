@@ -36,3 +36,5 @@ class Package(custom.GStreamer, package.Package):
                 'glib:libs:lang:schemas', 'orc:libs', 'bzip2:libs',
                 'json-glib:libs',
             ]
+        elif self.config.target_platform == Platform.ANDROID:
+            self.files.remove('librsvg:libs')

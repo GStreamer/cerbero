@@ -626,6 +626,8 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('amfcodec', 'codecs')
             self.disable_plugin('nvcodec', 'codecs')
             self.disable_plugin('qsv', 'codecs')
+        elif self.config.target_platform == Platform.ANDROID:
+            self.disable_plugin('rsvg', 'codecs', dep='librsvg')
 
         if self.meson_options['nvcodec'] == 'enabled':
             self.files_libs += ['libgstcuda-1.0']
