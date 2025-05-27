@@ -28,6 +28,7 @@ from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
 from cerbero.utils import shell
 from cerbero.enums import Platform, Distro, Architecture
+from cerbero.utils import messages as m
 
 
 class BuildTools(BootstrapperBase, Fetch):
@@ -39,6 +40,15 @@ class BuildTools(BootstrapperBase, Fetch):
 
     def __init__(self, config, offline):
         BootstrapperBase.__init__(self, config, offline, None)
+        self._setup_build_tools_list()
+        self._setup_env()
+
+    def _setup_build_tools_list(self):
+        if self.config.override_build_tools:
+            if self.config.extra_build_tools:
+                m.warning('Ignoring "extra_build_tools" because "override_build_tools" is also defined')
+            self.BUILD_TOOLS = self.config.override_build_tools
+            return
 
         if self.config.variants.rust:
             self.BUILD_TOOLS.append('bindgen-cli')
@@ -66,7 +76,6 @@ class BuildTools(BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('wix')
 
         self.BUILD_TOOLS += self.config.extra_build_tools
-        self._setup_env()
 
     def check_build_tools(self):
         """

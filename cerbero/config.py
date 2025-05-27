@@ -285,6 +285,7 @@ class Config(object):
         'recipes_remotes',
         'ios_platform',
         'extra_build_tools',
+        'override_build_tools',
         'distro_packages_install',
         'interactive',
         'bash_completions',
@@ -700,6 +701,7 @@ class Config(object):
         self.set_property('recipes_commits', {})
         self.set_property('recipes_remotes', {})
         self.set_property('extra_build_tools', [])
+        self.set_property('override_build_tools', [])
         self.set_property('distro_packages_install', True)
         self.set_property('interactive', m.console_is_interactive())
         self.set_property('meson_properties', {})
