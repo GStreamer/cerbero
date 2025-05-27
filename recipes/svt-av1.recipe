@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'a1d95875f7539d49f7c8fdec0623fbf984804a168da6289705d53268e3b38412'
     tarball_dirname = 'SVT-AV1-v%(version)s'
     configure_options = [
-        '-DBUILD_APPS=OFF'
+        '-DBUILD_APPS=OFF',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     ]
     # svt-av1 handles BUILD_SHARED_LIBS itself and is ON by default
     library_type = LibraryType.SHARED
