@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.48.2'
+    version = '2.48.3'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '539c6c19b4be1630341a9e9582c25378a1e64eaab7818772ef6c09648ad9584c'
+    tarball_checksum = '807571f07e87823b8fb79564692c9b1ef81ee62edbf51345a15bd0e7e1f2e07b'
     deps = [
         'icu',
         'cairo',
@@ -190,9 +190,6 @@ class Recipe(recipe.Recipe):
                 arch_src_name = 'arm'
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
             self.configure_options += ' -DANDROID=1'
-            # Android libc does not have bcmp()
-            self.append_env('CXXFLAGS', ' -Dbcmp=memcmp ')
-            self.append_env('CFLAGS', ' -Dbcmp=memcmp ')
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
         else:
