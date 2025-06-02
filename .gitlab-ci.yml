@@ -87,10 +87,9 @@ default:
 
 .android fedora image:
   variables:
-    # FIXME: add $GST_UPSTREAM_BRANCH suffix when android image is bumped
-    FDO_DISTRIBUTION_TAG: "$ANDROID_FEDORA_TAG"
+    FDO_DISTRIBUTION_TAG: "$ANDROID_FEDORA_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: '40'
-    FDO_DISTRIBUTION_PACKAGES: "file git-core java-11-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz python3-setuptools"
+    FDO_DISTRIBUTION_PACKAGES: "file git-core java-17-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz python3-setuptools"
     FDO_DISTRIBUTION_EXEC: ci/docker_android_setup.sh $ANDROID_HOME $ANDROID_NDK_HOME $GST_UPSTREAM_BRANCH
     FDO_UPSTREAM_REPO: gstreamer/cerbero
     FDO_REPO_SUFFIX: android

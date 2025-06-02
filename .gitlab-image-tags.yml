@@ -9,8 +9,7 @@ variables:
 
   CHECKS_FEDORA_TAG: '2025-03-13.0'
 
-  # FIXME: needs a rebuild (also add suffix to FDO_DISTRIBUTION_TAG in .gitlab-ci.yml then)
-  ANDROID_FEDORA_TAG: '2024-11-01.0'
+  ANDROID_FEDORA_TAG: '2025-06-02.0'
 
   UBUNTU_TAG: '2025-04-08.0'
 

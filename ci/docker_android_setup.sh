@@ -28,7 +28,7 @@ echo "e9acab5b5fbb560a72cfaecce8946896ff6aab9d" > ${ANDROID_HOME}/licenses/mips-
 
 # pre-cache deps
 export GSTREAMER_ROOT_ANDROID=/android/sources/gstreamer-android
-curl -o /android/sources/gstreamer-android.tar.xz https://gstreamer.freedesktop.org/data/pkg/android/1.22.0/gstreamer-1.0-android-universal-1.22.0.tar.xz
+curl -o /android/sources/gstreamer-android.tar.xz https://gstreamer.freedesktop.org/data/pkg/android/1.26.2/gstreamer-1.0-android-universal-1.26.2.tar.xz
 mkdir $GSTREAMER_ROOT_ANDROID
 tar -xvf /android/sources/gstreamer-android.tar.xz -C $GSTREAMER_ROOT_ANDROID
 ls $GSTREAMER_ROOT_ANDROID
