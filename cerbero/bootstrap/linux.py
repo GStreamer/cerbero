@@ -105,7 +105,6 @@ class DebianBootstrapper(UnixBootstrapper):
         'libasound2-dev',
         'build-essential',
         'gperf',
-        'wget',
         'libxtst-dev',
         'libxrandr-dev',
         'libglu1-mesa-dev',
@@ -116,6 +115,7 @@ class DebianBootstrapper(UnixBootstrapper):
         'python3-setuptools',
         'libssl-dev',
         'libclang-dev',
+        'libcurl-dev',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -166,6 +166,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'nasm',
         'pkgconfig',
         'curl',
+        'libcurl-devel',
         'rpm-build',
         'redhat-rpm-config',
         'libXrender-devel',
@@ -320,7 +321,6 @@ class ArchBootstrapper(UnixBootstrapper):
         'libxv',
         'mesa',
         'python3',
-        'wget',
         'git',
         'xorg-util-macros',
         'ccache',
@@ -329,6 +329,7 @@ class ArchBootstrapper(UnixBootstrapper):
         'which',
         'libpulse',
         'clang',
+        'curl',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -369,7 +370,7 @@ class GentooBootstrapper(UnixBootstrapper):
         'x11-libs/libXrender',
         'x11-libs/libXv',
         'media-libs/mesa',
-        'net-misc/wget',
+        'net-misc/curl',
         'dev-libs/openssl',
         'media-libs/alsa-lib',
         'sys-devel/clang',
