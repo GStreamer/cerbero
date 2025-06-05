@@ -28,13 +28,13 @@ class Recipe(recipe.Recipe):
         # archdir has to be toolchain-specific: mingw_x86_64, uwp-debug_arm64, etc
         platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
         env_var = ('GSTREAMER_1_0_ROOT_' + platform_arch).upper()
-        vspropsdir =  os.path.join(self.config.prefix, self.files_devel[0])
+        vspropsdir =  os.path.join(self.config.prefix, self.vsprefix, 'libs')
         if not os.path.exists(vspropsdir):
             os.makedirs(vspropsdir)
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, vspropsdir, env_var, logfile=self.logfile)
         # Copy msvc
-        propsdir = os.path.join(self.config.prefix, self.files_devel[1])
+        propsdir = os.path.join(self.config.prefix, self.vsprefix, 'msvc')
         if not os.path.exists(propsdir):
             os.makedirs(propsdir)
         datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'msvc')
