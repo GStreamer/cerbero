@@ -51,7 +51,7 @@ class GenVSProps(Command):
     def run(self, config, args):
         self.runargs(config, args.output_dir, args.prefix)
 
-    def runargs(self, config, output_dir, prefix=DEFAULT_PREFIX_MACRO):
+    def runargs(self, config, output_dir, prefix=DEFAULT_PREFIX_MACRO, logfile=None):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -60,7 +60,7 @@ class GenVSProps(Command):
                 pc, prefix=config.prefix, inherit_common=True, prefix_replacement='$(%s)' % prefix, env=config.env
             )
             p2v.create(output_dir)
-            m.action('Created %s.props' % pc)
+            m.log('Created %s.props' % pc, logfile=logfile)
 
         common = CommonProps(prefix)
         common.create(output_dir)
