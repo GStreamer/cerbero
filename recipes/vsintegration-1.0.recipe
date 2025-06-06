@@ -50,8 +50,8 @@ class Recipe(recipe.Recipe):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
         # Copy Wizard template files
-        propsdir = os.path.join(self.config.prefix, self.vsprefix, 'gst-template')
+        propsdir = os.path.join(self.config.prefix, self.vsprefix, 'gst-sdk-template')
         if os.path.exists(propsdir):
             shutil.rmtree(propsdir)
-        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'gst-template')
+        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'gst-sdk-template')
         shutil.copytree(datapropsdir, propsdir)

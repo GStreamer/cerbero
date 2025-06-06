@@ -25,7 +25,7 @@ function CreateCustomProject(strProjectName, strProjectPath)
 	{
 		var strProjTemplatePath = wizard.FindSymbol('PROJECT_TEMPLATE_PATH');
 		var strProjTemplate = '';
-		strProjTemplate = strProjTemplatePath + '\\gst-template\\gst-template.vcxproj';
+		strProjTemplate = strProjTemplatePath + '\\gst-sdk-template\\gst-template.vcxproj';
 
 		var Solution = dte.Solution;
 		var strSolutionName = "";
