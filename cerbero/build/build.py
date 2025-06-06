@@ -631,6 +631,16 @@ class Autotools(MakefilesBase):
         else:
             self.configure_tpl.append('--disable-introspection')
 
+        if self.library_type == LibraryType.BOTH:
+            self.configure_tpl.append('--enable-shared')
+            self.configure_tpl.append('--enable-static')
+        elif self.library_type == LibraryType.SHARED:
+            self.configure_tpl.append('--enable-shared')
+            self.configure_tpl.append('--disable-static')
+        elif self.library_type == LibraryType.STATIC:
+            self.configure_tpl.append('--disable-shared')
+            self.configure_tpl.append('--enable-static')
+
         if self.autoreconf:
             await shell.async_call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
 
