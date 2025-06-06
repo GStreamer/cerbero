@@ -315,12 +315,18 @@ class VSMergeModule(MergeModule):
         self.root.attrib['xmlns:vs'] = WIX_VS_SCHEMA
 
         etree.SubElement(self.module, 'CustomActionRef', Id=f'VS{self.year}InstallVSTemplates')
-        etree.SubElement(self.module, 'PropertyRef', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
-        tpl_base = etree.SubElement(self.module, 'Directory', Id='VS{self.year}_PROJECTTEMPLATES_DIR')
-        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Name=f"{self.package.vs_template_name or '.'}")
+        etree.SubElement(self.module, 'PropertyRef', Id=f'VS{self.year}_IDE_DIR')
+        tpl_base = etree.SubElement(self.module, 'Directory', Id=f'VS{self.year}_IDE_DIR')
+        tpl_base = etree.SubElement(tpl_base, 'Directory', Name='VC')
+        # In 2015 onwards "wizard" files go into VCProjects
+        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Name='VCProjects')
+        self._wizard_dir = etree.SubElement(self._wizard_dir, 'Directory', Name=self.package.vs_template_name)
         self._dirnodes[self.package.vs_wizard_dir] = self._wizard_dir
-        # In 2015 onwards they all go into the same folder
-        self._dirnodes[self.package.vs_template_dir] = self._wizard_dir
+        # In 2015 onwards "template" files go into VCWizards
+        # **NOTE**: the end path is <VS IDE root>/<RELATIVE_PATH>/<wizard name>
+        self._tpl_dir = etree.SubElement(tpl_base, 'Directory', Name='VCWizards')
+        self._tpl_dir = etree.SubElement(self._tpl_dir, 'Directory', Name=self.package.vs_template_name)
+        self._dirnodes[self.package.vs_template_dir] = self._tpl_dir
 
 
 class VSFragment(Fragment):
@@ -348,15 +354,23 @@ class VSFragment(Fragment):
         self.root.attrib['xmlns:vs'] = WIX_VS_SCHEMA
 
         etree.SubElement(self.fragment, 'CustomActionRef', Id=f'VS{self.year}InstallVSTemplates')
-        etree.SubElement(self.fragment, 'PropertyRef', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
-        tpl_base = etree.SubElement(self.fragment, 'Directory', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
-        dirpath = f"{self.package.vs_template_name or '.'}"
-        dirid = self._format_dir_id(self.package.name, dirpath)
-        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Id=dirid, Name=dirpath)
+        etree.SubElement(self.fragment, 'PropertyRef', Id=f'VS{self.year}_IDE_DIR')
+        tpl_base = etree.SubElement(self.fragment, 'Directory', Id=f'VS{self.year}_IDE_DIR')
+        tpl_base = etree.SubElement(tpl_base, 'Directory', Name='VC')
+        dirpath = self.package.vs_template_name
+        dirid = self._format_dir_id(self.package.name, 'VCProjects' + dirpath)
+        # In 2015 onwards "wizard" files go into VCProjects
+        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Name='VCProjects')
+        self._wizard_dir = etree.SubElement(self._wizard_dir, 'Directory', Id=dirid, Name=dirpath)
         self._dirnodes[self.package.vs_wizard_dir] = self._wizard_dir
         self._dirids[self.package.vs_wizard_dir] = dirid
+        # In 2015 onwards "template" files go into VCWizards
+        # **NOTE**: the end path is <VS IDE root>/<RELATIVE_PATH>/<wizard name>
+        dirid = self._format_dir_id(self.package.name, 'VCWizards' + dirpath)
+        self._tpl_dir = etree.SubElement(tpl_base, 'Directory', Name='VCWizards')
+        self._tpl_dir = etree.SubElement(self._tpl_dir, 'Directory', Id=dirid, Name=self.package.vs_template_name)
         # In 2015 onwards they all go into the same folder
-        self._dirnodes[self.package.vs_template_dir] = self._wizard_dir
+        self._dirnodes[self.package.vs_template_dir] = self._tpl_dir
         self._dirids[self.package.vs_template_dir] = dirid
 
 
@@ -751,7 +765,6 @@ class MSI(WixBase):
 
     def _add_vs_properties(self):
         etree.SubElement(self.product, f'{{{WIX_VS_SCHEMA}}}FindVisualStudio')
-        etree.SubElement(self.product, 'PropertyRef', Id='VS2015DEVENV')
         etree.SubElement(self.product, 'PropertyRef', Id='VS2017DEVENV')
         etree.SubElement(self.product, 'PropertyRef', Id='VS2019DEVENV')
         etree.SubElement(self.product, 'PropertyRef', Id='VS2022DEVENV')

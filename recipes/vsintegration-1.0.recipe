@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -20,7 +23,17 @@ class Recipe(recipe.Recipe):
         self.files_devel += [
             f'{self.vsprefix}/libs',
             f'{self.vsprefix}/msvc',
+            f'{self.vsprefix}/gst-sdk-template'
         ]
+        for year, _ in self.years.items():
+            self.files_devel.append(f"{self.vsprefix.replace('2010', year)}/wizard")
+
+    years = {
+        '2015': '14.0',
+        '2017': '15.0',
+        '2019': '16.0',
+        '2022': '17.0',
+    }
 
     async def install(self):
         import shutil
@@ -31,8 +44,8 @@ class Recipe(recipe.Recipe):
         vspropsdir =  os.path.join(self.config.prefix, self.vsprefix, 'libs')
         if not os.path.exists(vspropsdir):
             os.makedirs(vspropsdir)
-        genvsprops = GenVSProps()
-        genvsprops.runargs(self.config, vspropsdir, env_var, logfile=self.logfile)
+        # genvsprops = GenVSProps()
+        # genvsprops.runargs(self.config, vspropsdir, env_var, logfile=self.logfile)
         # Copy msvc
         propsdir = os.path.join(self.config.prefix, self.vsprefix, 'msvc')
         if not os.path.exists(propsdir):
@@ -42,13 +55,17 @@ class Recipe(recipe.Recipe):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
         # Copy Wizard files
-        propsdir = os.path.join(self.config.prefix, self.vsprefix, 'wizard')
-        if not os.path.exists(propsdir):
-            os.makedirs(propsdir)
-        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'wizard')
-        for f in os.listdir(datapropsdir):
-            path = os.path.join(datapropsdir, f)
-            shutil.copy(path, os.path.join(propsdir, f))
+        for year, version in self.years.items():
+            srcdir = os.path.join(self.config.data_dir, 'vs-1.0', 'wizard')
+            dstdir = os.path.join(self.config.prefix, self.vsprefix.replace('2010', year), 'wizard')
+            if not os.path.exists(dstdir):
+                os.makedirs(dstdir)
+            for f in os.listdir(srcdir):
+                src = os.path.join(srcdir, f)
+                dst = os.path.join(dstdir, f)
+                shutil.copy(src, dst)
+                if dst.endswith('.vsz'):
+                    shell.replace(dst, {'10.0': version})
         # Copy Wizard template files
         propsdir = os.path.join(self.config.prefix, self.vsprefix, 'gst-sdk-template')
         if os.path.exists(propsdir):
