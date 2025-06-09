@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import subprocess
+import sys
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
@@ -24,7 +26,6 @@ from cerbero.packages.packagesstore import PackagesStore
 from cerbero.bootstrap.build_tools import BuildTools
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates
 from cerbero.utils import messages as m
-from setuptools.sandbox import run_setup
 
 
 class BundleSource(Command):
@@ -104,7 +105,8 @@ class BundleSource(Command):
         setup_args.append('--source-dirs=' + ','.join(bundle_dirs))
 
         command = str(config._relative_path('setup.py'))
-        run_setup(command, setup_args)
+
+        subprocess.check_call([sys.executable, command, *setup_args])
 
 
 register_command(BundleSource)
