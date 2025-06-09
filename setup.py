@@ -67,7 +67,8 @@ with open('MANIFEST.in', 'a+') as f:
         filenames = parse_dir(dirname)
         requested = globals()[dirname]
         if requested:
-            requested_filenames = tuple([os.sep + x + suffix for x in requested])
+            # Separator must match Git's
+            requested_filenames = tuple(['/' + x + suffix for x in requested])
 
             # Add special directories
             if dirname == 'packages':
@@ -83,6 +84,12 @@ with open('MANIFEST.in', 'a+') as f:
             ]
 
             missing_files = [p for p in requested_filenames if not [True for m in filenames if m.endswith(p)]]
+
+            # Special case these as they're all in the same file
+            if all(f.startswith('/gstreamer-1.0-vs-templates') for f in missing_files):
+                missing_files = []
+                filenames.append('packages/gstreamer-1.0-vs-templates.package')
+
             assert not missing_files, 'Not all %s from the command line (%s) exist' % (
                 dirname,
                 ', '.join(missing_files),
