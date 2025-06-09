@@ -48,14 +48,14 @@ build_android_examples() {
     time tar -C ${GSTREAMER_ROOT_ANDROID} -xf gstreamer-1.0-android-universal-*.tar.*
 
     # install tools
-    ./ci/run_retry.sh ${ANDROID_HOME}/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "cmake;3.18.1" "build-tools;30.0.3" "ndk;25.2.9519653" "platforms;android-32"
+    ./ci/run_retry.sh ${ANDROID_HOME}/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "cmake;3.22.1" "build-tools;35.0.0" "ndk;25.2.9519653" "platforms;android-32"
 
     # build the examples
     ./ci/generate_rules.py
     CI_BASE_DIR=$PWD
     mv build.ninja ${OUTPUT_DIR}/
     pushd ${OUTPUT_DIR}
-    ${CI_BASE_DIR}/ci/run_retry.sh ${ANDROID_HOME}/cmake/3.18.1/bin/ninja
+    ${CI_BASE_DIR}/ci/run_retry.sh ${ANDROID_HOME}/cmake/3.22.1/bin/ninja
     popd
 }
 
