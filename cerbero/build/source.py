@@ -143,8 +143,10 @@ class Source(object):
             cpu_bound=False,
             logfile=logfile,
         )
-        os.makedirs(os.path.join(self.src_dir, '.cargo'))
-        with open(os.path.join(self.src_dir, '.cargo', 'config.toml'), 'w') as f:
+        dot_cargo = os.path.join(self.src_dir, '.cargo')
+        os.makedirs(dot_cargo, exist_ok=True)
+        # Append so we don't overwrite any existing .cargo/config.toml settings
+        with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
             f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
 
