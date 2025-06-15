@@ -115,8 +115,9 @@ class Source (object):
         ct = await shell.async_call_output([self.cargo, 'vendor'] + vendor_args,
                                            cmd_dir=self.config_src_dir, env=self.env,
                                            cpu_bound=False, logfile=logfile)
-        os.makedirs(os.path.join(self.config_src_dir, '.cargo'))
-        with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
+        os.makedirs(os.path.join(self.config_src_dir, '.cargo'), exist_ok=True)
+        # Append so we don't overwrite any existing .cargo/config.toml settings
+        with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'a') as f:
             f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
 
