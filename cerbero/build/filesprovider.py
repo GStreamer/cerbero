@@ -56,7 +56,7 @@ def get_implib_dllname(config, path):
         try:
             ret = shell.check_output([lib_exe, '-list', path], env=config.env)
         except FatalError:
-            return 0
+            return None
         # The last non-empty line should contain the dllname
         return ret.split('\n')[-2]
     dlltool = config.env.get('DLLTOOL', None)
@@ -65,7 +65,7 @@ def get_implib_dllname(config, path):
     try:
         return shell.check_output(shlex.split(dlltool) + ['-I', path], env=config.env)
     except FatalError:
-        return 0
+        return None
 
 
 def find_dll_implib(config, libname, prefix, libdir, ext, regex):
@@ -78,10 +78,13 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
             implib_notfound.append(implib)
             continue
         dllname = get_implib_dllname(config, path)
-        if dllname == 0:
+        if not dllname:
             continue
         dllname = dllname.strip()
-        if dllname == '':
+        if not dllname:
+            continue
+        if dllname.endswith('.obj'):
+            # Ban .lib that are static libraries e.g. unfixed cURL recipe
             continue
         return [os.path.join(libdir, dllname)]
     # If import libraries aren't found, look for a DLL by exactly the specified
