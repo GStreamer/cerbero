@@ -103,10 +103,10 @@ endif()
 
 # Prepare Android hotfixes for x264
 if(ANDROID_ABI MATCHES "^armeabi")
-    set(NEEDS_NOTEXT_FIX TRUE)
+    set(NEEDS_TEXTREL_ERROR TRUE)
     set(NEEDS_BSYMBOLIC_FIX TRUE)
 elseif(ANDROID_ABI STREQUAL "x86")
-    set(NEEDS_NOTEXT_FIX TRUE)
+    set(NEEDS_TEXTREL_ERROR TRUE)
     set(NEEDS_BSYMBOLIC_FIX TRUE)
 # arm64: https://ffmpeg.org/pipermail/ffmpeg-devel/2022-July/298734.html 
 elseif(ANDROID_ABI STREQUAL "x86_64" OR ANDROID_ABI STREQUAL "arm64-v8a")
@@ -404,17 +404,12 @@ if (GSTREAMER_IS_MOBILE)
             $<TARGET_PROPERTY:GStreamer::GStreamer,INTERFACE_INCLUDE_DIRECTORIES>
     )
 
-    # Text relocations are required for all 32-bit objects. We
-    # must disable the warning to allow linking with lld. Unlike gold, ld which
-    # will silently allow text relocations, lld support must be explicit.
-    #
-    # See https://crbug.com/911658#c19 for more information. See also
-    # https://trac.ffmpeg.org/ticket/7878
-    if(DEFINED NEEDS_NOTEXT_FIX)
+    # text relocations are strictly forbidden, error out if we encounter any
+    if(DEFINED NEEDS_TEXTREL_ERROR)
         target_link_options(
             GStreamerMobile
             PRIVATE
-                "-Wl,-z,notext"
+                "-Wl,-z,text"
         )
     endif()
 
