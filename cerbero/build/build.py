@@ -498,6 +498,7 @@ class MakefilesBase(Build, ModifyEnvBase):
                 else:
                     configure_cmd.append(arg % substs)
         else:
+            substs['options'] = ' '.join(self.configure_options)
             configure_cmd = ' '.join(self.configure_tpl) % substs
         return configure_cmd
 
