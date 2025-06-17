@@ -16992,3 +16992,38 @@ index 854e49f75..23600e597 100644
 -- 
 2.44.0.windows.1
 
+From fb1fd0702188ec1fe59d2752e3a2bcb0f4848c47 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 17 Jun 2025 16:02:27 +0530
+Subject: [PATCH] meson: Don't add -Wl,z,notext to disable textrel warnings
+
+libvpx's ASM does not cause any text relocations, so we can disable
+this. In fact, notext adds a TEXTREL flag unconditionally, even when
+there aren't any text relocations.
+---
+ meson.build | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index e34ab284b..14f71dc05 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1319,15 +1319,6 @@ elif tgt_os == 'android'
+ 		project_c_args += ['-mstackrealign']
+ 		project_cpp_args += ['-mstackrealign']
+ 	endif
+-	if c.get_linker_id().contains('lld') and tgt_isa == 'x86' and features.get('pic')
+-		# Text relocations are required for all x86 objects. We
+-		# must disable the warning to allow linking with lld. Unlike gold, ld which
+-		# will silently allow text relocations, lld support must be explicit.
+-		#
+-		# See https://crbug.com/911658#c19 for more information. See also
+-		# https://trac.ffmpeg.org/ticket/7878
+-		project_c_link_args += ['-Wl,-z,notext']
+-	endif
+ endif
+ 
+ if features.get('gcc', false)
+-- 
+2.49.0
+

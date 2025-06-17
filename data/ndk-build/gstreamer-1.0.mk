@@ -83,29 +83,24 @@ ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
 GSTREAMER_DEPS                += gio-2.0
 endif
 
-NEEDS_NOTEXT_FIX    := no
+NEEDS_TEXTREL_ERROR := no
 NEEDS_BSYMBOLIC_FIX := no
 ifeq ($(TARGET_ARCH_ABI),armeabi)
-NEEDS_NOTEXT_FIX    := yes
+NEEDS_TEXTREL_ERROR := yes
 NEEDS_BSYMBOLIC_FIX := yes
 else ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-NEEDS_NOTEXT_FIX    := yes
+NEEDS_TEXTREL_ERROR := yes
 NEEDS_BSYMBOLIC_FIX := yes
 else ifeq ($(TARGET_ARCH_ABI),x86)
-NEEDS_NOTEXT_FIX    := yes
+NEEDS_TEXTREL_ERROR := yes
 NEEDS_BSYMBOLIC_FIX := yes
 else ifeq ($(TARGET_ARCH_ABI),x86_64)
 NEEDS_BSYMBOLIC_FIX := yes
 endif
 
-# Text relocations are required for all 32-bit objects. We
-# must disable the warning to allow linking with lld. Unlike gold, ld which
-# will silently allow text relocations, lld support must be explicit.
-#
-# See https://crbug.com/911658#c19 for more information. See also
-# https://trac.ffmpeg.org/ticket/7878
-ifeq ($(NEEDS_NOTEXT_FIX),yes)
-GSTREAMER_LD := $(GSTREAMER_LD) -Wl,-z,notext
+# text relocations are strictly forbidden, error out if we encounter any
+ifeq ($(NEEDS_TEXTREL_ERROR),yes)
+GSTREAMER_LD := $(GSTREAMER_LD) -Wl,-z,text
 endif
 
 # resolve textrels in the x86 asm

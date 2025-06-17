@@ -30,7 +30,7 @@ index 5dbefa43..6f13ffd3 100644
  libopenh264 = library('openh264',
    link_whole: [libcommon, libprocessing, libencoder, libdecoder],
 +  # failsafe for ASM relocations
-+  link_args: cpp.get_supported_link_arguments(['-Wl,-Bsymbolic', '-Wl,-z,notext']),
++  link_args: cpp.get_supported_link_arguments(['-Wl,-Bsymbolic', '-Wl,-z,text']),
    install: true,
    soversion: major_version,
    version: meson.project_version(),
