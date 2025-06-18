@@ -662,7 +662,7 @@ cerbero cross-ios universal examples arm64-host:
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
-    CERBERO_PACKAGE_ARGS: ""
+    CERBERO_PACKAGE_ARGS: "-t"
   before_script:
     # Test that the powershell script works
     - ./cerbero-uninstalled --help
