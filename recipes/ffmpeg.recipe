@@ -11,6 +11,8 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/tree/a66a916f069fe490a3fe418ec54f9cd05dd608be
         name + '/0001-Add-Meson-build.patch',
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/merge_requests/151
+        name + '/fix-textrels.patch',
     ]
 
     btype = BuildType.MESON
@@ -65,6 +67,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_arch == Architecture.X86 and self.config.target_platform == Platform.IOS:
             # Simulator doesn't like shared libs
             self.library_type = LibraryType.STATIC
+        if self.config.target_arch == Architecture.X86 and self.config.target_platform == Platform.ANDROID:
+            self.meson_options['asm'] = 'disabled'
 
         # Populate self.files_devel
         files_devel_tpl = ['%(libdir)s/{}.la', '%(libdir)s/pkgconfig/{}.pc', 'include/{}']
