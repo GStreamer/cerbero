@@ -1,0 +1,250 @@
+From 6c630cd1fb4bdb2b1ede3d9b7b98a2bc3c9be081 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 17 Jun 2025 22:12:33 +0000
+Subject: [PATCH 1/2] meson: Fix missing asm checks causing textrels on armv7a
+ and x86
+
+See https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1845
+---
+ meson.build | 49 +++++++++++++++++++++++++++----------------------
+ 1 file changed, 27 insertions(+), 22 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 49b7c936..10be213c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,7 +1,7 @@
+ project('x264', 'c',
+   version: run_command(find_program('version.py'), '--package-version', check: true).stdout().strip(),
+   default_options: ['optimization=2', 'c_std=c11'],
+-  meson_version: '>= 0.52'
++  meson_version: '>= 0.64'
+ )
+ 
+ x264_ver = meson.project_version()
+@@ -177,8 +177,10 @@ else
+   asflags += ['-UPREFIX']
+ endif
+ 
++asm_allowed = get_option('asm').allowed()
++
+ if ['x86', 'x86_64'].contains(host_cpu)
+-  if not get_option('asm').disabled()
++  if asm_allowed
+     nasm = find_program('nasm', required: false)
+     if not nasm.found()
+       subproject('win-nasm')
+@@ -265,14 +267,16 @@ elif host_cpu == 'arm'
+   endif
+ endif
+ 
+-if get_option('b_staticpic') and ['arm', 'x86'].contains(host_cpu)
++if get_option('b_staticpic') and host_cpu == 'x86' and asm_allowed
+   # Text relocations are required for all 32-bit objects. We
+   # must disable the warning to allow linking with lld. Unlike gold, ld which
+   # will silently allow text relocations, lld support must be explicit.
+   #
+   # See https://crbug.com/911658#c19 for more information. See also
+   # https://trac.ffmpeg.org/ticket/7878
+-  if cc.has_link_argument('-Wl,-z,notext')
++  if host_system == 'android'
++    warning('Text relocations are required on x86. If you need, please pass -Wl,-z,notext as linker flag.')
++  elif cc.has_link_argument('-Wl,-z,notext')
+     add_project_link_arguments('-Wl,-z,notext', language: 'c')
+   endif
+ endif
+@@ -325,7 +329,6 @@ endif
+ inline_asm_check = 'int main (void) { @0@ return 0; }'
+ 
+ if host_cpu == 'x86' or host_cpu == 'x86_64'
+-  asm_allowed = not get_option('asm').disabled()
+ 
+   cpp_cond = '''
+ #include <@0@>
+@@ -345,7 +348,7 @@ int main(void) {
+   # under Clang if stack realignment is used. This is probably
+   # because the only compilers still supporting the architecture
+   # are the Android NDK and MSYS CLANG32.
+-  # See:
++  # See:
+   # - https://github.com/android/ndk/issues/693
+   # - https://bugs.llvm.org/show_bug.cgi?id=37542
+   if is_broken_android_api and host_cpu == 'x86'
+@@ -396,7 +399,7 @@ int main(void) {
+     endif
+     cdata.set10('HAVE_MMX', true)
+   endif
+-elif host_cpu == 'arm'
++elif host_cpu == 'arm' and asm_allowed
+   cdata.set10('HAVE_ARM_INLINE_ASM', cc.links(inline_asm_check.format('__asm__("add r0, r1, r2");'), name: 'Compiler supports gcc-style inline assembly'))
+   if compiler_style != 'MS'
+     add_project_arguments('-mcpu=cortex-a8', '-mfpu=neon', language: 'c')
+@@ -409,7 +412,7 @@ elif host_cpu == 'arm'
+   else
+     error('You specified a pre-ARMv6 or Thumb-1 CPU in your CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
+   endif
+-elif host_cpu == 'aarch64'
++elif host_cpu == 'aarch64' and asm_allowed
+   if compiler_style == 'MS' and (cc.get_define('_M_ARM64') != '')
+     cdata.set10('HAVE_AARCH64', true)
+     cdata.set10('HAVE_NEON', true)
+@@ -421,9 +424,9 @@ elif host_cpu == 'aarch64'
+   endif
+ endif
+ 
+-if ['arm', 'aarch64'].contains(host_cpu)
++if ['arm', 'aarch64'].contains(host_cpu) and asm_allowed
+   # check if the assembler supports '.func' (clang 3.5 does not)
+-  # It is possible to run compile checks on generated files, however,
++  # It is possible to run compile checks on generated files, however,
+   # Meson versions earlier than 1.2.0 do not set the lookup path
+   # correctly, causing Python to fail opening it.
+   # https://github.com/mesonbuild/meson/issues/11983
+@@ -446,7 +449,7 @@ if ['arm', 'aarch64'].contains(host_cpu)
+   endif
+ endif
+ 
+-if host_cpu.startswith('mips')
++if host_cpu.startswith('mips') and asm_allowed
+   add_project_arguments('-mmsa', '-mfp64', '-mhard-float', language: 'c')
+ 
+   if cc.links(inline_asm_check.format('__asm__("addvi.b $w0, $w1, 1");'), name: 'MSA')
+@@ -562,16 +565,6 @@ if ['x86', 'x86_64'].contains(host_cpu) and nasm.found()
+ 
+   asflags += ['-DSTACK_ALIGNMENT=@0@'.format(stack_alignment)]
+ 
+-  if get_option('b_staticpic')
+-    asflags += ['-DPIC']
+-
+-    # resolve textrels in the x86 asm
+-    add_project_link_arguments(
+-      cc.get_supported_link_arguments('-Wl,-Bsymbolic'),
+-      language: 'c'
+-    )
+-  endif
+-
+   asm_incdir = meson.current_source_dir() / 'common' / 'x86'
+ 
+   foreach d : depths
+@@ -663,6 +656,16 @@ elif host_cpu == 'arm'
+   endforeach
+ endif
+ 
++if get_option('b_staticpic') and host_cpu == 'x86'
++  asflags += ['-DPIC']
++
++  # resolve textrels in the x86 asm
++  add_project_link_arguments(
++    cc.get_supported_link_arguments('-Wl,-Bsymbolic'),
++    language: 'c'
++  )
++endif
++
+ cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h') and cc.has_function('memalign'))
+ cdata.set10('HAVE_STRING_H', cc.has_header('string.h')) # getopt.c
+ cdata.set10('ARCH_X86_64', host_cpu == 'x86_64')
+@@ -699,6 +702,8 @@ elif ['darwin', 'ios'].contains(host_system)
+   cdata.set10('SYS_MACOSX', true)
+ elif host_system == 'sunos' or host_system == 'solaris'
+   cdata.set10('SYS_SunOS', true)
++elif host_system == 'android'
++  cdata.set10('SYS_LINUX', true)
+ else
+   cdata.set10('SYS_' + host_system.to_upper(), true)
+ endif
+@@ -833,7 +838,7 @@ sources_x = [
+   'encoder/lookahead.c',
+ ]
+ 
+-if not get_option('asm').disabled()
++if asm_allowed
+   if ['x86', 'x86_64'].contains(host_cpu)
+     sources_x += files(
+       'common/x86/mc-c.c',
+-- 
+GitLab
+
+
+From 126e86e7b1ac0cd19830c224ea50c847e9a31b01 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 18 Jun 2025 19:21:11 +0530
+Subject: [PATCH 2/2] meson: Auto-disable the asm option on Android x86
+
+This will also error out if the asm option is enabled on Android x86.
+---
+ meson.build | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 10be213c..b741baa4 100644
+--- a/meson.build
++++ b/meson.build
+@@ -177,14 +177,17 @@ else
+   asflags += ['-UPREFIX']
+ endif
+ 
+-asm_allowed = get_option('asm').allowed()
++asm = get_option('asm').require(host_cpu != 'x86' or host_system != 'android',
++    error_message: 'causes text relocations on Android x86')
++
++asm_allowed = asm.allowed()
+ 
+ if ['x86', 'x86_64'].contains(host_cpu)
+   if asm_allowed
+     nasm = find_program('nasm', required: false)
+     if not nasm.found()
+       subproject('win-nasm')
+-      nasm = find_program('nasm', required: get_option('asm'))
++      nasm = find_program('nasm', required: asm)
+     endif
+   endif
+   if host_cpu == 'x86'
+@@ -243,25 +246,25 @@ elif host_cpu == 'aarch64'
+       asflags += ['-arch', 'arm64']
+     endif
+   elif host_system == 'windows'
+-    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
+-    armasm = find_program('armasm', required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
++    armasm = find_program('armasm', required: asm)
+     if compiler_style == 'MS'
+       asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
+     endif
+   endif
+ elif host_cpu == 'arm'
+   if host_system == 'windows' and compiler_style == 'MS'
+-    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
+-    armasm = find_program('armasm', required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
++    armasm = find_program('armasm', required: asm)
+     asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
+   elif host_system == 'windows'
+     # FIXME once Meson exposes the compiler command line
+-    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
+     gcc = disabler()
+     if cc.get_id().contains('clang')
+-      gcc = find_program('clang', required: get_option('asm'))
++      gcc = find_program('clang', required: asm)
+     else
+-      gcc = find_program('gcc', required: get_option('asm'))
++      gcc = find_program('gcc', required: asm)
+     endif
+     asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
+   endif
+@@ -274,9 +277,9 @@ if get_option('b_staticpic') and host_cpu == 'x86' and asm_allowed
+   #
+   # See https://crbug.com/911658#c19 for more information. See also
+   # https://trac.ffmpeg.org/ticket/7878
+-  if host_system == 'android'
+-    warning('Text relocations are required on x86. If you need, please pass -Wl,-z,notext as linker flag.')
+-  elif cc.has_link_argument('-Wl,-z,notext')
++  #
++  # We cannot ignore these text relocations on Android though, so skip it there
++  if cc.has_link_argument('-Wl,-z,notext')
+     add_project_link_arguments('-Wl,-z,notext', language: 'c')
+   endif
+ endif
+-- 
+GitLab
+

@@ -21,6 +21,8 @@ class Recipe(recipe.Recipe):
 
     patches = [
         f'{name}/0001-Add-Meson-build.patch',
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/31
+        f'{name}/fix-textrels.patch',
     ]
 
     meson_options = {}
