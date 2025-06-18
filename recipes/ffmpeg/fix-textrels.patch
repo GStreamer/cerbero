@@ -1,0 +1,364 @@
+From bb98c9a11bed5f047a4cb05e3c17fb1429da81d2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 17 Jun 2025 23:45:26 +0000
+Subject: [PATCH 1/4] meson: Fix spurious Unicode spaces
+
+---
+ meson.build | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 80007c646fb..f50b62a0421 100644
+--- a/meson.build
++++ b/meson.build
+@@ -120,7 +120,7 @@ project_c_args = [
+   '-Wno-address',
+ ]
+ 
+-# Work around meson subprojects ignoring default_options
++# Work around meson subprojects ignoring default_options
+ # https://github.com/mesonbuild/meson/issues/1889#issuecomment-1275991958
+ if meson.is_subproject() and meson.version().version_compare('< 0.63')
+   project_c_args += ['-std=c11']
+@@ -1929,7 +1929,7 @@ conf.set('uspp_filter', 0)
+ if host_machine.system() == 'windows'
+   conf.set('symver', 0)
+   conf.set('dos_paths', 1)
+-  # https://ffmpeg.org/pipermail/ffmpeg-devel/2023-August/313023.html
++  # https://ffmpeg.org/pipermail/ffmpeg-devel/2023-August/313023.html
+   project_c_args += cc.get_supported_arguments('-DWIN32_LEAN_AND_MEAN', '-wd4005', '-Wp,-w')
+ endif
+ 
+@@ -2557,7 +2557,7 @@ if conf.get('x86') == 1
+   # of an x86 context. So I fix those semantics here.
+   conf.set10('x86asm', get_option('asm').allowed() and (conf.get('mmx', 1) == 1) and get_option('x86asm').allowed())
+ 
+-  # Manual: Skip Nasm building for iOS simulator because of an Apple lld bug
++  # Manual: Skip Nasm building for iOS simulator because of an Apple lld bug
+   # ld: warning: ignoring file libavutil.a, building for iOS Simulator-x86_64 but
+   # attempting to link with file built for iOS Simulator-x86_64
+   is_simulator = false
+@@ -2642,7 +2642,7 @@ if conf.get('x86') == 1
+   # because the only compilers still supporting the architecture
+   # are the Android NDK and MSYS CLANG32.
+   # Thus an additional check on aligned_stack is done here.
+-  # See:
++  # See:
+   # - https://github.com/android/ndk/issues/693
+   # - https://bugs.llvm.org/show_bug.cgi?id=37542
+   if is_broken_android_api and conf.get('x86_64') == 0
+@@ -2876,7 +2876,7 @@ endif
+ can_run_asm_checks = meson.version().version_compare('>=1.2.0')
+ 
+ foreach check : asm_as_checks
+-  # It is possible to run compile checks on generated files, however,
++  # It is possible to run compile checks on generated files, however,
+   # Meson versions earlier than 1.2.0 do not set the lookup path
+   # correctly, causing Python to fail opening it.
+   # https://github.com/mesonbuild/meson/issues/11983
+@@ -2993,7 +2993,7 @@ arm_skip_checks = conf.get('arm', 0) == 1 and (host_machine.system() == 'linux'
+ if not arm_skip_checks or not can_run_asm_checks
+   foreach ext : arch_ext_list_arm
+     if ext in asm_archext_list
+-      # Skip the usual inline || external -> unsuffixed for these extensions.
++      # Skip the usual inline || external -> unsuffixed for these extensions.
+       continue
+     endif
+     inline = '@0@_inline'.format(ext)
+-- 
+GitLab
+
+
+From b13054b8eea8ad051e322d212b0b5d805480c628 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 17 Jun 2025 23:45:41 +0000
+Subject: [PATCH 2/4] meson: Remove textrels in x86 Android
+
+---
+ meson.build | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index f50b62a0421..f1988331b33 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2591,7 +2591,11 @@ if conf.get('x86') == 1
+           #
+           # See https://crbug.com/911658#c19 for more information. Tracked upstream at
+           # https://trac.ffmpeg.org/ticket/7878
+-          add_project_link_arguments('-Wl,-z,notext', language: 'c')
++          if host_machine.system() == 'android'
++            warning('Text relocations are required to link assembly code on x86. If you need, please pass -Wl,-z,notext as linker flag.')
++          else
++            add_project_link_arguments('-Wl,-z,notext', language: 'c')
++          endif
+       endif
+       x86asm_checks += [
+         ['vmovdqa32 [eax]{k1}{z}, zmm0', 'avx512_external'],
+-- 
+GitLab
+
+
+From f70419ffa9a1c9e13536f4c420b776a46378861c Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 18 Jun 2025 19:20:38 +0530
+Subject: [PATCH 3/4] meson: Define host_system for ease of use
+
+---
+ meson.build | 49 +++++++++++++++++++++++++------------------------
+ 1 file changed, 25 insertions(+), 24 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index f1988331b33..fd30d964743 100644
+--- a/meson.build
++++ b/meson.build
+@@ -146,7 +146,10 @@ thread_dep = dependency('threads')
+ 
+ common_deps = [thread_dep]
+ 
+-if host_machine.system() == 'windows'
++cpu = host_machine.cpu_family()
++host_system = host_machine.system()
++
++if host_system == 'windows'
+   common_deps += [cc.find_library('ws2_32')]
+ endif
+ 
+@@ -1359,9 +1362,9 @@ check_headers = [
+   ['asm/types.h'],
+ ]
+ 
+-if host_machine.system() == 'darwin'
++if host_system == 'darwin'
+   check_headers += [['dispatch/dispatch.h']]
+-elif host_machine.system() == 'android' and get_option('jni').allowed()
++elif host_system == 'android' and get_option('jni').allowed()
+   check_headers += [['jni.h']]
+ endif
+ 
+@@ -1806,8 +1809,6 @@ endforeach
+ 
+ arch = 'c'
+ 
+-cpu = host_machine.cpu_family()
+-
+ if cpu == 'x86'
+   arch = 'x86'
+   conf.set('x86', 1)
+@@ -1858,7 +1859,7 @@ if cc.get_id() == 'clang'
+     # every single entry point into the libraries or enable -mstackrealign
+     # (doing stack realignment in every single function).
+ 
+-    if ['windows', 'freebsd', 'netbsd', 'openbsd'].contains(host_machine.system())
++    if ['windows', 'freebsd', 'netbsd', 'openbsd'].contains(host_system)
+       conf.set('aligned_stack', 0)
+     else
+       project_c_args += cc.get_supported_arguments([
+@@ -1926,14 +1927,14 @@ conf.set('frame_thread_encoder', 1)
+ conf.set('mcdeint_filter', 0)
+ conf.set('uspp_filter', 0)
+ 
+-if host_machine.system() == 'windows'
++if host_system == 'windows'
+   conf.set('symver', 0)
+   conf.set('dos_paths', 1)
+   # https://ffmpeg.org/pipermail/ffmpeg-devel/2023-August/313023.html
+   project_c_args += cc.get_supported_arguments('-DWIN32_LEAN_AND_MEAN', '-wd4005', '-Wp,-w')
+ endif
+ 
+-if ['linux', 'openbsd', 'android', 'freebsd', 'netbsd'].contains(host_machine.system())
++if ['linux', 'openbsd', 'android', 'freebsd', 'netbsd'].contains(host_system)
+   conf.set('section_data_rel_ro', 1)
+ endif
+ 
+@@ -2317,7 +2318,7 @@ if conf.get('pthreads') == 0 and conf.get('w32threads') == 0 and conf.get('os2th
+   endif
+ endif
+ 
+-if host_machine.system() == 'android' and get_option('jni').allowed()
++if host_system == 'android' and get_option('jni').allowed()
+   if conf.get('jni_h') == 1 and not (conf.get('pthreads') == 1)
+     error('jni not found')
+   endif
+@@ -2447,7 +2448,7 @@ endif
+ # Manual patch for Cairo
+ # https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/265
+ if conf.get('librsvg') == 1
+-  if conf.get('static') == 1 and host_machine.system() == 'windows'
++  if conf.get('static') == 1 and host_system == 'windows'
+     project_c_args += ['-DCAIRO_WIN32_STATIC_BUILD']
+   endif
+ endif
+@@ -2457,7 +2458,7 @@ endif
+ # which does not embed mingwex on the archives
+ if conf.get('libass') == 1
+   test_libass_dep = dependency('libass', required: false, version: '>= 0.11.0', static: conf.get('static').is_odd())
+-  if test_libass_dep.found() and cc.has_header('iconv.h', dependencies: test_libass_dep) and host_machine.system() == 'windows'
++  if test_libass_dep.found() and cc.has_header('iconv.h', dependencies: test_libass_dep) and host_system == 'windows'
+     conf.set10('libass',
+       cc.links('''
+         #include <iconv.h>
+@@ -2505,7 +2506,7 @@ asm_inline_checks = [
+ # of inline assembly to nonlocal labels defined within inline assembly,
+ # see https://github.com/llvm/llvm-project/issues/76046.
+ # Original bug report: https://github.com/llvm/llvm-project/issues/64127
+-if cc.get_id() != 'clang' or host_machine.system() != 'windows'
++if cc.get_id() != 'clang' or host_system != 'windows'
+   asm_inline_checks += [
+     ['"Label:\\n"', 'inline_asm_nonlocal_labels']
+   ]
+@@ -2518,9 +2519,9 @@ asm_insn_checks = []
+ asm_as_checks = []
+ asm_arch_ext_checks = []
+ 
+-if host_machine.system() == 'windows'
++if host_system == 'windows'
+   asm_format = conf.get('x86_64') == 1 ? 'win64' : 'win32'
+-elif host_machine.system() == 'darwin'
++elif host_system == 'darwin'
+   asm_format = conf.get('x86_64') == 1 ? 'macho64' : 'macho32'
+ else
+   asm_format = conf.get('x86_64') == 1 ? 'elf64' : 'elf32'
+@@ -2572,10 +2573,10 @@ if conf.get('x86') == 1
+   if conf.get('x86asm') == 1
+     conf.set('x86asm', 0)
+     nasm_version = '>=0'
+-    if host_machine.system() == 'windows'
++    if host_system == 'windows'
+       nasm_version = '>=2.12'
+     endif
+-    x86asm = find_program('nasm', version: nasm_version, required: host_machine.system() in ['windows', 'darwin'])
++    x86asm = find_program('nasm', version: nasm_version, required: host_system in ['windows', 'darwin'])
+     x86asm_type = 'nasm'
+     if not x86asm.found()
+       x86asm = find_program('yasm', required: false)
+@@ -2706,7 +2707,7 @@ elif conf.get('arm') == 1
+     conf.set('vfp_args', 1)
+   elif cc.links(cpp_cond.format('stddef.h', 'defined _M_ARM_FP && _M_ARM_FP >= 30'), name: 'vfp_args_fp')
+     conf.set('vfp_args', 1)
+-  elif not cc.links(cpp_cond.format('stddef.h', 'defined __ARM_PCS || defined __SOFTFP__'), name: 'arm_pcs_or_softfp') and host_machine.system() != 'darwin'
++  elif not cc.links(cpp_cond.format('stddef.h', 'defined __ARM_PCS || defined __SOFTFP__'), name: 'arm_pcs_or_softfp') and host_system != 'darwin'
+     if not cc.has_header_symbol('stddef.h', '__SOFTFP__')
+       conf.set('vfp_args', 1)
+       conf.set('fpabi', 'vfp')
+@@ -2989,7 +2990,7 @@ if conf.get('x86') == 1
+   message('Inline assembly direct symbol references available: @0@'.format(conf.get('inline_asm_direct_symbol_refs')))
+ endif
+ 
+-arm_skip_checks = conf.get('arm', 0) == 1 and (host_machine.system() == 'linux' or host_machine.system() == 'android')
++arm_skip_checks = conf.get('arm', 0) == 1 and (host_system == 'linux' or host_system == 'android')
+ 
+ # If the ASM checks couldn't be run, we need to update the state
+ # of ALL Arm instruction sets
+@@ -3151,7 +3152,7 @@ endforeach
+ 
+ dshow_indev_extra_deps = []
+ 
+-if host_machine.system() == 'windows'
++if host_system == 'windows'
+   foreach libname: ['psapi', 'ole32', 'strmiids', 'uuid', 'oleaut32', 'shlwapi']
+     dshow_indev_extra_deps += [cc.find_library(libname, required: false)]
+   endforeach
+@@ -3298,9 +3299,9 @@ endif
+ 
+ makedef_args += ['--prefix', extern_prefix]
+ 
+-if host_machine.system() == 'windows'
++if host_system == 'windows'
+   makedef_args += ['--os', 'win']
+-elif host_machine.system() in ['darwin', 'ios']
++elif host_system in ['darwin', 'ios']
+   makedef_args += ['--os', 'darwin']
+ else
+   makedef_args += ['--os', 'linux']
+@@ -3320,7 +3321,7 @@ final_conf.set_quoted('FFMPEG_DATADIR', join_paths(get_option('prefix'), get_opt
+ final_conf.set_quoted('AVCONV_DATADIR', join_paths(get_option('prefix'), get_option('datadir')))
+ final_conf.set_quoted('CC_IDENT', '@0@ @1@'.format(cc.get_id(), cc.version()))
+ final_conf.set_quoted('BUILDSUF', '')
+-final_conf.set_quoted('SLIBSUF', host_machine.system() == 'windows' ? '.dll' : '.so')
++final_conf.set_quoted('SLIBSUF', host_system == 'windows' ? '.dll' : '.so')
+ final_conf.set('SWS_MAX_FILTER_SIZE', 256)
+ final_conf.set('EXTERN_ASM', extern_prefix)
+ final_conf.set_quoted('EXTERN_PREFIX', extern_prefix)
+@@ -3426,7 +3427,7 @@ foreach built_lib : built_libs
+     sources += get_variable('lib@0@_@1@_slib_sources'.format(built_lib[0], arch), [])
+   endif
+ 
+-  if host_machine.system() == 'windows'
++  if host_system == 'windows'
+     # In subproject mode, the file that will be read (if present)
+     # is the config.h of the *root* project, instead of our config.h.
+     # This is because -I folder take effect *after* the .rc
+@@ -3565,7 +3566,7 @@ foreach built_lib : built_libs
+   endif
+ 
+   version_script = meson.current_build_dir() / 'lib@0@'.format(built_lib[0]) / 'lib@0@.ver'.format(built_lib[0])
+-  if host_machine.system() in ['darwin', 'ios']
++  if host_system in ['darwin', 'ios']
+     vflag = '-Wl,-exported_symbols_list,@0@'.format(version_script)
+   else
+     vflag = '-Wl,--version-script,@0@'.format(version_script)
+-- 
+GitLab
+
+
+From 1b31f5f3f390be8c750d3c572d9d5d2e8b9c88f0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 18 Jun 2025 19:21:11 +0530
+Subject: [PATCH 4/4] meson: Auto-disable the asm option on Android x86
+
+This will also error out if the asm option is enabled on Android x86.
+---
+ meson.build | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index fd30d964743..3ab837378c8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -553,7 +553,8 @@ types_list = [
+   'struct_mfxConfigInterface',
+ ]
+ 
+-asm = get_option('asm')
++asm = get_option('asm').require(cpu != 'x86' or host_system != 'android',
++    error_message: 'causes text relocations on Android x86')
+ inline_asm = get_option('inline_asm')
+ 
+ conf.set10('asm', asm.allowed())
+@@ -2556,7 +2557,7 @@ if conf.get('x86') == 1
+ 
+   # Manual: the configure script never checks if x86asm is enabled outside
+   # of an x86 context. So I fix those semantics here.
+-  conf.set10('x86asm', get_option('asm').allowed() and (conf.get('mmx', 1) == 1) and get_option('x86asm').allowed())
++  conf.set10('x86asm', asm.allowed() and (conf.get('mmx', 1) == 1) and get_option('x86asm').allowed())
+ 
+   # Manual: Skip Nasm building for iOS simulator because of an Apple lld bug
+   # ld: warning: ignoring file libavutil.a, building for iOS Simulator-x86_64 but
+@@ -2584,7 +2585,7 @@ if conf.get('x86') == 1
+     endif
+     conf.set10('x86asm', x86asm.found())
+     if x86asm.found()
+-      if cc.get_linker_id().contains('lld') and cpu == 'x86' and not ['windows', 'cygwin'].contains(host_machine.system()) 
++      if cc.get_linker_id().contains('lld') and cpu == 'x86' and not ['android', 'windows', 'cygwin'].contains(host_system)
+           # x86inc.asm ignores the PIC flag when compiling for x86 which unfortunately
+           # causes text relocations in the object files generated by the assembler. We
+           # must disable the warning to allow linking with lld. Unlike gold, ld which
+@@ -2592,11 +2593,9 @@ if conf.get('x86') == 1
+           #
+           # See https://crbug.com/911658#c19 for more information. Tracked upstream at
+           # https://trac.ffmpeg.org/ticket/7878
+-          if host_machine.system() == 'android'
+-            warning('Text relocations are required to link assembly code on x86. If you need, please pass -Wl,-z,notext as linker flag.')
+-          else
+-            add_project_link_arguments('-Wl,-z,notext', language: 'c')
+-          endif
++          #
++          # We cannot ignore these text relocations on Android though, so skip it there
++          add_project_link_arguments('-Wl,-z,notext', language: 'c')
+       endif
+       x86asm_checks += [
+         ['vmovdqa32 [eax]{k1}{z}, zmm0', 'avx512_external'],
+-- 
+GitLab
+
