@@ -38,6 +38,41 @@ clone_gstreamer() {
     git clone "${gst_remote}" -b "${gst_commit}" --depth 1 gstreamer/
 }
 
+find_textrels() {
+    set +x
+    local apks
+    local libs
+
+    mapfile -t apks < <(find ${EXAMPLES_HOME} -iname '*.apk')
+    echo "${apks[@]}"
+    if [[ "${#apks[@]}" -eq 0 ]]; then
+        echo "No APKs found in ${EXAMPLES_HOME}"
+        return 1
+    fi
+
+    local ret=0
+    for apk in "${apks[@]}"; do
+        echo "Checking $apk"
+        d=$(basename "${apk}_CONTENTS")
+        mkdir "$d"
+        unzip -qd "$d" "$apk"
+        mapfile -t libs < <(find "$d" -iname libgstreamer_android.so)
+        for lib in "${libs[@]}"; do
+            echo $lib
+            if readelf --dynamic "$lib" | grep TEXTREL; then
+                echo "Text relocations found in $lib:"
+                scanelf -qT "$lib"
+                ret=1
+            fi
+        done
+    done
+
+    if [[ $ret != 0 ]]; then
+        echo "ERROR: Text relocations found! See above for details."
+    fi
+    return $ret
+}
+
 build_android_examples() {
     clone_gstreamer
     mkdir -p ${OUTPUT_DIR}
@@ -56,7 +91,8 @@ build_android_examples() {
     mv build.ninja ${OUTPUT_DIR}/
     pushd ${OUTPUT_DIR}
     ${CI_BASE_DIR}/ci/run_retry.sh ${ANDROID_HOME}/cmake/3.22.1/bin/ninja
-    popd
+
+    find_textrels
 }
 
 build_ios_examples() {
