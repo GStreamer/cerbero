@@ -171,6 +171,7 @@ class Recipe(custom.GStreamer):
         ]
 
     def prepare(self):
+        self.enable_plugin('pbtypes', 'sys')
         self.enable_plugin('cdparanoia', 'sys', 'cdparanoia', dep='cdparanoia')
         self.enable_plugin('ximagesink', 'sys', 'x11', option='x11')
         self.enable_plugin('xvimagesink', 'sys', 'x11', option='xvideo')
