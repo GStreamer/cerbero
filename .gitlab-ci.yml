@@ -89,7 +89,7 @@ default:
   variables:
     FDO_DISTRIBUTION_TAG: "$ANDROID_FEDORA_TAG-$GST_UPSTREAM_BRANCH"
     FDO_DISTRIBUTION_VERSION: '42'
-    FDO_DISTRIBUTION_PACKAGES: "file git-core java-21-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz python3-setuptools"
+    FDO_DISTRIBUTION_PACKAGES: "file git-core java-21-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz python3-setuptools pax-utils binutils"
     FDO_DISTRIBUTION_EXEC: ci/docker_android_setup.sh $ANDROID_HOME $ANDROID_NDK_HOME $GST_UPSTREAM_BRANCH
     FDO_UPSTREAM_REPO: gstreamer/cerbero
     FDO_REPO_SUFFIX: android
