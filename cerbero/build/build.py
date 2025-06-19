@@ -1369,6 +1369,10 @@ class Cargo(Build, ModifyEnvBase):
             s = '\n[profile.release]\nsplit-debuginfo = "packed"\n'
             self.append_config_toml(s)
 
+        if self.using_msvc() and self.library_type != LibraryType.SHARED:
+            # Trim codegen units to aid in prelinking
+            self.append_config_toml('codegen-units = 1\n')
+
         if self.config.target_platform == Platform.ANDROID:
             # Use the compiler's forwarding
             # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
