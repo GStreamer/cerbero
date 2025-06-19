@@ -5,6 +5,8 @@ from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
 from pathlib import Path
+
+import os
 import re
 import shutil
 import tempfile
@@ -265,13 +267,22 @@ class Recipe(recipe.Recipe):
                 f.write(f'set(ANDROID_ABI {arch})\n')
                 f.write(f'set(ANDROID_PLATFORM android-{DistroVersion.get_android_api_version(self.config.target_distro_version)})\n')
                 f.write(f"include({self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake)")
+
+        if self.config.target_platform == Platform.WINDOWS and self.library_type != LibraryType.SHARED:
+            if 'gst-plugin-webrtc' in self.cargo_packages:
+                # Buy some extra space for the MSI
+                self.append_config_toml('\n[profile.release.package."gst-plugin-webrtc"]\n'
+                                        'opt-level = "s"\n\n'
+                                        '[profile.release.package."gst-plugin-aws"]\n'
+                                        'opt-level = "s"\n')
+
         await super().configure()
 
     def post_install(self):
         # Cargo-C currently can't install pc files into custom dirs, so we need
         # to move these plugin pkgconfig files to the right place.
         for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
-            if not f.endswith('.pc') or not 'gstreamer-1.0' in f:
+            if not f.endswith('.pc') or 'gstreamer-1.0' not in f:
                 continue
             name = os.path.basename(f)
             src = os.path.join(self.config.libdir, 'pkgconfig', name)
@@ -289,6 +300,91 @@ class Recipe(recipe.Recipe):
                 src = dst.with_name(f'{dst.stem[3:]}.lib')
                 if src.exists():
                     shutil.copy(src, dst)
+
+            # Try single-object prelinking (but with no symbol visibility
+            # changing)
+            # objcopy (from GNU binutils) is needed but it causes
+            # https://github.com/llvm/llvm-project/issues/62182
+            libraries = [f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False)
+                         if f.endswith('.a')]
+            for f in libraries:
+                source = Path(self.config.prefix) / f
+
+                manifest = shell.check_output(
+                    [self.get_llvm_tool("llvm-nm.exe"), "-gjPUA", "--quiet", source.absolute()],
+                    env=self.env,
+                )
+
+                symbol_pattern = re.compile('gst_plugin_*')
+
+                with tempfile.TemporaryDirectory(prefix='cerbero', dir=self.config.home_dir) as tmp:
+                    # List those symbols that will be kept
+                    symbols_to_keep = set()
+
+                    for line in manifest.splitlines():
+                        data = line.split(sep=" ")
+                        symbol = data[1]
+
+                        if symbol_pattern.match(symbol):
+                            symbols_to_keep.add(symbol)
+
+                    ar = self.get_llvm_tool("llvm-ar.exe")
+                    m.log(f"Unpacking {source.absolute()} with ar", self.logfile)
+                    shell.new_call(
+                        [ar, 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
+
+                    # Now everything is flat in the pwd
+                    m.log("Performing Single-Object Prelinking", self.logfile)
+                    prelinked_obj = (
+                        Path(tmp) / source.name).with_suffix('.prelinked.o')
+
+                    # lld doesn't support this, their drivers are per-OS
+                    ld = shutil.which("ld.bfd.exe")
+
+                    if ld is None:
+                        raise FatalError('ld.bfd not found')
+
+                    rsp = (
+                        Path(tmp) / source.name).with_suffix('.rsp')
+
+                    with rsp.open('w', encoding='utf-8') as f:
+                        files = set(str(f.relative_to(tmp)) for f in Path(tmp).glob('*.o'))
+
+                        flags = ['--relocatable']
+                        flags.extend(f'--export-dynamic-symbol={i}' for i in symbols_to_keep)
+                        flags.extend(['-o', prelinked_obj.name])
+                        flags.extend(files)
+
+                        f.write(' '.join(flags))
+
+                    shell.new_call(
+                        [
+                            ld,
+                            f"@{rsp.name}"
+                        ],
+                        cmd_dir=tmp,
+                        logfile=self.logfile,
+                    )
+
+                    dest = Path(tmp) / source.name
+                    m.log(f"Repacking library to {dest.absolute()}", self.logfile)
+
+                    shell.new_call(
+                        [
+                            ar,
+                            'rs',
+                            dest.absolute(),
+                            prelinked_obj.absolute()
+                        ],
+                        cmd_dir=tmp,
+                        logfile=self.logfile
+                    )
+
+                    # And now we paper over
+                    backup_source = source.absolute().with_suffix('.original.a')
+                    backup_source.unlink(missing_ok=True)
+                    source.rename(backup_source)
+                    os.replace(dest.absolute(), source.absolute())
         else:
             for f in self.dist_files_list(only_existing=False):
                 if not f.endswith('.dll'):
