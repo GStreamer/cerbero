@@ -37,7 +37,7 @@ import asyncio
 from pathlib import Path, PureWindowsPath, PurePath
 from collections.abc import Iterable
 
-from cerbero.enums import Platform, Architecture, Distro, DistroVersion
+from cerbero.enums import Platform, Subsystem, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError, CommandError
 from cerbero.utils import messages as m
 
@@ -206,6 +206,7 @@ def system_info():
     Return a tuple with the platform type, the architecture and the
     distribution
     """
+    subsystem = None
     # Get the platform info
     platform = os.environ.get('OS', '').lower()
     if not platform:
@@ -214,6 +215,7 @@ def system_info():
         platform = Platform.WINDOWS
     elif platform.startswith('darwin'):
         platform = Platform.DARWIN
+        subsystem = Subsystem.MACOS
     elif platform.startswith('linux'):
         platform = Platform.LINUX
     else:
@@ -435,7 +437,7 @@ Terminating.""",
 
     num_of_cpus = determine_num_of_cpus()
 
-    return platform, arch, distro, distro_version, num_of_cpus
+    return platform, subsystem, arch, distro, distro_version, num_of_cpus
 
 
 def validate_packager(packager):

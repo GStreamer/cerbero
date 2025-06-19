@@ -50,6 +50,10 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
         Platform.DARWIN: '/Library/Frameworks/GStreamer.framework/',
         Platform.IOS: '/Library/Developer/GStreamer/iPhone.sdk'}
 
+    install_dir_simulator = {
+        Platform.IOS: '/Library/Developer/GStreamer/iPhoneSimulator.sdk',
+    }
+
     root_env_var = 'GSTREAMER_1_0_ROOT_%(arch)s'
     wix_upgrade_code = {
         PackageType.DEVEL: {

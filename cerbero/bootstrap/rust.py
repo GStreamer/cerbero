@@ -94,15 +94,15 @@ class RustBootstrapper(BootstrapperBase):
             # the current variant determines the default target.
             # So we need to always bootstrap $arch-windows-msvc,
             # and override the build triple accordingly
-            self.build_triple = self.config.rust_triple(self.config.arch, self.config.platform, True)
+            self.build_triple = self.config.rust_triple(self.config.arch, self.config.platform, None, True)
             tgt.add(self.build_triple)
             # rustup-init wants to always install both 64-bit and 32-bit
             # toolchains, so ensure that we fetch and install both
             archs = {Architecture.X86_64, Architecture.X86}
             other_arch = (archs - {self.config.arch}).pop()
             # in both MSVC and MinGW ABIs
-            tgt.add(self.config.rust_triple(other_arch, self.config.platform, True))
-            tgt.add(self.config.rust_triple(other_arch, self.config.platform, False))
+            tgt.add(self.config.rust_triple(other_arch, self.config.platform, None, True))
+            tgt.add(self.config.rust_triple(other_arch, self.config.platform, None, False))
             self.target_triples.update(tgt)
         self.fetch_urls = self.get_fetch_urls()
         self.fetch_urls_func = self.get_more_fetch_urls

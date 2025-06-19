@@ -25,7 +25,7 @@ from pathlib import PurePath, Path
 
 # FIXME: these unused imports are here for backwards compatibility with modules
 # that import them cerbero.config instead of cerbero.enums
-from cerbero.enums import Architecture, Platform, Distro, DistroVersion, License, LibraryType  # noqa: F401
+from cerbero.enums import Architecture, Subsystem, Platform, Distro, DistroVersion, License, LibraryType  # noqa: F401
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5, detect_qt6
@@ -56,8 +56,9 @@ RUST_TRIPLE_MAPPING = {
     (Platform.LINUX, Architecture.X86_64): 'x86_64-unknown-linux-gnu',
     (Platform.DARWIN, Architecture.ARM64): 'aarch64-apple-darwin',
     (Platform.DARWIN, Architecture.X86_64): 'x86_64-apple-darwin',
-    (Platform.IOS, Architecture.ARM64): 'aarch64-apple-ios',
-    (Platform.IOS, Architecture.X86_64): 'x86_64-apple-ios',
+    (Platform.IOS, Architecture.ARM64, Subsystem.IOS): 'aarch64-apple-ios',
+    (Platform.IOS, Architecture.ARM64, Subsystem.IOS_SIMULATOR): 'aarch64-apple-ios-sim',
+    (Platform.IOS, Architecture.X86_64, Subsystem.IOS_SIMULATOR): 'x86_64-apple-ios',
     (Platform.WINDOWS, Architecture.X86_64, 'gnu'): 'x86_64-pc-windows-gnu',
     (Platform.WINDOWS, Architecture.X86_64, 'msvc'): 'x86_64-pc-windows-msvc',
     (Platform.WINDOWS, Architecture.ARM64, 'msvc'): 'aarch64-pc-windows-msvc',
@@ -232,6 +233,7 @@ class Config(object):
     _properties = [
         'platform',
         'target_platform',
+        'target_subsystem',
         'arch',
         'target_arch',
         'prefix',
@@ -448,7 +450,7 @@ class Config(object):
                 config.sources = Path(self.sources, config.target_arch).as_posix()
                 config.prefix = Path(self.prefix, config.target_arch).as_posix()
                 # A universal prefix is only available if arch-prefixes are merged during build
-                if self.cross_universal_type() == 'merged':
+                if 'merged' in self.cross_universal_type():
                     config.universal_prefix = self.prefix
             # qmake_path is different for each arch in android-universal, but
             # not in ios-universal.
@@ -679,7 +681,7 @@ class Config(object):
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
-        platform, arch, distro, distro_version, num_of_cpus = system_info()
+        platform, subsystem, arch, distro, distro_version, num_of_cpus = system_info()
         target_distro = distro
         # In Windows we do not differenciate between MSYS and MSYS2 for the target_distro
         if platform == Platform.WINDOWS:
@@ -688,6 +690,7 @@ class Config(object):
         self.set_property('num_of_cpus', num_of_cpus)
         self.set_property('cargo_build_jobs', None)
         self.set_property('target_platform', platform)
+        self.set_property('target_subsystem', subsystem)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
@@ -780,11 +783,31 @@ class Config(object):
         )
 
     def cross_universal_type(self):
-        if not self.cross_compiling() or self.target_arch != Architecture.UNIVERSAL:
+        if not self.cross_compiling():
             return None
-        # cross-{macos,ios}-universal, each arch prefix is merged and flattened into one prefix
-        if self.target_platform in (Platform.IOS, Platform.DARWIN):
-            return 'merged'
+        if self.target_arch != Architecture.UNIVERSAL and not self.universal_archs:
+            return None
+        # cross-macos-universal, cross-ios-universal, cross-ios-sim-universal:
+        # each arch prefix is merged and flattened into one prefix
+        if Platform.is_apple(self.target_platform):
+
+            def subsystem_kind(cf):
+                # XXX: Ideally we should look at target_subsystem defined in
+                # the file, but that is only known to the parent universal
+                # config, not the sub-arch inside. So we use the filename.
+                return 'simulator' if '-sim-' in cf else 'device'
+
+            # Detect whether the universal prefix is heterogenous. At the time
+            # of writing, only cross-ios-universal met this description: it
+            # ships iOS ARM64 and iOS Simulator x86_64.
+            subsystem = None
+            for arch, config_file in self.universal_archs.items():
+                if subsystem is None:
+                    subsystem = subsystem_kind(config_file)
+                    continue
+                if subsystem != subsystem_kind(config_file):
+                    return 'merged-hetero'
+            return 'merged-homo'
         return 'split'
 
     def is_automatically_symbolicable(self):
@@ -807,7 +830,7 @@ class Config(object):
                 return True
             if self.target_platform == Platform.DARWIN and self.target_arch == Architecture.X86_64:
                 return True
-            if self.target_arch == Architecture.UNIVERSAL and self.cross_universal_type() == 'merged':
+            if self.target_arch == Architecture.UNIVERSAL and 'merged' in self.cross_universal_type():
                 return True
             return False
         return True
@@ -1005,17 +1028,25 @@ class Config(object):
         mingw = 'MinGW' if readable else 'mingw'
         msvc = 'MSVC' if readable else 'msvc'
         debug = ' Debug' if readable else '-debug'
-        if self.target_platform != Platform.WINDOWS or self._is_build_tools_config:
-            return (self.target_platform, self.target_arch)
-        if not self.variants.visualstudio:
-            return (mingw, self.target_arch)
-        target_platform = msvc
-        # Debug CRT needs a separate prefix
-        if self.variants.vscrt == 'mdd':
-            target_platform += debug
-        # Check for invalid configuration of a custom Visual Studio path
-        if self.vs_install_path and not self.vs_install_version:
-            raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
+
+        target_platform = self.target_platform
+        # When targeting Apple mobile platform with a subsystem
+        if Platform.is_apple_mobile(self.target_platform):
+            target_platform = self.target_subsystem
+        # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
+        elif self.target_platform == Platform.WINDOWS:
+            if self.variants.visualstudio:
+                # Check for invalid configuration of a custom Visual Studio path
+                if self.vs_install_path and not self.vs_install_version:
+                    raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
+                target_platform = msvc
+
+                # Debug CRT needs a separate prefix
+                if self.variants.vscrt == 'mdd':
+                    target_platform += debug
+            else:
+                target_platform = mingw
+
         return (target_platform, self.target_arch)
 
     def _load_last_defaults(self):
@@ -1132,31 +1163,36 @@ class Config(object):
         return '.'.join([mayor, minor, revision])
 
     @staticmethod
-    def rust_triple(arch, platform, vs):
-        if platform != Platform.WINDOWS:
-            key = (platform, arch)
-        elif vs:
-            key = (Platform.WINDOWS, arch, 'msvc')
+    def rust_triple(arch, platform, subsystem, vs):
+        if platform == Platform.WINDOWS:
+            if vs:
+                key = (Platform.WINDOWS, arch, 'msvc')
+            else:
+                key = (Platform.WINDOWS, arch, 'gnu')
+        elif Platform.is_apple_mobile(platform):
+            key = (platform, arch, subsystem)
         else:
-            key = (Platform.WINDOWS, arch, 'gnu')
+            key = (platform, arch)
         if key in RUST_TRIPLE_MAPPING:
             return RUST_TRIPLE_MAPPING[key]
         else:
-            raise FatalError(f'Unsupported build platform/arch combination: {platform}/{arch}')
+            raise FatalError(
+                f'Unsupported build platform/arch combination: {platform}/{arch}, subsystem: {subsystem}, vs: {vs}'
+            )
 
     @property
     def rust_build_triple(self):
-        return self.rust_triple(self.arch, self.platform, self.variants.visualstudio)
+        return self.rust_triple(self.arch, self.platform, None, self.variants.visualstudio)
 
     @property
     def rust_target_triples(self):
         if self.target_arch != Architecture.UNIVERSAL:
-            targets = (self.target_arch,)
+            targets = {self.target_arch: self}
         else:
-            targets = self.arch_config.keys()
+            targets = self.arch_config
         triples = []
-        for target_arch in targets:
-            triple = self.rust_triple(target_arch, self.target_platform, self.variants.visualstudio)
+        for target_arch, c in targets.items():
+            triple = self.rust_triple(target_arch, c.target_platform, c.target_subsystem, c.variants.visualstudio)
             triples.append(triple)
         return triples
 

@@ -20,7 +20,7 @@ import os
 import re
 
 from cerbero.build.filesprovider import FilesProvider
-from cerbero.enums import License, Platform
+from cerbero.enums import License, Platform, Subsystem
 from cerbero.packages import PackageType
 from cerbero.utils import remove_list_duplicates, messages as m
 
@@ -188,7 +188,10 @@ class PackageBase(object):
 
     def get_install_dir(self):
         try:
-            return self.install_dir[self.config.target_platform]
+            if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+                return self.install_dir_simulator
+            else:
+                return self.install_dir[self.config.target_platform]
         except Exception:
             return self.config.install_dir
 
@@ -515,6 +518,7 @@ class SDKPackage(MetaPackage):
     # packages/gstreamer-1.0/gstreamer-1.0.package
     root_env_var = 'CERBERO_SDK_ROOT_%(arch)s'
     osx_framework_library = None
+    install_dir_simulator = None
 
     def __init__(self, config, store):
         MetaPackage.__init__(self, config, store)

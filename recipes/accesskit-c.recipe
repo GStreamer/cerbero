@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
         # same as for the librsvg.recipe
         try:
             self.target_triple = self.config.rust_triple(self.config.target_arch,
-                self.config.target_platform, self.using_msvc())
+                self.config.target_platform, self.config.target_subsystem, self.using_msvc())
         except FatalError as e:
             raise InvalidRecipeError(self, e.msg)
         self.meson_options['triplet'] = self.target_triple

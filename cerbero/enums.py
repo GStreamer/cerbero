@@ -52,7 +52,7 @@ class Platform:
         return platform in (Platform.ANDROID, Platform.IOS)
 
     def is_apple_mobile(platform):
-        return Platform.is_apple(platform) and Platform.is_mobile(platform)
+        return platform == Platform.IOS
 
 
 class Architecture:
@@ -232,6 +232,15 @@ class DistroVersion:
         if not version.startswith('ios_'):
             raise FatalError('Not an iOS version: ' + version)
         return [int(s) for s in version[4:].split('_')]
+
+
+class Subsystem:
+    """Enumeration of supported subsystem names, matching Meson:
+    https://mesonbuild.com/Reference-tables.html#subsystem-names-since-120"""
+
+    MACOS = 'macos'
+    IOS = 'ios'
+    IOS_SIMULATOR = 'ios-simulator'
 
 
 class LicenseDescription:

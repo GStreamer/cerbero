@@ -516,8 +516,14 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     home_folder = True
     user_resources = []
 
-    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+    def __init__(self, config, package, store):
+        ProductPackage.__init__(self, config, package, store)
+        self.readable_platform = self.config._get_toolchain_target_platform_arch(readable=True)[0]
+        self.platform_arch = self.config._get_toolchain_target_platform_arch()[0]
+
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False, install_dir=None):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
+        self.install_dir = self.package.get_install_dir()
 
         framework_name = self.package.osx_framework_library[0]
         self._prepare_pack()
@@ -589,9 +595,9 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         m.action(_('Creating framework package'))
         packager = FrameworkBundlePackager(
             self.package,
-            'ios-framework',
+            '%s-framework' % (self.platform_arch),
             'GStreamer',
-            'GStreamer iOS Framework Bundle Version %s' % (self.package.version),
+            'GStreamer %s Framework Bundle Version %s' % (self.readable_platform, self.package.version),
             '3ffe67c2-3421-411f-8287-e8faa892f853',
         )
         return packager
@@ -618,7 +624,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         return '%s-%s-%s-%s%s' % (
             self.package.name,
             self.package.version,
-            self.config.target_platform,
+            self.platform_arch,
             self.config.target_arch,
             suffix,
         )
@@ -643,7 +649,7 @@ class Packager(object):
     ARTIFACT_TYPE = 'pkg'
 
     def __new__(klass, config, package, store):
-        if config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(config.target_platform):
             if not isinstance(package, MetaPackage):
                 raise FatalError('iOS platform only support packages', 'for MetaPackage')
             return IOSPackage(config, package, store)

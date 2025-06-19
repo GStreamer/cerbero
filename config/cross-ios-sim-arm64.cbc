@@ -1,6 +1,6 @@
 from cerbero.config import Platform, Subsystem, Architecture, Distro, DistroVersion
 
 target_platform = Platform.IOS
-target_subsystem = Subsystem.IOS
+target_subsystem = Subsystem.IOS_SIMULATOR
 target_arch = Architecture.ARM64
 target_distro = Distro.IOS

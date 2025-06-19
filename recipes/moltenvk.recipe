@@ -38,6 +38,13 @@ class Recipe(recipe.Recipe):
         'include/vk_video',
     ]
 
+    def _passthrough_libs(self):
+        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix:
+            return True
+        if Platform.is_apple_mobile(self.config.target_platform):
+            return self.config.cross_universal_type() == 'merged-homo'
+        return False
+
     def prepare(self):
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             raise InvalidRecipeError(self, f'Invalid platform {self.config.target_platform}')
@@ -67,13 +74,17 @@ class Recipe(recipe.Recipe):
         # * iOS Simulator (arm64+x86_64)
         # * tvOS (arm64+arm64e)
         # * tvOS Simulator (arm64+x86_64)
-        # However, our packaging is currently lacking (TODO), and we ship "fat"
-        # archives with arm64 (ios) and x86_64 (ios-simulator) merged. So we need to
+        #
+        # With the availability of iOS Simulator Universal builds, we can
+        # directly ship the artifacts provided by MoltenVK in those cases.
+        #
+        # In the cross-ios-universal case, we still need to ship "fat" archives
+        # with arm64 (ios) and x86_64 (ios-simulator) merged. So we need to
         # extract the x86_64 archive and place it in the arch-specific prefix,
-        # and let cerbero merge it with the ios-arm64 one (and then sign it).
+        # and let cerbero merge it with the ios-arm64 one (and then sign it)
         #
         # For non-universal builds on iOS, no extra steps are necessary.
-        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
+        if self._passthrough_libs():
             self.skip_steps += [BuildSteps.MERGE]
         # It doesn't ship symbols
         self.skip_steps += [BuildSteps.DSYMUTIL]
@@ -83,19 +94,26 @@ class Recipe(recipe.Recipe):
 
         incs = ['vulkan', 'MoltenVK', 'vk_video']
         lib = f'lib{self.config.lib_suffix}'
-        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
+        if self._passthrough_libs():
             uprefix = Path(self.config.universal_prefix)
             # Add dangling symlinks into the arch-specific prefix so that
             # recipes can find and link to these
             dst = Path(self.config.prefix, 'bin', 'glslc')
+            dst.parent.mkdir(parents=True, exist_ok=True)
             relsrc = os.path.relpath(uprefix / 'bin', dst.parent)
             dst.unlink(missing_ok=True)
             os.symlink(f'{relsrc}/glslc', dst)
 
-            dst = Path(self.config.libdir, 'libMoltenVK.dylib')
+            if self.config.target_platform == Platform.DARWIN:
+                libMoltenVK = 'libMoltenVK.dylib'
+            else:
+                libMoltenVK = 'libMoltenVK.a'
+            dst = Path(self.config.libdir, libMoltenVK)
+            dst.parent.mkdir(parents=True, exist_ok=True)
             relsrc = os.path.relpath(uprefix / lib, dst.parent)
             dst.unlink(missing_ok=True)
-            os.symlink(f'{relsrc}/libMoltenVK.dylib', dst)
+            os.symlink(f'{relsrc}/{libMoltenVK}', dst)
+
             for d in incs:
                 dst = Path(self.config.prefix, 'include', d)
                 relsrc = os.path.relpath(uprefix / 'include', dst.parent)
@@ -104,9 +122,11 @@ class Recipe(recipe.Recipe):
                     shutil.rmtree(dst)
                 else:
                     dst.unlink(missing_ok=True)
+                dst.parent.mkdir(parents=True, exist_ok=True)
                 os.symlink(f'{relsrc}/{d}', dst)
             if self.config.target_arch != Architecture.ARM64:
-                return;
+                # Install into the post-merge (universal) prefix exactly once
+                return
             # Now, we install everything into the post-merge (universal) prefix
             prefix = Path(self.config.universal_prefix)
         else:
@@ -130,10 +150,10 @@ class Recipe(recipe.Recipe):
                 to_copy += [(src_libdir / f, libdir)]
         elif self.config.target_platform == Platform.IOS:
             arch = self.config.target_arch
-            if arch == Architecture.ARM64:
-                d = 'ios-arm64'
-            elif arch == Architecture.X86_64:
+            if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
                 d = 'ios-arm64_x86_64-simulator'
+            elif arch == Architecture.ARM64:
+                d = 'ios-arm64'
             else:
                 raise BuildStepError(f'Unsupported target arch {arch}')
             to_copy += [(src_libdir / 'MoltenVK.xcframework' / d / 'libMoltenVK.a', libdir)]
@@ -156,7 +176,8 @@ class Recipe(recipe.Recipe):
             files += [libdir / x for x in ('libMoltenVK.dylib', 'libMoltenVK.a')]
             # Thinning the binaries causes them to become unloadable, so just skip it
             #files += [bindir / x for x in bins if x != 'glslangValidator']
-        elif self.config.target_platform == Platform.IOS and self.config.target_arch == Architecture.X86_64:
+        elif not self._passthrough_libs() and self.config.target_platform == Platform.IOS \
+             and self.config.target_arch == Architecture.X86_64:
             # Simulator lib is fat (universal), needs thinning
             files += [libdir / 'libMoltenVK.a']
 

@@ -55,7 +55,6 @@ class Recipe(recipe.Recipe):
         'inter',
         'isobmff',
         'json',
-        'vvdec',
         'livesync',
         'lewton',
         'mpegtslive',
@@ -124,16 +123,6 @@ class Recipe(recipe.Recipe):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.BOTH
-
-        if 'dav1d' in self.cargo_packages:
-            self.deps.append('dav1d')
-
-        if 'onvif' in self.cargo_packages or 'closedcaption' in self.cargo_packages:
-            self.deps.append('pango')
-            self.deps.append('cairo')
-
-        if 'vvdec' in self.cargo_packages:
-            self.deps.append('vvdec')
 
         plugin_files = {
             'analytics': [
@@ -208,9 +197,26 @@ class Recipe(recipe.Recipe):
 
         for category, names in plugin_files.items():
             for name in names:
+                if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+                    if name == 'vvdec':
+                        # FIXME: bindgen needs to be upgraded in vvdec-sys
+                        # See:
+                        # - https://github.com/cadubentzen/vvdec-rs/blob/main/vvdec-sys/Cargo.toml#L13
+                        # - https://github.com/aws/aws-lc-rs/issues/761
+                        continue
                 package_name = name if name[0:2] != 'rs' else name[2:]
                 if package_name in self.cargo_packages:
                     self.enable_plugin(name, category)
+
+        if 'dav1d' in self.cargo_packages:
+            self.deps.append('dav1d')
+
+        if 'onvif' in self.cargo_packages or 'closedcaption' in self.cargo_packages:
+            self.deps.append('pango')
+            self.deps.append('cairo')
+
+        if 'vvdec' in self.cargo_packages:
+            self.deps.append('vvdec')
 
         self.cargo_packages = [f'gst-plugin-{pkg}' for pkg in self.cargo_packages]
         # Build with Cerbero's latest glib version as minimum version
@@ -272,6 +278,9 @@ class Recipe(recipe.Recipe):
             self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
             self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
             self.set_env('CMAKE_GENERATOR', 'Ninja')
+        elif self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+            self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
+            self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
 
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version

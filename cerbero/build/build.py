@@ -1005,7 +1005,7 @@ class Meson(Build, ModifyEnvBase):
         # Point meson to rustc with correct arguments to ensure it's detected when cross-compiling
         if self.config.cargo_home and self.config.variants.rust:
             target_triple = self.config.rust_triple(
-                self.config.target_arch, self.config.target_platform, self.using_msvc()
+                self.config.target_arch, self.config.target_platform, self.config.target_subsystem, self.using_msvc()
             )
             binaries['rust'] = [self.config.cargo_home + '/bin/rustc', '--target', target_triple]
 
@@ -1313,9 +1313,10 @@ class Cargo(Build, ModifyEnvBase):
             self.rustc_debuginfo = 'split'
         else:
             self.rustc_debuginfo = 'strip'
+
         try:
             self.target_triple = self.config.rust_triple(
-                self.config.target_arch, self.config.target_platform, self.using_msvc()
+                self.config.target_arch, self.config.target_platform, self.config.target_subsystem, self.using_msvc()
             )
         except FatalError as e:
             raise InvalidRecipeError(self.name, e.msg)
@@ -1456,7 +1457,7 @@ class CargoC(Cargo):
         # cargo-c ignores config.toml's rustflags, which are necessary for i386
         # cross-build
         self.target_triple = self.config.rust_triple(
-            self.config.target_arch, self.config.target_platform, self.using_msvc()
+            self.config.target_arch, self.config.target_platform, self.config.target_subsystem, self.using_msvc()
         )
         if self.target_triple == 'i686-pc-windows-gnu':
             tgt = self.target_triple.upper().replace('-', '_')

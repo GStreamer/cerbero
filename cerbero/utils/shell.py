@@ -41,10 +41,10 @@ from cerbero.errors import CommandError, FatalError
 PATCH = 'patch'
 SUBPROCESS_EXCEPTIONS = (FileNotFoundError, PermissionError, subprocess.CalledProcessError)
 
-info = system_info()
-PLATFORM = info[0]
-DISTRO = info[2]
-CPU_BOUND_SEMAPHORE = CerberoSemaphore(info[4])
+_info = system_info()
+PLATFORM = _info[0]
+DISTRO = _info[3]
+CPU_BOUND_SEMAPHORE = CerberoSemaphore(_info[5])
 NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(2)
 DRY_RUN = False
 

@@ -22,7 +22,16 @@ import pickle
 import time
 import traceback
 
-from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro, DistroVersion, License, LibraryType
+from cerbero.config import (
+    USER_CONFIG_DIR,
+    Platform,
+    Subsystem,
+    Architecture,
+    Distro,
+    DistroVersion,
+    License,
+    LibraryType,
+)
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
@@ -463,6 +472,7 @@ class CookBook(object):
         recipes = []
         d = {
             'Platform': Platform,
+            'Subsystem': Subsystem,
             'Architecture': Architecture,
             'BuildType': BuildType,
             'SourceType': SourceType,
