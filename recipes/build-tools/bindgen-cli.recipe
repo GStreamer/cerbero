@@ -8,12 +8,16 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'bindgen-cli'
-    version = '0.71.1'
+    version = '0.72.0'
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
-    url = 'https://github.com/rust-lang/rust-bindgen/releases/download/v%(version)s/source.tar.gz'
-    tarball_checksum = '3730f24bd448bfbaac5bee6e314ce904cd7877ac8007c79821ce5fa721599262'
-    tarball_dirname = '%(name)s-%(version)s'
+    # url = 'https://github.com/rust-lang/rust-bindgen/releases/download/v%(version)s/source.tar.gz'
+    tarball_checksum = '1da7050a17fdab0e20d5d8c20d48cddce2973e8b7cb0afc15185bfad22f8ce5b'
+    # tarball_dirname = '%(name)s-%(version)s'
+
+    # This release was done as-is, no official source tarball
+    url = 'https://github.com/rust-lang/rust-bindgen/archive/refs/tags/v%(version)s.tar.gz'
+    tarball_dirname = 'rust-bindgen-%(version)s'
 
     # The bindgen repo is a workspace for both bindgen (the crate)
     # and bindgen-cli (the CLI), we need only the CLI
