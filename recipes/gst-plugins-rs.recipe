@@ -224,7 +224,13 @@ class Recipe(recipe.Recipe):
                 # MSVC is already set up
                 self.set_env('CMAKE_GENERATOR', 'Ninja')
             else:
-                self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}')
+                bindgen_args = [f'--sysroot={self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}']
+                if 'gst-plugin-vvdec' in self.cargo_packages:
+                    # Use a header provided by gcc's stdlib to determine
+                    # stdbool.h's location
+                    include_folders = [f'-I{f.parent.as_posix()}' for f in Path(self.config.toolchain_prefix).glob('**/sha512intrin.h')]
+                    bindgen_args.extend(include_folders)
+                self.set_env('BINDGEN_EXTRA_CLANG_ARGS', ' '.join(bindgen_args))
         elif self.config.target_platform == Platform.ANDROID:
             # For aws-lc-rs
             self.set_env('ANDROID_NDK_ROOT', self.config.env['ANDROID_NDK_HOME'])
