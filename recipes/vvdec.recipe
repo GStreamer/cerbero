@@ -29,6 +29,10 @@ class Recipe(recipe.Recipe):
         else:
             self.library_type = LibraryType.SHARED
 
+        if self.config.target_platform in (Platform.IOS, Platform.DARWIN):
+            # Bitcode breaks xcodebuild archiving
+            self.configure_options.append('-DVVDEC_ENABLE_LINK_TIME_OPT=OFF')
+
         if self.config.target_platform == Platform.ANDROID:
             # VVdeC uses exceptions internally
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
