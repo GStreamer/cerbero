@@ -7,7 +7,6 @@ from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import tempfile
 
 
