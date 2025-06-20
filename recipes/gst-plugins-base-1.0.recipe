@@ -43,6 +43,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstgio%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstoverlaycomposition%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstpango%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstpbtypes%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrawparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgsttypefindfunctions%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstvideoconvertscale%(mext)s',
@@ -63,6 +64,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstgio.a', '%(libdir)s/gstreamer-1.0/libgstgio.la',
              '%(libdir)s/gstreamer-1.0/libgstoverlaycomposition.a', '%(libdir)s/gstreamer-1.0/libgstoverlaycomposition.la',
              '%(libdir)s/gstreamer-1.0/libgstpango.a', '%(libdir)s/gstreamer-1.0/libgstpango.la',
+             '%(libdir)s/gstreamer-1.0/libgstpbtypes.a', '%(libdir)s/gstreamer-1.0/libgstpbtypes.la',
              '%(libdir)s/gstreamer-1.0/libgstrawparse.a', '%(libdir)s/gstreamer-1.0/libgstrawparse.la',
              '%(libdir)s/gstreamer-1.0/libgsttypefindfunctions.a', '%(libdir)s/gstreamer-1.0/libgsttypefindfunctions.la',
              '%(libdir)s/gstreamer-1.0/libgstvideoconvertscale.a', '%(libdir)s/gstreamer-1.0/libgstvideoconvertscale.la',
@@ -171,7 +173,6 @@ class Recipe(custom.GStreamer):
         ]
 
     def prepare(self):
-        self.enable_plugin('pbtypes', 'sys')
         self.enable_plugin('cdparanoia', 'sys', 'cdparanoia', dep='cdparanoia')
         self.enable_plugin('ximagesink', 'sys', 'x11', option='x11')
         self.enable_plugin('xvimagesink', 'sys', 'x11', option='xvideo')
