@@ -501,7 +501,7 @@ class SDKPackage(MetaPackage):
     depending on the SDK could use them to set their environment easily and
     check wether the requirements are met in the pre-installation step.
 
-    On OS X, the installer will create the tipical bundle structure used for
+    On OS X, the installer will create the typical bundle structure used for
     OS X Frameworks, creating the 'Versions' and 'Current' directories for
     versionning as well as 'Headers' and 'Libraries' linking to the current
     version of the framework.
