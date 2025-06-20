@@ -271,7 +271,8 @@ class ProductPackage(PackagerBase):
 
             env['PKG_CONFIG_PATH'] = f"{env['PKG_CONFIG_PATH']}:{sysconfig.get_config_var('LIBPC')}"
         self.include_dirs = PkgConfig.list_all_include_dirs(env=env)
-        self.tmp = tempfile.mkdtemp()
+        # Make it recognizable for capturing purposes
+        self.tmp = tempfile.mkdtemp(prefix=self._package_name('-'), dir=self.output_dir)
         self.fw_path = self.tmp
 
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: [], PackageType.DEBUG: []}
@@ -527,6 +528,10 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
 
         framework_name = self.package.osx_framework_library[0]
         self._prepare_pack()
+        # Calm Git if you're running this interactively
+        with open(os.path.join(self.tmp, '.gitignore'), 'w', encoding='utf-8') as f:
+            f.write('*\n')
+
         self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
         os.mkdir(self.fw_path)
 
@@ -556,7 +561,9 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         else:
             pkg_path = self._create_dmg(self.fw_path, os.path.join(output_dir, self._package_name('.dmg')))
 
-        if not keep_temp:
+        if keep_temp:
+            m.action(f'Temporary build directory is at {self.tmp}')
+        else:
             shutil.rmtree(self.tmp)
         return [pkg_path]
 
