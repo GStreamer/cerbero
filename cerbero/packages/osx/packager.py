@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+from pathlib import Path
 import tempfile
 import shutil
 
@@ -31,6 +32,7 @@ from cerbero.packages.osx.bundles import FrameworkBundlePackager, ApplicationBun
 from cerbero.packages.osx.buildtools import PackageBuild, ProductBuild
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
+from cerbero.utils.tar import Tar
 
 
 class FrameworkHeadersMixin(object):
@@ -517,10 +519,11 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     home_folder = True
     user_resources = []
 
-    def __init__(self, config, package, store):
+    def __init__(self, config, package, store, xcframework=False):
         ProductPackage.__init__(self, config, package, store)
         self.readable_platform = self.config._get_toolchain_target_platform_arch(readable=True)[0]
         self.platform_arch = self.config._get_toolchain_target_platform_arch()[0]
+        self.xcframework = xcframework
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False, install_dir=None):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -544,28 +547,44 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self._copy_templates(files)
         self._copy_headers(files, version_dir)
         self._create_framework_headers(self.config.prefix, self.include_dirs, version_dir)
+
+        # This step zaps the POSIX compliant folders
         if os.path.exists(os.path.join(version_dir, 'include')):
             shutil.rmtree(os.path.join(version_dir, 'include'))
         if os.path.exists(os.path.join(version_dir, 'lib')):
             shutil.rmtree(os.path.join(version_dir, 'lib'))
         self._create_merged_lib(libname, files)
         self.package.packages = []
-        self.fw_path = self.tmp
-        self._create_framework_bundle_package(packager)
-        self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
-
-        if isinstance(self.package, SDKPackage):
-            pkg_path = self._create_product(PackageType.DEVEL)
-            if self.package.user_resources:
-                pkg_path = self._create_dmg(pkg_path, pkg_path.replace('.pkg', '.dmg'))
+        if not self.xcframework:
+            self.fw_path = self.tmp
+            self._create_framework_bundle_package(packager)
+            self.fw_path = os.path.join(self.tmp, f'{framework_name}.framework')
+            if isinstance(self.package, SDKPackage):
+                pkg_path = self._create_product(PackageType.DEVEL)
+                if self.package.user_resources:
+                    pkg_path = self._create_dmg(pkg_path, pkg_path.replace('.pkg', '.dmg'))
+            else:
+                pkg_path = self._create_dmg(self.fw_path, os.path.join(output_dir, self._package_name('.dmg')))
         else:
-            pkg_path = self._create_dmg(self.fw_path, os.path.join(output_dir, self._package_name('.dmg')))
+            os.mkdir(os.path.join(version_dir, 'lib'))
+            m.action('Setting up symlink for xcframework entrypoint')
+            # Library name must match Framework name
+            src = Path(libname).parent / 'Libraries' / 'libGStreamer.a'
+            src.symlink_to(os.path.join('..', 'GStreamer'))
+            self.fw_path = f'{framework_name}.framework'
+            tar_path = os.path.join(self.output_dir, self._package_name('.xcframework.tar.xz'))
+            m.action('Creating tarball for xcframework ingestion')
+            Tar(tar_path).configure(self.config, self.tmp).pack([self.fw_path], force=True)
 
         if keep_temp:
             m.action(f'Temporary build directory is at {self.tmp}')
         else:
             shutil.rmtree(self.tmp)
-        return [pkg_path]
+
+        if self.xcframework:
+            return [tar_path]
+        else:
+            return [pkg_path]
 
     def _copy_files(self, files, root):
         for f in files:
@@ -668,9 +687,21 @@ class Packager(object):
             return ApplicationPackage(config, package, store)
 
 
+class XCPackager(object):
+    ARTIFACT_TYPE = 'xcframework'
+
+    def __new__(klass, config, package, store):
+        if not Platform.is_apple_mobile(config.target_platform):
+            raise FatalError('xcframework is only supported for Apple mobile platforms')
+        if not isinstance(package, MetaPackage):
+            raise FatalError('iOS platform only support packages for MetaPackage')
+        return IOSPackage(config, package, store, xcframework=True)
+
+
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
 
     register_packager(Distro.OS_X, Packager)
     register_packager(Distro.IOS, Packager)
+    register_packager(Distro.IOS, XCPackager)

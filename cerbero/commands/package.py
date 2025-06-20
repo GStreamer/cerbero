@@ -122,7 +122,7 @@ class Package(Command):
                 ArgparseArgument(
                     '--artifact',
                     type=str,
-                    choices=['tarball', 'msi', 'pkg', 'wheel', 'inno'],
+                    choices=['tarball', 'msi', 'pkg', 'wheel', 'inno', 'xcframework'],
                     default=None,
                     help=_(
                         'Select installation method (default is tarball for Linux and Android, msi for Windows, pkg for macOS and iOS)'

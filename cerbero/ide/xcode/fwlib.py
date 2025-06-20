@@ -60,6 +60,7 @@ class FrameworkLibrary(object):
         else:
             libraries = self.libraries
 
+        m.action(f'Creating framework library at {self.libname}')
         self._create_framework_library(libraries)
 
     def _libraries_paths(self, libraries):
