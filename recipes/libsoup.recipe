@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'gnome://'
     tarball_checksum = '62959f791e8e8442f8c13cedac8c4919d78f9120d5bb5301be67a5e53318b4a3'
     meson_options = {'vapi': 'disabled', 'tls_check': 'false', 'tests' : 'false'}
-    deps = ['libxml2', 'glib', 'glib-networking', 'libpsl', 'nghttp2']
+    deps = ['glib', 'glib-networking', 'libpsl', 'nghttp2']
 
     # sqlite ships with the system on macOS and iOS. Android also ships with
     # sqlite3, but it's not available from the NDK; only from Java.
@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         soup_deps = ['gio-2.0', 'gmodule-2.0', 'gobject-2.0', 'glib-2.0',
-                     'ffi', 'xml2', 'psl', 'z', 'nghttp2']
+                     'ffi', 'psl', 'z', 'nghttp2']
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             soup_deps += ['sqlite3']
         # Meson does not generate la files
