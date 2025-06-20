@@ -209,7 +209,8 @@ class PackageBase(object):
         return []
 
     def identifier(self):
-        return '%s.%s.%s' % (self.org, self.config.target_arch, self.name)
+        platform_arch = self.config._get_toolchain_target_platform_arch()[0]
+        return '%s.%s.%s' % (self.org, platform_arch, self.name)
 
     def __str__(self):
         return self.name
