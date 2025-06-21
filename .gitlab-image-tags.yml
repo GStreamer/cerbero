@@ -5,13 +5,13 @@ variables:
   # If you are hacking on them or need a them to rebuild, its enough
   # to change any part of the string of the image you want.
   ###
-  FEDORA_TAG:  '2025-06-19.0'
+  FEDORA_TAG:  '2025-06-21.0'
 
   CHECKS_FEDORA_TAG: '2025-06-19.0'
 
   ANDROID_FEDORA_TAG: '2025-06-19.1'
 
-  UBUNTU_TAG: '2025-04-08.0'
+  UBUNTU_TAG: '2025-06-21.0'
 
   TESTS_UBUNTU_TAG: '2025-05-14'
 
