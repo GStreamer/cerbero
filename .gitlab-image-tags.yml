@@ -9,8 +9,7 @@ variables:
 
   CHECKS_FEDORA_TAG: '2025-03-13.0'
 
-  # FIXME: bump tag and rebuild image (and add branch suffix in .gitlab-ci.yml)
-  ANDROID_FEDORA_TAG: '2024-11-01.0'
+  ANDROID_FEDORA_TAG: '2025-06-21.0-1.26'
 
   UBUNTU_TAG: '2025-03-13.0'
 
