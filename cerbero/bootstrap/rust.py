@@ -153,6 +153,8 @@ class RustBootstrapper(BootstrapperBase):
         # We need tomli now, and we need cargo-c in the function we call next
         await self.extract()
         self.extract_steps = []
+        # Get the existing targets
+        self.load_manifest()
 
         if not self.config.find_toml_module(system_only=True):
             # tomli-<version>.tar.gz
@@ -190,8 +192,10 @@ class RustBootstrapper(BootstrapperBase):
             entry = channel_data['pkg'][c]['target'][self.build_triple]
             urls += list(get_entry_urls(entry))
 
-        # Then maybe also rust-std for the target machine
-        for triple in self.target_triples:
+        # Then maybe also rust-std for the existing + new targets
+        installed_targets = self.manifest.get('targets', set())
+        required_targets = self.target_triples.union(installed_targets)
+        for triple in required_targets:
             if triple != self.build_triple:
                 entry = channel_data['pkg']['rust-std']['target'][triple]
                 urls += list(get_entry_urls(entry))
@@ -216,6 +220,27 @@ class RustBootstrapper(BootstrapperBase):
         rustup_env['RUSTUP_DIST_SERVER'] = 'file://{}'.format(self.config.local_sources)
         return rustup_env
 
+    def load_manifest(self):
+        """
+        Read Rust toolchain install state
+        """
+        if self.manifest_path.exists() and not self.manifest:
+            with self.manifest_path.open('rb') as f:
+                try:
+                    self.manifest = pickle.load(f)
+                except Exception:
+                    m.warning('Could not recover Rust toolchain status, assuming installation from scratch')
+
+    def save_manifest(self):
+        """
+        Save updates and newly installed targets (if any)
+        """
+        with self.manifest_path.open('wb') as f:
+            try:
+                pickle.dump(self.manifest, f)
+            except IOError as ex:
+                m.warning('Could not save Rust toolchain status: %s' % ex)
+
     async def install_rustup(self):
         """
         Install Rustup and the specified targets
@@ -224,20 +249,10 @@ class RustBootstrapper(BootstrapperBase):
         if self.installed:
             return
 
-        # Read manifest
-        if self.manifest_path.exists():
-            with self.manifest_path.open('rb') as f:
-                try:
-                    self.manifest = pickle.load(f)
-                except Exception:
-                    m.warning('Could not recover Rust toolchain status, assuming installation from scratch')
+        self.load_manifest()
         await self.install_toolchain()
         await self.install_targets()
-        with self.manifest_path.open('wb') as f:
-            try:
-                pickle.dump(self.manifest, f)
-            except IOError as ex:
-                m.warning('Could not save Rust toolchain status: %s' % ex)
+        self.save_manifest()
         self.installed = True
 
     async def install_toolchain(self):
@@ -298,11 +313,15 @@ class RustBootstrapper(BootstrapperBase):
                     shutil.copy(src, f)
 
         self.manifest['rust_version'] = self.RUST_VERSION
-        # New version, reinstall targets from scratch
+        # Update the target triples so that install_targets will reinstall them
+        installed_targets = self.manifest.get('targets', set())
+        self.target_triples = self.target_triples.union(installed_targets)
         self.manifest['targets'] = set()
 
     async def install_targets(self):
-        # Install Rust toolchain with rustup-init
+        """
+        Install Rust toolchain with rustup-init
+        """
         installed_targets = self.manifest.get('targets', set())
         if self.target_triples.issubset(installed_targets):
             m.action(f'Skipping target components deploy, {installed_targets} installed')
