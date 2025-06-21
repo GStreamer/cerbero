@@ -4,17 +4,18 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gobject-introspection'
-    version = '1.80.1'
+    version = '1.84.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'a1df7c424e15bda1ab639c00e9051b9adf5cea1a9e512f8a603b53cd199bc6d8'
+    tarball_checksum = '945b57da7ec262e5c266b89e091d14be800cc424277d82a02872b7d794a84779'
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
     deps = ['glib'] # 'glib-base'
     meson_options = {
         'doctool': 'disabled',
         'cairo': 'disabled',
+        'tests': 'false',
     }
 
     # libgirepository is built with shared_library()
@@ -77,23 +78,18 @@ class Recipe(recipe.Recipe):
     ]
 
     # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1149#note_2562914
-    # Remove if introspected Glib is re-added
     patches = [
+        # Remove the following two patches if introspected Glib is re-added
         f'{name}/0001-Revert-build-Do-not-compile-uninstalled-GIR-into-typ.patch',
         f'{name}/0002-Revert-build-Do-not-install-generated-GLib-GIR-files.patch',
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/490 (merged in 1.81.2)
-        f'{name}/0003-giscanner-remove-dependency-on-distutils.msvccompile.patch',
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/503
-        f'{name}/0004-meson-Use-the-specified-python-if-it-s-custom.patch',
-        f'{name}/0005-dumper-Fix-introspection-binaries-missing-rpaths-for.patch',
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/474 (merged in 1.81.2)
-        f'{name}/0006-scannerlexer.l-Handle-Visual-Studio-specific-__force.patch',
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/511
-        f'{name}/0007-build-Add-giomoduledir-to-Windows-PATH-for-g-ir-scan.patch',
-        f'{name}/0008-giscanner-Do-not-split-paths-with-spaces.patch',
-        f'{name}/0009-dumper-Do-not-use-Bash-script-with-MSVC.patch',
-        f'{name}/0010-giscanner-Consider-UCRT64-and-CLANG64-as-mingw32-com.patch',
-        f'{name}/0001-girepository-Load-typelibs-from-a-relocatable-prefix.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/533
+        f'{name}/0003-girepository-Load-typelibs-from-a-relocatable-prefix.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/531
+        f'{name}/0004-build-Fix-b_vscrt-value-use-without-converting-it-to.patch',
+        f'{name}/0005-windows-Do-not-use-msvc-syntax-for-pkg-config-parsin.patch',
+        f'{name}/0006-tests-Fix-path-parsing-for-Windows.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/532
+        f'{name}/0007-g-ir-tools-Support-reading-rspfiles-for-arguments.patch',
     ]
 
     def prepare(self):

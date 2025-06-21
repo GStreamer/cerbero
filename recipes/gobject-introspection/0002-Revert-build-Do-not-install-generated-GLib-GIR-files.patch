@@ -1,18 +1,18 @@
-From 981d2278bdb9482a93f51906884ba213e7397061 Mon Sep 17 00:00:00 2001
+From 9a40394a35ac291696c3463daf263615ef926ddf Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
-Date: Tue, 10 Sep 2024 10:55:56 -0300
-Subject: [PATCH 2/2] Revert "build: Do not install generated GLib GIR files"
+Date: Sat, 21 Jun 2025 14:01:54 -0300
+Subject: [PATCH 2/7] Revert "build: Do not install generated GLib GIR files"
 
 This reverts commit afbe7697e019e95a4267088891adbbb4ddeccc3d.
 ---
- gir/meson.build | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ gir/meson.build | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
 diff --git a/gir/meson.build b/gir/meson.build
-index 69740b1c..9aafc8b0 100644
+index 73273715..a23c0a91 100644
 --- a/gir/meson.build
 +++ b/gir/meson.build
-@@ -238,6 +238,8 @@ glib_gir = custom_target('gir-glib',
+@@ -246,6 +246,8 @@ glib_gir = custom_target('gir-glib',
    output: 'GLib-2.0.gir',
    depends: [gir_giscanner_pymod, glib_gir_dep, gdump],
    depend_files: gir_giscanner_built_files,
@@ -21,7 +21,7 @@ index 69740b1c..9aafc8b0 100644
    env: g_ir_scanner_env,
    command: glib_command + [
      '--cflags-begin'] + glib_includes + extra_giscanner_cflags + [
-@@ -305,6 +307,8 @@ gobject_gir = custom_target('gir-gobject',
+@@ -313,6 +315,8 @@ gobject_gir = custom_target('gir-gobject',
    output: 'GObject-2.0.gir',
    depends: [glib_gir, gir_giscanner_pymod, gobject_gir_dep, gdump],
    depend_files: gir_giscanner_built_files,
@@ -30,7 +30,7 @@ index 69740b1c..9aafc8b0 100644
    env: g_ir_scanner_env,
    command: gobject_command + [
      '--include-uninstalled=' + glib_gir.full_path(),
-@@ -357,6 +361,8 @@ gir_files += custom_target('gir-gmodule',
+@@ -365,6 +369,8 @@ uninstalled_gir_files += custom_target('gir-gmodule',
    output: 'GModule-2.0.gir',
    depends: [glib_gir, gir_giscanner_pymod, gmodule_gir_dep, gdump],
    depend_files: gir_giscanner_built_files,
@@ -39,7 +39,7 @@ index 69740b1c..9aafc8b0 100644
    env: g_ir_scanner_env,
    command: gmodule_command + [
      '--include-uninstalled=' + glib_gir.full_path(),
-@@ -452,6 +458,8 @@ gio_gir = custom_target('gir-gio',
+@@ -460,6 +466,8 @@ gio_gir = custom_target('gir-gio',
    output: 'Gio-2.0.gir',
    depends: [gobject_gir, gir_giscanner_pymod, gio_gir_dep, gdump],
    depend_files: gir_giscanner_built_files,
@@ -48,6 +48,15 @@ index 69740b1c..9aafc8b0 100644
    env: g_ir_scanner_env,
    command: gio_command + [
      '--include-uninstalled=' + gobject_gir.full_path(),
+@@ -541,6 +549,8 @@ foreach gir: uninstalled_gir_files
+     output: '@BASENAME@.typelib',
+     depends: [gobject_gir, gircompiler, ],
+     command: gircompiler_command,
++    install: true,
++    install_dir: typelibdir,
+   )
+ endforeach
+ 
 -- 
-2.44.0.windows.1
+2.47.0.windows.2
 

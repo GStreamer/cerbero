@@ -1,7 +1,7 @@
-From a8d5952fd007eed34e9f1af20eba2abe10b313a2 Mon Sep 17 00:00:00 2001
+From 079cd66c77d53cdf5007002bd225658e221715c3 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 12 Feb 2025 20:32:59 +0530
-Subject: [PATCH] girepository: Load typelibs from a relocatable prefix on
+Subject: [PATCH 3/7] girepository: Load typelibs from a relocatable prefix on
  macOS
 
 This is already relocatable on Windows.
@@ -10,7 +10,7 @@ This is already relocatable on Windows.
  1 file changed, 27 insertions(+)
 
 diff --git a/girepository/girepository.c b/girepository/girepository.c
-index 12eaf36..ca47cd5 100644
+index 12eaf366..ca47cd55 100644
 --- a/girepository/girepository.c
 +++ b/girepository/girepository.c
 @@ -125,6 +125,33 @@ DllMain (HINSTANCE hinstDLL,
@@ -48,5 +48,5 @@ index 12eaf36..ca47cd5 100644
  #endif
  
 -- 
-2.39.5 (Apple Git-154)
+2.47.0.windows.2
 

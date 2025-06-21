@@ -1,0 +1,133 @@
+From eb716a5fa15b060b0fef8659afa10fba4d4b79cb Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 4 Jun 2025 11:53:20 -0300
+Subject: [PATCH 5/7] windows: Do not use msvc-syntax for pkg-config parsing
+
+It embeds the assumption of xxx.lib while Meson-compiled static
+libraries follow the GCC naming convention.
+---
+ giscanner/ccompiler.py | 23 +++++++++++++++++++++++
+ giscanner/dumper.py    |  9 +++++----
+ giscanner/pkgconfig.py | 14 ++++++--------
+ giscanner/utils.py     |  7 +++++--
+ 4 files changed, 39 insertions(+), 14 deletions(-)
+
+diff --git a/giscanner/ccompiler.py b/giscanner/ccompiler.py
+index c16fc889..c339c1df 100644
+--- a/giscanner/ccompiler.py
++++ b/giscanner/ccompiler.py
+@@ -285,6 +285,29 @@ class CCompiler(object):
+             else:
+                 os.environ[envvar] = os.pathsep.join(runtime_paths)
+ 
++    def convert_flags(self, args):
++        for a in args:
++            if os.path.isfile(a):
++                # If we get a real filename, just use it as-is
++                yield a
++            # The dumper program needs to look for dynamic libraries
++            # in the library paths first
++            elif a.startswith('-L'):
++                library_path = a[2:].replace('/', '\\')
++                if os.path.exists(library_path):
++                    yield '-libpath:' + library_path
++                else:
++                    yield a
++            elif a.startswith('-l'):
++                # Note that Visual Studio builds do not use libtool!
++                library = a[2:]
++                if library != 'm':
++                    yield library + '.lib'
++                else:
++                    continue
++            else:
++                yield a
++
+     def get_external_link_flags(self, args, libraries):
+         # An "external" link is where the library to be introspected
+         # is installed on the system; this case is used for the scanning
+diff --git a/giscanner/dumper.py b/giscanner/dumper.py
+index 96bcd845..4c7d449c 100644
+--- a/giscanner/dumper.py
++++ b/giscanner/dumper.py
+@@ -184,8 +184,7 @@ class DumpCompiler(object):
+         return os.path.join(tmpdir, tmpl)
+ 
+     def _compile(self, *sources):
+-        cflags = pkgconfig.cflags(self._packages,
+-                                  msvc_syntax=self._compiler.check_is_msvc())
++        cflags = pkgconfig.cflags(self._packages)
+         cflags.extend(self._options.cflags)
+         return self._compiler.compile(cflags,
+                                       self._options.cpp_includes,
+@@ -237,8 +236,10 @@ class DumpCompiler(object):
+ 
+         args.extend(sources)
+ 
+-        pkg_config_libs = pkgconfig.libs(self._packages,
+-                                         msvc_syntax=self._compiler.check_is_msvc())
++        pkg_config_libs = pkgconfig.libs(self._packages)
++
++        if self._compiler.check_is_msvc():
++            pkg_config_libs = self._compiler.convert_flags(pkg_config_libs)
+ 
+         if not self._options.external_library:
+             self._compiler.get_internal_link_flags(args,
+diff --git a/giscanner/pkgconfig.py b/giscanner/pkgconfig.py
+index 39db41d6..6bafdbe5 100644
+--- a/giscanner/pkgconfig.py
++++ b/giscanner/pkgconfig.py
+@@ -42,16 +42,15 @@ def check_output(flags, ignore_errors, command=None):
+         raise PkgConfigError('pkg-config: error executing command %s: %s' % (argv, e))
+ 
+ 
+-def cflags(packages, msvc_syntax=False, ignore_errors=True, command=None):
+-    flags = ['--msvc-syntax'] if msvc_syntax else []
+-    flags.append('--cflags')
++def cflags(packages, ignore_errors=True, command=None):
++    flags = ['--cflags']
+     flags.extend(packages)
+     out = check_output(flags, ignore_errors, command)
+     return shlex.split(out)
+ 
+ 
+-def libs_only_L(packages, static=False, msvc_syntax=False, ignore_errors=True, command=None):
+-    flags = ['--msvc-syntax'] if msvc_syntax else []
++def libs_only_L(packages, static=False, ignore_errors=True, command=None):
++    flags = []
+     if static:
+         flags.append('--static')
+     flags.append('--libs-only-L')
+@@ -60,9 +59,8 @@ def libs_only_L(packages, static=False, msvc_syntax=False, ignore_errors=True, c
+     return shlex.split(out)
+ 
+ 
+-def libs(packages, msvc_syntax=False, ignore_errors=True, command=None):
+-    flags = ['--msvc-syntax'] if msvc_syntax else []
+-    flags.append('--libs')
++def libs(packages, ignore_errors=True, command=None):
++    flags = ['--libs']
+     flags.extend(packages)
+     out = check_output(flags, ignore_errors, command)
+     return shlex.split(out)
+diff --git a/giscanner/utils.py b/giscanner/utils.py
+index 9840143c..ff39fd75 100644
+--- a/giscanner/utils.py
++++ b/giscanner/utils.py
+@@ -338,8 +338,11 @@ class dll_dirs(metaclass=Singleton):
+                     self._add_dll_dir(path)
+ 
+             for path in giscanner.pkgconfig.libs_only_L(pkgs, True):
+-                libpath = path.replace('-L', '')
+-                self._add_dll_dir(libpath)
++                if path.startswith('-L') or path.startswith('/L'):
++                    libpath = path[2:]
++                    self._add_dll_dir(libpath)
++                else:
++                    continue
+ 
+             for path in giscanner.pkgconfig.bindir(pkgs):
+                 self._add_dll_dir(path)
+-- 
+2.47.0.windows.2
+
