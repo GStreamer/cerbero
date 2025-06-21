@@ -18,6 +18,7 @@
 
 import os
 from pathlib import Path
+import pickle
 import sys
 import stat
 import shutil
@@ -73,16 +74,22 @@ class RustBootstrapper(BootstrapperBase):
     target_triples = None
     # Downloaded rustup path
     rustup = None
-    # Downloadad rust channel
+    # Downloaded rust channel
     channel = None
 
     def __init__(self, config, offline):
         super().__init__(config, offline, 'rust')
+
+        self.manifest = {}
+        self.manifest_path = Path(self.config.rustup_home) / 'cerbero.rustup'
+
+        # Not yet processed
+        self.installed = False
         self.offline = offline
         self.build_triple = self.config.rust_build_triple
-        self.target_triples = self.config.rust_target_triples
+        self.target_triples = set(self.config.rust_target_triples)
         if self.config.platform == Platform.WINDOWS:
-            tgt = set(self.target_triples)
+            tgt = set()
             # On Windows, build tools must be built using MSVC. However,
             # the current variant determines the default target.
             # So we need to always bootstrap $arch-windows-msvc,
@@ -96,7 +103,7 @@ class RustBootstrapper(BootstrapperBase):
             # in both MSVC and MinGW ABIs
             tgt.add(self.config.rust_triple(other_arch, self.config.platform, True))
             tgt.add(self.config.rust_triple(other_arch, self.config.platform, False))
-            self.target_triples = list(tgt)
+            self.target_triples.update(tgt)
         self.fetch_urls = self.get_fetch_urls()
         self.fetch_urls_func = self.get_more_fetch_urls
         self.extract_steps = []
@@ -197,7 +204,7 @@ class RustBootstrapper(BootstrapperBase):
 
     async def install_toolchain_for_cargoc_fetch(self):
         m.action('Installing Rust toolchain so cargo-c.recipe can fetch deps')
-        await self.install_toolchain()
+        await self.install_rustup()
         return ([], None)
 
     def get_rustup_env(self):
@@ -209,6 +216,30 @@ class RustBootstrapper(BootstrapperBase):
         rustup_env['RUSTUP_DIST_SERVER'] = 'file://{}'.format(self.config.local_sources)
         return rustup_env
 
+    async def install_rustup(self):
+        """
+        Install Rustup and the specified targets
+        (with the ability to skip components)
+        """
+        if self.installed:
+            return
+
+        # Read manifest
+        if self.manifest_path.exists():
+            with self.manifest_path.open('rb') as f:
+                try:
+                    self.manifest = pickle.load(f)
+                except Exception:
+                    m.warning('Could not recover Rust toolchain status, assuming installation from scratch')
+        await self.install_toolchain()
+        await self.install_targets()
+        with self.manifest_path.open('wb') as f:
+            try:
+                pickle.dump(self.manifest, f)
+            except IOError as ex:
+                m.warning('Could not save Rust toolchain status: %s' % ex)
+        self.installed = True
+
     async def install_toolchain(self):
         """
         Run rustup to install the downloaded toolchain. We pretend that
@@ -216,7 +247,15 @@ class RustBootstrapper(BootstrapperBase):
         toolchain, rustup will automatically remove the older toolchain, which
         it wouldn't do if we installed a specific version.
         """
-        # Install Rust toolchain with rustup-init
+        rust_version = self.manifest.get('rust_version', None)
+        if rust_version == self.RUST_VERSION:
+            m.action(f'Skipping Rust host toolchain deploy ({rust_version} installed)')
+            return
+
+        # Update is required, ZAP
+        if os.path.exists(self.config.rustup_home):
+            shutil.rmtree(self.config.rustup_home)
+
         st = os.stat(self.rustup)
         os.chmod(self.rustup, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         rustup_args = [
@@ -231,14 +270,10 @@ class RustBootstrapper(BootstrapperBase):
             '--component',
             'llvm-tools-preview',
         ]
-        for triple in self.target_triples:
-            rustup_args += ['--target', triple]
         rustup_env = self.get_rustup_env()
         for suffix in ('', '.asc', '.sha256'):
             stable_channel = f'{os.path.dirname(self.channel)}/channel-rust-stable.toml'
             shutil.copyfile(self.channel + suffix, stable_channel + suffix)
-        if os.path.exists(self.config.rustup_home):
-            shutil.rmtree(self.config.rustup_home)
         # Use async_call_output to discard stdout which contains messages that will confuse the user
         await shell.async_call_output(rustup_args, cpu_bound=False, env=rustup_env)
         m.message('Rust toolchain v{} installed at {}'.format(self.RUST_VERSION, self.config.rust_prefix))
@@ -262,8 +297,28 @@ class RustBootstrapper(BootstrapperBase):
                     f.unlink()
                     shutil.copy(src, f)
 
+        self.manifest['rust_version'] = self.RUST_VERSION
+        # New version, reinstall targets from scratch
+        self.manifest['targets'] = set()
+
+    async def install_targets(self):
+        # Install Rust toolchain with rustup-init
+        installed_targets = self.manifest.get('targets', set())
+        if self.target_triples.issubset(installed_targets):
+            m.action(f'Skipping target components deploy, {installed_targets} installed')
+            return
+        cargo_bin = Path(self.config.cargo_home) / 'bin'
+        rustup = cargo_bin / f'rustup{self.config._get_exe_suffix()}'
+        rustup_args = [rustup, 'target', 'add', *self.target_triples]
+        # Use async_call_output to discard stdout which contains messages that
+        # will confuse the user
+        await shell.async_call_output(rustup_args, cpu_bound=False, env=self.get_rustup_env())
+
+        installed_targets.update(self.target_triples)
+        self.manifest['targets'] = installed_targets
+
     async def start(self, jobs=0):
-        await self.install_toolchain()
+        await self.install_rustup()
 
 
 if __name__ == '__main__':
