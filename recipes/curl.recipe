@@ -16,6 +16,7 @@ class Recipe(recipe.Recipe):
     licenses = [{License.CURL: ['COPYING']}]
     deps = ['openssl', 'zlib']
     files_libs = ['libcurl']
+    files_devel = ['include/curl', '%(libdir)s/pkgconfig/libcurl.pc']
 
     can_msvc = True
 
@@ -57,10 +58,10 @@ class Recipe(recipe.Recipe):
                 original_implib.unlink(missing_ok=True)
 
     def post_install(self):
-        super().post_install()
-
         if self.config.platform in (Platform.DARWIN, Platform.IOS):
             # Neither CMake's build script nor Meson is aware the library is
             # built solely statically.
             pcfile = f'{self.config.libdir}/pkgconfig/libcurl.pc'
             shell.replace(pcfile, {'Libs:': 'Libs: -framework SystemConfiguration -framework CoreFoundation -framework CoreServices '})
+
+        super().post_install()
