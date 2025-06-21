@@ -30,11 +30,11 @@ class Recipe(recipe.Recipe):
     ###
 
     name = 'glib' # 'glib-base'
-    version = '2.80.5'
+    version = '2.82.4'
     stype = SourceType.TARBALL
     url = 'gnome://glib/%(maj_ver)s/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
-    tarball_checksum = '9f23a9de803c695bbfde7e37d6626b18b9a83869689dd79019bf3ae66c3e6771'
+    tarball_checksum = '37dd0877fe964cd15e9a2710b044a1830fb1bd93652a6d0cb6b8b2dff187c709'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'tests': 'false', 'introspection': 'disabled'}
@@ -49,15 +49,6 @@ class Recipe(recipe.Recipe):
         'glib/0005-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
         # TODO upstreaming
         'glib/0006-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
-        # futex_time64 is seccomp blocked in Android API level < 30
-        # Upstreamed since 2.81 (remove when bumping version)
-        'glib/0007-glib-gthread-posix-Block-futex_time64-usage-on-Andro.patch',
-        'glib/0008-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
-        'glib/0009-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
-        'glib/0010-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch',
-        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4125
-        # From 2.81.1, backported into 2.74.6
-        'glib/0011-Merge-branch-pr-fix_some_windows_testsuite_failures-.patch',
     ]
 
     files_libs = [

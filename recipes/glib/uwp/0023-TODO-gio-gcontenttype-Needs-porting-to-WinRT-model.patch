@@ -12,7 +12,7 @@ diff --git a/gio/gcontenttype-win32.c b/gio/gcontenttype-win32.c
 index 11ea203ab..4e1ce5114 100644
 --- a/gio/gcontenttype-win32.c
 +++ b/gio/gcontenttype-win32.c
-@@ -38,6 +38,9 @@ static char *
+@@ -39,6 +39,9 @@ static char *
  get_registry_classes_key (const char    *subdir,
                            const wchar_t *key_name)
  {
@@ -22,7 +22,7 @@ index 11ea203ab..4e1ce5114 100644
    wchar_t *wc_key;
    HKEY reg_key = NULL;
    DWORD key_type;
-@@ -45,7 +48,7 @@ get_registry_classes_key (const char    *subdir,
+@@ -46,7 +49,7 @@ get_registry_classes_key (const char    *subdir,
    char *value_utf8;
  
    value_utf8 = NULL;
@@ -31,7 +31,7 @@ index 11ea203ab..4e1ce5114 100644
    nbytes = 0;
    wc_key = g_utf8_to_utf16 (subdir, -1, NULL, NULL, NULL);
    if (RegOpenKeyExW (HKEY_CLASSES_ROOT, wc_key, 0,
-@@ -83,6 +86,7 @@ get_registry_classes_key (const char    *subdir,
+@@ -84,6 +87,7 @@ get_registry_classes_key (const char    *subdir,
      RegCloseKey (reg_key);
  
    return value_utf8;
@@ -39,9 +39,9 @@ index 11ea203ab..4e1ce5114 100644
  }
  
  /*< private >*/
-@@ -403,6 +407,9 @@ g_content_type_guess (const gchar  *filename,
+@@ -404,6 +408,9 @@ g_content_type_guess_impl (const gchar  *filename,
  GList *
- g_content_types_get_registered (void)
+ g_content_types_get_registered_impl (void)
  {
 +#ifdef G_WINAPI_ONLY_APP
 +  return NULL;
@@ -49,7 +49,7 @@ index 11ea203ab..4e1ce5114 100644
    DWORD index;
    wchar_t keyname[256];
    DWORD key_len;
-@@ -434,6 +441,7 @@ g_content_types_get_registered (void)
+@@ -435,6 +442,7 @@ g_content_types_get_registered_impl (void)
      }
    
    return g_list_reverse (types);
@@ -58,5 +58,5 @@ index 11ea203ab..4e1ce5114 100644
  
  gchar **
 -- 
-2.44.0.windows.1
+2.39.5 (Apple Git-154)
 
