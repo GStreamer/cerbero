@@ -28,6 +28,7 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.CARGO_C
     cargo_packages = [
+        'analytics',
         'audiofx',
         'aws',
         'cdg',
@@ -55,7 +56,6 @@ class Recipe(recipe.Recipe):
         'quinn',
         'rav1e',
         'regex',
-        'relationmeta',
         'reqwest',
         'raptorq',
         'png',
@@ -130,6 +130,7 @@ class Recipe(recipe.Recipe):
                 'gopbuffer',
                 'livesync',
                 'originalbuffer',
+                'rsanalytics',
                 'rsinter',
                 'rstracers',
                 'streamgrouper',
@@ -145,7 +146,6 @@ class Recipe(recipe.Recipe):
                 'quinn',
                 'rsonvif',
                 'raptorq',
-                'rsrelationmeta',
                 'reqwest',
                 'rsrtp',
                 'rsrtsp',
