@@ -287,7 +287,7 @@ class FilesProvider(object):
     def _dylib_plugins(self):
         if self.btype not in (BuildType.MESON, BuildType.CARGO_C):
             return False
-        if self.platform not in (Platform.DARWIN, Platform.IOS):
+        if not Platform.is_apple(self.platform):
             return False
         # gstreamer plugins on macOS and iOS use the .dylib extension when
         # built with Meson but modules that use GModule do not
@@ -658,7 +658,7 @@ class FilesProvider(object):
                     patterns.append('%(libdir)s/%(f)s.dll.a')
                     patterns.append('%(libdir)s/%(fnolib)s.def')
                     patterns.append('%(libdir)s/%(fnolib)s.lib')
-                elif self.platform in [Platform.DARWIN, Platform.IOS]:
+                elif Platform.is_apple(self.platform):
                     patterns.append('%(libdir)s/%(f)s.dylib')
 
             for x in self._get_category_files_list(category):

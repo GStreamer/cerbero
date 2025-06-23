@@ -293,7 +293,7 @@ class ProductPackage(PackagerBase):
         packages = self.package.packages[:] + [(package.name, True, True)]
         self.package.packages = packages
         path = packager.pack(self.output_dir, self.fw_path)[0]
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(self.config.target_platform):
             self.packages_paths[PackageType.DEVEL][package] = path
             self.empty_packages[PackageType.RUNTIME].append(package)
         else:

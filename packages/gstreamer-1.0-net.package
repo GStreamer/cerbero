@@ -32,7 +32,7 @@ class Package(custom.GStreamer, package.Package):
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
 
-        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+        if not Platform.is_apple(self.config.target_platform):
             self.files.append('sqlite3:libs')
 
         if self.config.variants.rust:
@@ -47,6 +47,6 @@ class Package(custom.GStreamer, package.Package):
                 'gst-plugins-bad-1.0:plugins_net', 'gst-rtsp-server-1.0:libs:plugins_net',
             ]
 
-        if self.config.target_platform not in (Platform.IOS, Platform.ANDROID):
+        if not Platform.is_apple_mobile(self.config.target_platform):
             if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
                 self.files.append('curl:libs')

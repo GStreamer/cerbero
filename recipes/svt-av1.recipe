@@ -37,7 +37,7 @@ class Recipe(recipe.Recipe):
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
 
         # We only want static libs on iOS and Android
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+        if Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
     def post_install(self):

@@ -30,7 +30,7 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         soup_deps = ['gio-2.0', 'gmodule-2.0', 'gobject-2.0', 'glib-2.0',
                      'ffi', 'psl', 'z', 'nghttp2']
-        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+        if not Platform.is_apple(self.config.target_platform):
             soup_deps += ['sqlite3']
         # Meson does not generate la files
         LibtoolLibrary('soup-3.0', None, None, None,

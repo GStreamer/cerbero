@@ -111,7 +111,7 @@ class Recipe(recipe.Recipe):
             ]
 
     def prepare(self):
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+        if Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.BOTH
@@ -413,7 +413,7 @@ class Recipe(recipe.Recipe):
             libraries = [f for f in self.devel_files_list(only_existing=False)
                          if f.endswith('.a')]
             for f in libraries:
-                if self.config.target_platform in (Platform.IOS, Platform.DARWIN):
+                if Platform.is_apple(self.config.target_platform):
                     # Apple wants you to do Single-Object Prelink
                     source = Path(self.config.prefix) / f
 

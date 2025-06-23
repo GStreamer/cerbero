@@ -32,6 +32,15 @@ class Platform:
     ANDROID = 'android'
     IOS = 'ios'
 
+    def is_apple(platform):
+        return platform in (Platform.DARWIN, Platform.IOS)
+
+    def is_mobile(platform):
+        return platform in (Platform.ANDROID, Platform.IOS)
+
+    def is_apple_mobile(platform):
+        return Platform.is_apple(platform) and Platform.is_mobile(platform)
+
 
 class Architecture:
     """Enumeration of supported acrchitectures"""

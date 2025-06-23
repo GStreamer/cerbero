@@ -32,7 +32,7 @@ from cerbero.utils import messages as m
 
 def get_optimization_from_config(config):
     if config.variants.optimization:
-        if config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if Platform.is_mobile(config.target_platform):
             return 's'
         return '2'
     return '0'
@@ -802,7 +802,7 @@ class CMake(MakefilesBase):
             ]
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if Platform.is_apple(self.config.target_platform):
             r = re.compile(r'.*-isysroot ([^ ]+) .*')
             sysroot = r.match(cflags).group(1)
             self.configure_options += ['-DCMAKE_OSX_SYSROOT=' + sysroot]
@@ -1369,7 +1369,7 @@ class Cargo(Build, ModifyEnvBase):
             self.cargo_args += [f'-j{jobs}']
 
         # https://github.com/lu-zero/cargo-c/issues/278
-        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
     def num_of_cpus(self):

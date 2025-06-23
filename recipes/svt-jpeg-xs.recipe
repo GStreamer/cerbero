@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.SHARED
 
     def prepare(self):
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+        if Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
         if self.config.target_arch in (Architecture.X86, Architecture.X86_64):

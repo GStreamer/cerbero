@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
 
     def _get_openssl_platform(self):
         # map platforms
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(self.config.target_platform):
             if self.config.target_arch == Architecture.ARMv7:
                 return 'BSD-generic32'
             if self.config.target_arch == Architecture.ARMv7S:
@@ -46,7 +46,7 @@ class Recipe(recipe.Recipe):
                 return 'BSD-generic64'
             if self.config.target_arch == Architecture.ARM64:
                 return 'BSD-generic64'
-            raise InvalidRecipeError(self, "Unknown iOS platform")
+            raise InvalidRecipeError(self, f"Unknown Apple mobile arch: {self.config.target_arch}")
         if self.config.target_platform == Platform.ANDROID:
             self.make += ['CROSS_SYSROOT=' + self.config.sysroot]
             if self.config.target_arch == Architecture.ARM:
@@ -143,7 +143,7 @@ class Recipe(recipe.Recipe):
             self.make_install = ['make', 'install_sw', 'RANLIB=' + ranlib]
 
         # We probably don't need and can't use the tools on these platforms
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+        if Platform.is_mobile(self.config.target_platform):
             self.make += ['build_libs', 'openssl.pc', 'libssl.pc', 'libcrypto.pc']
             self.make_install = ['make', 'install_dev', 'RANLIB=' + ranlib]
 
@@ -173,7 +173,7 @@ class Recipe(recipe.Recipe):
             else:
                 self.set_env('TERM', 'cygwin')
 
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         if self.config.target_platform == Platform.ANDROID:
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
@@ -193,7 +193,7 @@ class Recipe(recipe.Recipe):
         # OpenSSL guesses the libdir incorrectly on x86_64
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
             ' --libdir=lib' + self.config.lib_suffix + '  no-makedepend no-unit-test no-tests no-fuzz-afl no-fuzz-libfuzzer no-h3demo'
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(self.config.target_platform):
             # Note: disable 'no-devcryptoeng' when we finally target the
             # *real* ios configuration targets
             config_sh += ' no-shared no-dso no-async no-devcryptoeng '
@@ -233,7 +233,7 @@ class Recipe(recipe.Recipe):
         # XXX: Don't forget to update this when the soname is bumped!
         # We don't build shared libraries on iOS as the build system
         # of openssl is broken and iOS does not support them anyway.
-        if self.config.target_platform != Platform.IOS:
+        if not Platform.is_apple_mobile(self.config.target_platform):
             libtool_la = LibtoolLibrary('ssl', 1, 1, 0, self.config.libdir,
                                         self.config.target_platform,
                                         deps=['crypto'])

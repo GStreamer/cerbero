@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_arch == Architecture.ARM64 or self.config.target_platform == Platform.IOS:
             self.configure_options.append('-DWAVPACK_ENABLE_ASM=OFF')
         # We only want static libs on iOS and Android
-        if self.config.target_platform not in (Platform.IOS, Platform.ANDROID):
+        if not Platform.is_mobile(self.config.target_platform):
             self.configure_options.append('-DBUILD_SHARED_LIBS=ON')
             self.library_type = LibraryType.SHARED
         if self.config.cross_compiling() and self.config.target_platform not in [Platform.WINDOWS, Platform.DARWIN]:

@@ -30,7 +30,7 @@ class Recipe(recipe.Recipe):
                 # Arm64 assembly is completely incompatible
                 self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         # x265 ignores CCASFLAGS
-        elif self.config.target_platform == Platform.IOS:
+        elif Platform.is_apple_mobile(self.config.target_platform):
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         elif self.config.target_arch == Architecture.X86:
             # on x86 it tries to use the high bank of AVX

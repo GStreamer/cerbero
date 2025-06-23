@@ -37,12 +37,12 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/vpx', '%(libdir)s/pkgconfig/vpx.pc']
 
     def prepare(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if Platform.is_apple(self.config.target_platform):
             # make sure the linker uses the correct stdlib when building with
             # 10.13 which makes the usage of libstdc++ a hard error.
             self.append_env('LDFLAGS', '-stdlib=libc++')
 
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID, Platform.WINDOWS):
+        if self.config.target_platform == Platform.WINDOWS or Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
         if self.config.target_platform == Platform.ANDROID:
