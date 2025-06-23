@@ -513,7 +513,7 @@ class Recipe(custom.GStreamer):
 
         self.enable_plugin('x265', 'codecs', dep='x265')
 
-        if self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
+        if not Platform.is_mobile(self.config.target_platform):
             # These need plugins
             self.enable_plugin('frei0r', 'effects', dep='frei0r-plugins')
 
@@ -597,7 +597,7 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
             self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
-        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if Platform.is_mobile(self.config.target_platform):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
 
         # Recipes that need autoreconf hang on the Windows CI

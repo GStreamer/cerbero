@@ -70,7 +70,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
             self.wix_use_fragment = True
 
         if self.config.variants.visualstudio or \
-           self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+           Platform.is_mobile(self.config.target_platform):
             discard = ['gstreamer-1.0-dvd']
             if self.config.variants.uwp:
                 # Need to remove it here too, platform_packages gets added to

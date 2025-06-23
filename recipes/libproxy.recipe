@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/libproxy', '%(libdir)s/pkgconfig/libproxy-1.0.pc']
 
     def prepare(self):
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_mobile(self.config.target_platform):
             # https://github.com/libproxy/libproxy/pull/284
             self.meson_options['config-osx'] = 'false'
 
