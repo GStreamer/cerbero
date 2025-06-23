@@ -56,6 +56,11 @@ class Tar:
                 os.makedirs(output_dir)
             await shell.async_call([self.get_cmd(), '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
 
+    def unpack_sync(self, output_dir):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        return shell.new_call([self.get_cmd(), '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
+
     def _compress_tar(self, tar_filename):
         compress_cmd = None
         if self.compress == Tar.Compression.BZ2:
