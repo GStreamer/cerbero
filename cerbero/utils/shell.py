@@ -22,7 +22,6 @@ import asyncio
 import sys
 import os
 import re
-import tarfile
 import zipfile
 import tempfile
 import time
@@ -33,16 +32,13 @@ import collections
 from pathlib import Path, PurePath
 
 from cerbero.enums import CERBERO_VERSION, Platform, Distro
-from cerbero.utils import _, system_info, split_version, CerberoSemaphore
+from cerbero.utils import _, system_info, split_version, to_winpath, CerberoSemaphore
 from cerbero.utils import messages as m
-from cerbero.utils import to_winpath
+from cerbero.utils.tar import Tar
 from cerbero.errors import CommandError, FatalError
 
 
 PATCH = 'patch'
-TAR = 'tar'
-HOMEBREW_TAR = 'gtar'
-TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 SUBPROCESS_EXCEPTIONS = (FileNotFoundError, PermissionError, subprocess.CalledProcessError)
 
 info = system_info()
@@ -367,18 +363,8 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
     """
     m.log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
-    if filepath.endswith(TARBALL_SUFFIXES):
-        # Recent versions of tar are much faster than the tarfile module, but we
-        # can't use tar on Windows because MSYS tar is ancient and buggy.
-        if DISTRO == Distro.MSYS or force_tarfile:
-            cmode = 'bz2' if filepath.endswith('bz2') else filepath[-2:]
-            tf = tarfile.open(filepath, mode='r:' + cmode)
-            tf.extractall(path=output_dir)
-        else:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath, '--no-same-owner'])
-
+    if filepath.endswith(Tar.TARBALL_SUFFIXES):
+        await Tar(filepath).unpack(output_dir, force_tarfile)
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, 'r')
         zf.extractall(path=output_dir)
@@ -689,25 +675,6 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
                 else:
                     env['CERBERO_ENV'] = '[cerbero-%s-%s]' % (platform, arch)
                     os.execlpe(shell, shell, env)
-
-
-def get_tar_cmd():
-    """
-    Returns the tar command to use
-
-    @return: the tar command
-    @rtype: str
-    """
-    # Use bsdtar with MSYS2 since tar hangs
-    # https://github.com/msys2/MSYS2-packages/issues/1548
-    if DISTRO == Distro.MSYS2:
-        return 'bsdtar'
-    # Allow using Homebrewed tar since it's GNU compatible
-    # (macOS uses FreeBSD tar)
-    elif shutil.which(HOMEBREW_TAR):
-        return HOMEBREW_TAR
-    else:
-        return TAR
 
 
 def get_path_minus_msys(path):

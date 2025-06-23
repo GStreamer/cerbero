@@ -29,6 +29,7 @@ from cerbero.enums import Platform, Distro
 from cerbero.errors import FatalError
 from cerbero.utils import N_, ArgparseArgument, git, shell, run_until_complete
 from cerbero.utils import messages as m
+from cerbero.utils.tar import Tar
 
 
 class BaseCache(Command):
@@ -342,7 +343,7 @@ class GenCache(BaseCache):
 
     def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
         cmd = [
-            shell.get_tar_cmd(),
+            Tar.get_cmd(),
             '-C',
             workdir,
             '--use-compress-program=xz --threads=0',
