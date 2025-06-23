@@ -1,3 +1,4 @@
+from functools import lru_cache
 import os
 import tarfile
 import tempfile
@@ -39,15 +40,20 @@ class Tar:
                 os.remove(self.filename)
             else:
                 raise UsageError('File %s already exists' % self.filename)
-        if self.distro == Distro.MSYS:
+        if Tar.uses_ancient_msys_tar():
             self._write_tar_windows(package_prefix, files)
         else:
             self._write_tar(package_prefix, files)
 
+    @staticmethod
+    @lru_cache()
+    def uses_ancient_msys_tar():
+        return shell.DISTRO == Distro.MSYS and Tar.get_cmd() == Tar.STOCK_TAR
+
     async def unpack(self, output_dir, force_tarfile=False):
         # Recent versions of tar are much faster than the tarfile module, but we
         # can't use tar on Windows because MSYS tar is ancient and buggy.
-        if shell.DISTRO == Distro.MSYS or force_tarfile:
+        if Tar.uses_ancient_msys_tar() or force_tarfile:
             cmode = 'bz2' if self.filename.endswith('bz2') else self.filename[-2:]
             tf = tarfile.open(self.filename, mode='r:' + cmode)
             tf.extractall(path=output_dir)
@@ -105,11 +111,10 @@ class Tar:
         # it creating hard links/copies
         files = sorted(set(files))
 
-        if package_prefix and self.platform == Platform.DARWIN and tar == Tar.STOCK_TAR:
-            # bsdtar doesn't tolerate --transform, abort
-            raise UsageError("Apple bsdtar doesn't support --transform")
-
         if package_prefix:
+            if self.platform == Platform.DARWIN and tar == Tar.STOCK_TAR:
+                # bsdtar doesn't tolerate --transform, abort
+                raise UsageError("Apple bsdtar doesn't support --transform")
             # Only transform the files (and not symbolic/hard links)
             tar_cmd += ['--transform', 'flags=r;s|^|{}/|'.format(package_prefix)]
         if self.compress == Tar.Compression.BZ2:
@@ -119,11 +124,24 @@ class Tar:
             else:
                 tar_cmd += ['--bzip2']
         elif self.compress == Tar.Compression.XZ:
-            # bsdtar hangs when piping to an external compress-program, and
-            # --xz is very slow because it doesn't use XZ_OPT (probably uses
-            # libarchive) and single-threaded xz is 6-10x slower. So we create
-            # a plain tar using bsdtar first, then compress it with xz later.
-            tar_filename = os.path.splitext(tar_filename)[0]
+            if self.platform == Platform.DARWIN and tar == Tar.STOCK_TAR:
+                # libarchive supports parallelism
+                tar_cmd += ['--xz', '--options', 'xz:threads=0']
+            elif self.platform == Platform.WINDOWS and tar == Tar.MSYS_BSD_TAR:
+                # libarchive supports parallelism
+                tar_cmd += ['--xz', '--options', 'xz:threads=0']
+            elif Tar.uses_ancient_msys_tar():
+                # bsdtar hangs when piping to an external compress-program, and
+                # --xz is very slow because it doesn't use XZ_OPT (probably uses
+                # libarchive) and single-threaded xz is 6-10x slower. So we create
+                # a plain tar using bsdtar first, then compress it with xz later.
+                tar_filename = os.path.splitext(tar_filename)[0]
+            else:
+                if shutil.which('xz'):
+                    # Use xz when available for parallel compression
+                    tar_cmd += ['--use-compress-program=xz -T0']
+                else:
+                    tar_cmd += ['--xz']
 
         tar_cmd += ['-cf', tar_filename]
         with tempfile.TemporaryDirectory() as d:
@@ -138,11 +156,12 @@ class Tar:
             except FatalError:
                 os.replace(tar_filename, tar_filename + '.partial')
                 raise
-        if self.compress == Tar.Compression.XZ:
+        if self.compress == Tar.Compression.XZ and Tar.uses_ancient_msys_tar():
             # We didn't compress it with tar, compress it now
             self._compress_tar(tar_filename)
 
     @staticmethod
+    @lru_cache()
     def get_cmd():
         """
         Returns the tar command to use
