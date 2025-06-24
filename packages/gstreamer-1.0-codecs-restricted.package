@@ -18,10 +18,6 @@ class Package(custom.GStreamer, package.Package):
                    'gst-plugins-bad-1.0:plugins_codecs_restricted_devel']
 
     def prepare(self):
-        # Recipes that need autoreconf hang on the Windows CI
-        if self.config.platform == Platform.WINDOWS:
-            self.files.remove('a52dec:libs')
-
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_codecs_restricted')
             self.files_devel.append('gst-plugins-rs:plugins_restricted_devel')

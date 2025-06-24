@@ -48,7 +48,6 @@ class Recipe(custom.GStreamer):
         # Recipes that need autoreconf hang on the Windows CI
         if self.config.platform == Platform.WINDOWS:
             self.disable_plugin('dvdread', 'dvd', dep='libdvdread')
-            self.disable_plugin('a52dec', 'codecs_restricted', dep='a52dec')
 
         if self.using_uwp():
             self.disable_plugin('x264', 'codecs_restricted', dep='x264')

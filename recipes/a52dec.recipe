@@ -1,27 +1,38 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 
 class Recipe(recipe.Recipe):
     name = 'a52dec'
-    version = '0.7.4'
+    version = '0.8.0'
     stype = SourceType.TARBALL
-    # This URL doesn't support https, so we don't use it
-    #url = 'http://liba52.sourceforge.net/files/a52dec-%(version)s.tar.gz'
-    url = 'https://gstreamer.freedesktop.org/src/mirror/a52dec-%(version)s.tar.gz'
-    tarball_checksum = 'a21d724ab3b3933330194353687df82c475b5dfb997513eef4c25de6c865ec33'
+    btype = BuildType.MESON
+    library_type = LibraryType.BOTH
+    # Alpine Linux, Arch Linux, & FreeBSD Ports all use this upstream
+    # https://github.com/Homebrew/homebrew-core/pull/135879
+    url = 'https://distfiles.adelielinux.org/source/%(name)s/%(name)s-%(version)s.tar.gz'
+    tarball_checksum = '03c181ce9c3fe0d2f5130de18dab9bd8bc63c354071515aa56983c74a9cffcc9'
     licenses = [License.GPLv2Plus]
-    configure_options = '--with-pic --enable-shared'
+    
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+        f'{name}/0002-Skip-getopt-copy-when-provided-by-the-system.patch',
+    ]
 
-    # Needed on Windows because the configure script that ships with the
-    # tarball is ancient and outputs incorrect linker flags
-    autoreconf = True
+    configure_options = {
+        'tools': 'disabled',
+    }
 
     files_libs = ['liba52']
-    files_bins = ['a52dec']
     files_devel = ['include/a52dec']
 
     def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += ' --disable-oss'
-        self.append_env('CFLAGS', '-fPIC')
-        # Don't enable always-inline, breaks the build on windows and macos (space is significant)
-        self.set_env('ac_cv_c_inline', 'inline ')
+        # Does not implement fvisibility or linking scripts
+        if self.config.target_platform == Platform.WINDOWS:
+            self.library_type = LibraryType.STATIC
+
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+        if self.config.target_platform == Platform.WINDOWS:
+            shutil.copy(
+                    os.path.join(self.config.libdir, 'liba52.a'),
+                    os.path.join(self.config.libdir, 'a52.lib'))
