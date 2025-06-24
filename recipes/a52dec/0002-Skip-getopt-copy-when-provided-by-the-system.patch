@@ -1,0 +1,87 @@
+From a015cbf26aaa149ce0b10d4146b727ea0264a3fe Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 24 Jun 2025 17:55:49 +0000
+Subject: [PATCH 2/2] Skip getopt copy when provided by the system
+
+---
+ meson.build          |  3 +++
+ src/getopt_shim.h.in |  4 ++++
+ src/meson.build      | 26 ++++++++++++++++++++++++--
+ 3 files changed, 31 insertions(+), 2 deletions(-)
+ create mode 100644 src/getopt_shim.h.in
+
+diff --git a/meson.build b/meson.build
+index aef9ef2..6c31628 100644
+--- a/meson.build
++++ b/meson.build
+@@ -122,6 +122,9 @@ endif
+ cdata.set_quoted('PACKAGE', meson.project_name())
+ cdata.set_quoted('VERSION', meson.project_version())
+ 
++have_getopt = cc.has_function('getopt', prefix: '#include <unistd.h>')
++cdata.set('HAVE_GETOPT', have_getopt)
++
+ pkg = import('pkgconfig')
+ 
+ incdir = include_directories('include')
+diff --git a/src/getopt_shim.h.in b/src/getopt_shim.h.in
+new file mode 100644
+index 0000000..289b5b1
+--- /dev/null
++++ b/src/getopt_shim.h.in
+@@ -0,0 +1,4 @@
++#ifndef _GETOPT_H
++#define _GETOPT_H
++#include <unistd.h>
++#endif // _GETOPT_H
+diff --git a/src/meson.build b/src/meson.build
+index 89b65e9..8f74f4a 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1,9 +1,24 @@
++fs = import('fs')
++
++if have_getopt
++    getopt_shim = fs.copyfile('getopt_shim.h.in', 'getopt.h')
++else
++    getopt_shim = []
++endif
++
+ a52dec_sources = files(
+     'a52dec.c',
+     'gettimeofday.c',
+-    'getopt.c',
+ )
+ 
++if have_getopt
++    a52dec_sources += getopt_shim
++else
++    a52dec_sources += files(
++        'getopt.c',
++    )
++endif
++
+ a52dec = executable(
+     'a52dec',
+     a52dec_sources,
+@@ -15,9 +30,16 @@ a52dec = executable(
+ 
+ extract_a52_sources = files(
+     'extract_a52.c',
+-    'getopt.c',
+ )
+ 
++if have_getopt
++    extract_a52_sources += getopt_shim
++else
++    extract_a52_sources += files(
++        'getopt.c',
++    )
++endif
++
+ extract_a52 = executable(
+     'extract_a52',
+     extract_a52_sources,
+-- 
+2.50.0
+

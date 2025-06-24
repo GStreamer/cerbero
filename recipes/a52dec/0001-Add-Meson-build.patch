@@ -1,0 +1,302 @@
+From 3a7fe73d04da0635d9e58e9a701d9df6f92f0449 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 24 Jun 2025 17:55:36 +0000
+Subject: [PATCH 1/2] Add Meson build
+
+---
+ include/meson.build |  18 ++++++
+ liba52/meson.build  |  29 ++++++++++
+ libao/meson.build   |  28 +++++++++
+ meson.build         | 134 ++++++++++++++++++++++++++++++++++++++++++++
+ meson.options       |   3 +
+ src/meson.build     |  31 ++++++++++
+ 6 files changed, 243 insertions(+)
+ create mode 100644 include/meson.build
+ create mode 100644 liba52/meson.build
+ create mode 100644 libao/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson.options
+ create mode 100644 src/meson.build
+
+diff --git a/include/meson.build b/include/meson.build
+new file mode 100644
+index 0000000..e32b36e
+--- /dev/null
++++ b/include/meson.build
+@@ -0,0 +1,18 @@
++headers = files(
++    'a52.h',
++    'attributes.h',
++    'audio_out.h',
++    'mm_accel.h',
++)
++
++install_headers(
++    headers,
++    subdir: meson.project_name()
++)
++
++config_h = configure_file(
++    output: 'config.h',
++    configuration: cdata
++)
++
++add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
+diff --git a/liba52/meson.build b/liba52/meson.build
+new file mode 100644
+index 0000000..d2bf5d3
+--- /dev/null
++++ b/liba52/meson.build
+@@ -0,0 +1,29 @@
++liba52_sources = files(
++    'bitstream.c',
++    'imdct.c',
++    'bit_allocate.c',
++    'parse.c',
++    'downmix.c',
++)
++
++liba52 = library(
++    'a52',
++    liba52_sources + [config_h],
++    include_directories: incdir,
++    dependencies: m_dep,
++    gnu_symbol_visibility: 'default',
++    install: true,
++)
++
++liba52_pc = pkg.generate(
++    liba52,
++    description: 'A decoding library for ATSC A/52 streams.',
++    version: meson.project_version(),
++    subdirs: meson.project_name()
++)
++
++liba52_dep = declare_dependency(
++    link_with: liba52,
++    dependencies: m_dep,
++    include_directories: incdir,
++)
+diff --git a/libao/meson.build b/libao/meson.build
+new file mode 100644
+index 0000000..6eccef3
+--- /dev/null
++++ b/libao/meson.build
+@@ -0,0 +1,28 @@
++libao_sources = files(
++    'audio_out.c',
++    'audio_out_null.c',
++    'audio_out_float.c',
++    # 'audio_out_oss.c',
++    # 'audio_out_solaris.c',
++    # 'audio_out_al.c',
++    'audio_out_wav.c',
++    'audio_out_aif.c',
++    'audio_out_peak.c',
++    'convert2s16.c',
++)
++
++if host_machine.system() == 'windows'
++    libao_sources += files(
++        'audio_out_win.c',
++    )
++endif
++
++libao = library(
++    'ao',
++    libao_sources + [config_h],
++    c_args: libao_args,
++    dependencies: libao_libs,
++    include_directories: incdir,
++    gnu_symbol_visibility: 'default',
++    install: false,
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..aef9ef2
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,134 @@
++project('a52dec', 'c',
++    version: '0.8.0',
++    meson_version: '>= 1.4.0',
++    default_options: [
++        'c_std=gnu99,c11',
++        'buildtype=debugoptimized',
++        'warning_level=1',
++    ],
++    license: 'GPL-2.0-only'
++)
++
++if host_machine.system() in ['windows', 'cygwin']
++    if get_option('default_library') in ['shared', 'both']
++        error('This library does not support Windows style exports')
++    endif
++endif
++
++cc = meson.get_compiler('c')
++cdata = configuration_data()
++
++cdata.set('HAVE_SYS_TIME_H', cc.has_header('sys/time.h'))
++cdata.set('HAVE_TIME_H', cc.has_header('time.h'))
++cdata.set('HAVE_SYS_TIMEB_H', cc.has_header('sys/timeb.h'))
++cdata.set('HAVE_IO_H', cc.has_header('io.h'))
++have_struct_timeval = cc.has_type('struct timeval')
++if not have_struct_timeval
++    have_struct_timeval = cc.has_type('struct timeval', prefix: '#include <sys/time.h>\n#include <time.h>')
++endif
++cdata.set('HAVE_STRUCT_TIMEVAL', have_struct_timeval)
++cdata.set('HAVE_MEMALIGN', cc.has_function('memalign'))
++cdata.set('HAVE_GETTIMEOFDAY', cc.has_function('gettimeofday'))
++cdata.set('HAVE_FTIME', cc.has_function('ftime'))
++
++c_args = cc.get_supported_arguments(
++    '-fno-common'
++)
++
++inline_test = '''int @0@ foo(char* ptr){ return ptr[2]; }
++int main(int, char** argv){ return foo(argv[0]); }
++'''
++if not cc.compiles(inline_test.format('inline'), name: 'supports inline keyword')
++    if cc.has_function_attribute('__always_inline__')
++        cdata.set('inline', '__attribute__ ((__always_inline__))')
++    elif cc.compiles(inline_test.format('__forceinline'))
++        cdata.set('inline', '__forceinline')
++    elif cc.compiles(inline_test.format('__inline'))
++        cdata.set('inline', '__inline')
++    elif cc.compiles(inline_test.format('__inline__'))
++        cdata.set('inline', '__inline__')
++    else
++        cdata.set('inline', '')
++    endif
++endif
++
++restrict_test = '''int main() {
++    char * @0@ p;
++    return 0;
++}
++'''
++if cc.compiles(restrict_test.format('__restrict'), name: 'supports __restrict keyword')
++    cdata.set('restrict', '__restrict')
++elif cc.compiles(restrict_test.format('__restrict__'), name: 'supports __restrict__ keyword')
++    cdata.set('restrict', '__restrict__')
++elif cc.compiles(restrict_test.format('_Restrict'), name: 'supports _Restrict keyword')
++    cdata.set('restrict', '_Restrict')
++elif not cc.compiles(restrict_test.format('restrict'), name: 'supports restrict keyword')
++    cdata.set('restrict', '')
++endif
++
++builtin_expect = '''int foo (int a)
++{
++    a = __builtin_expect (a, 10);
++    return a == 10 ? 0 : 1;
++}
++'''
++cdata.set('HAVE_BUILTIN_EXPECT', cc.compiles(builtin_expect, name: 'supports __builtin_expect'))
++
++if host_machine.endian() == 'big'
++    cdata.set('WORDS_BIGENDIAN', true)
++endif
++
++precision = get_option('precision')
++if precision == 'fixed'
++    cdata.set('LIBA52_FIXED', true)
++elif precision == 'double'
++    cdata.set('LIBA52_DOUBLE', true)
++endif
++
++# c89 or higher
++cdata.set('RETSIGTYPE', 'void')
++
++m_dep = cc.find_library('m', required : false)
++
++libao_args = []
++libao_libs = [m_dep]
++if host_machine.system() == 'windows'
++    libao_libs = cc.find_library('winmm', required: true)
++    libao_args += ['-DLIBAO_WIN']
++endif
++
++a52dec_args = []
++if get_option('gprof')
++    a52dec_args += ['-DA52DEC_GPROF']
++    a52dec_args += cc.get_supported_arguments('-p')
++endif
++
++aligned_max_test = '''int main() {
++    static char c __attribute__ ((aligned(@0@))) = 0;
++    return c;
++}
++'''
++ac_cv_c_attr_align_try = 0
++foreach i : [2, 4, 8, 16, 32, 64]
++    if cc.compiles(aligned_max_test.format(i), name: 'supports aligned(@0@)'.format(i))
++        ac_cv_c_attr_align_try = i
++    endif
++endforeach
++if ac_cv_c_attr_align_try != 0
++    cdata.set('ATTRIBUTE_ALIGNED_MAX', i)
++endif
++
++cdata.set_quoted('PACKAGE', meson.project_name())
++cdata.set_quoted('VERSION', meson.project_version())
++
++pkg = import('pkgconfig')
++
++incdir = include_directories('include')
++
++subdir('include')
++subdir('liba52')
++subdir('libao')
++if get_option('tools').allowed()
++    subdir('src')
++endif
+diff --git a/meson.options b/meson.options
+new file mode 100644
+index 0000000..93b713c
+--- /dev/null
++++ b/meson.options
+@@ -0,0 +1,3 @@
++option('precision', type: 'combo', choices: ['float', 'fixed', 'double'])
++option('gprof', type: 'boolean', value: false)
++option('tools', type: 'feature', value: 'disabled')
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..89b65e9
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,31 @@
++a52dec_sources = files(
++    'a52dec.c',
++    'gettimeofday.c',
++    'getopt.c',
++)
++
++a52dec = executable(
++    'a52dec',
++    a52dec_sources,
++    c_args: a52dec_args,
++    dependencies: [m_dep, liba52_dep],
++    link_with: libao,
++    install: true,
++)
++
++extract_a52_sources = files(
++    'extract_a52.c',
++    'getopt.c',
++)
++
++extract_a52 = executable(
++    'extract_a52',
++    extract_a52_sources,
++    dependencies: [m_dep, liba52_dep],
++    link_with: libao,
++    install: true,
++)
++
++install_man(
++    files('a52dec.1', 'extract_a52.1')
++)
+-- 
+2.50.0
+
