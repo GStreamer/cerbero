@@ -1,0 +1,337 @@
+From 58d7d88f0e92d316354e8da72524cf268719c589 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 24 Jun 2025 23:57:54 +0000
+Subject: [PATCH] Add Meson build
+
+---
+ meson.build            | 56 ++++++++++++++++++++++++++++++++++++++++++
+ meson/libdvdnav.def    | 49 ++++++++++++++++++++++++++++++++++++
+ meson/libdvdnav.sym    | 45 +++++++++++++++++++++++++++++++++
+ meson/libdvdnav.ver    | 51 ++++++++++++++++++++++++++++++++++++++
+ msvc/meson.build       |  1 +
+ src/dvdnav/meson.build | 41 +++++++++++++++++++++++++++++++
+ src/meson.build        | 27 ++++++++++++++++++++
+ 7 files changed, 270 insertions(+)
+ create mode 100644 meson.build
+ create mode 100644 meson/libdvdnav.def
+ create mode 100644 meson/libdvdnav.sym
+ create mode 100644 meson/libdvdnav.ver
+ create mode 100644 msvc/meson.build
+ create mode 100644 src/dvdnav/meson.build
+ create mode 100644 src/meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..dbf0331
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,56 @@
++project('libdvdnav', 'c', 'cpp',
++    version: '6.1.1',
++    meson_version: '>= 1.4.0',
++    default_options: [
++        'c_std=gnu99,c11',
++        'cpp_std=gnu++14,c++14',
++        'warning_level=2'
++    ],
++    license: 'GPL-2.0-or-later'
++)
++
++cc = meson.get_compiler('c')
++cdata = configuration_data()
++
++if host_machine.endian() == 'big'
++    cdata.set('WORDS_BIGENDIAN', true)
++endif
++
++if host_machine.system() in ['windows', 'cygwin']
++    cdata.set('HAVE_GETTIMEOFDAY', cc.has_function('gettimeofday'))
++endif
++
++cdata.set_quoted('VERSION', meson.project_version())
++
++thread_dep = dependency('threads')
++
++dvdread_dep = dependency('dvdread', version: '>= 6.0.0', required: true)
++
++c_args = ['-DHAVE_CONFIG_H']
++c_args += cc.get_supported_arguments(
++    '-mno-ms-bitfields',
++    '-Wsign-compare'
++)
++
++add_project_arguments(c_args, language: 'c')
++
++include_dirs = []
++
++msvc_def = meson.current_source_dir() / 'meson' / 'libdvdnav.def'
++if host_machine.system() in ['darwin', 'ios']
++    vflag = '-Wl,-exported_symbols_list,@0@'.format(meson.current_source_dir() / 'meson' / 'libdvdnav.sym')
++elif host_machine.system() in ['linux', 'android']
++    vflag = '-Wl,--version-script,@0@'.format(meson.current_source_dir() / 'meson' / 'libdvdnav.ver')
++else
++    vflag = []
++endif
++
++subdir('src')
++
++pkg = import('pkgconfig')
++
++pc = pkg.generate(
++    libdvdnav,
++    description: 'DVD Navigation library',
++    version: meson.project_version()
++)
+diff --git a/meson/libdvdnav.def b/meson/libdvdnav.def
+new file mode 100644
+index 0000000..8c3cc99
+--- /dev/null
++++ b/meson/libdvdnav.def
+@@ -0,0 +1,49 @@
++; Unsure why, but the original reexports all of dvdread et al.'s functions
++; I've remade the files and trimmed them down for sanity reasons
++;  - Amy
++EXPORTS
++    dvdnav_set_readahead_flag
++    dvdnav_set_region_mask
++    dvdnav_spu_language_select
++    dvdnav_audio_language_select
++    dvdnav_menu_language_select
++    dvdnav_get_angle_info
++    dvdnav_current_title_info
++    dvdnav_title_play
++    dvdnav_part_play
++    dvdnav_get_number_of_titles
++    dvdnav_get_title_string
++    dvdnav_open
++    dvdnav_close
++    dvdnav_wait_skip
++    dvdnav_get_video_scale_permission
++    dvdnav_get_video_aspect
++    dvdnav_still_skip
++    dvdnav_err_to_string
++    dvdnav_get_next_cache_block
++    dvdnav_free_cache_block
++    dvdnav_get_position
++    dvdnav_sector_search
++    dvdnav_get_current_highlight
++    dvdnav_button_select_and_activate
++    dvdnav_right_button_select
++    dvdnav_left_button_select
++    dvdnav_lower_button_select
++    dvdnav_upper_button_select
++    dvdnav_mouse_select
++    dvdnav_button_select
++    dvdnav_mouse_activate
++    dvdnav_button_activate
++    dvdnav_angle_change
++    dvdnav_prev_pg_search
++    dvdnav_next_pg_search
++    dvdnav_menu_call
++    dvdnav_spu_stream_to_lang
++    dvdnav_get_spu_logical_stream
++    dvdnav_audio_stream_to_lang
++    dvdnav_get_audio_logical_stream
++    dvdnav_is_domain_vts
++
++    dvdnav_set_PGC_positioning_flag
++    dvdnav_get_number_of_parts
++    dvdnav_reset
+diff --git a/meson/libdvdnav.sym b/meson/libdvdnav.sym
+new file mode 100644
+index 0000000..43857e6
+--- /dev/null
++++ b/meson/libdvdnav.sym
+@@ -0,0 +1,45 @@
++_dvdnav_set_readahead_flag
++_dvdnav_set_region_mask
++_dvdnav_spu_language_select
++_dvdnav_audio_language_select
++_dvdnav_menu_language_select
++_dvdnav_get_angle_info
++_dvdnav_current_title_info
++_dvdnav_title_play
++_dvdnav_part_play
++_dvdnav_get_number_of_titles
++_dvdnav_get_title_string
++_dvdnav_open
++_dvdnav_close
++_dvdnav_wait_skip
++_dvdnav_get_video_scale_permission
++_dvdnav_get_video_aspect
++_dvdnav_still_skip
++_dvdnav_err_to_string
++_dvdnav_get_next_cache_block
++_dvdnav_free_cache_block
++_dvdnav_get_position
++_dvdnav_sector_search
++_dvdnav_get_current_highlight
++_dvdnav_button_select_and_activate
++_dvdnav_right_button_select
++_dvdnav_left_button_select
++_dvdnav_lower_button_select
++_dvdnav_upper_button_select
++_dvdnav_mouse_select
++_dvdnav_button_select
++_dvdnav_mouse_activate
++_dvdnav_button_activate
++_dvdnav_angle_change
++_dvdnav_prev_pg_search
++_dvdnav_next_pg_search
++_dvdnav_menu_call
++_dvdnav_spu_stream_to_lang
++_dvdnav_get_spu_logical_stream
++_dvdnav_audio_stream_to_lang
++_dvdnav_get_audio_logical_stream
++_dvdnav_is_domain_vts
++
++_dvdnav_set_PGC_positioning_flag
++_dvdnav_get_number_of_parts
++_dvdnav_reset
+diff --git a/meson/libdvdnav.ver b/meson/libdvdnav.ver
+new file mode 100644
+index 0000000..153d30b
+--- /dev/null
++++ b/meson/libdvdnav.ver
+@@ -0,0 +1,51 @@
++{
++    global:
++        dvdnav_set_readahead_flag;
++        dvdnav_set_region_mask;
++        dvdnav_spu_language_select;
++        dvdnav_audio_language_select;
++        dvdnav_menu_language_select;
++        dvdnav_get_angle_info;
++        dvdnav_current_title_info;
++        dvdnav_title_play;
++        dvdnav_part_play;
++        dvdnav_get_number_of_titles;
++        dvdnav_get_title_string;
++        dvdnav_open;
++        dvdnav_close;
++        dvdnav_wait_skip;
++        dvdnav_get_video_scale_permission;
++        dvdnav_get_video_aspect;
++        dvdnav_still_skip;
++        dvdnav_err_to_string;
++        dvdnav_get_next_cache_block;
++        dvdnav_free_cache_block;
++        dvdnav_get_position;
++        dvdnav_sector_search;
++        dvdnav_get_current_highlight;
++        dvdnav_button_select_and_activate;
++        dvdnav_right_button_select;
++        dvdnav_left_button_select;
++        dvdnav_lower_button_select;
++        dvdnav_upper_button_select;
++        dvdnav_mouse_select;
++        dvdnav_button_select;
++        dvdnav_mouse_activate;
++        dvdnav_button_activate;
++        dvdnav_angle_change;
++        dvdnav_prev_pg_search;
++        dvdnav_next_pg_search;
++        dvdnav_menu_call;
++        dvdnav_spu_stream_to_lang;
++        dvdnav_get_spu_logical_stream;
++        dvdnav_audio_stream_to_lang;
++        dvdnav_get_audio_logical_stream;
++        dvdnav_is_domain_vts;
++
++        dvdnav_set_PGC_positioning_flag;
++        dvdnav_get_number_of_parts;
++        dvdnav_reset;
++
++    local:
++        *;
++}
+diff --git a/msvc/meson.build b/msvc/meson.build
+new file mode 100644
+index 0000000..ed29c08
+--- /dev/null
++++ b/msvc/meson.build
+@@ -0,0 +1 @@
++include_dirs += include_directories('include')
+diff --git a/src/dvdnav/meson.build b/src/dvdnav/meson.build
+new file mode 100644
+index 0000000..ee57977
+--- /dev/null
++++ b/src/dvdnav/meson.build
+@@ -0,0 +1,41 @@
++include_dirs += include_directories('.')
++
++config_h = configure_file(
++    output: 'config.h',
++    configuration: cdata
++)
++
++libdvdnav = library(
++    'dvdnav',
++    libdvdnav_sources + config_h,
++    include_directories: include_dirs,
++    dependencies: [dvdread_dep, thread_dep],
++    link_args: vflag,
++    version: '8.0.0',
++    vs_module_defs: msvc_def,
++    install: true
++)
++
++version_h = configure_file(
++    input: 'version.h.in',
++    output: 'version.h',
++    configuration: {
++        'DVDNAV_MAJOR': 6,
++        'DVDNAV_MINOR': 1,
++        'DVDNAV_SUB': 1
++    }
++)
++
++install_headers(
++    files(
++        'dvd_types.h',
++        'dvdnav_events.h',
++        'dvd_types.h',
++    ) + version_h,
++    subdir: 'dvdnav'
++)
++
++libdvdnav_dep = declare_dependency(
++    link_with: libdvdnav,
++    include_directories: include_dirs,
++)
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..85ae65f
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,27 @@
++libdvdnav_sources = files(
++    'dvdnav.c',
++    'read_cache.c',
++    'navigation.c',
++    'highlight.c',
++    'logger.c',
++    'logger.h',
++    'searching.c',
++    'settings.c',
++    'dvdnav_internal.h',
++    'read_cache.h',
++    'vm/decoder.c',
++    'vm/decoder.h',
++    'vm/vm.c',
++    'vm/vm.h',
++    'vm/play.c',
++    'vm/play.h',
++    'vm/getset.c',
++    'vm/getset.h',
++    'vm/vmget.c',
++    'vm/vmcmd.c',
++    'vm/vmcmd.h',
++)
++
++include_dirs += include_directories('.')
++
++subdir('dvdnav')
+-- 
+2.50.0
+

@@ -23,7 +23,6 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         # Recipes that need autoreconf hang on the Windows CI
         if self.config.platform == Platform.WINDOWS:
-            self.files.remove('libdvdnav:libs')
             self.files.remove('libdvdread:libs')
 
         if self.config.variants.rust:
