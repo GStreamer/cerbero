@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
     patches = [
         # From upstream git
         name + '/0001-Add-Meson-build.patch',
+        f'{name}/0002-Fix-MSVC-compatibility.patch',
     ]
 
     files_libs = ['libdvdread']

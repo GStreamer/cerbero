@@ -45,10 +45,6 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('dvdread', 'dvd', dep='libdvdread')
 
-        # Recipes that need autoreconf hang on the Windows CI
-        if self.config.platform == Platform.WINDOWS:
-            self.disable_plugin('dvdread', 'dvd', dep='libdvdread')
-
         if self.using_uwp():
             self.disable_plugin('x264', 'codecs_restricted', dep='x264')
 

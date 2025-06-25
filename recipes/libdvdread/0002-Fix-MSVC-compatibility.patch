@@ -1,0 +1,164 @@
+From 70f75aea49bde18a706bace54b3719b1dd25a44a Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 24 Jun 2025 21:50:06 -0300
+Subject: [PATCH] Fix MSVC compatibility
+
+There are clear indicia that this was tried, but it's clearly
+unfinished. The assumption of _WIN32 == MINGW is clear
+throughout the code.
+---
+ meson.build              | 15 ++++++++++++++-
+ msvc/include/inttypes.h  | 32 --------------------------------
+ msvc/include/strings.h   |  3 +++
+ src/dvd_input.c          |  1 -
+ src/dvd_reader.c         |  8 +++++++-
+ src/dvdread/dvd_reader.h |  4 ++--
+ src/meson.build          |  2 +-
+ 7 files changed, 27 insertions(+), 38 deletions(-)
+ delete mode 100644 msvc/include/inttypes.h
+ create mode 100644 msvc/include/strings.h
+
+diff --git a/meson.build b/meson.build
+index 239e60c..7f45875 100644
+--- a/meson.build
++++ b/meson.build
+@@ -17,7 +17,17 @@ cc = meson.get_compiler('c')
+ cdata = configuration_data()
+ 
+ # Include directories
+-dvdread_inc_dirs = include_directories('.', 'src', 'src/dvdread')
++dvdread_inc_dirs = [include_directories('.', 'src', 'src/dvdread')]
++
++if cc.get_define('_MSC_VER') != ''
++    dvdread_inc_dirs += include_directories('msvc/include', 'msvc/contrib/dirent')
++    cdata.set('ssize_t', '__int64')
++    cdata.set('PATH_MAX', 'MAX_PATH')
++    cdata.set('S_ISDIR(m)', '((m) & _S_IFDIR)')
++    cdata.set('S_ISREG(m)', '((m) & _S_IFREG)')
++    cdata.set('S_ISBLK(m)', 0)
++    cdata.set('S_ISCHR(m)', 0)
++endif
+ 
+ # The version number for the shared library
+ dvdread_soname_version = '8.0.0'
+@@ -78,6 +88,9 @@ elif cc.has_function('strerror_s', prefix: '#include <string.h>', args: test_arg
+     cdata.set('HAVE_STRERROR_S', 1)
+ endif
+ 
++cdata.set('HAVE_SYS_PARAM_H', cc.has_header('sys/param.h'))
++cdata.set('HAVE_DIRENT_H', cc.has_header('dirent.h'))
++
+ 
+ # External dependencies and libraries
+ 
+diff --git a/msvc/include/inttypes.h b/msvc/include/inttypes.h
+deleted file mode 100644
+index 4e1cbe1..0000000
+--- a/msvc/include/inttypes.h
++++ /dev/null
+@@ -1,32 +0,0 @@
+-/*
+- * Copyright (C) 2000-2001 the xine project
+- *
+- * This file is part of xine, a unix video player.
+- *
+- * xine is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * xine is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software Foundation,
+- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+- *
+- * WIN32 PORT,
+- * by Matthew Grooms <elon@altavista.com>
+- *
+- * inttypes.h - Standard integer definitions.
+- *
+- */
+-
+-#ifndef _SYS_INTTYPES_H_
+-#define _SYS_INTTYPES_H_
+-
+-#include <config.h>
+-
+-#endif
+diff --git a/msvc/include/strings.h b/msvc/include/strings.h
+new file mode 100644
+index 0000000..c3f5bf5
+--- /dev/null
++++ b/msvc/include/strings.h
+@@ -0,0 +1,3 @@
++#if defined(_MSC_VER)
++#  include "unistd.h"
++#endif
+diff --git a/src/dvd_input.c b/src/dvd_input.c
+index 26b6928..75b2e11 100644
+--- a/src/dvd_input.c
++++ b/src/dvd_input.c
+@@ -62,7 +62,6 @@ int         (*dvdinput_read)  (dvd_input_t, void *, int, int);
+ #  include <dlfcn.h>
+ # else
+ #   if defined(_WIN32)
+-/* Only needed on MINGW at the moment */
+ #    include "../msvc/contrib/dlfcn.c"
+ #   endif
+ # endif
+diff --git a/src/dvd_reader.c b/src/dvd_reader.c
+index c4d9641..cfacbe2 100644
+--- a/src/dvd_reader.c
++++ b/src/dvd_reader.c
+@@ -31,7 +31,13 @@
+ #include <string.h>         /* memcpy, strlen */
+ #include <unistd.h>         /* pclose */
+ #include <limits.h>         /* PATH_MAX */
+-#include <dirent.h>         /* opendir, readdir */
++# if defined(HAVE_DIRENT_H)
++#  include <dirent.h>         /* opendir, readdir */
++# else
++#   if defined(_MSC_VER)
++#    include "../msvc/contrib/dirent/dirent.c"
++#   endif
++# endif
+ #include <ctype.h>          /* isalpha */
+ 
+ #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__APPLE__)
+diff --git a/src/dvdread/dvd_reader.h b/src/dvdread/dvd_reader.h
+index e30527c..e7a2718 100644
+--- a/src/dvdread/dvd_reader.h
++++ b/src/dvdread/dvd_reader.h
+@@ -24,10 +24,10 @@
+ #define LIBDVDREAD_DVD_READER_H
+ 
+ #ifdef _MSC_VER
+-#include <config.h>
+-
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdint.h>
++#define ssize_t __int64
+ #endif
+ 
+ #include <sys/types.h>
+diff --git a/src/meson.build b/src/meson.build
+index 3443dd3..68b514b 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -26,7 +26,7 @@ else
+ endif
+ 
+ # The final libdvdread library
+-libdvdread = library('dvdread', dvdread_src,
++libdvdread = library('dvdread', dvdread_src + config_h_target,
+     include_directories: dvdread_inc_dirs,
+     dependencies: [
+         libdvdcss_dependency,
+-- 
+2.47.0.windows.2
+
