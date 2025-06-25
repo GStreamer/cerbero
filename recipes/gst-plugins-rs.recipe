@@ -98,11 +98,12 @@ class Recipe(recipe.Recipe):
                 self.update_categories()
             f = getattr(self, attr)
             f += [f'%(libdir)s/gstreamer-1.0/libgst{name}%(mext)s']
+        attr = f'files_plugins_{category}_devel'
+        if not hasattr(self, attr):
+            setattr(self, attr, [])
+        d = getattr(self, attr)
+        d.append(f'%(libdir)s/gstreamer-1.0/pkgconfig/gst{name}.pc')
         if self.library_type in (LibraryType.STATIC, LibraryType.BOTH):
-            attr = f'files_plugins_{category}_devel'
-            if not hasattr(self, attr):
-                setattr(self, attr, [])
-            d = getattr(self, attr)
             d += [
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.a',
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.la',
