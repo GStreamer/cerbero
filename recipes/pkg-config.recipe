@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     url = 'https://pkgconfig.freedesktop.org/releases/pkg-config-%(version)s.tar.gz'
     tarball_checksum = '6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591'
     btype = BuildType.MESON
+    # Meson 1.9+ now overrides subproject's default options with cli ones
+    library_type = LibraryType.STATIC
     meson_options = {'host_tool': 'disabled', 'internal_glib': 'enabled'}
 
     # We want to link these statically into pkg-config, so for proxy-libintl
