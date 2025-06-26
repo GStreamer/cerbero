@@ -35,6 +35,7 @@ class Recipe(recipe.Recipe):
         'claxon',
         'closedcaption',
         'dav1d',
+        'elevenlabs',
         'fallbackswitch',
         'ffv1',
         'fmp4',
@@ -139,6 +140,7 @@ class Recipe(recipe.Recipe):
             ],
             'net': [
                 'aws',
+                'elevenlabs',
                 'hlssink3',
                 'hlsmultivariantsink',
                 'mpegtslive',
