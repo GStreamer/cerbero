@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer, running_on_cerbero_ci
+from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import DistroVersion
 from cerbero.errors import FatalError
 from cerbero.utils import messages as m
@@ -293,7 +294,7 @@ class Recipe(recipe.Recipe):
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         # It also follows MSVC convention for static/import libraries
-        if self.using_msvc():
+        if self.config.target_platform == Platform.WINDOWS:
             for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
                 if not f.endswith('.a'):
                     continue
@@ -308,11 +309,26 @@ class Recipe(recipe.Recipe):
             # https://github.com/llvm/llvm-project/issues/62182
             libraries = [f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False)
                          if f.endswith('.a')]
+
+            # This needs to be computed because on cross-builds
+            # there is no extension, and on native builds it shutil.which
+            # needs the .exe
+            ext = FilesProvider.EXTENSIONS[self.config.platform]['bext']
+            nm = self.get_llvm_tool("llvm-nm" + ext)
+            ar = self.get_llvm_tool("llvm-ar" + ext)
+            # lld doesn't support this, their drivers are per-OS
+            bindir = Path(self.config.toolchain_prefix) / 'bin'
+            ld_call = self.config.mingw_env_for_build_system['LD']
+            ld = shutil.which(ld_call[0] + ext, path=bindir.as_posix())
+
+            if ld is None:
+                raise FatalError('ld.bfd not found')
+
             for f in libraries:
                 source = Path(self.config.prefix) / f
 
                 manifest = shell.check_output(
-                    [self.get_llvm_tool("llvm-nm.exe"), "-gjPUA", "--quiet", source.absolute()],
+                    [nm, "-gjPUA", "--quiet", source.absolute()],
                     env=self.env,
                 )
 
@@ -329,7 +345,6 @@ class Recipe(recipe.Recipe):
                         if symbol_pattern.match(symbol):
                             symbols_to_keep.add(symbol)
 
-                    ar = self.get_llvm_tool("llvm-ar.exe")
                     m.log(f"Unpacking {source.absolute()} with ar", self.logfile)
                     shell.new_call(
                         [ar, 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
@@ -339,19 +354,13 @@ class Recipe(recipe.Recipe):
                     prelinked_obj = (
                         Path(tmp) / source.name).with_suffix('.prelinked.o')
 
-                    # lld doesn't support this, their drivers are per-OS
-                    ld = shutil.which("ld.bfd.exe")
-
-                    if ld is None:
-                        raise FatalError('ld.bfd not found')
-
                     rsp = (
                         Path(tmp) / source.name).with_suffix('.rsp')
 
                     with rsp.open('w', encoding='utf-8') as f:
                         files = set(str(f.relative_to(tmp)) for f in Path(tmp).glob('*.o'))
 
-                        flags = ['--relocatable']
+                        flags = ld_call[1:] + ['--relocatable']
                         if self.config.target_arch == Architecture.X86:
                             flags.extend(['-m', 'i386pe'])
                         flags.extend(f'--export-dynamic-symbol={i}' for i in symbols_to_keep)
