@@ -107,7 +107,7 @@ class Package(Command):
                 ArgparseArgument(
                     '--compress-method',
                     type=str,
-                    choices=['default', 'xz', 'bz2', 'none'],
+                    choices=['default', 'xz', 'bz2', 'zst', 'none'],
                     default='default',
                     help=_('Select compression method for tarballs'),
                 ),
