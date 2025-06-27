@@ -352,6 +352,8 @@ class Recipe(recipe.Recipe):
                         files = set(str(f.relative_to(tmp)) for f in Path(tmp).glob('*.o'))
 
                         flags = ['--relocatable']
+                        if self.config.target_arch == Architecture.X86:
+                            flags.extend(['-m', 'i386pe'])
                         flags.extend(f'--export-dynamic-symbol={i}' for i in symbols_to_keep)
                         flags.extend(['-o', prelinked_obj.name])
                         flags.extend(files)
