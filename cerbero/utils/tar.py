@@ -14,11 +14,12 @@ class Tar:
         BZ2 = 'bz2'
         XZ = 'xz'
         TAR = 'tar'
+        ZSTD = 'zst'
 
     STOCK_TAR = 'tar'
     HOMEBREW_TAR = 'gtar'
     MSYS_BSD_TAR = 'bsdtar'
-    TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
+    TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz', 'tar.zst', 'tar.zstd')
 
     def __init__(self, filename):
         self.filename = filename
@@ -29,7 +30,7 @@ class Tar:
         self.compress = compress
         if not self.compress:
             self.compress = config.package_tarball_compression
-        if self.compress not in (Tar.Compression.TAR, Tar.Compression.BZ2, Tar.Compression.XZ):
+        if self.compress not in (Tar.Compression.TAR, Tar.Compression.BZ2, Tar.Compression.XZ, Tar.Compression.ZSTD):
             raise UsageError('Invalid compression type {!r}'.format(self.compress))
         self.prefix = files_prefix
         return self
@@ -73,6 +74,11 @@ class Tar:
             compress_cmd = ['bzip2']
         elif self.compress == Tar.Compression.XZ:
             compress_cmd = ['xz', '--verbose', '--threads', '0']
+        elif self.compress == Tar.Compression.ZSTD:
+            # level 18 takes roughly as much (3m 20s) as XZ
+            # to compress a whole Windows MinGW tarball pair
+            # (Ryzen 7 2700x on Windows 10, NVMe drive)
+            compress_cmd = ['zstd', '-T0', '-18']
 
         if not compress_cmd:
             raise RuntimeError('Unspecified compression algorithm')
@@ -142,6 +148,14 @@ class Tar:
                     tar_cmd += ['--use-compress-program=xz -T0']
                 else:
                     tar_cmd += ['--xz']
+        elif self.compress == Tar.Compression.ZSTD:
+            # zst is MSYS2's default compression algorithm
+            if tar == Tar.MSYS_BSD_TAR:
+                tar_cmd += ['--zstd', '--options', 'zstd:threads=0,zstd:compression-level=18']
+            elif shutil.which('zstd'):
+                tar_cmd += ['--use-compress-program=zstd -T0 -18']
+            else:
+                raise UsageError('zstd is not available in the PATH')
 
         tar_cmd += ['-cf', tar_filename]
         with tempfile.TemporaryDirectory() as d:
