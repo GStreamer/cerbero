@@ -516,7 +516,6 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('frei0r', 'effects', dep='frei0r-plugins')
 
         if self.config.target_platform == Platform.WINDOWS:
-            self.meson_options['wasapi2'] = 'disabled'
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['d3d11'] = 'enabled'
@@ -526,8 +525,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
             if self.using_msvc():
-                self.enable_plugin('wasapi2', 'sys', 'visualstudio')
-                # This dll is used by wasapi2 and mediafoundation UWP build
+                # This dll is used by mediafoundation UWP build
                 self.files_libs += ['libgstwinrt-1.0']
                 # WIC plugin supports only MSVC built for now
                 self.enable_plugin('wic', 'codecs')
@@ -573,6 +571,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('qt6d3d11', 'qt6', 'qt6')
             self.enable_plugin('asio', 'sys')
             self.enable_plugin('mediafoundation', 'sys')
+            self.enable_plugin('wasapi2', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
@@ -616,6 +615,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('directsoundsrc', 'capture', option='directsound')
             self.disable_plugin('directshow', 'sys')
             self.disable_plugin('wasapi', 'sys')
+            self.disable_plugin('wasapi2', 'sys')
             self.disable_plugin('win32ipc', 'sys')
             self.disable_plugin('winscreencap', 'capture')
             self.disable_plugin('winks', 'capture')
