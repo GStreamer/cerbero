@@ -44,8 +44,8 @@ class Recipe(recipe.Recipe):
         vspropsdir =  os.path.join(self.config.prefix, self.vsprefix, 'libs')
         if not os.path.exists(vspropsdir):
             os.makedirs(vspropsdir)
-        # genvsprops = GenVSProps()
-        # genvsprops.runargs(self.config, vspropsdir, env_var, logfile=self.logfile)
+        genvsprops = GenVSProps()
+        genvsprops.runargs(self.config, vspropsdir, env_var, logfile=self.logfile)
         # Copy msvc
         propsdir = os.path.join(self.config.prefix, self.vsprefix, 'msvc')
         if not os.path.exists(propsdir):
