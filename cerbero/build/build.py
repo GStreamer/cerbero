@@ -26,7 +26,7 @@ from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
-from cerbero.utils import shell, add_system_libs, determine_num_cargo_jobs
+from cerbero.utils import shell, add_system_libs, default_cargo_build_jobs
 from cerbero.utils import messages as m
 
 
@@ -1373,8 +1373,11 @@ class Cargo(Build, ModifyEnvBase):
             self.library_type = LibraryType.STATIC
 
     def num_of_cpus(self):
+        cpus = self.config.cargo_build_jobs
+        if not cpus:
+            cpus = self.config.num_of_cpus
         if self.config.allow_parallel_build and getattr(self, 'allow_parallel_build', True):
-            return min(determine_num_cargo_jobs(), self.config.num_of_cpus)
+            return min(default_cargo_build_jobs(), cpus)
         return 1
 
     def get_cargo_args(self):

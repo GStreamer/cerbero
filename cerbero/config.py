@@ -264,6 +264,7 @@ class Config(object):
         'allow_parallel_build',
         'allow_universal_parallel_build',
         'num_of_cpus',
+        'cargo_build_jobs',
         'use_configure_cache',
         'packages_prefix',
         'packager',
@@ -668,6 +669,7 @@ class Config(object):
             target_distro = Distro.WINDOWS
         self.set_property('platform', platform)
         self.set_property('num_of_cpus', num_of_cpus)
+        self.set_property('cargo_build_jobs', None)
         self.set_property('target_platform', platform)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)

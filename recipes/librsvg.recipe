@@ -3,7 +3,7 @@
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import messages as m
-from cerbero.utils import shell, to_winpath
+from cerbero.utils import default_cargo_build_jobs, shell, to_winpath
 from pathlib import Path
 import re
 import shlex
@@ -121,7 +121,11 @@ class Recipe(recipe.Recipe):
     async def compile(self):
         # This recipe mixes Meson with Rust!
         # Pass through the number of Ninja jobs as an upper limit
-        self.set_env('CARGO_BUILD_JOBS', f'{self.num_of_cpus()}')
+        cpus = self.config.cargo_build_jobs
+        if not cpus:
+            cpus = self.num_of_cpus()
+        cpus = min(default_cargo_build_jobs(), cpus)
+        self.set_env('CARGO_BUILD_JOBS', f'{cpus}')
         await super().compile()
 
     def post_install(self):

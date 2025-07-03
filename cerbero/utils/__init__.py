@@ -92,7 +92,7 @@ def determine_num_of_cpus() -> int:
 
 
 @functools.lru_cache()
-def determine_num_cargo_jobs():
+def default_cargo_build_jobs():
     """
     Returns 1 if <= 4 threads or with <= 8 GB RAM.
     """
