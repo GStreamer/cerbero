@@ -715,7 +715,7 @@ class CMake(MakefilesBase):
         '-DCMAKE_INSTALL_INCLUDEDIR=include',
         '%(options)s',
         '-DCMAKE_BUILD_TYPE=Release',
-        '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX',
+        '-DCMAKE_FIND_ROOT_PATH=%(prefix)s',
         '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true',
     ]
 
