@@ -39,6 +39,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.configure_options.append(f'-DOPENSSL_ROOT_DIR={self.config.prefix}')
+        includedir = Path(self.config.prefix) / 'include'
+        self.configure_options.append(f'-DOPENSSL_INCLUDE_DIR={includedir}')
         self.configure_options.append(f'-DZLIB_ROOT={self.config.prefix}')
 
     async def install(self):
