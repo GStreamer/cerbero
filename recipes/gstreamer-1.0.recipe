@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+
 from cerbero.enums import Symbolication
 
 
@@ -41,6 +44,8 @@ class Recipe(custom.GStreamer):
             '%(libdir)s/pkgconfig/gstreamer-controller-1.0.pc',
             '%(libdir)s/pkgconfig/gstreamer-net-1.0.pc',
             'share/cmake/FindGStreamer.cmake',
+            'share/cmake/FindGStreamerMobile.cmake',
+            'share/cmake/gstreamer_mobile_makedef.py',
     ]
 
     files_lang = ['gstreamer-1.0']
@@ -89,3 +94,16 @@ class Recipe(custom.GStreamer):
         # Generate the plugin cache only if the executable is runnable
         if self.config.prefix_is_executable():
             self.files_bins += ['gst-preregistry-generate']
+
+    async def post_install(self):
+        dest_dir = os.path.join(self.config.prefix, 'share', 'cmake')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'FindGStreamerMobile.cmake'),
+            dest_dir
+        )
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'gstreamer_mobile_makedef.py'),
+            dest_dir
+        )
