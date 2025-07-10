@@ -1,4 +1,10 @@
-*.recipe gitlab-language=python
-*.package gitlab-language=python
-*.config gitlab-language=python
-*.cbc gitlab-language=python
+*.recipe text=auto eol=lf gitlab-language=python
+*.package text=auto eol=lf gitlab-language=python
+*.config text=auto eol=lf gitlab-language=python
+*.cbc text=auto eol=lf gitlab-language=python
+*.py text=auto eol=lf
+*.patch text=auto eol=lf
+*.crt text=auto eol=lf
+*.lock text=auto eol=lf
+data/vs-1.0 text=auto eol=crlf
+data/wix text=auto eol=crlf

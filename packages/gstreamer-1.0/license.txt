@@ -1,4 +1,4 @@
-﻿Installer, default installation: The installer (Microsoft Windows
+Installer, default installation: The installer (Microsoft Windows
 and MacOSX) and the default installation (GNU/Linux) contain and
 install the minimal default installation. At install time or later,
 the downloading of optional components is also possible, but read on
