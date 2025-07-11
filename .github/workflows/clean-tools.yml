@@ -1,0 +1,21 @@
+name: Clean Build Tools
+on:
+  workflow_dispatch:
+
+jobs:
+  clean:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        target: [arm64, x86_64]
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v4
+      - name: Setup Cerbero
+        uses: ./.github/actions/setup-cerbero
+        with:
+          target_arch: ${{ matrix.target }}
+      - name: Clean Build Tools
+        run: |
+          ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
+            wipe --keep-sources --build-tools --force

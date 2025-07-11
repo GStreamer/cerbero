@@ -12,11 +12,6 @@ on:
           - 'dry-run'
           - 'skip'
           - 'yes'
-      clean_build_tools:
-        description: 'Clean build-tools'
-        required: true
-        type: boolean
-        default: false
   pull_request:
     types:
       - opened
@@ -36,22 +31,10 @@ jobs:
     steps:
       - name: Fetch source code
         uses: actions/checkout@v4
-      - name: Configure Cerbero
-        run: |
-          ANDROID_ARCH=${{ matrix.target }}
-          ANDROID_ARCH=${ANDROID_ARCH//_/-}
-          tee -a $GITHUB_ENV <<< "ANDROID_ARCH=$ANDROID_ARCH"
-          tee -a $GITHUB_ENV <<< "ANDROID_CONFIG=config/cross-android-$ANDROID_ARCH.cbc"
-          tee local.cbc <<EOF
-          use_ccache = True
-          local_sources = "$HOME/cerbero-sources"
-          home_dir = "$HOME/cerbero-build-$ANDROID_ARCH"
-          EOF
-      - name: Clean build tools
-        if: ${{ inputs.clean_build_tools }}
-        run: |
-          ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
-            wipe --keep-sources --build-tools --force
+      - name: Setup Cerbero
+        uses: ./.github/actions/setup-cerbero
+        with:
+          target_arch: ${{ matrix.target }}
       - name: Bootstrap Cerbero
         run: |
           ./cerbero-uninstalled -t -c local.cbc -c "${ANDROID_CONFIG}" \
