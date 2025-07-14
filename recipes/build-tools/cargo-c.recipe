@@ -13,6 +13,10 @@ class Recipe(recipe.Recipe):
     # Need system openssl on Linux
     use_system_libs = True
 
+    patches = [
+        f'{name}/0001-Fix-Windows-libdir-paths.patch'
+    ]
+
     deps = ['zlib', 'pkg-config']
     # Need openssl on macOS. On Windows, a prebuilt openssl crate is downloaded.
     platform_deps = {
