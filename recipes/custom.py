@@ -169,6 +169,9 @@ def list_gstreamer_1_0_plugins_by_category(config):
                 # Only pick static libs
                 if not e.endswith('.a'):
                     continue
+                # and skip the melded gst-plugins-rs library
+                if 'rsworkspace' in e:
+                    continue
                 if e.startswith('libgst'):
                     e = e[6:-2]
                 else:

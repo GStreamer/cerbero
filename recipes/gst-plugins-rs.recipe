@@ -1,13 +1,13 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer, running_on_cerbero_ci
-from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import DistroVersion
 from cerbero.errors import FatalError
+from cerbero.tools.pkgconfig import PkgConfigWriter
 from cerbero.utils import messages as m
 from cerbero.utils import shell, default_cargo_build_jobs, determine_total_ram
-from pathlib import Path
 
 import os
+from pathlib import Path
 import re
 import shutil
 import tempfile
@@ -90,6 +90,8 @@ class Recipe(recipe.Recipe):
     # Needed for openssl
     use_system_libs = True
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
+
+    files_libs = []
 
     def enable_plugin(self, name, category):
         if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
@@ -222,7 +224,13 @@ class Recipe(recipe.Recipe):
             self.set_env('LDFLAGS')
             self.set_env('LIBRARY_PATH')
 
+        self.workspace_lib = Path(self.config.libdir) / 'gstreamer-1.0' / 'libgstrsworkspace.a'
+        self.workspace_pc = Path(self.config.libdir) / 'gstreamer-1.0' / 'pkgconfig' / 'gstrsworkspace.pc'
+
         if self.config.platform == Platform.WINDOWS:
+            # Append the melded library
+            self.files_plugins_core_devel.append('%(libdir)s/gstreamer-1.0/libgstrsworkspace.a')
+            self.files_plugins_core_devel.append('%(libdir)s/gstreamer-1.0/pkgconfig/gstrsworkspace.pc')
             # For bindgen if it's needed
             self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
             # For aws-lc-rs -- uses CMake in the background
@@ -271,26 +279,21 @@ class Recipe(recipe.Recipe):
                 f.write(f"include({self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake)")
         await super().configure()
 
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+        self.workspace_lib.unlink(missing_ok=True)
+
     def post_install(self):
         # Cargo-C currently can't install pc files into custom dirs, so we need
         # to move these plugin pkgconfig files to the right place.
         for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
-            if not f.endswith('.pc') or 'gstreamer-1.0' not in f:
+            if not f.endswith('.pc') or 'gstreamer-1.0' not in f or 'gstrsworkspace' in f:
                 continue
             name = os.path.basename(f)
             src = os.path.join(self.config.libdir, 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             if os.path.exists(src):
                 shutil.move(src, dst)
-                if self.config.target_platform == Platform.WINDOWS:
-                    lines = []
-                    with open(dst, 'r', encoding='utf-8') as f:
-                        lines = f.readlines()
-                    # Patch up Rust's leakage of windows-sys prebuilt lib
-                    # https://github.com/rust-lang/cargo/issues/15748
-                    lines = [re.sub(r'-lwindows[0-9.]+', '-lsecur32 -lcrypt32 -lncrypt', line) for line in lines]
-                    with open(dst, 'w', encoding='utf-8') as f:
-                        f.writelines(lines)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         # It also follows MSVC convention for static/import libraries
@@ -543,5 +546,62 @@ class Recipe(recipe.Recipe):
 
                         # And now we paper over
                         os.replace(dest.absolute(), source.absolute())
+
+        if self.config.target_platform == Platform.WINDOWS:
+            for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
+                if not f.endswith('.pc') or 'gstreamer-1.0' not in f:
+                    continue
+                # Files have already been moved!
+                src = Path(self.config.prefix, f)
+                with src.open('r', encoding='utf-8') as f:
+                    pc_file = f.read()
+                # Patch up Rust's leakage of windows-sys prebuilt lib,
+                # the import files are already inserted inside the static libs
+                # https://github.com/rust-lang/cargo/issues/15748
+                pc_file = re.sub(r'-lwindows[0-9.]+', '', pc_file)
+                # winapi crate imports under MinGW
+                pc_file = re.sub(r'-lwinapi_', '-l', pc_file)
+                if self.library_type in (LibraryType.STATIC, LibraryType.BOTH):
+                    # Inject our substitute Rust workspace library
+                    if re.search(r'Requires.private:\s+\w', pc_file):
+                        pc_file = pc_file.replace('Requires.private:', 
+                        'Requires.private: gstrsworkspace,')
+                    else:
+                        pc_file = pc_file.replace('Requires.private:', 'Requires.private: gstrsworkspace')
+                with src.open('w', encoding='utf-8') as f:
+                    f.write(pc_file)
+
+            if self.library_type in (LibraryType.STATIC, LibraryType.BOTH):
+                libs = '-L${libdir}/gstreamer-1.0 -lgstrsworkspace'
+                # Inject default libraries to cover inclusions from stdlib.
+                # The linker will seamlessly remove any unused ones.
+                # (May need to be altered in the future!)
+                # Note: I'm sure GCC complains if these are missing, adding
+                # them to MSVC is placebo because of the below flag
+                libs += ' -lws2_32 -lntdll -lsecur32 -lcrypt32 -lncrypt -luserenv '
+                if self.config.variants.visualstudio:
+                    # MSVC first resolves functions, then prunes the COMDATs.
+                    # However, with melded libraries rsworkspace will introduce
+                    # unneeded imports. This will guarantee that the prune passes.
+                    libs += ' /FORCE:UNRESOLVED '
+
+                PkgConfigWriter(
+                    'gstrsworkspace',
+                    'gst-plugins-rs workspace library',
+                    self.version,
+                    self.config.prefix,
+                    libs=libs,
+                    rel_libdir=self.config.rel_libdir
+                ).save('gstrsworkspace', str(self.workspace_pc.parent))
+
+                self.workspace_lib.unlink(missing_ok=True)
+
+                files = [f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False) if f.endswith('.a') and 'gstrsworkspace' not in f]
+
+                dragonfire = os.path.join(self.config.build_tools_prefix, 'bin', 'dragonfire')
+
+                shell.new_call(
+                    [dragonfire, '-o', self.workspace_lib, '-f', 'coff', *files], cmd_dir=self.config.prefix, logfile=self.logfile, env=self.env
+                )
 
         super().post_install()

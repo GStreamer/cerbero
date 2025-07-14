@@ -23,6 +23,7 @@ import inspect
 import asyncio
 from functools import reduce
 from pathlib import Path
+import re
 
 from cerbero.enums import License, LicenseDescription
 from cerbero.build import build, source
@@ -514,6 +515,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
             'gstwebrtcnice-1.0': 'gstreamer-webrtc-nice-1.0',
             'gstdxva-1.0': None,
             'gstd3dshader-1.0': None,
+            # Melded library for gst-plugins-rs, not a plugin
+            # but also not an ABI component of gstreamer
+            'gstrsworkspace': 'gstrsworkspace',
         }
         generated_libs = []
 
@@ -555,7 +559,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 if not pcname:
                     continue
 
-                minor, micro = map(int, self.version.split('.')[1:3])
+                # gst-plugins-rs and x264 have components with non-number chars
+                minor, micro = map(int, map(lambda s: re.match(r'([0-9]+)', s).group(0), self.version.split('.')[1:3]))
                 minor = minor * 100 + micro
                 major = micro = 0
 

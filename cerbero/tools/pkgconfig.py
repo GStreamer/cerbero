@@ -19,7 +19,7 @@
 import os
 
 
-class PkgConfigWritter(object):
+class PkgConfigWriter(object):
     VARIABLES_TPL = """\
 prefix=%(prefix)s
 exec_prefix=${prefix}
@@ -43,7 +43,9 @@ Cflags: %(cflags)s
     rel_incldir = 'include'
     rel_sharedir = 'share'
 
-    def __init__(self, name, desc, version, req, libs, cflags, prefix, rel_libdir='lib'):
+    def __init__(
+        self, name, desc, version, prefix, req='', libs='', cflags='', libs_priv='', req_priv='', rel_libdir='lib'
+    ):
         self.name = name
         self.desc = desc
         self.version = version
@@ -51,14 +53,14 @@ Cflags: %(cflags)s
         self.libs = libs
         self.cflags = cflags
         self.prefix = prefix
-        self.libs_priv = ''
-        self.req_priv = ''
+        self.libs_priv = libs_priv
+        self.req_priv = req_priv
         self.rel_libdir = rel_libdir
 
     def save(self, name, pkgconfigdir):
         variables = self._get_variables()
         body = self._get_body()
-        with open(os.path.join(pkgconfigdir, '%s.pc' % name), 'w+') as f:
+        with open(os.path.join(pkgconfigdir, f'{name}.pc'), 'w', encoding='utf-8') as f:
             f.write(variables)
             f.write(body)
 
