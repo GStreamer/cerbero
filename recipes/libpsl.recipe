@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'https://github.com/rockdaboot/libpsl/releases/download/libpsl-%(version)s/libpsl-%(version)s.tar.gz'
     tarball_checksum = '41bd1c75a375b85c337b59783f5deb93dbb443fb0a52d257f403df7bd653ee12'
-    meson_options = {'runtime': 'no', 'builtin': 'no'}
+    meson_options = {'runtime': 'no', 'builtin': False}
 
     patches = [
         # Taken from upstream git tag 0.21.0
@@ -33,6 +33,9 @@ class Recipe(recipe.Recipe):
         # all, or to have an option to disable building of tests.
         if self.config.target_platform == Platform.IOS:
             self.patches += ['libpsl/0002-meson-Do-not-build-tests-on-iOS.patch']
+        elif self.config.target_platform == Platform.ANDROID:
+            self.meson_options.update({'builtin': 'libicu', 'runtime': 'libicu'})
+            self.deps.append('icu')
 
     def post_install(self):
         libtool_la = LibtoolLibrary('psl', 0, 0, 0, self.config.libdir,
