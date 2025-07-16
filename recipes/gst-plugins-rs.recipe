@@ -12,14 +12,13 @@ import tempfile
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
-    version = '0.14.0-alpha.1'
+    version = '0.14.0'
     stype = SourceType.GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
     if GStreamer.tagged_for_release:
         commit = f'gstreamer-{GStreamer.version}'
     else:
-        # For 1.26 we'll track the main branch until it branches for 0.14
-        commit = 'origin/main'
+        commit = 'origin/0.14'
     # Each plugin uses one or more of these licenses.
     licenses = [{
         License.Apachev2: ['LICENSE-APACHE'],
