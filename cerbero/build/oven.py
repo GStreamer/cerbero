@@ -24,7 +24,7 @@ import asyncio
 import collections
 from subprocess import CalledProcessError
 
-from cerbero.enums import Platform, LibraryType
+from cerbero.enums import LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import N_, shell, run_tasks, determine_num_of_cpus
@@ -110,10 +110,7 @@ class Oven(object):
         self.steps_filter = steps_filter
         if not self.jobs:
             self.jobs = determine_num_of_cpus()
-        if self.config.platform == Platform.WINDOWS:
-            self._build_lock = asyncio.Semaphore(self.jobs / 2)
-        else:
-            self._build_lock = asyncio.Semaphore(2)
+        self._build_lock = asyncio.Semaphore(2)
         # Add a separate lock for Rust tasks that will
         # be required if only one concurrent job is allowed.
         self._architecture_lock = asyncio.Semaphore(1)
@@ -359,30 +356,20 @@ class Oven(object):
         if self.jobs > 4:
             queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue()
             job_allocation[BuildSteps.COMPILE[1]] = 2
-        if self.jobs > 5:
-            job_allocation[BuildSteps.COMPILE[1]] = 3
-            if self.config.platform == Platform.WINDOWS:
-                # On Windows, the majority of our recipes use GNU make or
-                # nmake, both of which are run with -j1, so we need to increase
-                # the job allocation since we can run more of them in parallel
-                job_allocation[BuildSteps.COMPILE[1]] = self.jobs // 2
         if self.jobs > 7:
             install_queue = asyncio.PriorityQueue()
             for step in install_steps:
                 queues[step] = install_queue
             job_allocation[BuildSteps.INSTALL[1]] = 1
         if self.jobs > 8:
-            # Extract on windows is slow because we use tarfile for it, so we
-            # can parallelize it. On other platforms, decompression is pretty
-            # fast, so we shouldn't parallelize.
-            if self.config.platform != Platform.WINDOWS:
-                job_allocation[BuildSteps.EXTRACT[1]] = 1
-                queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue()
+            job_allocation[BuildSteps.EXTRACT[1]] = 1
+            queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue()
         if self.jobs > 9:
             # Two jobs is the same allocation as fetch-package/bootstrap, which
             # is a good idea to avoid getting bottlenecked if one of the
             # download mirrors is slow.
             job_allocation[BuildSteps.FETCH[1]] = 2
+            job_allocation[BuildSteps.COMPILE[1]] = 3
             queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue()
 
         # async locks used to synchronize step execution
