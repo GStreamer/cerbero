@@ -43,7 +43,7 @@ class RecoveryActions(object):
     SKIP = N_('Skip recipe')
     ABORT = N_('Abort')
 
-    def __new__(klass):
+    def __new__(cls):
         return [
             RecoveryActions.SHELL,
             RecoveryActions.RETRY_ALL,
@@ -106,10 +106,8 @@ class Oven(object):
         self.interactive = self.config.interactive
         self.deps_only = deps_only
         shell.DRY_RUN = dry_run
-        self.jobs = jobs
+        self.jobs = jobs or determine_num_of_cpus()
         self.steps_filter = steps_filter
-        if not self.jobs:
-            self.jobs = determine_num_of_cpus()
         self._build_lock = asyncio.Semaphore(2)
         # Add a separate lock for Rust tasks that will
         # be required if only one concurrent job is allowed.
@@ -392,7 +390,7 @@ class Oven(object):
                 used_steps.extend(install_steps)
                 install_done = True
             else:
-                for i in range(count):
+                for _ in range(count):
                     tasks.append(asyncio.ensure_future(cook_recipe_worker(queues[step], [step])))
                 used_steps.append(step)
             used_jobs += count
@@ -419,7 +417,7 @@ class Oven(object):
             sys.stdout,
         )
 
-        for i in range(self.jobs - used_jobs):
+        for _ in range(self.jobs - used_jobs):
             tasks.append(asyncio.ensure_future(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
 
         async def recipes_done():
