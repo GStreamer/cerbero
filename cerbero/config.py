@@ -849,6 +849,8 @@ class Config(object):
         self.build_tools_config.cached_sources = self.cached_sources
         self.build_tools_config.vs_install_path = self.vs_install_path
         self.build_tools_config.vs_install_version = self.vs_install_version
+        self.build_tools_config.cargo_build_jobs = self.cargo_build_jobs
+        self.build_tools_config.num_of_cpus = self.num_of_cpus
 
         self.build_tools_config.do_setup_env()
 
