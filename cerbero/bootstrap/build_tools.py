@@ -75,6 +75,9 @@ class BuildTools(BootstrapperBase, Fetch):
         if self.config.target_platform == Platform.WINDOWS and self.config.platform == Platform.LINUX:
             self.BUILD_TOOLS.append('wix')
 
+        if self.config.variants.rust:
+            self.BUILD_TOOLS.append('dragonfire')
+
         self.BUILD_TOOLS += self.config.extra_build_tools
 
     def check_build_tools(self):

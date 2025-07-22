@@ -1,0 +1,12 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'dragonfire'
+    version = '0.1.2'
+    stype = SourceType.GIT
+    btype = BuildType.CARGO
+    licenses = [{License.MPLv2: ['LICENSE.md']}]
+    remotes = {'origin': 'https://gitlab.freedesktop.org/amyspark/dragonfire.git'}
+    commit = 'v0.1.2'
+
+    files_bins = ['dragonfire']
