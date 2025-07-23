@@ -5,12 +5,12 @@ from cerbero.errors import FatalError
 from cerbero.tools.pkgconfig import PkgConfigWriter
 from cerbero.utils import messages as m
 from cerbero.utils import shell
+from cerbero.utils.rust import Prelink
 
 import os
 from pathlib import Path
 import re
 import shutil
-import tempfile
 
 
 class Recipe(recipe.Recipe):
@@ -116,7 +116,9 @@ class Recipe(recipe.Recipe):
             ]
 
     def requires_melding(self):
-        return not Platform.is_apple(self.config.target_platform) and self.library_type in (LibraryType.STATIC, LibraryType.BOTH)
+        if Platform.is_apple(self.config.target_platform):
+            return False
+        return self.library_type in (LibraryType.STATIC, LibraryType.BOTH)
 
     def prepare(self):
         if Platform.is_app_platform(self.config.target_platform):
@@ -421,122 +423,15 @@ class Recipe(recipe.Recipe):
                 src = Path(self.config.prefix, f)
                 bak = src.with_suffix('.bak')
                 bak.unlink(missing_ok=True)
-        # CAVEAT: on Apple platforms, compiler_builtins (and any other
-        # crate mistakenly built with LTO enabled) will contain LLVM
-        # bitcode, causing usages of eg. stock (pre Xcode 16) nm to emit
-        # spam like:
-        # /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm: error: /tmp/GStreamer(libgstrsworkspace_a-compiler_builtins-3ec2bc050946f0ab.compiler_builtins.f12b8f9133eedb91-cgu.012.rcgu.o): Unknown attribute kind (91) (Producer: 'LLVM20.1.7-rust-1.89.0-stable' Reader: 'LLVM APPLE_1_1600.0.26.3_0')
-        # /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm: error: /tmp/GStreamer(libgstrsworkspace_a-compiler_builtins-3ec2bc050946f0ab.compiler_builtins.f12b8f9133eedb91-cgu.069.rcgu.o): Invalid attribute group entry (Producer: 'LLVM20.1.7-rust-1.89.0-stable' Reader: 'LLVM APPLE_1_1600.0.26.3_0')
-        # Furthermore, if one tries to link to a melded library, AppleClang ld
-        # will refuse to with cryptical errors like:
-        # ld: multiple errors: compact unwind must have at least 1 fixup in '<framework>/GStreamer[arm64][1021](libgstrsworkspace_a-3f2b47962471807d-lse_ldset4_acq.o)'; r_symbolnum=-19 out of range in '<framework>/GStreamer[arm64][1022](libgstrsworkspace_a-compiler_builtins-350c23344d78cfbc.compiler_builtins.5e126dca1f5284a9-cgu.162.rcgu.o)'
-        elif Platform.is_apple(self.config.target_platform):
+        elif self.config.target_subsystem == Subsystem.MACOS:
             libraries = [f for f in self.devel_files_list(only_existing=False)
                          if f.endswith('.a')]
+            prelinker = Prelink(self.config, self.env, self.logfile)
             for f in libraries:
-                # Apple wants you to do Single-Object Prelink
-                source = Path(self.config.prefix) / f
-
-                # Only global symbols
-                # Only symbol names
-                # Use portable output format
-                # Skip undefined symbols
-                # Write pathname of the object file
-                manifest = shell.check_output(
-                    [self.get_llvm_tool("llvm-nm"), "-gjPUA", "--quiet", source.absolute()],
-                    env=self.env,
-                )
-
-                # Now we need to match the symbols to the pattern
-
-                # Here's the catch: Apple strip is silly enough to be unable to
-                # -undefined suppress a .o because of the -two_level_namespace being
-                # the default post-10.1. So we need to determine which objects have
-                # matching symbols. The rest can be safely stripped.
-
-                # The symbol listing format is as follows:
-                #  ./libgstrswebrtc.a[gstrswebrtc-3a8116aacab254c2.2u9b7sba8k2fvc9v.rcgu.o]: _gst_plugin_rswebrtc_get_desc T 500 0
-                # Field 1 has the object name between brackets.
-                # Field 2 is the symbol name.
-                symbol_pattern = re.compile('_gst_plugin_*')
-
-                with tempfile.TemporaryDirectory(prefix='cerbero', dir=self.config.home_dir) as tmp:
-                    # List those symbols that will be kept
-                    symbols_to_keep = set()
-
-                    for line in manifest.splitlines():
-                        data = line.split(sep=" ")
-                        symbol = data[1]
-
-                        if symbol_pattern.match(symbol):
-                            symbols_to_keep.add(symbol)
-
-                    module = (
-                        Path(tmp) / source.name).with_suffix('.symbols')
-
-                    with module.open('w', encoding='utf-8') as f:
-                        f.write('# Stripped by Cerbero\n')
-
-                        for symbol in symbols_to_keep:
-                            f.write(f'{symbol}\n')
-
-                    m.log(
-                        f"Symbols to preserve in {source.absolute()}:", self.logfile
-                    )
-                    for symbol in symbols_to_keep:
-                        m.log(f"\t{symbol}", self.logfile)
-
-                    # Unpack archive
-                    m.log(f"Unpacking {source.absolute()} with ar", self.logfile)
-                    shell.new_call(
-                        [shutil.which('ar'), 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
-
-                    # Now everything is flat in the pwd
-                    m.log("Performing Single-Object Prelinking", self.logfile)
-                    prelinked_obj = (
-                        Path(tmp) / source.name).with_suffix('.prelinked.o')
-
-                    ld = shutil.which("ld")
-
-                    if ld is None:
-                        raise FatalError(f'ld not found')
-
-                    # DO NOT split this into an array unless
-                    # you wrap this into a 'sh -c' call.
-                    # It needs the glob to be parsed by the shell!
-                    shell.new_call(
-                        ' '.join([
-                            ld,
-                            "-r",
-                            "-exported_symbols_list",
-                            str(module.absolute()),
-                            "-o",
-                            str(prelinked_obj.absolute()),
-                            "*.o",
-                        ]),
-                        cmd_dir=tmp,
-                        logfile=self.logfile,
-                    )
-
-                    # With the stripping done, all files now need to be rearchived
-                    dest = Path(tmp) / source.name
-                    m.log(f"Repacking library to {dest.absolute()}", self.logfile)
-
-                    libtool = shutil.which("libtool")
-
-                    if libtool is None:
-                        raise FatalError(f'libtool not found')
-
-                    shell.new_call([
-                            libtool,
-                            "-static",
-                            prelinked_obj.absolute(),
-                            "-o",
-                            dest.absolute(),
-                        ],
-                        cmd_dir=tmp,
-                        logfile=self.logfile,
-                    )
-
-                    # And now we paper over
-                    os.replace(dest.absolute(), source.absolute())
+                prelinker.prelink(f, '_gst_plugin_*')
+            pc_files = [
+                f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False)
+                if f.endswith('.pc') and 'gstreamer-1.0' in f
+            ]
+            for f in pc_files:
+                prelinker.patch_pkgconfig(f)

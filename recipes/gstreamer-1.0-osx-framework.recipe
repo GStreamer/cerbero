@@ -31,6 +31,9 @@ class Recipe(recipe.Recipe):
             # Not a gstreamer library pkgconfig file
             if 'gstreamer-plugins-' in gstlib:
                 continue
+            # Do not inject the melded gst-plugins-rs library
+            if 'rsworkspace' in gstlib:
+                continue
             gstlibs.append(gstlib)
         return gstlibs
 

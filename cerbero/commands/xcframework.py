@@ -91,6 +91,9 @@ class XCFramework(Command):
         dst = Path(output_dir) / f'gstreamer-{version}-xcframework.tar.xz'
 
         tmp = Path(tempfile.mkdtemp(prefix='xcframework-', dir=output_dir))
+        # Calm Git if you're running this interactively
+        with (tmp / '.gitignore').open('w', encoding='utf-8') as f:
+            f.write('*\n')
         xcfw = tmp / 'GStreamer.xcframework'
         xcodebuild = [shutil.which('xcodebuild'), '-create-xcframework']
 
