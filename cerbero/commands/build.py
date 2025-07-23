@@ -63,7 +63,7 @@ class Build(Command):
                 '--steps',
                 '-s',
                 nargs='+',
-                action='store',
+                action='extend',
                 type=str,
                 help=_('List of steps to execute, instead of all build steps.'),
             ),
