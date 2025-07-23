@@ -25,9 +25,10 @@ import subprocess
 import asyncio
 import collections
 from collections import defaultdict
+from pathlib import Path
 
 from cerbero.config import Distro, Architecture
-from cerbero.errors import FatalError
+from cerbero.errors import CommandError, FatalError
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.utils import shell, run_tasks, run_until_complete
 from cerbero.utils import messages as m
@@ -192,10 +193,22 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
     async def _check_duplicated_symbols(self, file, tmpdir):
         syms = defaultdict(list)
-        symbols = (await shell.async_call_output(['nm', '-UA', file], tmpdir, env=self.env)).split('\n')
+        # Get llvm-nm if available (fixes Unknown attribute errors if the
+        # libraries include Rust code)
+        try:
+            root_dir = shell.check_output(['rustc', '--print', 'sysroot'], env=self.env).strip()
+            tools = list(Path(root_dir).glob('**/llvm-nm'))
+            if tools:
+                nm = tools[0]
+            else:
+                m.warning('llvm-nm not found, the check may fail if Rust objects are found!')
+                nm = 'nm'
+        except CommandError:
+            nm = 'nm'
+        symbols = await shell.async_call_output([nm, '-UA', '--quiet', file], tmpdir, env=self.env)
         # nm output is: test.o: 00000000 T _gzwrite
         # (filename, address, symbol type, symbols_name)
-        for s in symbols:
+        for s in symbols.splitlines():
             s = s.split(' ')
             if len(s) == 4 and s[2] == 'T':
                 syms[s[3]].append(s)
