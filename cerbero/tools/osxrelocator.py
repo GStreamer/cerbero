@@ -207,7 +207,7 @@ class OSXRelocator(object):
         if fileext == '.a' and 'ar archive' in filedesc:
             return False
 
-        return filedesc.startswith('Mach-O')
+        return filedesc.startswith('Mach-O') and 'companion' not in filedesc
 
 
 class Main(object):
