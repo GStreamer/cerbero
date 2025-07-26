@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     patches = ['libtool/0001-Add-support-for-weak_framework-linking-on-Darwin.patch',
                'libtool/0001-support-gcc-toolchain-argument.patch']
 
-    files_bin = ['bin/libtool', 'bin/libtoolize']
+    files_bins = ['libtool', 'libtoolize']
     files_libs = ['libltdl']
     files_share = ['share/libtool']
     files_aclocal = [

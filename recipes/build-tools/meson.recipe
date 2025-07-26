@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
         tarball_checksum = 'cd27277649b5ed50d19875031de516e270b22e890d9db65ed9af57d18ebc498d'
         patches = []
 
-    files_bin = ['bin/meson']
+    files_bins = ['meson']
     files_python = []
 
     async def install(self):
