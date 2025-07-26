@@ -45,8 +45,8 @@ def abspath(path):
     return oldabspath(path).replace('\\', '/')
 
 
-def realpath(path):
-    return oldrealpath(path).replace('\\', '/')
+def realpath(path, **kwargs):
+    return oldrealpath(path, **kwargs).replace('\\', '/')
 
 
 def relpath(path, start=None):
