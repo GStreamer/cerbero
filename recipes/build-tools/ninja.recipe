@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '821bdff48a3f683bc4bb3b6f0b5fe7b2d647cf65d52aeb63328c91a6c6df285a'
     patches = ['ninja/0001-configure.py-Look-for-cl.exe-before-assuming-MSVC.patch']
 
-    files_bin = ['bin/ninja']
+    files_bins = ['ninja']
 
     def configure(self):
         shell.new_call([self.config.python_exe, 'configure.py', '--bootstrap', '--verbose'],

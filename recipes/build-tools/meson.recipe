@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
             f'{name}/0001-Python-Work-around-missing-rpath-in-Xcode-python3-em.patch'
         ]
 
-    files_bin = ['bin/meson']
+    files_bins = ['meson']
     files_python = []
 
     async def install(self):

@@ -11,6 +11,5 @@ class Recipe(recipe.Recipe):
     deps = ['autoconf', 'gettext-m4']
     use_msys_perl = True
 
-    files_bin = ['bin/automake', 'bin/aclocal',
-                 'bin/automake-1.15', 'bin/aclocal-1.15']
+    files_bins = ['automake', 'aclocal', 'automake-1.15', 'aclocal-1.15']
     files_share = ['share/aclocal-1.15', 'share/automake-1.15']
