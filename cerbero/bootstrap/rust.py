@@ -306,9 +306,7 @@ class RustBootstrapper(BootstrapperBase):
                 m.warning('Found broken symbolic link support: https://github.com/rust-lang/rustup/issues/4291')
                 symlinks = [f for f in cargo_bin.glob('*') if f.is_symlink()]
                 for f in symlinks:
-                    # TypeError: realpath() got an unexpected keyword argument 'strict'
-                    # Old 3.11 version in CI?
-                    src = os.path.realpath(str(f))
+                    src = f.resolve()
                     f.unlink()
                     shutil.copy(src, f)
 
