@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
+import shutil
+
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
@@ -39,6 +42,11 @@ class Recipe(recipe.Recipe):
             self.library_type = LibraryType.STATIC
 
     def post_install(self):
+        if self.using_msvc():
+            # svt-av1 has a separate (internal) build folder for binaries
+            bindir = Path(self.config.prefix, self.extensions['sdir']).as_posix()
+            for f in Path(self.config_src_dir, 'Bin').glob("**/*.pdb"):
+                shutil.copy(f.as_posix(), bindir)
         dependency_libs=[]
         if self.config.target_platform == Platform.ANDROID:
             dependency_libs += ['-lm']
