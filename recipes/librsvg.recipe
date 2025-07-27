@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
     licenses_bins = [License.GPLv2Plus]
-    files_loader = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader_svg%(srext)s']
+    files_plugins = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader_svg%(srext)s']
     files_devel = ['include/librsvg-2.0/librsvg/*.h',
                    '%(libdir)s/pkgconfig/librsvg-2.0.pc']
     #files_typelibs = ['Rsvg-2.0']
