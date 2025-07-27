@@ -295,13 +295,27 @@ class Recipe(recipe.Recipe):
         # https://github.com/lu-zero/cargo-c/issues/280
         # It also follows MSVC convention for static/import libraries
         if self.config.target_platform == Platform.WINDOWS:
-            for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
-                if not f.endswith('.a'):
-                    continue
-                dst = Path(self.config.prefix) / f
-                src = dst.with_name(f'{dst.stem[3:]}.lib')
-                if src.exists():
-                    shutil.copy(src, dst)
+            if self.config.variants.visualstudio:
+                for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
+                    if not f.endswith('.a'):
+                        continue
+                    dst = Path(self.config.prefix) / f
+                    src = dst.with_name(f'{dst.stem[3:]}.lib')
+                    if src.exists():
+                        shutil.copy(src, dst)
+            else:
+                for f in self.dist_files_list(only_existing=False):
+                    if not f.endswith('.dll'):
+                        continue
+                    name = os.path.basename(f)
+                    d = os.path.dirname(f)
+                    src = os.path.join(self.config.prefix, d, f'{name[3:]}')
+                    dst = os.path.join(self.config.prefix, f)
+                    if os.path.exists(src):
+                        shutil.copy(src, dst)
+                    # if there's a .dll.a it also needs renaming
+                    if os.path.exists(src + '.a'):
+                        shutil.copy(src + '.a', dst + '.a')
         else:
             for f in self.dist_files_list(only_existing=False):
                 if not f.endswith('.dll'):
