@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
-    files_devel = ['%(libdir)s/gio/modules/pkgconfig/gioopenssl.pc']
+    files_devel = []
 
     def prepare(self):
         # Glib doesn't support static libraries on Windows yet
@@ -30,6 +30,10 @@ class Recipe(recipe.Recipe):
         else:
             self.files_devel.append(
                 '%(libdir)s/gio/modules/libgioopenssl.a')
+            # Only generated when building the static module
+            self.files_devel.append(
+                '%(libdir)s/gio/modules/pkgconfig/gioopenssl.pc'
+            )
         # Pick system openssl if on Linux and not cross-compiling
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
