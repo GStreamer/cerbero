@@ -714,16 +714,18 @@ class CMake(MakefilesBase):
         '-DCMAKE_INSTALL_BINDIR=bin',
         '-DCMAKE_INSTALL_INCLUDEDIR=include',
         '%(options)s',
-        '-DCMAKE_BUILD_TYPE=Release',
         '-DCMAKE_FIND_ROOT_PATH=%(prefix)s',
         '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true',
     ]
+    # FIXME: set to RelWithDebInfo when implementing symbol shipping
+    build_variant = 'Release'
 
     def __init__(self):
         MakefilesBase.__init__(self)
         self.build_dir = os.path.join(self.build_dir, 'b')
         self.config_sh = 'cmake'
         self.configure_tpl.append(f'-DCMAKE_INSTALL_LIBDIR={self.config.rel_libdir}')
+        self.configure_tpl.append(f'-DCMAKE_BUILD_TYPE={self.build_variant}')
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
             self.config_sh = shutil.which('cmake', path=shell.get_path_minus_msys(self.env['PATH']))

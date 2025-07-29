@@ -35,8 +35,8 @@ class Recipe(recipe.Recipe):
             shutil.move(
                     os.path.join(self.config.libdir, 'jpeg-static.lib'),
                     os.path.join(self.config.libdir, 'libjpeg.a'))
-            shell.replace(f'{self.config.libdir}/cmake/libjpeg-turbo/libjpeg-turboTargets-release.cmake', {'lib/turbojpeg-static.lib:': 'lib/libturbojpeg.a'})
-            shell.replace(f'{self.config.libdir}/cmake/libjpeg-turbo/libjpeg-turboTargets-release.cmake', {'lib/jpeg-static.lib:': 'lib/libjpeg.a'})
+            shell.replace(f'{self.config.libdir}/cmake/libjpeg-turbo/libjpeg-turboTargets-{self.build_variant.lower()}.cmake', {'lib/turbojpeg-static.lib:': 'lib/libturbojpeg.a'})
+            shell.replace(f'{self.config.libdir}/cmake/libjpeg-turbo/libjpeg-turboTargets-{self.build_variant.lower()}.cmake', {'lib/jpeg-static.lib:': 'lib/libjpeg.a'})
 
     def post_install(self):
         # Meson does not generate la files

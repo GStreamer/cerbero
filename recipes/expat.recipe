@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
             shutil.move(
                     os.path.join(self.config.libdir, 'libexpat.lib'),
                     os.path.join(self.config.libdir, 'expat.lib'))
-            shell.replace(f'{self.config.libdir}/cmake/expat-{self.version}/expat-release.cmake', {'lib/libexpat.lib:': 'lib/expat.lib'})
+            shell.replace(f'{self.config.libdir}/cmake/expat-{self.version}/expat-{self.build_variant.lower()}.cmake', {'lib/libexpat.lib:': 'lib/expat.lib'})
             shell.replace(f'{self.config.libdir}/pkgconfig/expat.pc', {'-llibexpat': '-lexpat'})
 
     def post_install(self):

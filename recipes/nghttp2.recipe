@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
             shutil.move(
                     os.path.join(self.config.libdir, 'nghttp2_static.lib'),
                     os.path.join(self.config.libdir, 'libnghttp2.a'))
-            shell.replace(f'{self.config.libdir}/cmake/nghttp2/nghttp2-targets-release.cmake', {'lib/nghttp2_static.lib:': 'lib/libnghttp2.a'})
+            shell.replace(f'{self.config.libdir}/cmake/nghttp2/nghttp2-targets-{self.build_variant.lower()}.cmake', {'lib/nghttp2_static.lib:': 'lib/libnghttp2.a'})
 
     def post_install(self):
         libtool_la = LibtoolLibrary('nghttp2', None, None, None, self.config.libdir,
