@@ -3,6 +3,7 @@
 from pathlib import Path
 import shutil
 import tempfile
+from cerbero.enums import Symbolication
 from cerbero.utils import shell
 from cerbero.tools.libtool import LibtoolLibrary
 
@@ -51,6 +52,12 @@ class Recipe(recipe.Recipe):
         self.hdr10lib = Path(self.config.sources) / f'x265-10bit-{self.version}' / 'b' / f'{prefix}x265-10bit.a'
         self.hdr12lib = Path(self.config.sources) / f'x265-12bit-{self.version}' / 'b' / f'{prefix}x265-12bit.a'
         self.configure_options.append(f'-DEXTRA_LIB={self.hdr10lib.as_posix()};{self.hdr12lib.as_posix()}')
+
+        if self.config.variants.visualstudio:
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['x265']
+            }
 
     def post_install(self):
         # Craft a wholearchive of 8-, 10- and 12-bit x265

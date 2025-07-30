@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
+
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -39,6 +41,12 @@ class Recipe(recipe.Recipe):
                     os.path.join(self.config.libdir, 'libpng16.a'))
             shell.replace(f'{self.config.libdir}/libpng/libpng16-{self.build_variant.lower()}.cmake', {'lib/png16_static.lib:': 'lib/libpng16.a'})
             shell.replace(f'{self.config.libdir}/cmake/PNG/pngTargets-{self.build_variant.lower()}.cmake', {'lib/png16_static.lib:': 'lib/libpng16.a'})
+
+        if self.config.variants.visualstudio:
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['png16']
+            }
 
     def post_install(self):
         # Meson does not generate la files

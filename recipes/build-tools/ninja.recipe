@@ -12,6 +12,10 @@ class Recipe(recipe.Recipe):
 
     files_bins = ['ninja']
 
+    def prepare(self):
+        if self.config.is_automatically_symbolicable() or Platform.is_apple(self.config.target_platform):
+            self.symbolicate_manually = False
+
     def configure(self):
         shell.new_call([self.config.python_exe, 'configure.py', '--bootstrap', '--verbose'],
                        self.build_dir, logfile=self.logfile, env=self.env)

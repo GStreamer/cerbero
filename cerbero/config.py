@@ -774,6 +774,16 @@ class Config(object):
             return 'merged'
         return 'split'
 
+    def is_automatically_symbolicable(self):
+        """
+        Can symbols be generated just by strip+objcopy?
+        """
+        if Platform.is_apple(self.target_platform):
+            return False
+        if self.variants.visualstudio:
+            return False
+        return True
+
     def prefix_is_executable(self):
         """Can the binaries from the target platform can be executed in the
         build env?"""

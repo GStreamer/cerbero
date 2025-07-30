@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from pathlib import Path
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
+
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
@@ -44,6 +45,11 @@ class Recipe(recipe.Recipe):
             self.configure_options.append('-DCOMPILER_SUPPORTS_SYMBOL_MAPS=TRUE')
         if self.config.target_arch == Architecture.X86 and self.config.variants.mingw:
             self.append_env('ASMFLAGS', '-m32')
+        if self.config.variants.visualstudio:
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['wavpack']
+            }
 
     def post_install(self):
         deps = ['-lm']

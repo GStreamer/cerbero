@@ -171,7 +171,6 @@ class Recipe(recipe.Recipe):
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
             self.set_env('ANDROID_NDK_ROOT', self.get_env('ANDROID_NDK_HOME'))
 
-
     @modify_environment
     async def configure(self):
         if self.config.platform == Platform.WINDOWS:

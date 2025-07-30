@@ -193,4 +193,7 @@ class TestUniversalRecipe(unittest.TestCase):
         self.assertEqual(self.recipe.steps, [])
         self.recipe.add_recipe(self.recipe_x86)
         self.recipe.add_recipe(self.recipe_x86_64)
-        self.assertEqual(self.recipe.steps, recipe.BuildSteps() + [recipe.BuildSteps.MERGE])
+        build_steps = recipe.BuildSteps()
+        build_steps.remove(recipe.BuildSteps.DSYMUTIL)
+        build_steps += [recipe.BuildSteps.MERGE, recipe.BuildSteps.DSYMUTIL]
+        self.assertEqual(self.recipe.steps, build_steps)

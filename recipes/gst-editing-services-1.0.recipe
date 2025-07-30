@@ -17,8 +17,7 @@ class Recipe(custom.GStreamer):
     files_plugins_ges_devel = ['%(libdir)s/gstreamer-1.0/libgstnle.a', '%(libdir)s/gstreamer-1.0/libgstnle.la',
                                '%(libdir)s/gstreamer-1.0/libgstges.a', '%(libdir)s/gstreamer-1.0/libgstges.la']
 
-    files_validate = ['%(libdir)s/gst-validate-launcher/python/launcher/apps/geslaunch.py',
-                      'share/gstreamer-1.0/validate/scenarios/ges-edit-clip-while-paused.scenario']
+    files_validate = []
 
     files_python = []
 
@@ -26,3 +25,8 @@ class Recipe(custom.GStreamer):
         if self.config.variants.python:
             self.files_python.append('%(pydir)s/gi/overrides/GES.py')
             self.meson_options['python-exe'] = self.config.get_build_python_exe()
+        if self.config.target_platform != Platform.WINDOWS:
+            self.files_validate = [
+                '%(libdir)s/gst-validate-launcher/python/launcher/apps/geslaunch.py',
+                'share/gstreamer-1.0/validate/scenarios/ges-edit-clip-while-paused.scenario'
+            ]

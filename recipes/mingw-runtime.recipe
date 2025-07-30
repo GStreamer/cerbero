@@ -21,6 +21,11 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
         if self.config.variants.visualstudio and self.config.cross_compiling():
             self.runtime_dep = False
+        # Stripping any of these makes GCC tools die
+        # libgcc_s_seh-1.dll
+        # libstdc++-6.dll
+        # libwinpthread-1.dll
+        self.skip_steps = [BuildSteps.DSYMUTIL]
         lib_suffix = ''
         if self.config.platform != Platform.WINDOWS:
             lib_suffix = f'/{self.config.build}'

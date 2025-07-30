@@ -75,6 +75,8 @@ class Recipe(recipe.Recipe):
         # For non-universal builds on iOS, no extra steps are necessary.
         if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
             self.skip_steps += [BuildSteps.MERGE]
+        # It doesn't ship symbols
+        self.skip_steps += [BuildSteps.DSYMUTIL]
 
     async def install(self):
         srcdir = Path(self.config.moltenvk_prefix)

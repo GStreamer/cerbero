@@ -191,7 +191,10 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
             out_path = os.path.join(root, f)
             out_dir = os.path.split(out_path)[0]
             os.makedirs(out_dir, exist_ok=True)
-            shutil.copy(in_path, out_path)
+            if os.path.isdir(in_path):
+                shell.copy_dir(in_path, out_path)
+            else:
+                shutil.copy(in_path, out_path)
         if package_type == PackageType.DEVEL:
             self._create_framework_headers(self.config.prefix, self.include_dirs, root)
 

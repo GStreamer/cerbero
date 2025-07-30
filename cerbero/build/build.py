@@ -341,6 +341,10 @@ class Build(object):
     library_type = LibraryType.BOTH
     # Whether this recipe's build system can be built with MSVC
     can_msvc = False
+    # Whether this recipe needs to install symbols manually, and if so,
+    # for which patterns
+    symbolicate_manually = False
+    symbolication_patterns = {}
 
     def __init__(self):
         self._properties_keys = []
@@ -709,8 +713,8 @@ class CMake(MakefilesBase):
         '-DCMAKE_FIND_ROOT_PATH=%(prefix)s',
         '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true',
     ]
-    # FIXME: set to RelWithDebInfo when implementing symbol shipping
-    build_variant = 'Release'
+
+    build_variant = 'RelWithDebInfo'
 
     def __init__(self):
         MakefilesBase.__init__(self)
@@ -721,6 +725,9 @@ class CMake(MakefilesBase):
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
             self.config_sh = shutil.which('cmake', path=shell.get_path_minus_msys(self.env['PATH']))
+        if self.config.variants.visualstudio:
+            # Needs fishing out of the build folder
+            self.symbolicate_manually = True
 
     @modify_environment
     async def configure(self):
@@ -1337,12 +1344,12 @@ class Cargo(Build, ModifyEnvBase):
         self.build_dir = Path(self.build_dir, '_builddir').as_posix()
         self.cargo = os.path.join(self.config.cargo_home, 'bin', 'cargo' + self.config._get_exe_suffix())
 
+        # All Cargo builds generate split debuginfo, but don't install it
+        # by themselves
+        self.symbolicate_manually = True
+
         # Debuginfo is enormous, about 0.5GB per plugin, so it's split out
-        # where enabled by default (macOS and MSVC) and stripped everywhere
-        # else because the split-debuginfo option is unstable and actually
-        # crashes.
-        # TODO: We don't ship split debuginfo (dSYM, PDB) in the packages yet:
-        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
+        # where enabled by default (macOS and MSVC) and packed elsewhere.
         if self.config.target_platform == Platform.DARWIN or self.using_msvc():
             self.rustc_debuginfo = 'split'
         else:
@@ -1425,15 +1432,14 @@ class Cargo(Build, ModifyEnvBase):
         else:
             os.makedirs(self.build_dir)
 
-        # TODO: Ideally we should strip while packaging, not while linking
-        if self.rustc_debuginfo == 'strip':
-            s = '\n[profile.release]\nstrip = "debuginfo"\n'
-            self.append_config_toml(s)
-        else:
+        # On the rest of the OSes, the info will be plucked with strip/objcopy
+        if self.rustc_debuginfo == 'split':
             s = '\n[profile.release]\nsplit-debuginfo = "packed"\n'
             self.append_config_toml(s)
 
         if self.library_type != LibraryType.SHARED:
+            if self.rustc_debuginfo != 'split':
+                self.append_config_toml('\n[profile.release]\n')
             # Thin out Rust-generated staticlibs
             self.append_config_toml('opt-level = "s"\n')
             # Thin out embedded debuginfo in the .objs

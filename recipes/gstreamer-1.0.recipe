@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
+from cerbero.enums import Symbolication
+
 
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
@@ -50,6 +51,12 @@ class Recipe(custom.GStreamer):
         'GstNet-1.0'
         ]
 
+    symbolication_patterns = {
+        # dragonfire generated library, static only
+        Symbolication.SKIP: [], 
+        Symbolication.MANUAL: ['gst-ptp-helper']
+    }
+
 
     def prepare(self):
         if Platform.is_apple_mobile(self.config.target_platform):
@@ -75,3 +82,4 @@ class Recipe(custom.GStreamer):
            not Platform.is_mobile(self.config.target_platform):
             self.meson_options['ptp-helper'] = 'enabled'
             self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
+            self.append_env('RUSTFLAGS', '-g')

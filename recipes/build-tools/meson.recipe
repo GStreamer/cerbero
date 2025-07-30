@@ -24,6 +24,10 @@ class Recipe(recipe.Recipe):
     files_bins = ['meson']
     files_python = []
 
+    def prepare(self):
+        # Meson is just a ZIP + PE shim
+        self.skip_steps = [BuildSteps.DSYMUTIL]
+
     async def install(self):
         # setup.py barfs if using posix paths on Windows
         if self.config.platform == Platform.WINDOWS:
@@ -46,3 +50,6 @@ class Recipe(recipe.Recipe):
                 shutil.move(f, tof)
             if os.path.isdir(scriptsdir):
                 os.rmdir(scriptsdir)
+
+    def have_symbol_files(self):
+        return False

@@ -22,6 +22,7 @@ import shutil
 import inspect
 import asyncio
 from functools import reduce
+from itertools import chain
 from pathlib import Path
 import re
 
@@ -37,6 +38,7 @@ from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_
 from cerbero.utils import shell, add_system_libs, run_tasks
 from cerbero.utils import messages as m
+from cerbero.tools import dsymutil
 from cerbero.tools.libtool import LibtoolLibrary
 
 LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
@@ -159,6 +161,7 @@ class BuildSteps(object):
     MERGE = (N_('Merge universal binaries'), 'merge')
     RELOCATE_OSX_LIBRARIES = (N_('Relocate OSX libraries'), 'relocate_osx_libraries')
     CODE_SIGN = (N_('Codesign build-tools'), 'code_sign')
+    DSYMUTIL = (N_('Generating symbolication bundle'), 'symbolicate')
 
     def __new__(cls):
         return [
@@ -168,6 +171,7 @@ class BuildSteps(object):
             BuildSteps.COMPILE,
             BuildSteps.INSTALL,
             BuildSteps.POST_INSTALL,
+            BuildSteps.DSYMUTIL,
         ]
 
     @classmethod
@@ -301,7 +305,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         self.platform_deps = self.platform_deps or {}
 
         self.skip_steps = self.skip_steps or []
-        allowed_skip = {BuildSteps.MERGE, BuildSteps.RELOCATE_OSX_LIBRARIES, BuildSteps.CODE_SIGN}
+        allowed_skip = {BuildSteps.MERGE, BuildSteps.RELOCATE_OSX_LIBRARIES, BuildSteps.CODE_SIGN, BuildSteps.DSYMUTIL}
         bad_skip = set(self.skip_steps) - allowed_skip
         if bad_skip:
             raise FatalError(f'Can only skip steps {allowed_skip}, not {bad_skip}')
@@ -313,6 +317,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
             self._steps.append(BuildSteps.RELOCATE_OSX_LIBRARIES)
         if self.config.target_platform == Platform.DARWIN and self.config.prefix == self.config.build_tools_prefix:
             self._steps.append(BuildSteps.CODE_SIGN)
+
+        if self.config.target_platform == Platform.ANDROID or self.config.prefix == self.config.build_tools_prefix:
+            self._steps.remove(BuildSteps.DSYMUTIL)
 
         FilesProvider.__init__(self, config)
         try:
@@ -613,7 +620,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         # Only relocate files are that are potentially relocatable and
         # remove duplicates by symbolic links so we relocate libs only
         # once.
-        for f in set([get_real_path(x) for x in self.files_list() if file_is_relocatable(x)]):
+        for f in set([get_real_path(x) for x in self.files_list(with_symbols=False) if file_is_relocatable(x)]):
             relocator.relocate_file(f)
 
     def code_sign(self):
@@ -631,6 +638,128 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
 
         for f in set([get_real_path(x) for x in self.files_list() if file_is_bin(x)]):
             shell.new_call(['codesign', '-f', '-s', '-', f], logfile=self.logfile, env=self.env)
+
+    def _symbolicable_files(self):
+        """
+        Shim for calling down to the per recipe override of symbolicable_files
+        (this one goes through getattr)
+        """
+        return self.symbolicable_files()
+
+    def symbolicate(self):
+        """
+        Generate symbols for dylibs and binaries
+        """
+
+        if BuildSteps.DSYMUTIL in self.skip_steps:
+            return
+
+        if self.config.target_platform == Platform.ANDROID:
+            # No devel package on Android, Studio does its own stripping
+            return
+
+        auto_sym, manual_sym = self.symbolicable_files()
+        auto_sym = dsymutil.symbolicable_files(auto_sym, self.config.prefix, self.config.target_platform)
+        manual_sym = dsymutil.symbolicable_files(manual_sym, self.config.prefix, self.config.target_platform)
+
+        if Platform.is_apple(self.config.target_platform):
+            # generate dSYM for those we can, fish out the rest
+            dsymutil.symbolicate_macho_files(auto_sym, logfile=self.logfile, env=self.env)
+        elif not self.using_msvc():
+            # these are embedded automatically into the ELF/PE
+            dsymutil.symbolicate_gnu_files(chain(auto_sym, manual_sym), logfile=self.logfile, env=self.env)
+            # Clear them, already symbolicated
+            manual_sym = []
+
+        if manual_sym:
+            # for non-GNU platforms, we must fish out the dSYM/pdb
+            symbols = Path(self.build_dir).glob(f"**/*{self.extensions['debugext']}")
+
+            symbols = set(list(f.resolve() for f in symbols))
+
+            for pdb in symbols:
+                # Rust has a different convention e.g. cargo-capi.exe == cargo_capi.pdb
+                # And CMake can result in wavpack.pdb -> libwavpack.dll
+                def possible_names(binary):
+                    return (
+                        binary.stem in pdb.stem
+                        or binary.stem.replace('-', '_') in pdb.stem
+                        or pdb.stem == binary.stem[3:]
+                    )
+
+                def exact_names(binary):
+                    # For fished Cargo symbols, it's `dragonfire-<hash>.dSYM`
+                    # or `libfoo.dylib.dSYM` -- be careful with the latter!
+                    return (
+                        binary.name == pdb.stem or binary.stem == pdb.stem or binary.stem.replace('-', '_') == pdb.stem
+                    )
+
+                # libfoo-2.0-0.dll -> libfoo-2.0-0.pdb, libfoo.pdb, foo.pdb
+                potential_matches = list(filter(possible_names, manual_sym))
+
+                # for frei0r plugins where they have "3dflippo" and "flippo"
+                exact_matches = list(filter(exact_names, potential_matches))
+
+                if not potential_matches:
+                    continue
+                elif len(exact_matches) == 1:
+                    match = exact_matches[0]
+                    # Rust naming normalization
+                    if match.stem.replace('-', '_') != match.stem:
+                        dst = match.parent / pdb.name.replace('_', '-')
+                    else:
+                        dst = match.parent / pdb.name
+                elif len(potential_matches) == 1:
+                    match = potential_matches[0]
+                    dst = match.parent / pdb.name
+                    if pdb.stem != match.stem[3:]:  # If not CMake (wavpack)
+                        dst = dst.with_stem(match.stem)
+                else:
+                    m.warning(f'Too many matches for dSYM file {pdb}: {potential_matches}', logfile=self.logfile)
+                    continue
+
+                if pdb.is_dir():
+                    m.log(f'Mirroring {pdb} to {dst}', logfile=self.logfile)
+                    shutil.rmtree(dst.as_posix())
+                    shutil.copytree(pdb, dst)
+                else:
+                    m.log(f'Copying {pdb} to {dst}', logfile=self.logfile)
+                    shutil.copy(pdb, dst)
+
+        if Platform.is_apple(self.config.target_platform):
+            # NOTE: the name of gst-dots-viewer (and other rustc-only, Meson-built
+            # executables) needs to be corrected to read the executable name,
+            # without the disambiguation hash
+            for sym in manual_sym:
+                # The prefix here comes from the proxy recipe
+                symbol_name = sym.with_suffix(sym.suffix + '.dSYM').relative_to(self.config.prefix)
+                output_dir = Path(self.config.prefix, symbol_name)
+                # Correct naming for rustc built binaries
+                canonical_name = sym.name
+                contents_dir = output_dir / 'Contents'
+                relocations_dir = contents_dir / 'Resources' / 'Relocations'
+                # now edit the .yml and change the line
+                # binary-path:     '<path to Cerbero sources folder>/darwin_universal/<arch>/<package-version>/_builddir/<triplet>/release/deps/libgstaws.dylib'
+                # to read the manual_sym path
+                for f in relocations_dir.glob('**/*.yml'):
+                    src = open(f, 'r', encoding='utf-8').read()
+                    src = re.sub(r"binary-path:(\s+)'.+'", rf"binary-path:\1'{sym}'", src, count=1)
+                    # Correct the name if necessary
+                    if f.name == canonical_name + '.yml':
+                        open(f, 'w', encoding='utf-8').write(src)
+                    else:
+                        g = f.with_name(canonical_name + '.yml')
+                        open(g, 'w', encoding='utf-8').write(src)
+                        f.unlink()
+                # correct DWARF file now
+                dwarf_dir = contents_dir / 'Resources' / 'DWARF'
+                inputs = list(dwarf_dir.glob('*'))
+                if len(inputs) == 1:
+                    os.rename(inputs[0], inputs[0].with_name(canonical_name))
+
+        # Runs the validation and prints missing files warning
+        # (this is the only step needed in MSVC and buidltools)
+        return self.devel_files_list(with_symbols=True)
 
     def _install_srcdir_license(self, lfiles, install_dir):
         """
@@ -1038,7 +1167,9 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
     def steps(self):
         if self.is_empty():
             return []
-        return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
+        s = self._proxy_recipe.steps[:]
+        s.remove(BuildSteps.DSYMUTIL)
+        return s + [BuildSteps.MERGE, BuildSteps.DSYMUTIL]
 
     # The two following steps are not wrapped by the metaclass
     # because they are not part of the default set.
@@ -1053,13 +1184,83 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
         for _arch, recipe in self._recipes.items():
             recipe.relocate_osx_libraries()
 
+    def symbolicate(self):
+        if BuildSteps.DSYMUTIL in self.skip_steps:
+            return
+
+        archs = {k: Path(v.config.prefix) for k, v in self._recipes.items()}
+
+        for _, recipe in self._recipes.items():
+            recipe.symbolicate()
+
+        if len(archs) == 1:
+            return
+
+        if not Platform.is_apple(self.config.target_platform):
+            raise FatalError('Can only run Mach-O symbolication on Apple platforms')
+
+        # Calls up to the shim -- see the note above code_sign
+        auto_sym, manual_sym = self._symbolicable_files()
+        auto_sym = dsymutil.symbolicable_files(auto_sym, self.config.prefix, self.config.target_platform)
+        manual_sym = dsymutil.symbolicable_files(manual_sym, self.config.prefix, self.config.target_platform)
+
+        # We must generate the dSYM from the fat binary
+        # https://issues.chromium.org/issues/41243372#comment7
+        dsymutil.symbolicate_macho_files(auto_sym, logfile=self.logfile, env=self.env)
+        # The foo.dSYM/Contents/Resources/DWARF member must be
+        # lipo'd, the rest can be copied in place
+        # NOTE: the name of gst-dots-viewer (and other rustc-only, Meson-built
+        # executables) needs to be corrected to read the executable name,
+        # without the disambiguation hash
+        for sym in manual_sym:
+            # The prefix here comes from the proxy recipe
+            symbol_name = sym.with_suffix(sym.suffix + '.dSYM').relative_to(self.config.prefix)
+            symbol_srcs = [prefix.joinpath(symbol_name) for _, prefix in archs.items()]
+            output_dir = Path(self.config.prefix, symbol_name)
+            # Correct naming for rustc built binaries
+            canonical_name = sym.name
+            # Copy the info.plist
+            shutil.rmtree(output_dir, ignore_errors=True)
+            info_plist = symbol_srcs[0] / 'Contents' / 'Info.plist'
+            contents_dir = output_dir / 'Contents'
+            contents_dir.mkdir(parents=True)
+            shutil.copy(info_plist, contents_dir)
+            # Copy the Resources/Relocations folder
+            relocations_dir = contents_dir / 'Resources' / 'Relocations'
+            for f in symbol_srcs:
+                src = f / 'Contents' / 'Resources' / 'Relocations'
+                # m.log(f'Mirroring {src} to {relocations_dir}', logfile=self.logfile)
+                shutil.copytree(src, relocations_dir, dirs_exist_ok=True)
+            # now edit the .yml and change the line
+            # binary-path:     '<path to Cerbero sources folder>/darwin_universal/<arch>/<package-version>/_builddir/<triplet>/release/deps/libgstaws.dylib'
+            # to read the manual_sym path
+            for f in relocations_dir.glob('**/*.yml'):
+                src = open(f, 'r', encoding='utf-8').read()
+                src = re.sub(r"binary-path:(\s+)'.+'", rf"binary-path:\1'{sym}'", src, count=1)
+                open(f, 'w', encoding='utf-8').write(src)
+            # lipo now!
+            dwarf_dir = contents_dir / 'Resources' / 'DWARF'
+            dwarf_dir.mkdir(parents=True)
+            dwarf_name = dwarf_dir.relative_to(output_dir)
+            input_pairs = zip(*[f.joinpath(dwarf_name).glob('*') for f in symbol_srcs])
+            for inputs in input_pairs:
+                shell.new_call(
+                    ['lipo', *inputs, '-create', '-output', canonical_name],
+                    cmd_dir=dwarf_dir,
+                    env=self.env,
+                    logfile=self.logfile,
+                )
+
+        # Runs the validation and prints missing files warning
+        return self.devel_files_list(with_symbols=True)
+
     async def merge(self):
         if BuildSteps.MERGE in self.skip_steps:
             return
 
         arch_inputs = {}
         for arch, recipe in self._recipes.items():
-            arch_inputs[arch] = set(recipe.files_list())
+            arch_inputs[arch] = set(recipe.files_list(with_symbols=False))
 
         # merge the common files
         inputs = reduce(lambda x, y: x & y, arch_inputs.values())

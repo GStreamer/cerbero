@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from pathlib import Path
+
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
@@ -18,7 +20,7 @@ class Recipe(recipe.Recipe):
         '-DNATIVE=OFF',
         '-DBUILD_APPS=OFF',
         '-DBUILD_TESTING=OFF',
-        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     ]
 
     files_libs = ['libSvtJpegxs']
@@ -35,6 +37,13 @@ class Recipe(recipe.Recipe):
         if self.config.target_arch in (Architecture.X86, Architecture.X86_64):
             self.configure_options.append('-DENABLE_NASM=ON')
 
+        if self.config.variants.visualstudio:
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['SvtJpegxs']
+            }
+            # Fix output directory for symbolication
+            self.configure_options.append(f'-DCMAKE_OUTPUT_DIRECTORY={self.build_dir}/Bin/')
 
     # https://github.com/OpenVisualCloud/SVT-JPEG-XS/blob/e1030c6c8ee2fb05b76c3fa14cccf8346db7a1fa/Source/Lib/CMakeLists.txt#L91
     async def install(self):

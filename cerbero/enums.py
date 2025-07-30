@@ -281,3 +281,8 @@ class LibraryType:
     STATIC = 'static'
     SHARED = 'shared'
     BOTH = 'both'
+
+
+class Symbolication:
+    SKIP = 'skip'
+    MANUAL = 'manual'

@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -29,6 +30,13 @@ class Recipe(recipe.Recipe):
     patches = [
         f'{name}/0001-Expose-NGHTTP2_STATICLIB-on-the-pkg-config-file.patch'
     ]
+
+    def prepare(self):
+        if self.config.variants.visualstudio:
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['nghttp2']
+            }
 
     async def install(self):
         await super(recipe.Recipe, self).install()

@@ -27,6 +27,8 @@ from pathlib import Path
 from typing import Optional, List
 
 from cerbero.config import Platform, LibraryType
+from cerbero.enums import Symbolication
+from cerbero.tools import dsymutil
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
@@ -94,6 +96,17 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     path = Path(prefix, libdir, dllname).as_posix()
     if os.path.exists(path):
         return [Path(libdir, dllname).as_posix()]
+    else:
+        # MinGW convention -- libfoo-1.0-0.dll, strip prefix and suffix
+        # and glob for soversion
+        libname = libname.removeprefix('lib').removesuffix('.dll')
+        glob = set(Path(prefix, libdir).glob(f'lib{libname}-*.dll'))
+        if len(glob) == 1:
+            return list(f.as_posix() for f in glob)
+        # zlib convention e.g. when buildtools
+        glob = set(Path(prefix, libdir).glob(f'{libname}-*.dll'))
+        if len(glob) == 1:
+            return list(f.as_posix() for f in glob)
     if len(implib_notfound) == len(implibs):
         m.warning('No import libraries found for {!r}'.format(libname))
     else:
@@ -103,13 +116,17 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     return []
 
 
-def find_pdb_implib(config, libname, prefix):
+def find_pdb_implib(config, libname, prefix, debugext):
     dlls = find_dll_implib(config, libname, prefix, 'bin', None, None)
     pdbs = []
     for dll in dlls:
-        pdb = dll[:-3] + 'pdb'
-        if os.path.exists(Path(prefix, pdb).as_posix()):
-            pdbs.append(pdb)
+        pdb = [
+            dll + debugext,  # .so.debuginfo
+            dll[:-4] + debugext,  # .debuginfo, .pdb
+        ]
+        for f in pdb:
+            if Path(prefix, f).exists():
+                pdbs.append(f)
     return pdbs
 
 
@@ -155,6 +172,7 @@ class FilesProvider(object):
             'smext': '.a',
             'pext': '.pyd',
             'srext': '.dll',
+            'debugext': None,  # see later
         },
         Platform.LINUX: {
             'bext': '',
@@ -163,6 +181,7 @@ class FilesProvider(object):
             'smext': '.a',
             'pext': '.so',
             'srext': '.so',
+            'debugext': '.debuginfo',
         },
         Platform.ANDROID: {
             'bext': '',
@@ -171,6 +190,7 @@ class FilesProvider(object):
             'smext': '.a',
             'pext': '.so',
             'srext': '.so',
+            'debugext': None,  # Disallow stripping
         },
         Platform.DARWIN: {
             'bext': '',
@@ -179,6 +199,7 @@ class FilesProvider(object):
             'smext': '.a',
             'pext': '.so',
             'srext': '.dylib',
+            'debugext': '.dSYM',
         },
         Platform.IOS: {
             'bext': '',
@@ -187,6 +208,7 @@ class FilesProvider(object):
             'smext': '.a',
             'pext': '.so',
             'srext': '.dylib',
+            'debugext': '.dSYM',
         },
     }
 
@@ -214,8 +236,11 @@ class FilesProvider(object):
             self._findlibfunc = find_dll_implib
         else:
             raise AssertionError
+        if self.using_msvc():
+            self.extensions['debugext'] = '.pdb'
+        elif self.platform == Platform.WINDOWS:
+            self.extensions['debugext'] = '.debuginfo'
         self.py_prefixes = config.py_prefixes
-        self.add_files_bins_devel()
         self.add_license_files()
         self.update_categories()
         self._listfuncs = {
@@ -260,11 +285,50 @@ class FilesProvider(object):
         return libsmatch
 
     def _search_library_pdb(self, file):
-        f = os.path.basename(file)
-        pdbs = find_pdb_implib(self.config, f[:-4], self.config.prefix)
-        return pdbs
+        stem = os.path.basename(file)
+        abspath = Path(self.config.prefix, file).resolve()
+        if abspath.suffix == self.extensions['debugext'] and abspath.exists() and stem == abspath.name:
+            # Straightforward symbol file (plugin, binary)
+            # (check stem so that flac.pdb doesn't match FLAC(-8).pdb)
+            return [file]
+        elif self.config.target_platform == Platform.WINDOWS:
+            # try implib
+            libname = abspath.stem
+            if (
+                libname.startswith('lib')
+                or libname.endswith(self.extensions['srext'])
+                or libname.endswith(self.extensions['mext'])
+            ):
+                # If looking up PDBs (libfoo.dll.debuginfo)...
+                libname = os.path.splitext(libname)[0].removeprefix('lib')
+            libs = find_pdb_implib(self.config, libname, self.config.prefix, self.extensions['debugext'])
+            if libs:
+                return libs
+        # Look shared object up, try SOVERSIONing
+        # e.g. frei0r-plugins, libgst*, gst-plugins-rs
+        libs = [
+            abspath.with_suffix('').with_suffix(self.extensions['srext']),
+            abspath.with_suffix('').with_suffix(self.extensions['mext']),
+        ]
+        for lib in filter(lambda f: f.exists(), libs):
+            dSYM = abspath.with_stem(lib.resolve().name)
+            # Now test it against the resolved SOVERSION'd dylib
+            if dSYM.exists():
+                return [dSYM.relative_to(self.config.prefix).as_posix()]
 
-    def _validate_existing(self, files, only_existing=True):
+        return []
+
+    def _search_binary_pdb(self, file):
+        """
+        Looks up pdbs for binaries matching either themselves
+        or the Rust convention cargo-capi.exe -> cargo_capi.pdb
+        """
+        files_list = self._search_file(file)
+        if files_list:
+            return files_list
+        return self._search_file(file.replace('-', '_'))
+
+    def _validate_existing(self, files, only_existing=True, with_symbols=True):
         if not only_existing:
             nonvalidated = []
             for each in files:
@@ -277,11 +341,14 @@ class FilesProvider(object):
             if not searchfunc:
                 searchfunc = self._search_file
             validated = searchfunc(f)
-            # Warn about missing files
-            if not validated:
-                m.warning('Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__))
-            else:
+            if validated:
                 vfs.extend(validated)
+            elif not with_symbols:
+                if self.extensions['debugext']:
+                    if str(f).endswith(self.extensions['debugext']):
+                        continue
+            else:
+                m.warning('Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__))
         return vfs
 
     def _dylib_plugins(self):
@@ -295,16 +362,13 @@ class FilesProvider(object):
             return False
         return True
 
-    def have_pdbs(self):
-        if not self.using_msvc():
-            return False
+    def have_symbol_files(self):
         if self.config.variants.nodebug:
             return False
         if self.library_type in (LibraryType.STATIC, LibraryType.NONE):
             return False
-        # https://github.com/lu-zero/cargo-c/issues/279
-        if issubclass(self.btype, BuildType.CARGO):
-            return False
+        if self.config.target_platform == Platform.ANDROID:
+            return False  # Android Studio handles it
         return True
 
     def add_license_files(self):
@@ -316,27 +380,41 @@ class FilesProvider(object):
         if self.licenses or getattr(self, 'licenses_bins', None):
             self.files_devel.append('share/licenses/{}'.format(self.name))
 
-    def add_files_bins_devel(self):
+    def _list_devel_binaries(self, with_symbols=True):
         """
-        When a recipe is built with MSVC, all binaries have a corresponding
-        .pdb file that must be included in the devel package. This files list
-        is identical to `self.files_bins`, so we duplicate it here into a devel
-        category. It will get included via the 'default' search function.
+        All binaries have a corresponding .pdb/dwp/dSYM file
+        that must be included in the devel package. This files list
+        is identical to `self.files_bins`, but it is no longer identical
+        in lifetime because symbols are generated for macOS after
+        relocation (non universal) or after merging (universal).
         """
-        if not self.have_pdbs():
-            return
+        if not self.have_symbol_files() or not with_symbols:
+            return {}
         pdbs = []
-        if hasattr(self, 'files_bins'):
-            for f in self.files_bins:
-                pdbs.append('bin/{}.pdb'.format(f))
-        if hasattr(self, 'platform_files_bins'):
-            for f in self.platform_files_bins.get(self.config.target_platform, []):
-                pdbs.append('bin/{}.pdb'.format(f))
-        if not hasattr(self, 'files_bins_devel'):
-            self.files_bins_devel = []
-        self.files_bins_devel += pdbs
+        if hasattr(self, 'files_bins') and self.extensions['debugext']:
+            files_bins = self._list_files_by_category(self.BINS_CAT)
+            files_bins = dsymutil.symbolicable_files(files_bins, self.config.prefix, self.config.target_platform)
+            for f in files_bins:
+                f_rel = os.path.relpath(f, self.config.prefix)
+                if self.config.target_platform == Platform.WINDOWS:
+                    # .exe, .dll -> .pdb, .debuginfo
+                    f_rel, _ = os.path.splitext(f_rel)
+                pdbs.append('{}{}'.format(f_rel, self.extensions['debugext']))
+        if hasattr(self, 'files_misc') and self.extensions['debugext']:
+            files_bins = dsymutil.symbolicable_files(
+                self.files_misc,
+                self.config.prefix,
+                self.config.target_platform,
+            )
+            for f in files_bins:
+                f_rel = os.path.relpath(f, self.config.prefix)
+                if self.config.target_platform == Platform.WINDOWS:
+                    # .exe, .dll -> .pdb, .debuginfo
+                    f_rel, _ = os.path.splitext(f_rel)
+                pdbs.append('{}{}'.format(f_rel, self.extensions['debugext']))
+        return {k: self._search_binary_pdb for k in pdbs}
 
-    def devel_files_list(self, only_existing=True):
+    def devel_files_list(self, only_existing=True, with_symbols=True):
         """
         Return the list of development files, which consists in the files and
         directories listed in the 'devel' category and the link libraries .a,
@@ -345,8 +423,11 @@ class FilesProvider(object):
         devfiles = {}
         devfiles.update(self._list_files_by_category(self.DEVEL_CAT))
         devfiles.update(self._list_girfiles())
-        devfiles.update(self._list_devel_libraries())
-        devfiles = self._validate_existing(devfiles, only_existing)
+        devfiles.update(self._list_devel_binaries(with_symbols))
+        devfiles.update(self._list_devel_libraries(with_symbols))
+        if with_symbols:
+            devfiles.update(self._list_plugins_dsyms(devfiles.keys()))
+        devfiles = self._validate_existing(devfiles, only_existing, with_symbols)
         return sorted(list(set(devfiles)))
 
     def dist_files_list(self, only_existing=True):
@@ -363,12 +444,12 @@ class FilesProvider(object):
         distfiles = self._validate_existing(distfiles, only_existing)
         return sorted(list(set(distfiles)))
 
-    def files_list(self, only_existing=True):
+    def files_list(self, only_existing=True, with_symbols=True):
         """
         Return the complete list of files
         """
         files = self.dist_files_list(only_existing)
-        files.extend(self.devel_files_list(only_existing))
+        files.extend(self.devel_files_list(only_existing, with_symbols))
         return sorted(list(set(files)))
 
     def files_list_by_categories(self, categories, only_existing=True):
@@ -379,7 +460,7 @@ class FilesProvider(object):
         for cat in categories:
             cat_files = self._list_files_by_category(cat)
             files.update(cat_files)
-        files = self._validate_existing(files, only_existing)
+        files = self._validate_existing(files, only_existing, False)
         return sorted(list(set(files)))
 
     def files_list_by_category(self, category, only_existing=True):
@@ -405,6 +486,33 @@ class FilesProvider(object):
             libname = f[start:-end]
             libraries[libname] = searchfunc(f)
         return libraries
+
+    def symbolicable_files(self):
+        """
+        Prepare the list of automatically and manually symbolicable files
+        """
+        files_list = self.files_list(with_symbols=False)
+        patterns = getattr(self, 'symbolication_patterns', {})
+
+        # If files are automatically convertible (GNU)
+        if self.config.is_automatically_symbolicable():
+            return (files_list, [])
+        # If patterns are empty *all* files must be manually symbolicated
+        elif getattr(self, 'symbolicate_manually', False) and not any(patterns.values()):
+            return ([], files_list)
+
+        auto_sym = set()
+        manual_sym = set()
+        skip_patterns = patterns.get(Symbolication.SKIP, [])
+        manual_patterns = patterns.get(Symbolication.MANUAL, [])
+        for f in files_list:
+            if any(p in f for p in skip_patterns):
+                continue
+            elif any(p in f for p in manual_patterns):
+                manual_sym.add(f)
+            else:
+                auto_sym.add(f)
+        return (auto_sym, manual_sym)
 
     def use_gobject_introspection(self):
         return self.TYPELIB_CAT in self._files_categories()
@@ -458,7 +566,7 @@ class FilesProvider(object):
         """
         List plugin files and arbitrary files in the prefix
 
-        FIXME: Curently plugins are also searched using this, but there should
+        FIXME: Currently plugins are also searched using this, but there should
         be a separate system for those.
         """
         # replace extensions
@@ -473,20 +581,11 @@ class FilesProvider(object):
             # Find frei0r plugins wholesale
             if f.endswith('.dll') and self.using_msvc() and '*' not in f:
                 fs[self._get_msvc_dll(f)] = None
+            # librsvg's pixbufloader
+            elif f.endswith('.dll') and not self.using_msvc() and 'gdk-pixbuf-2.0' in f:
+                fs[self._get_msvc_dll(f)] = None
             else:
                 fs[f] = None
-            # Look for a PDB file and add it
-            if self.have_pdbs():
-                # We try to find a pdb file corresponding to the plugin's .a
-                # file instead of the .dll because we want it to go into the
-                # devel package, not the runtime package.
-                m = self._FILES_STATIC_PLUGIN_REGEX.match(f)
-                if m:
-                    # Plugin DLLs are required to be foo.dll when the recipe uses MSVC, and
-                    # will be in the same directory as the .a static plugin/library
-                    fdir = os.path.dirname(f)
-                    pdb = '{}/{}.pdb'.format(fdir, ''.join(m.groups()))
-                    fs[pdb] = None
             # For plugins, the .la file is generated using the .pc file, but we
             # don't add the .pc to files_devel. It has the same name, so we can
             # add it using the .la entry.
@@ -501,6 +600,34 @@ class FilesProvider(object):
         if self.platform != Platform.ANDROID:
             fs = {k: v for k, v in fs.items() if not k.endswith('.la')}
 
+        return fs
+
+    def _list_plugins_dsyms(self, files):
+        """
+        Add PDBs/dwp/dSYMs for the given list of plugins
+        """
+        if not self.have_symbol_files():
+            return {}
+        fs = {}
+        skip_files = set(f % self.extensions for f in getattr(self, 'skip_pdb_files', []))
+        for f in files:
+            if f in skip_files:
+                continue
+            # We try to find a pdb file corresponding to the plugin's .a
+            # file instead of the .dll because we want it to go into the
+            # devel package, not the runtime package.
+            m = self._FILES_STATIC_PLUGIN_REGEX.match(f)
+            if m:
+                fdir = os.path.dirname(f)
+                if self.using_msvc():
+                    # Plugin DLLs are required to be foo.dll when the recipe uses MSVC, and
+                    # will be in the same directory as the .a static plugin/library
+                    pdb = '{}/{}{}'.format(fdir, ''.join(m.groups()), self.extensions['debugext'])
+                else:
+                    # Apple and GNU convention is
+                    # prefixfoo.soversion.ext.dSYM
+                    pdb = '{}/lib{}%(mext)s%(debugext)s'.format(fdir, ''.join(m.groups())) % self.extensions
+                fs[pdb] = None
         return fs
 
     def _list_binaries(self, files):
@@ -636,11 +763,12 @@ class FilesProvider(object):
             files[file] = None
         return files
 
-    def _list_devel_libraries(self):
+    def _list_devel_libraries(self, with_symbols=True):
         if self.runtime_dep:
             return {}
 
         devel_libs = {}
+        skip_pdb_files = set(f % self.extensions for f in getattr(self, 'skip_pdb_files', []))
         for category in self.categories:
             if category != self.LIBS_CAT and not category.startswith(self.LIBS_CAT + '_'):
                 continue
@@ -666,10 +794,15 @@ class FilesProvider(object):
                 for pattern in patterns:
                     file = pattern % {'f': x, 'fnolib': x[3:], 'libdir': self.extensions['libdir']}
                     devel_libs[file] = None
-                # PDB names are derived from DLL library names (which are
-                # arbitrary), so we must use the same search function for them.
-                if self.have_pdbs():
-                    pdb = '%(sdir)s/%(f)s.pdb' % {'f': x[3:], **self.extensions}
+                if self.have_symbol_files() and with_symbols and self.library_type != LibraryType.STATIC:
+                    if x in skip_pdb_files:
+                        continue
+                    # PDB names are derived from DLL library names (which are
+                    # arbitrary), so we must use the same search function for them.
+                    if self.using_msvc():
+                        pdb = '%(sdir)s/%(f)s%(debugext)s' % {'f': x[3:], **self.extensions}
+                    else:
+                        pdb = '%(sdir)s/%(f)s%(srext)s%(debugext)s' % {'f': x, **self.extensions}
                     devel_libs[pdb] = self._search_library_pdb
 
         return devel_libs
@@ -695,11 +828,11 @@ class UniversalFilesProvider(FilesProvider):
             setattr(self, name, partial(self._aggregate_files_list_func, name))
         self.config = config
 
-    def _aggregate_files_list_func(self, funcname, *args):
+    def _aggregate_files_list_func(self, funcname, *args, **kwargs):
         files = []
         for r in self._recipes.values():
             func = getattr(r, funcname)
-            rfiles = func(*args)
+            rfiles = func(*args, **kwargs)
             for rf in rfiles:
                 f = self.get_arch_file(r.config.target_arch, rf)
                 files.append(f)

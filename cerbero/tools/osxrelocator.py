@@ -129,11 +129,11 @@ class OSXRelocator(object):
             lambda p: p.startswith('/') and not p.startswith('/Applications/Xcode.app'), self.list_rpaths(object_file)
         ):
             cmd = [INT_CMD, '-delete_rpath', p, object_file]
-            shell.new_call(cmd, fail=False)
+            shell.new_call(cmd, fail=False, logfile=self.logfile)
         # Add relative RPATHs
         for p in filter(lambda p: p not in existing_rpaths, rpaths):
             cmd = [INT_CMD, '-add_rpath', p, object_file]
-            shell.new_call(cmd, fail=False)
+            shell.new_call(cmd, fail=False, logfile=self.logfile)
         # Change dependencies' paths from absolute to @rpath/
         for lib in self.list_shared_libraries(object_file):
             new_lib = lib.replace(self.install_prefix, '@rpath').replace('@rpath/lib/', '@rpath/')

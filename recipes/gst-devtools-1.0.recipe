@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -27,6 +27,11 @@ class Recipe(custom.GStreamer):
         'GstValidate-1.0'
     ]
 
+    symbolication_patterns = {
+        Symbolication.SKIP: [],
+        Symbolication.MANUAL: ['gst-dots-viewer']
+    }
+
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
             self.files_libs.append("libgstvalidate-default-overrides-1.0")
@@ -39,7 +44,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['dots_viewer'] = 'enabled'
             self.files_bins.append('gst-dots-viewer')
             if self.config.platform == Platform.DARWIN:
-                self.set_env('RUSTFLAGS', "-C link-args=-Wl,-headerpad_max_install_names")
+                self.set_env('RUSTFLAGS', "-C link-args=-Wl,-headerpad_max_install_names -C split-debuginfo=packed")
         else:
             self.meson_options['dots_viewer'] = 'disabled'
 

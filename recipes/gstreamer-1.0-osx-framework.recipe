@@ -13,6 +13,10 @@ class Recipe(recipe.Recipe):
 
     files_library = ['lib/GStreamer']
 
+    def prepare(self):
+        # Just reexports symbols
+        self.skip_steps = [BuildSteps.DSYMUTIL]
+
     async def _get_installed_gst_libs(self):
         args = [self.env['PKG_CONFIG'], '--list-all']
         out = await async_call_output(args, logfile=self.logfile, cpu_bound=False, env=self.env)
@@ -38,3 +42,6 @@ class Recipe(recipe.Recipe):
             raise FatalError('No gstreamer libraries were found in the prefix!')
         fwlib = DynamicFrameworkLibrary(self.config.min_osx_sdk_version, self.config.target_distro, libname, install_name, libs, self.config.target_arch, env=self.env)
         fwlib.create()
+
+    def have_symbol_files(self):
+        return False
