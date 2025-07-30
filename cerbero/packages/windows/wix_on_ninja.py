@@ -4,7 +4,6 @@
 from __future__ import annotations
 from enum import Enum
 from pathlib import Path
-import shlex
 import shutil
 import tempfile
 from zipfile import ZipFile
@@ -68,83 +67,6 @@ class Light(object):
         )
 
 
-class StripRule(object):
-    """Wrapper for the strip tool"""
-
-    def __init__(self, config, keep_symbols=None):
-        self.config = config
-        self.keep_symbols = keep_symbols or []
-
-    def rule(writer: Writer, config):
-        if 'STRIP' not in config.env:
-            m.warning('Strip command is not defined for this configuration, skipping rule generation')
-            return
-
-        strip_cmd = shlex.split(config.env['STRIP'])
-
-        # This is NOT windows -- don't waste checks
-        strip_cmd.extend(
-            [
-                '-o',
-                '$out',
-                '$extra',  # -K goes here
-                '--strip-unneeded',
-                '$in',
-            ]
-        )
-
-        if config.target_platform == Platform.DARWIN:
-            strip_cmd.append('-x')
-
-        writer.rule('strip', ' '.join(strip_cmd), description='Stripping $out')
-        writer.newline()
-
-        copy_cmd = [
-            Path(config.python).as_posix(),
-            '-c',
-            '"from sys import argv; from shutil import copy; copy(argv[1], argv[2])"',
-            '$in',
-            '$out',
-        ]
-
-        writer.rule('copy', ' '.join(copy_cmd), description='Copying $out')
-        writer.newline()
-
-    def copy_file(self, writer: Writer, source_dir: Path, input_filename: Path, output_dir: Path):
-        writer.build(
-            Path(output_dir / input_filename).as_posix(),
-            'copy',
-            Path(source_dir / input_filename).as_posix(),
-        )
-        writer.newline()
-
-    def strip_file(self, writer: Writer, source_dir: Path, input_filename: Path, output_dir: Path):
-        if 'STRIP' not in self.config.env:
-            m.warning('Strip command is not defined for this configuration')
-            return
-
-        extra = []
-
-        for symbol in self.keep_symbols:
-            extra += ['-K', symbol]
-
-        writer.build(
-            Path(output_dir / input_filename).as_posix(),
-            'strip',
-            Path(source_dir / input_filename).as_posix(),
-            variables={'extra': extra},
-        )
-        writer.newline()
-
-    def strip_dir(self, writer: Writer, source_root, output_root):
-        srcd = Path(source_root)
-        outd = Path(output_root)
-        for dirpath, _, filenames in srcd.walk(follow_symlinks=True):
-            for f in filenames:
-                # Send path relative to dir_path
-                self.strip_file(writer, source_root, Path(dirpath) / f, outd)
-
-
 class MergeModuleWithNinjaPackager(PackagerBase):
     VS_EXT = ['-ext', 'WixToolset.VisualStudio.wixext']
 
@@ -152,42 +74,6 @@ class MergeModuleWithNinjaPackager(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
         self.wix_prefix = get_wix_prefix(config)
-
-    def is_strippable_file(filename: Path, package: Package):
-        return any([filename.parent().is_relative_to(x) for x in package.strip_dirs]) and not any(
-            [filename.name in path for path in package.strip_excludes]
-        )
-
-    def strip_files(self, writer: Writer, package_type, force=False):
-        """
-        Prepare the temporary roots for stripped files
-        """
-        tmpdir = None
-        if self.package.strip and 'STRIP' in self.config.env:
-            tmpdir = Path(f'{self.package.name}.stripped.d')
-            prefix = Path(self.config.prefix)
-            s = StripRule(self.config)
-            # Now we need to filter the list in two parts:
-            outputs = []
-
-            for file in self.files_list(package_type, force):
-                filename = Path(file)
-                dst: Path = tmpdir / filename
-
-                if self.is_strippable_file(filename, self.package):
-                    # Those with parent in strip_dirs, insert stripping rules
-                    s.strip_file(writer, prefix, filename, tmpdir)
-                else:
-                    # Those without, mkdir and copy
-                    s.copy_file(writer, prefix, filename, tmpdir)
-                outputs.append(dst)
-            tmpdir = tmpdir
-            writer.build(
-                tmpdir,
-                'phony',
-                outputs,
-            )
-        return tmpdir
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         """
@@ -226,24 +112,12 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             writer.comment('Incantations for the WiX Toolkit')
             writer.newline()
             Light.rule(writer, self.wix_prefix, self._with_wine)
-            StripRule.rule(writer, self.config)
-            writer.newline()
-
-            writer.comment('Incantations for stripping files')
-            writer.newline()
-            tmpdirs = {t: self.strip_files(t, force) for t in package_types}
             writer.newline()
 
             # set rules for runtime package
             writer.comment('Incantations for the runtime package generation')
             writer.newline()
-            p = self.create_merge_module(
-                writer,
-                PackageType.RUNTIME,
-                force,
-                self.package.version,
-                stripped_dir=tmpdirs.get(PackageType.RUNTIME, None),
-            )
+            p = self.create_merge_module(writer, PackageType.RUNTIME, force, self.package.version)
             if p:
                 paths.append(p)
                 writer.newline()
@@ -252,13 +126,7 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             if devel:
                 writer.comment('Incantations for the development package generation')
                 writer.newline()
-                p = self.create_merge_module(
-                    writer,
-                    PackageType.DEVEL,
-                    force,
-                    self.package.version,
-                    stripped_dir=tmpdirs.get(PackageType.RUNTIME, None),
-                )
+                p = self.create_merge_module(writer, PackageType.DEVEL, force, self.package.version)
                 if p:
                     paths.append(p)
                     writer.newline()
@@ -290,7 +158,7 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
         return paths
 
-    def create_merge_module(self, writer: Writer, package_type: PackageType, force: bool, version, stripped_dir=None):
+    def create_merge_module(self, writer: Writer, package_type: PackageType, force: bool, version):
         self.package.set_mode(package_type)
         try:
             files_list: list[str] = self.files_list(package_type, force)
@@ -317,12 +185,6 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             mergeoutput = Light.Output.MSM
             sources = f'{package_name}.wxs'
 
-        # There's a ready-made stripped folder here
-        implicit_deps = None
-        if stripped_dir:
-            implicit_deps = [stripped_dir]
-            mergemodule.prefix = Path(self.output_dir / stripped_dir).as_posix()
-
         mergemodule_path = Path(self.output_dir / sources).absolute()
         if mergemodule_path.exists():
             raise RuntimeError(f'Merge module manifest {mergemodule_path} already exists')
@@ -334,7 +196,6 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             writer,
             wixobjs,
             package_name,
-            implicit_deps=implicit_deps,
             merge_module=mergeoutput,
         )
 
@@ -395,7 +256,6 @@ class MSIWithNinjaPackager(PackagerBase):
             # Set Candle and Light rules up
             writer.comment('Incantations for the WiX Toolkit')
             Light.rule(writer, self.wix_prefix, self._with_wine)
-            StripRule.rule(writer, self.config)
 
             # set rules for runtime package
             writer.comment('Incantations for the runtime package generation')
@@ -473,16 +333,11 @@ class MSIWithNinjaPackager(PackagerBase):
             package.wix_use_fragment = self.package.wix_use_fragment
             m.action('Creating Merge Module for %s' % package)
             packager = MergeModuleWithNinjaPackager(self.config, package, self.store)
-            tmpdir = packager.strip_files(package_type, self.force)
             # FIXME: this should be passed correctly
             packager.output_dir = self.output_dir
-            path = packager.create_merge_module(
-                writer, package_type, self.force, self.package.version, stripped_dir=tmpdir
-            )
+            path = packager.create_merge_module(writer, package_type, self.force, self.package.version)
             if path:
                 packagedeps[package] = path
-                if tmpdir:
-                    tmp_dirs.append(tmpdir)
         self.packagedeps = packagedeps
         self.merge_modules[package_type] = list(packagedeps.values())
         return tmp_dirs

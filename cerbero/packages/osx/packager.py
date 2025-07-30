@@ -30,7 +30,6 @@ from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager, ApplicationBundlePackager
 from cerbero.packages.osx.buildtools import PackageBuild, ProductBuild
 from cerbero.utils import shell, _
-from cerbero.tools import strip
 from cerbero.utils import messages as m
 
 
@@ -389,7 +388,6 @@ class ApplicationPackage(PackagerBase):
         # bundle will try to create links for the main executable
         self._create_bundle()
         self._create_app_bundle()
-        self._strip_binaries()
         if self.package.osx_create_pkg:
             pkg = self._create_product()
             self._add_applications_link()
@@ -423,13 +421,6 @@ class ApplicationPackage(PackagerBase):
         """Creates the OS X Application bundle in temporary directory"""
         packager = ApplicationBundlePackager(self.package)
         return packager.create_bundle(self.appdir)
-
-    def _strip_binaries(self):
-        if self.package.strip:
-            for f in self.package.strip_dirs:
-                s_dir = os.path.join(self.appdir, 'Contents', 'Home', f)
-                s = strip.Strip(self.config, self.package.strip_excludes)
-                s.strip_dir(s_dir)
 
     def _add_applications_link(self):
         # Create link to /Applications
