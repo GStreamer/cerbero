@@ -98,7 +98,7 @@ class DistributionXML(object):
             parsed_choices.append(p)
             package = self.store.get_package(p)
             package.set_mode(self.package_type)
-            if package in self.emptypkgs:
+            if package in self.emptypkgs or not self.packages_paths[package]:
                 continue
             self.choices += '<line choice="%s"/>\n' % package.identifier()
             self._add_choice(package, not required, selected)
@@ -112,7 +112,7 @@ class DistributionXML(object):
 
         packages = [package] + self.store.get_package_deps(package)
         for package in packages:
-            if package in self.emptypkgs:
+            if package in self.emptypkgs or not self.packages_paths[package]:
                 continue
             package.set_mode(self.package_type)
             self.choices_desc += '<pkg-ref id="%s"/>\n' % package.identifier()

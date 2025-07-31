@@ -62,12 +62,11 @@ class PackagerBase(object):
     def files_list(self, package_type, force):
         if package_type == PackageType.DEVEL:
             files = self.package.devel_files_list()
+        elif package_type == PackageType.DEBUG:
+            files = self.package.debug_files_list()
         else:
             files = self.package.files_list()
-        real_files = []
-        for f in files:
-            if os.path.exists(os.path.join(self.config.prefix, f)):
-                real_files.append(f)
+        real_files = list(filter(lambda f: os.path.exists(os.path.join(self.config.prefix, f)), files))
         diff = list(set(files) - set(real_files))
         if len(diff) != 0:
             if force:

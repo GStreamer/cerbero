@@ -358,7 +358,6 @@ class Package(PackageBase):
             else:
                 rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
-        files.extend(self.debug_files_list())
         return sorted(list(set(files)))
 
     def all_files_list(self):

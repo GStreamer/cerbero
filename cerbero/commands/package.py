@@ -53,7 +53,7 @@ class Package(Command):
                     default=False,
                     help=_(
                         '(only meaningfull when --tarball is set) Create one single '
-                        'tarball with devel and runtime files'
+                        'tarball with devel, runtime, and debug files'
                     ),
                 ),
                 ArgparseArgument(

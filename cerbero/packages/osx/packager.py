@@ -133,9 +133,15 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
             if not devel:
                 raise e
             runtime_path = None
+        try:
+            debug_path = self._create_package(PackageType.DEBUG, output_dir, force)
+        except EmptyPackageError as e:
+            if not devel:
+                raise e
+            debug_path = None
 
         if not devel:
-            return [runtime_path, None]
+            return [runtime_path, debug_path, None]
 
         try:
             # create the development package
@@ -145,7 +151,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
                 raise e
             devel_path = None
 
-        return [runtime_path, devel_path]
+        return [runtime_path, debug_path, devel_path]
 
     def _get_install_dir(self):
         # if self.config.target_arch != Architecture.UNIVERSAL:
@@ -241,6 +247,9 @@ class ProductPackage(PackagerBase):
             r_path = self._create_product(PackageType.RUNTIME)
             paths.append(r_path)
 
+            r_path = self._create_product(PackageType.DEBUG)
+            paths.append(r_path)
+
             if devel:
                 # create devel package
                 d_path = self._create_product(PackageType.DEVEL)
@@ -265,9 +274,10 @@ class ProductPackage(PackagerBase):
         self.tmp = tempfile.mkdtemp()
         self.fw_path = self.tmp
 
-        self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
-        self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
+        self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: [], PackageType.DEBUG: []}
+        self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}, PackageType.DEBUG: {}}
 
+    # FIXME: this has no OS or variant information!
     def _package_name(self, suffix):
         return '%s-%s-%s%s' % (self.package.name, self.package.version, self.config.target_arch, suffix)
 
@@ -291,12 +301,14 @@ class ProductPackage(PackagerBase):
         self.store.add_package(package)
         packages = self.package.packages[:] + [(package.name, True, True)]
         self.package.packages = packages
-        path = packager.pack(self.output_dir, self.fw_path)[0]
+        path = packager.pack(self.output_dir, self.fw_path)
         if Platform.is_apple_mobile(self.config.target_platform):
-            self.packages_paths[PackageType.DEVEL][package] = path
+            self.packages_paths[PackageType.DEVEL][package] = path[0]
             self.empty_packages[PackageType.RUNTIME].append(package)
+            self.empty_packages[PackageType.DEBUG].append(package)
         else:
-            self.packages_paths[PackageType.RUNTIME][package] = path
+            self.packages_paths[PackageType.RUNTIME][package] = path[0]
+            self.packages_paths[PackageType.DEBUG][package] = path[1]
             self.empty_packages[PackageType.DEVEL].append(package)
 
     def _create_product(self, package_type):
@@ -337,14 +349,18 @@ class ProductPackage(PackagerBase):
                 )
                 m.action(_('Package created sucessfully'))
             except EmptyPackageError:
-                paths = [None, None]
+                paths = [None, None, None]
 
             if paths[0] is not None:
                 self.packages_paths[PackageType.RUNTIME][p] = paths[0]
             else:
                 self.empty_packages[PackageType.RUNTIME].append(p)
             if paths[1] is not None:
-                self.packages_paths[PackageType.DEVEL][p] = paths[1]
+                self.packages_paths[PackageType.DEBUG][p] = paths[1]
+            else:
+                self.empty_packages[PackageType.DEBUG].append(p)
+            if paths[2] is not None:
+                self.packages_paths[PackageType.DEVEL][p] = paths[2]
             else:
                 self.empty_packages[PackageType.DEVEL].append(p)
 

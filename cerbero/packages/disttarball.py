@@ -17,8 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import shutil
-import tempfile
 
 import cerbero.utils.messages as m
 from cerbero.utils import _
@@ -26,7 +24,6 @@ from cerbero.utils.tar import Tar
 from cerbero.enums import Platform
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.tools import strip
 
 
 class DistTarball(PackagerBase):
@@ -50,6 +47,12 @@ class DistTarball(PackagerBase):
             m.warning(_('The runtime package is empty'))
             dist_files = []
 
+        try:
+            debug_files = self.files_list(PackageType.DEBUG, force)
+        except EmptyPackageError:
+            m.warning(_('The debug package is empty'))
+            debug_files = []
+
         if devel:
             try:
                 devel_files = self.files_list(PackageType.DEVEL, force)
@@ -60,20 +63,20 @@ class DistTarball(PackagerBase):
             devel_files = []
 
         if not split:
+            dist_files += debug_files
             dist_files += devel_files
 
-        if not dist_files and not devel_files:
+        if not dist_files and not debug_files and not devel_files:
             raise EmptyPackageError(self.package.name)
 
         filenames = []
         if dist_files:
-            if not strip_binaries:
-                runtime = self._create_tarball(output_dir, PackageType.RUNTIME, dist_files, force, package_prefix)
-            else:
-                runtime = self._create_tarball_stripped(
-                    output_dir, PackageType.RUNTIME, dist_files, force, package_prefix
-                )
+            runtime = self._create_tarball(output_dir, PackageType.RUNTIME, dist_files, force, package_prefix)
             filenames.append(runtime)
+
+        if split and debug_files:
+            debug = self._create_tarball(output_dir, PackageType.DEBUG, debug_files, force, package_prefix)
+            filenames.append(debug)
 
         if split and devel and len(devel_files) != 0:
             devel = self._create_tarball(output_dir, PackageType.DEVEL, devel_files, force, package_prefix)
@@ -109,30 +112,6 @@ class DistTarball(PackagerBase):
             package_type,
             ext,
         )
-
-    def _create_tarball_stripped(self, output_dir, package_type, files, force, package_prefix):
-        tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
-
-        if hasattr(self.package, 'strip_excludes'):
-            s = strip.Strip(self.config, self.package.strip_excludes)
-        else:
-            s = strip.Strip(self.config)
-
-        for f in files:
-            orig_file = os.path.join(self.prefix, f)
-            tmp_file = os.path.join(tmpdir, f)
-            tmp_file_dir = os.path.dirname(tmp_file)
-            os.makedirs(tmp_file_dir, exist_ok=True)
-            shutil.copy(orig_file, tmp_file, follow_symlinks=False)
-            s.strip_file(tmp_file)
-
-        prefix_restore = self.prefix
-        self.prefix = tmpdir
-        tarball = self._create_tarball(output_dir, package_type, files, force, package_prefix)
-        self.prefix = prefix_restore
-        shutil.rmtree(tmpdir)
-
-        return tarball
 
     def _create_tarball(self, output_dir, package_type, files, force, package_prefix):
         filename = os.path.join(output_dir, self._get_name(package_type))

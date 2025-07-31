@@ -60,6 +60,10 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
             Architecture.X86_64: 'c20a66dc-b249-4e6d-a68a-d0f836b2b3cf',
             Architecture.ARM64: 'ec8a3ec9-e847-416f-b57f-3ab5b6868ebb',
             },
+        PackageType.DEBUG: {
+            Architecture.X86 : '527b49fe-81f3-59f9-9e0b-7d7421be6552',
+            Architecture.X86_64: '521cb2b6-824f-563e-bcfb-a99b0e82837e',
+        }
         }
     osx_framework_library = ('GStreamer', 'lib/GStreamer')
     ios_framework_library = ('GStreamer', 'lib/GStreamer')

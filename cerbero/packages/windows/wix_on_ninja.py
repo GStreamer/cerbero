@@ -91,7 +91,7 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
         # For packages that requires stripping object files, we need
         # to copy all the files to a new tree and strip them there:
-        package_types = [PackageType.RUNTIME]
+        package_types = [PackageType.RUNTIME, PackageType.DEBUG]
         if devel:
             package_types.append(PackageType.DEVEL)
 
@@ -118,6 +118,10 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             writer.comment('Incantations for the runtime package generation')
             writer.newline()
             p = self.create_merge_module(writer, PackageType.RUNTIME, force, self.package.version)
+            if p:
+                paths.append(p)
+                writer.newline()
+            p = self.create_merge_module(writer, PackageType.DEBUG, force, self.package.version)
             if p:
                 paths.append(p)
                 writer.newline()
@@ -260,6 +264,9 @@ class MSIWithNinjaPackager(PackagerBase):
             # set rules for runtime package
             writer.comment('Incantations for the runtime package generation')
             p, d = self._create_msi_installer(writer, PackageType.RUNTIME)
+            paths.append(p)
+            tmp_dirs.extend(d)
+            p, d = self._create_msi_installer(writer, PackageType.DEBUG)
             paths.append(p)
             tmp_dirs.extend(d)
 
