@@ -33,6 +33,7 @@ class Recipe(recipe.Recipe):
     cargo_packages = [
         'analytics',
         'audiofx',
+        'audioparsers',
         'aws',
         'cdg',
         'claxon',
@@ -157,6 +158,7 @@ class Recipe(recipe.Recipe):
                 'rsvideofx',
             ],
             'codecs': [
+                'rsaudioparsers',
                 'cdg',
                 'claxon',
                 'dav1d',
