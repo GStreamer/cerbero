@@ -325,16 +325,21 @@ class Package(PackageBase):
         return sorted(list(set(files)))
 
     def debug_files_list(self):
+        def is_executable(x):
+            return x in (
+                FilesProvider.LIBS_CAT,
+                FilesProvider.BINS_CAT,
+                FilesProvider.PY_CAT,
+            )  # or x.startswith('plugins')
+
         files = []
         for recipe, categories in self._recipes_files.items():
-            # only add matching debug files for recipes as below
-            if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
+            if len(categories) == 0 or any(is_executable(c) for c in categories):
                 rfiles = self.cookbook.get_recipe(recipe).debug_files_list()
                 files.extend(rfiles)
         for recipe, categories in self._recipes_files_devel.items():
             recipe = self.cookbook.get_recipe(recipe)
             if not categories:
-                # this excludes debuginfo for plugins. is this right?
                 files.extend(recipe.debug_files_list())
         return sorted(list(set(files)))
 
