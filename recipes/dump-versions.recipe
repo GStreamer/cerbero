@@ -1,0 +1,42 @@
+# -*- Mode: Python -*- vim: si:et:sw=4:sts=4:ts=4:syntax=python
+
+import custom
+import cerbero
+from cerbero.utils import git
+
+class Recipe(recipe.Recipe):
+    name = 'dump-versions'
+    version = '0.1'
+    licenses = [License.LGPLv2_1Plus]
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
+        'gst-plugins-bad-1.0', 'gst-libav-1.0', 'gst-plugins-ugly-1.0']
+
+    files_devel = [
+        'share/versions.txt',
+    ]
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.deps.append('gst-plugins-rs')
+        if self.config.variants.python:
+            self.deps.append('gst-python-1.0')
+
+    async def install(self):
+        vf = os.path.join(self.config.prefix, 'share', 'versions.txt')
+        versions = {}
+        for _, recipe in self.config.cookbook.recipes.items():
+            versions[recipe.name] = recipe.built_version()
+        with open(vf, 'w+', encoding='utf-8') as f:
+            root_dir = os.path.abspath(os.path.join(cerbero.__file__, '..', '..'))
+            if os.path.exists(os.path.join(root_dir, '.git')):
+                cerbero_commit = git.get_hash(root_dir, 'HEAD', logfile=self.logfile)
+                cerbero_version = custom.GStreamer.version
+                if custom.GStreamer.tagged_for_release:
+                    version = cerbero_version
+                else:
+                    version = f'{cerbero_version}+git~{cerbero_commit}'
+                f.write(f'cerbero {version}\n')
+            for k, v in sorted(versions.items()):
+                f.write(f'{k} {v}\n')

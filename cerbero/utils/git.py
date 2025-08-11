@@ -216,7 +216,8 @@ def get_hash(git_dir, commit, logfile=None):
     @param commit: the commit to log
     @type commit: str
     """
-    if not os.path.isdir(os.path.join(git_dir, '.git')):
+    # worktrees have .git as a file
+    if not os.path.exists(os.path.join(git_dir, '.git')):
         # If a recipe's source type is switched from tarball to git, then we
         # can get called from built_version() when the directory isn't git.
         # Return a fixed string + unix time to trigger a full fetch.
