@@ -42,6 +42,8 @@ class Recipe(recipe.Recipe):
         'elevenlabs',
         'fallbackswitch',
         'ffv1',
+        # 'file',
+        # 'flavors',
         'gif',
         'gopbuffer',
         'hlsmultivariantsink',
@@ -65,7 +67,9 @@ class Recipe(recipe.Recipe):
         'reqwest',
         'rtp',
         'rtsp',
+        # 'sodium',
         'speechmatics',
+        # 'spotify',
         'streamgrouper',
         'textahead',
         'textwrap',
@@ -74,6 +78,8 @@ class Recipe(recipe.Recipe):
         'tracers',
         'uriplaylistbin',
         'videofx',
+        # 'vvdec': added conditionally below
+        # 'webp',
         'webrtc',
         'webrtchttp',
     ]
@@ -176,6 +182,7 @@ class Recipe(recipe.Recipe):
                 'regex',
                 'textwrap',
                 'textahead',
+                # 'rswebp',
             ],
             'codecs_restricted': [
                 'vvdec',
