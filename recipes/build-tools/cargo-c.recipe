@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'cargo-c'
-    version = '0.10.14'
+    version = '0.10.15'
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
-    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.10.14.tar.gz'
-    tarball_checksum = 'eb6d09e871516083448f77b8677dbefc1dcc14e88d73eea82bcee903343e19c1'
+    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.10.15.tar.gz'
+    tarball_checksum = '59fe45092141f59b4d34948423a8e535ea8a2f0802a7436fb31e6c6663afa46a'
     tarball_dirname = '%(name)s-%(version)s'
     # Get this from the release page on github
     cargo_lock = f'{name}/{version}-Cargo.lock'
@@ -14,7 +14,6 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     patches = [
-        f'{name}/0001-Fix-Windows-libdir-paths.patch'
     ]
 
     deps = ['zlib', 'pkg-config']
