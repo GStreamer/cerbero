@@ -151,6 +151,9 @@ class PackageBase(object):
     def files_list(self):
         raise NotImplementedError("'files_list' must be implemented by subclasses")
 
+    def debug_files_list(self):
+        raise NotImplementedError("'debug_files_list' must be implemented by " 'subclasses')
+
     def devel_files_list(self):
         raise NotImplementedError("'devel_files_list' must be implemented by " 'subclasses')
 
@@ -321,6 +324,20 @@ class Package(PackageBase):
             files.extend(rfiles)
         return sorted(list(set(files)))
 
+    def debug_files_list(self):
+        files = []
+        for recipe, categories in self._recipes_files.items():
+            # only add matching debug files for recipes as below
+            if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
+                rfiles = self.cookbook.get_recipe(recipe).debug_files_list()
+                files.extend(rfiles)
+        for recipe, categories in self._recipes_files_devel.items():
+            recipe = self.cookbook.get_recipe(recipe)
+            if not categories:
+                # this excludes debuginfo for plugins. is this right?
+                files.extend(recipe.debug_files_list())
+        return sorted(list(set(files)))
+
     def devel_files_list(self):
         files = []
         for recipe, categories in self._recipes_files.items():
@@ -336,6 +353,7 @@ class Package(PackageBase):
             else:
                 rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
+        files.extend(self.debug_files_list())
         return sorted(list(set(files)))
 
     def all_files_list(self):
@@ -427,6 +445,9 @@ class MetaPackage(PackageBase):
 
     def files_list(self):
         return self._list_files(Package.files_list)
+
+    def debug_files_list(self):
+        return self._list_files(Package.debug_files_list)
 
     def devel_files_list(self):
         return self._list_files(Package.devel_files_list)

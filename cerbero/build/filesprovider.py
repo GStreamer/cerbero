@@ -380,7 +380,7 @@ class FilesProvider(object):
         if self.licenses or getattr(self, 'licenses_bins', None):
             self.files_devel.append('share/licenses/{}'.format(self.name))
 
-    def _list_devel_binaries(self, with_symbols=True):
+    def _list_devel_binaries(self):
         """
         All binaries have a corresponding .pdb/dwp/dSYM file
         that must be included in the devel package. This files list
@@ -388,8 +388,6 @@ class FilesProvider(object):
         in lifetime because symbols are generated for macOS after
         relocation (non universal) or after merging (universal).
         """
-        if not self.have_symbol_files() or not with_symbols:
-            return {}
         pdbs = []
         if hasattr(self, 'files_bins') and self.extensions['debugext']:
             files_bins = self._list_files_by_category(self.BINS_CAT)
@@ -414,7 +412,17 @@ class FilesProvider(object):
                 pdbs.append('{}{}'.format(f_rel, self.extensions['debugext']))
         return {k: self._search_binary_pdb for k in pdbs}
 
-    def devel_files_list(self, only_existing=True, with_symbols=True):
+    def debug_files_list(self, only_existing=True):
+        if not self.have_symbol_files():
+            return []
+        libs, devfiles = self._list_devel_libraries()
+        files = self.devel_files_list(False) + list(libs.keys())
+        devfiles.update(self._list_devel_binaries())
+        devfiles.update(self._list_plugins_dsyms(files))
+        devfiles = self._validate_existing(devfiles, only_existing, True)
+        return sorted(list(set(devfiles)))
+
+    def devel_files_list(self, only_existing=True):
         """
         Return the list of development files, which consists in the files and
         directories listed in the 'devel' category and the link libraries .a,
@@ -423,11 +431,8 @@ class FilesProvider(object):
         devfiles = {}
         devfiles.update(self._list_files_by_category(self.DEVEL_CAT))
         devfiles.update(self._list_girfiles())
-        devfiles.update(self._list_devel_binaries(with_symbols))
-        devfiles.update(self._list_devel_libraries(with_symbols))
-        if with_symbols:
-            devfiles.update(self._list_plugins_dsyms(devfiles.keys()))
-        devfiles = self._validate_existing(devfiles, only_existing, with_symbols)
+        devfiles.update(self._list_devel_libraries()[0])
+        devfiles = self._validate_existing(devfiles, only_existing, False)
         return sorted(list(set(devfiles)))
 
     def dist_files_list(self, only_existing=True):
@@ -444,12 +449,12 @@ class FilesProvider(object):
         distfiles = self._validate_existing(distfiles, only_existing)
         return sorted(list(set(distfiles)))
 
-    def files_list(self, only_existing=True, with_symbols=True):
+    def files_list(self, only_existing=True):
         """
         Return the complete list of files
         """
         files = self.dist_files_list(only_existing)
-        files.extend(self.devel_files_list(only_existing, with_symbols))
+        files.extend(self.devel_files_list(only_existing))
         return sorted(list(set(files)))
 
     def files_list_by_categories(self, categories, only_existing=True):
@@ -491,7 +496,9 @@ class FilesProvider(object):
         """
         Prepare the list of automatically and manually symbolicable files
         """
-        files_list = self.files_list(with_symbols=False)
+        # only_existing=True is necessary to resolve SOVERSION'd
+        # or prefixed libraries
+        files_list = self.dist_files_list(only_existing=self.config.target_platform == Platform.WINDOWS)
         patterns = getattr(self, 'symbolication_patterns', {})
 
         # If files are automatically convertible (GNU)
@@ -606,8 +613,6 @@ class FilesProvider(object):
         """
         Add PDBs/dwp/dSYMs for the given list of plugins
         """
-        if not self.have_symbol_files():
-            return {}
         fs = {}
         skip_files = set(f % self.extensions for f in getattr(self, 'skip_pdb_files', []))
         for f in files:
@@ -763,11 +768,12 @@ class FilesProvider(object):
             files[file] = None
         return files
 
-    def _list_devel_libraries(self, with_symbols=True):
+    def _list_devel_libraries(self):
         if self.runtime_dep:
-            return {}
+            return ({}, {})
 
         devel_libs = {}
+        pdbs = {}
         skip_pdb_files = set(f % self.extensions for f in getattr(self, 'skip_pdb_files', []))
         for category in self.categories:
             if category != self.LIBS_CAT and not category.startswith(self.LIBS_CAT + '_'):
@@ -794,7 +800,7 @@ class FilesProvider(object):
                 for pattern in patterns:
                     file = pattern % {'f': x, 'fnolib': x[3:], 'libdir': self.extensions['libdir']}
                     devel_libs[file] = None
-                if self.have_symbol_files() and with_symbols and self.library_type != LibraryType.STATIC:
+                if self.have_symbol_files() and self.library_type != LibraryType.STATIC:
                     if x in skip_pdb_files:
                         continue
                     # PDB names are derived from DLL library names (which are
@@ -803,9 +809,9 @@ class FilesProvider(object):
                         pdb = '%(sdir)s/%(f)s%(debugext)s' % {'f': x[3:], **self.extensions}
                     else:
                         pdb = '%(sdir)s/%(f)s%(srext)s%(debugext)s' % {'f': x, **self.extensions}
-                    devel_libs[pdb] = self._search_library_pdb
+                    pdbs[pdb] = self._search_library_pdb
 
-        return devel_libs
+        return (devel_libs, pdbs)
 
     def _ls_dir(self, dirpath):
         files = []
@@ -818,7 +824,7 @@ class FilesProvider(object):
 
 
 class UniversalFilesProvider(FilesProvider):
-    wrapped_list_funcs = ['devel_files_list', 'dist_files_list', 'files_list_by_categories']
+    wrapped_list_funcs = ['debug_files_list', 'devel_files_list', 'dist_files_list', 'files_list_by_categories']
 
     def __init__(self, config):
         # Override all public functions that return a list of files.

@@ -620,7 +620,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         # Only relocate files are that are potentially relocatable and
         # remove duplicates by symbolic links so we relocate libs only
         # once.
-        for f in set([get_real_path(x) for x in self.files_list(with_symbols=False) if file_is_relocatable(x)]):
+        for f in set([get_real_path(x) for x in self.files_list() if file_is_relocatable(x)]):
             relocator.relocate_file(f)
 
     def code_sign(self):
@@ -759,7 +759,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
 
         # Runs the validation and prints missing files warning
         # (this is the only step needed in MSVC and buidltools)
-        return self.devel_files_list(with_symbols=True)
+        return self.debug_files_list(only_existing=True)
 
     def _install_srcdir_license(self, lfiles, install_dir):
         """
@@ -1252,7 +1252,7 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
                 )
 
         # Runs the validation and prints missing files warning
-        return self.devel_files_list(with_symbols=True)
+        # return self.debug_files_list()
 
     async def merge(self):
         if BuildSteps.MERGE in self.skip_steps:
@@ -1260,7 +1260,7 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
 
         arch_inputs = {}
         for arch, recipe in self._recipes.items():
-            arch_inputs[arch] = set(recipe.files_list(with_symbols=False))
+            arch_inputs[arch] = set(recipe.files_list())
 
         # merge the common files
         inputs = reduce(lambda x, y: x & y, arch_inputs.values())
