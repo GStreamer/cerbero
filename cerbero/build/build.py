@@ -1441,8 +1441,8 @@ class Cargo(Build, ModifyEnvBase):
             self.append_config_toml('opt-level = "s"\n')
             # Thin out embedded debuginfo in the .objs
             self.append_config_toml('debug = 1\n')
-            # Trim codegen units to aid in prelinking
-            self.append_config_toml('lto = "thin"\n')
+            # Do not perform LTO -- breaks melding (future MR) and line numbers
+            self.append_config_toml('lto = false\n')
             self.append_config_toml('codegen-units = 1\n')
 
         if self.config.target_platform == Platform.ANDROID:
