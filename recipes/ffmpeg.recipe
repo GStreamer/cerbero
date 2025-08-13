@@ -27,6 +27,9 @@ class Recipe(recipe.Recipe):
         'dxva2': 'disabled',
         'vdpau': 'disabled',
         'filters': 'disabled',
+        'psnr_filter': 'enabled',
+        'ssim_filter': 'enabled',
+        'scale_filter': 'enabled',
         'yadif_filter': 'enabled',
         # Uncomment the following option once implemented in the port
         # 'doc': 'disabled',
