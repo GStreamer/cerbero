@@ -77,10 +77,6 @@ class Recipe(recipe.Recipe):
         'libexec/wpe-webkit-2.0/WPEWebProcess',
     ]
 
-    patches = [
-        'wpewebkit/0001-Revert-Use-UnixFileDescriptor-in-IPC-and-ProcessLaun.patch',
-    ]
-
     def prepare(self):
         from os import path
         glib_compile_resources_path = \
