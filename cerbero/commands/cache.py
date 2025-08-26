@@ -22,6 +22,7 @@ import json
 import tempfile
 import pickle
 import shutil
+import shlex
 from hashlib import sha256
 
 from cerbero.commands import Command, register_command
@@ -71,7 +72,7 @@ class BaseCache(Command):
                 if not line.startswith('command = '):
                     continue
                 _, cmd = line.split(' = ')
-                cache_build_tools_prefix = cmd.split(' -m venv ')[1].strip()
+                cache_build_tools_prefix = shlex.split(cmd)[-1]
                 return os.path.dirname(cache_build_tools_prefix)
         cache_file = os.path.join(config.build_tools_prefix, 'bin', 'meson')
         with open(cache_file, 'r', encoding='utf-8') as f:
