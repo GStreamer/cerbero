@@ -1,0 +1,30 @@
+From 66e44b1a2a21134370c8ab1d7498f550a6929270 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 27 Aug 2025 15:52:17 -0300
+Subject: [PATCH 3/3] cmake: Skip setting ASM up with MSVC
+
+Fixes build with CMake 4.1 which prefers GCC unconditionally now.
+---
+ CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7f6ef44..981a481 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -33,10 +33,12 @@ endif()
+ 
+ include(CheckLanguage)
+ 
++if (NOT MSVC)
+ check_language(ASM)
+ if(CMAKE_ASM_COMPILER)
+   enable_language(ASM)
+ endif()
++endif()
+ 
+ if(MSVC)
+   if(WavPack_CPU_X86 OR WavPack_CPU_X64)
+-- 
+2.50.1.windows.1
+

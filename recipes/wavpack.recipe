@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
         '-DWAVPACK_BUILD_DOCS=OFF',
         '-DWAVPACK_BUILD_PROGRAMS=OFF',
         '-DWAVPACK_BUILD_COOLEDIT_PLUGIN=OFF',
-        '-DWAVPACK_BUILD_WINAMP_PLUGIN=OFF'
+        '-DWAVPACK_BUILD_WINAMP_PLUGIN=OFF',
     ]
     can_msvc = True
     cmake_generator = 'ninja'
@@ -26,6 +26,7 @@ class Recipe(recipe.Recipe):
     patches = [
         f'{name}/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
         f'{name}/0002-cmake-Set-SOVERSION-to-match-Autotools.patch',
+        f'{name}/0003-cmake-Skip-setting-ASM-up-with-MSVC.patch',
     ]
 
     files_libs = ['libwavpack']
