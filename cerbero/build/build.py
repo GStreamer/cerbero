@@ -547,6 +547,9 @@ class MakefilesBase(Build, ModifyEnvBase):
         if isinstance(self.configure_tpl, str):
             m.deprecation(f'{self.name}: `configure_tpl` should be a list instead of a string')
             self.configure_tpl = self.configure_tpl.split()
+        elif isinstance(self.configure_tpl, list):
+            # Prepare individual instance, lists are inplace mutable
+            self.configure_tpl = list(self.configure_tpl)
 
         if not self.configure_options:
             self.configure_options = []
