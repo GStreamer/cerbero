@@ -692,6 +692,8 @@ class CMake(MakefilesBase):
         if self.config.variants.visualstudio:
             # Needs fishing out of the build folder
             self.symbolicate_manually = True
+            self.configure_tpl.append('-DCMAKE_POLICY_DEFAULT_CMP0141=NEW')
+            self.configure_tpl.append('-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded')
 
     @modify_environment
     async def configure(self):
