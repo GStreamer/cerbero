@@ -30,6 +30,8 @@ class Tar:
         self.compress = compress
         if not self.compress:
             self.compress = config.package_tarball_compression
+        if self.compress == 'none':
+            self.compress = Tar.Compression.TAR
         if self.compress not in (Tar.Compression.TAR, Tar.Compression.BZ2, Tar.Compression.XZ, Tar.Compression.ZSTD):
             raise UsageError('Invalid compression type {!r}'.format(self.compress))
         self.prefix = files_prefix
