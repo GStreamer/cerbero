@@ -65,6 +65,7 @@ find_textrels() {
                 ret=1
             fi
         done
+        rm -rf $d
     done
 
     if [[ $ret != 0 ]]; then
