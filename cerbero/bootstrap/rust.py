@@ -301,7 +301,7 @@ class RustBootstrapper(BootstrapperBase):
             try:
                 import subprocess
 
-                subprocess.check_output([str(cargo), '--version'], cwd=self.config.cargo_home)
+                subprocess.check_output([str(cargo), '--version'], env=rustup_env)
             except FileNotFoundError:
                 m.warning('Found broken symbolic link support: https://github.com/rust-lang/rustup/issues/4291')
                 symlinks = [f for f in cargo_bin.glob('*') if f.is_symlink()]
