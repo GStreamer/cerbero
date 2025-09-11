@@ -381,6 +381,12 @@ class Recipe(recipe.Recipe):
             await shell.async_call(
                 [dragonfire, '-o', self.workspace_lib, '-f', fmt, *files], cmd_dir=self.config.prefix, logfile=self.logfile, env=self.env
             )
+
+            # These end up cached, remove them
+            for f in files:
+                src = Path(self.config.prefix, f)
+                bak = src.with_suffix('.bak')
+                bak.unlink(missing_ok=True)
         # CAVEAT: on Apple platforms, compiler_builtins (and any other
         # crate mistakenly built with LTO enabled) will contain LLVM 
         # bitcode, causing usages of eg. stock (pre Xcode 16) nm to emit
