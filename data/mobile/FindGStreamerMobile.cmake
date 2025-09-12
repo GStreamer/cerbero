@@ -237,10 +237,10 @@ if (NOT DEFINED GSTREAMER_PLUGINS)
     set(GSTREAMER_PLUGINS ${_gst_plugins})
     # These are the API packages
     set(GSTREAMER_APIS ${GSTREAMER_PLUGINS})
-    list(FILTER GSTREAMER_APIS INCLUDE REGEX "^api_")
+    list(FILTER GSTREAMER_APIS INCLUDE REGEX "^gstreamer-")
     # Filter them out, although they're handled the same
     # they cannot be considered for the purposes of initialization
-    list(FILTER GSTREAMER_PLUGINS EXCLUDE REGEX "^api_")
+    list(FILTER GSTREAMER_PLUGINS EXCLUDE REGEX "^gstreamer-")
 endif()
 
 if (NOT TARGET GStreamer::mobile AND NOT DEFINED GStreamer_Mobile_MODULE_FILE)
