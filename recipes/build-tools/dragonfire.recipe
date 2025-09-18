@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'dragonfire'
-    version = '0.1.2'
+    version = '0.1.3'
     stype = SourceType.GIT
     btype = BuildType.CARGO
     licenses = [{License.MPLv2: ['LICENSE.md']}]
     remotes = {'origin': 'https://gitlab.freedesktop.org/amyspark/dragonfire.git'}
-    commit = 'v0.1.2'
+    commit = 'v0.1.3'
 
     files_bins = ['dragonfire']
