@@ -188,7 +188,7 @@ $ ./cerbero-uninstalled -c config/cross-win-arm64.cbc -v uwp package gstreamer-1
 $ ./cerbero-uninstalled -c config/cross-uwp-universal.cbc package gstreamer-1.0
 ```
 
-# Enabling Optional Features with Variants
+# Enabling and Disabling Optional Features with Variants
 
 Cerbero controls optional and platform-specific features with `variants`. You
 can see a full list of available variants by running:
@@ -217,7 +217,8 @@ $ ./cerbero-uninstalled -v variantname1,variantname2 [-c ...] package gstreamer-
 $ ./cerbero-uninstalled -v variantname1 -v variantname2 [-c ...] package gstreamer-1.0
 ```
 
-To explicitly disable a variant, use `novariantname` instead.
+To explicitly **disable** a variant, use `novariantname` instead,
+e.g. `-v norust` to disable Rust support and building of the Rust plugins.
 
 In the case of multiple enabling/disable of the same variant, then the last
 condition on the command line will take effect.  e.g. if novariantname is last
@@ -257,7 +258,7 @@ done for Qt6.
 **NOTE:** The package outputted will not contain a copy of the Qt libraries in
 it. You must link to them while building your app yourself.
 
-## Enabling Rust / Cargo Support
+## Enabling or Disabling Rust / Cargo Support
 
 Starting with version 1.22, Cerbero supports bootstrapping Rust toolchains, and
 can build Rust gstreamer plugins.
@@ -272,6 +273,9 @@ by invoking cerbero as follows:
 ```
 $ ./cerbero-uninstalled -v rust <command>
 ```
+
+To explicitly **disable** Rust support and building of the Rust plugins,
+pass `-v norust`.
 
 ## Enabling Hardware Codec Support
 
