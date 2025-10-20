@@ -6,7 +6,6 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = f'https://download.gnome.org/sources/pygobject/{version[0:4]}/pygobject-{version}.tar.xz'
-    url = 'gnome://'
     licenses = [{License.LGPLv2_1Plus: ['COPYING']}]
 
     deps = ['pycairo', 'gobject-introspection', 'libffi']
