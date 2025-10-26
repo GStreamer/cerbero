@@ -526,40 +526,25 @@ def get_wix_prefix(config):
     raise FatalError('The required packaging tool WiX 5.0 was not found')
 
 
-def add_system_libs(config, new_env, old_env=None):
-    """
-    Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
-    can be found.
-    """
+def _get_lib_search_paths(config, env=None):
     arch = config.target_arch
     libdir = 'lib'
-
-    # Only use this when compiling on Linux for Linux and not cross-compiling
-    # to some other Linux
-    if config.platform != Platform.LINUX:
-        return
-    if config.target_platform != Platform.LINUX:
-        return
-    if config.cross_compiling():
-        return
 
     if arch == Architecture.X86_64:
         if config.distro == Distro.REDHAT or config.distro == Distro.SUSE:
             libdir = 'lib64'
 
-    sysroot = '/'
-    if config.sysroot:
-        sysroot = config.sysroot
+    sysroot = config.sysroot or '/'
 
-    if not old_env:
-        old_env = os.environ
+    if not env:
+        env = os.environ
 
     search_paths = []
-    if old_env.get('PKG_CONFIG_LIBDIR', None):
-        search_paths += [old_env['PKG_CONFIG_LIBDIR']]
-    if old_env.get('PKG_CONFIG_PATH', None):
-        search_paths += [old_env['PKG_CONFIG_PATH']]
-    search_paths += [os.path.join(sysroot, 'usr', libdir, 'pkgconfig'), os.path.join(sysroot, 'usr/share/pkgconfig')]
+    if env.get('PKG_CONFIG_LIBDIR', None):
+        search_paths += [env['PKG_CONFIG_LIBDIR']]
+    if env.get('PKG_CONFIG_PATH', None):
+        search_paths += [env['PKG_CONFIG_PATH']]
+    search_paths += [os.path.join(sysroot, f'usr/{libdir}/pkgconfig'), os.path.join(sysroot, 'usr/share/pkgconfig')]
 
     if config.target_distro == Distro.DEBIAN:
         host = None
@@ -574,12 +559,21 @@ def add_system_libs(config, new_env, old_env=None):
         else:
             host = '%s-linux-gnu' % arch
 
-        search_paths.append(os.path.join(sysroot, 'usr/lib/%s/pkgconfig' % host))
+        search_paths.append(os.path.join(sysroot, f'usr/lib/{host}/pkgconfig'))
 
-    new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
+    return search_paths
 
-    search_paths = [os.environ.get('ACLOCAL_PATH', ''), os.path.join(sysroot, 'usr/share/aclocal')]
-    new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
+
+def get_system_pc_path(config, lib):
+    """
+    get the exact .pc full path for a library in the system
+    """
+    for search_path in _get_lib_search_paths(config):
+        pc_path = os.path.join(search_path, f'{lib}.pc')
+        if os.path.exists(pc_path):
+            return pc_path
+
+    raise FatalError(f'{lib}.pc not found in the system and required by the recipe, please run bootstrap again')
 
 
 def split_version(s):

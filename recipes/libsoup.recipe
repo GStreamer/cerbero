@@ -15,8 +15,7 @@ class Recipe(recipe.Recipe):
 
     # sqlite ships with the system on macOS and iOS. Android also ships with
     # sqlite3, but it's not available from the NDK; only from Java.
-    # We also build it on Linux to avoid the potential for bugs with
-    # use_system_libs and to support cross-linux.
+    # We also build it on Linux to support cross-linux.
     platform_deps = {
         Platform.ANDROID: ['sqlite3'],
         Platform.WINDOWS: ['sqlite3'],

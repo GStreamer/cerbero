@@ -10,9 +10,6 @@ class Recipe(recipe.Recipe):
     tarball_dirname = '%(name)s-%(version)s'
     # Get this from the release page on github
     cargo_lock = f'{name}/{version}-Cargo.lock'
-    # Need system openssl on Linux
-    use_system_libs = True
-
     patches = [
     ]
 
@@ -20,6 +17,7 @@ class Recipe(recipe.Recipe):
     # Need openssl on macOS. On Windows, a prebuilt openssl crate is downloaded.
     platform_deps = {
         Platform.DARWIN: ['openssl'],
+        Platform.LINUX:  ['openssl']
     }
 
     files_bins = ['cargo-capi', 'cargo-cbuild', 'cargo-cinstall', 'cargo-ctest']

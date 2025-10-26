@@ -16,8 +16,9 @@ class Recipe(recipe.Recipe):
     meson_options = {'libproxy': 'enabled', 'gnome_proxy': 'disabled',
                      'gnutls': 'disabled', 'openssl': 'enabled'}
     deps = ['glib', 'libproxy']
-    # openssl on Linux
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['openssl']
+    }
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']

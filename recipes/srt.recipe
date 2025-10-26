@@ -18,8 +18,9 @@ class Recipe(recipe.Recipe):
         '-DENABLE_APPS=OFF',
         '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     ]
-    # openssl on Linux
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['openssl']
+    }
 
     patches = [
         'srt/0001-cmake-Fix-exception-handling-mode-on-MSVC.patch',

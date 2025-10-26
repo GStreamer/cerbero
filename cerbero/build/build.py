@@ -26,7 +26,7 @@ from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
-from cerbero.utils import shell, add_system_libs, default_cargo_build_jobs
+from cerbero.utils import shell, default_cargo_build_jobs
 from cerbero.utils import messages as m
 
 
@@ -142,7 +142,6 @@ class ModifyEnvBase:
     Base class for build systems and recipes that require extra env variables
     """
 
-    use_system_libs = False
     # Use the outdated MSYS perl instead of the new perl downloaded in bootstrap
     use_msys_perl = False
 
@@ -299,33 +298,6 @@ class ModifyEnvBase:
             else:
                 self.env[var] = val
         self._old_env.clear()
-
-    def maybe_add_system_libs(self, step=''):
-        """
-        Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
-        can be found.
-        """
-        # Note: this is expected to be called with the environment already
-        # modified using @{async_,}modify_environment
-
-        # don't add system libs unless explicitly asked for
-        if not self.use_system_libs or not self.config.allow_system_libs:
-            return
-
-        # this only works because add_system_libs() does very little
-        # this is a possible source of env conflicts
-        new_env = {}
-        add_system_libs(self.config, new_env, self.env)
-
-        if 'configure' not in step:
-            # gobject-introspection gets the paths to internal libraries all
-            # wrong if we add system libraries during compile.  We should only
-            # need PKG_CONFIG_PATH during configure so just unset it everywhere
-            # else we will get linker errors compiling introspection binaries
-            if 'PKG_CONFIG_PATH' in new_env:
-                del new_env['PKG_CONFIG_PATH']
-        for var, val in new_env.items():
-            self.set_env(var, val, when='now-with-restore')
 
 
 class Build(object):
@@ -507,7 +479,6 @@ class MakefilesBase(Build, ModifyEnvBase):
         configure_dir = self.get_configure_dir()
         os.makedirs(configure_dir, exist_ok=True)
 
-        self.maybe_add_system_libs(step='configure')
         configure_cmd = self.get_configure_cmd()
 
         await shell.async_call(configure_cmd, configure_dir, logfile=self.logfile, env=self.env)
@@ -517,23 +488,19 @@ class MakefilesBase(Build, ModifyEnvBase):
         make_dir = self.get_make_dir()
         os.makedirs(make_dir, exist_ok=True)
 
-        self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     async def install(self):
-        self.maybe_add_system_libs(step='install')
         await shell.async_call(self.make_install, self.get_make_dir(), logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
-        self.maybe_add_system_libs(step='clean')
         shell.new_call(self.make_clean, self.get_make_dir(), logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
         if self.make_check:
-            self.maybe_add_system_libs(step='check')
             shell.new_call(self.make_check, self.get_make_dir(), logfile=self.logfile, env=self.env)
 
     def _init_options(self):
@@ -677,9 +644,6 @@ class Autotools(MakefilesBase):
                 self.configure_tpl.append('--target=%(target)s')
 
         use_configure_cache = self.config.use_configure_cache
-        if self.use_system_libs and self.config.allow_system_libs:
-            use_configure_cache = False
-
         if self._new_env:
             use_configure_cache = False
 
@@ -1292,27 +1256,22 @@ class Meson(Build, ModifyEnvBase):
         # https://gitlab.freedesktop.org/gstreamer/cerbero/issues/48
         self.unset_toolchain_env()
 
-        self.maybe_add_system_libs(step='configure')
         await shell.async_call(meson_cmd, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     async def compile(self):
-        self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     async def install(self):
-        self.maybe_add_system_libs(step='install')
         await shell.async_call(self.make_install, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
-        self.maybe_add_system_libs(step='clean')
         shell.new_call(self.make_clean, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
-        self.maybe_add_system_libs(step='check')
         shell.new_call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
 
 
@@ -1469,7 +1428,6 @@ class Cargo(Build, ModifyEnvBase):
 
     @modify_environment
     async def install(self):
-        self.maybe_add_system_libs(step='configure+install')
         if self.workspace_member:
             path = Path(self.src_dir, self.workspace_member).as_posix()
         else:
@@ -1533,13 +1491,11 @@ class CargoC(Cargo):
 
     @modify_environment
     async def compile(self):
-        self.maybe_add_system_libs(step='configure+compile')
         cmd = [self.cargo, 'cbuild'] + self.get_cargoc_args()
         await self.retry_run(shell.async_call, cmd, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     async def install(self):
-        self.maybe_add_system_libs(step='configure+install')
         cmd = [self.cargo, 'cinstall'] + self.get_cargoc_args()
         await self.retry_run(shell.async_call, cmd, self.build_dir, logfile=self.logfile, env=self.env)
 

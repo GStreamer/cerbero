@@ -36,10 +36,12 @@ from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_
-from cerbero.utils import shell, add_system_libs, run_tasks
+from cerbero.utils import shell, run_tasks, get_system_pc_path
 from cerbero.utils import messages as m
 from cerbero.tools import dsymutil
 from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.enums import LibraryType
+
 
 LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
 
@@ -530,9 +532,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
 
         pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
         env = self.env.copy()
-        if self.use_system_libs:
-            add_system_libs(self.config, env, self.env)
         PkgConfig.add_search_dir(pluginpcdir, env, self.config)
+        PkgConfig.add_search_dir(self.config.get_custom_pkg_config_path(), env, self.config)
         if self.config.qt5_pkgconfigdir:
             PkgConfig.add_search_dir(self.config.qt5_pkgconfigdir, env, self.config)
 
@@ -1332,3 +1333,56 @@ def import_recipe(file, class_name='Recipe'):
     # Cerbero checks for the __module__ being 'builtins' in order to load it again
     recipe_class.__module__ = None
     return recipe_class
+
+
+class SystemRecipe(Recipe):
+    name = None
+    pkgconfig_files = None
+
+    def __init__(self, config, env):
+        self.library_type = LibraryType.NONE
+        self._steps = [BuildSteps.INSTALL]
+        self.__file__ = __file__
+        self.pkgconfig_files = self.pkgconfig_files or []
+        self.deps = []
+        self.platform_deps = {}
+        self.config = config
+        FilesProvider.__init__(self, config)
+
+    def get_checksum(self):
+        return self.name
+
+    def built_version(self):
+        "system"
+
+    def fetch(self):
+        """Needed because fetch-bootstrap"""
+        pass
+
+    def install(self):
+        self._copy_pcfiles()
+
+    def get_mtime(self):
+        return os.path.getmtime(self.__file__)
+
+    def _copy_pcfiles(self):
+        for pkgconfig_file in self.pkgconfig_files:
+            self._copy_pcfile(pkgconfig_file)
+
+    def _copy_pcfile(self, pkgconfig_file):
+        custom_pkg_config_path = self.config.get_custom_pkg_config_path()
+
+        pc_path = get_system_pc_path(self.config, pkgconfig_file)
+        dest = os.path.join(custom_pkg_config_path, os.path.basename(pc_path))
+
+        if not os.path.exists(custom_pkg_config_path):
+            os.makedirs(custom_pkg_config_path)
+
+        if os.path.exists(dest):
+            # Force delete to avoid FileExistsError
+            os.unlink(dest)
+
+        shell.symlink(pc_path, dest)
+
+    def __repr__(self):
+        return '<SystemRecipe %s>' % self.name

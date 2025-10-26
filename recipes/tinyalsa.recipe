@@ -29,9 +29,10 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform not in (Platform.LINUX, Platform.ANDROID):
-            raise InvalidRecipeError(self, "Invalid platform") 
-        # ALSA
-        self.use_system_libs = not self.config.cross_compiling()
+            raise InvalidRecipeError(self, "Invalid platform")
+
+        if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
+            self.deps.append('libpulse')
 
     def post_install(self):
         LibtoolLibrary('tinyalsa', 2, 0, 0, self.config.libdir,

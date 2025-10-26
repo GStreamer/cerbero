@@ -23,8 +23,9 @@ class Recipe(custom.GStreamer):
     deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora',
             'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
-    platform_deps = {}
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['alsa', 'x11'],
+    }
 
     files_bins = ['gst-discoverer-1.0', 'gst-play-1.0', 'gst-device-monitor-1.0']
 

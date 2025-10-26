@@ -1,0 +1,3 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'libpulse'
+    pkgconfig_files = ['libpulse']

@@ -91,7 +91,9 @@ class Recipe(custom.GStreamer):
             'soundtouch', 'vo-aacenc', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar', 'libltc', 'qrencode', 'json-glib']
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['openssl']
+    }
 
     files_lang = ['gst-plugins-bad-1.0']
 
@@ -602,10 +604,11 @@ class Recipe(custom.GStreamer):
             ]
 
         if not Platform.is_mobile(self.config.target_platform):
-            if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
-                self.enable_plugin('curl', 'net')
-            else:
-                self.enable_plugin('curl', 'net', dep='curl')
+            self.enable_plugin('curl', 'net', dep='curl')
+            # if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
+            #     self.enable_plugin('curl', 'net')
+            # else:
+            #     self.enable_plugin('curl', 'net', dep='curl')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'

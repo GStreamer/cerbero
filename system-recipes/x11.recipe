@@ -1,0 +1,7 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'x11'
+    pkgconfig_files = ['x11', 'x11-xcb', 'xext', 'xi', 'xv', 'xproto', 'kbproto', 'xcb', 'xau', 'videoproto', 'xextproto']
+
+    def prepare(self):
+        if self.config.target_distro != Distro.REDHAT:
+            self.pkgconfig_files.append('xdmcp')

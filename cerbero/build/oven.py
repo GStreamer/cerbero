@@ -28,7 +28,7 @@ from cerbero.enums import LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import N_, shell, run_tasks, determine_num_of_cpus
-from cerbero.utils import add_system_libs, messages as m
+from cerbero.utils import messages as m
 from cerbero.utils.shell import BuildStatusPrinter
 
 
@@ -336,7 +336,7 @@ class Oven(object):
                     next_queue.put_nowait(RecipeStepPriority(recipe, count, step))
 
         # all the steps we are performing
-        all_steps = ['init'] + [s[1] for s in next(iter(recipes)).steps]
+        all_steps = ['init'] + list(set([s[1] for r in recipes for s in r.steps]))
 
         # async queues used for each step
         default_queue = asyncio.PriorityQueue()
@@ -458,8 +458,6 @@ class Oven(object):
             action = shell.prompt_multiple(msg, RecoveryActions())
             if action == RecoveryActions.SHELL:
                 environ = recipe.get_recipe_env()
-                if recipe.use_system_libs:
-                    add_system_libs(recipe.config, environ, environ)
                 if be.step == BuildSteps.EXTRACT[1]:
                     source_dir = recipe.get_for_arch(be.arch, 'src_dir')
                 else:

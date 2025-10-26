@@ -22,8 +22,9 @@ class Recipe(recipe.Recipe):
         name + '/0005-Fix-debug-build.patch',
         name + '/0006-Add-license-for-vcpkg-changes.patch',
     ]
-    # openssl on Linux
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['openssl'],
+    }
     files_libs = ['librtmp']
     files_devel = ['include/librtmp', '%(libdir)s/pkgconfig/librtmp.pc']
 

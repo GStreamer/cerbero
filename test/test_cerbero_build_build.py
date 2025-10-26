@@ -61,19 +61,6 @@ class ModifyEnvTest(unittest.TestCase):
         val = self.mk.get_env_var(self.var)
         self.assertEqual(val, '%s' % self.val2)
 
-    def testSystemLibs(self):
-        self.mk.env['PKG_CONFIG_PATH'] = '/path/1'
-        self.mk.env['PKG_CONFIG_LIBDIR'] = '/path/2'
-        self.mk.config.allow_system_libs = True
-        self.mk.use_system_libs = True
-        self.mk.maybe_add_system_libs('configure')
-        val = self.mk.get_env_var('PKG_CONFIG_PATH')
-        self.assertEqual(
-            val, '/path/2:/path/1:/usr/lib/pkgconfig:' '/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig'
-        )
-        val = self.mk.get_env_var('PKG_CONFIG_LIBDIR')
-        self.assertEqual(val, '/path/2')
-
     def testNestedModif(self):
         self.mk.env[self.var] = self.val1
         self.mk.append_env(self.var, self.val2)

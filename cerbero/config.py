@@ -251,7 +251,9 @@ class Config(object):
         'toolchain_version',
         'distro_version',
         'target_distro_version',
-        'allow_system_libs',
+        'system_recipes_dir',
+        'allow_system_recipes',
+        'system_recipes_priority',
         'packages_dir',
         'py_prefix',
         'logs',
@@ -512,6 +514,10 @@ class Config(object):
         if arches:
             m.message('Building the following arches: ' + ' '.join(arches))
 
+        if self.allow_system_recipes and self.target_platform != Platform.LINUX:
+            m.message('Force not allow system-recipes because target_platform is not Linux')
+            self.allow_system_recipes = False
+
     def do_setup_env(self):
         self._create_paths()
 
@@ -643,6 +649,7 @@ class Config(object):
         PkgConfig.set_executable(env, self)
         PkgConfig.set_default_search_dir(Path(prefix, 'share', 'pkgconfig').as_posix(), env, self)
         PkgConfig.add_search_dir(Path(libdir, 'pkgconfig').as_posix(), env, self)
+        PkgConfig.add_search_dir(self.get_custom_pkg_config_path(), env, self)
 
         # Some autotools recipes will call the native (non-cross) compiler to
         # build generators, and we don't want it to use these. We will set the
@@ -699,8 +706,10 @@ class Config(object):
         self.set_property('cached_sources', self._relative_path('sources'))
         self.set_property('config_dir', self._relative_path('config'))
         self.set_property('recipes_dir', self._relative_path('recipes'))
+        self.set_property('system_recipes_dir', self._relative_path('system-recipes'))
+        self.set_property('allow_system_recipes', platform == Platform.LINUX)
+        self.set_property('system_recipes_priority', 1)
         self.set_property('packages_dir', self._relative_path('packages'))
-        self.set_property('allow_system_libs', True)
         self.set_property('use_configure_cache', False)
         self.set_property('external_recipes', {})
         self.set_property('external_packages', {})
@@ -733,7 +742,11 @@ class Config(object):
             setattr(self, name, value)
 
     def get_recipes_repos(self):
-        recipes_dir = {'default': (self.recipes_dir, 0)}
+        recipes_dir = {}
+        if self.allow_system_recipes:
+            # Setting first system recipes to be loaded first if same priority
+            recipes_dir['system'] = (self.system_recipes_dir, self.system_recipes_priority)
+        recipes_dir['default'] = (self.recipes_dir, 0)
         for name, (path, priority) in self.external_recipes.items():
             path = os.path.abspath(os.path.expanduser(path))
             recipes_dir[name] = (path, priority)
@@ -1232,3 +1245,6 @@ class Config(object):
         if Path(self.prefix, glue, testfile).exists():
             return Path(self.prefix, glue)
         return None
+
+    def get_custom_pkg_config_path(self):
+        return os.path.join(self.libdir, 'system_pkgconfig')

@@ -1,0 +1,3 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'openssl'
+    pkgconfig_files = ['libcrypto', 'libssl', 'openssl']

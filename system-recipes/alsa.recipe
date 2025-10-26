@@ -1,0 +1,3 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'alsa'
+    pkgconfig_files = ['alsa']

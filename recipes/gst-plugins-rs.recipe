@@ -86,8 +86,9 @@ class Recipe(recipe.Recipe):
         'webrtchttp',
     ]
 
-    # Needed for openssl
-    use_system_libs = True
+    platform_deps = {
+        Platform.LINUX: ['openssl']
+    }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
     files_libs = []
@@ -323,7 +324,7 @@ class Recipe(recipe.Recipe):
             if self.requires_melding():
                 # Inject our substitute Rust workspace library
                 if re.search(r'Requires.private:\s+\w', pc_file):
-                    pc_file = pc_file.replace('Requires.private:', 
+                    pc_file = pc_file.replace('Requires.private:',
                     'Requires.private: gstrsworkspace,')
                 else:
                     pc_file = pc_file.replace('Requires.private:', 'Requires.private: gstrsworkspace')
@@ -416,7 +417,7 @@ class Recipe(recipe.Recipe):
                 bak = src.with_suffix('.bak')
                 bak.unlink(missing_ok=True)
         # CAVEAT: on Apple platforms, compiler_builtins (and any other
-        # crate mistakenly built with LTO enabled) will contain LLVM 
+        # crate mistakenly built with LTO enabled) will contain LLVM
         # bitcode, causing usages of eg. stock (pre Xcode 16) nm to emit
         # spam like:
         # /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/nm: error: /tmp/GStreamer(libgstrsworkspace_a-compiler_builtins-3ec2bc050946f0ab.compiler_builtins.f12b8f9133eedb91-cgu.012.rcgu.o): Unknown attribute kind (91) (Producer: 'LLVM20.1.7-rust-1.89.0-stable' Reader: 'LLVM APPLE_1_1600.0.26.3_0')

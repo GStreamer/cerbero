@@ -37,9 +37,10 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
-            'libvpx', 'libdv', 'cairo', 'opencore-amr']
-    use_system_libs = True
-
+            'libvpx', 'libdv', 'cairo', 'opencore-amr', 'libxml2']
+    platform_deps = {
+        Platform.LINUX: ['alsa', 'x11', 'libpulse'],
+    }
 
     files_lang = ['gst-plugins-good-1.0']
 
