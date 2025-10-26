@@ -132,7 +132,7 @@ if (!(Is-Newer 'py' $python_req)) {
   Write-Host "Python >= $python_req not found, installing..."
   choco install -y python3
 }
-python -m pip install setuptools
+py -3 -m pip install setuptools
 
 if (!(Is-Newer 'wix' $wix_req) -and !(Is-Newer "$env:WIX5\wix" $wix_req)) {
   Write-Host "WiX >= $wix_req not found, installing..."
