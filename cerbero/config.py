@@ -52,6 +52,7 @@ RUST_TRIPLE_MAPPING = {
     (Platform.LINUX, Architecture.ARM): 'arm-unknown-linux-gnueabi',
     (Platform.LINUX, Architecture.ARMv7): 'armv7-unknown-linux-gnueabihf',
     (Platform.LINUX, Architecture.ARM64): 'aarch64-unknown-linux-gnu',
+    (Platform.LINUX, Architecture.X86): 'x86-unknown-linux-gnu',
     (Platform.LINUX, Architecture.X86_64): 'x86_64-unknown-linux-gnu',
     (Platform.DARWIN, Architecture.ARM64): 'aarch64-apple-darwin',
     (Platform.DARWIN, Architecture.X86_64): 'x86_64-apple-darwin',
