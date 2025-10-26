@@ -60,6 +60,15 @@ $ Set-ExecutionPolicy -ExecutionPolicy Unrestricted
 $ .\tools\bootstrap-windows.ps1
 ```
 
+You may specify the Visual Studio version to install by passing the `-VSVersion`
+parameter with either `2019` or `2022`. If not specified, you will be prompted to
+choose one during the bootstrap process.
+
+```powershell
+# Run the bootstrap script specifying Visual Studio 2022
+$ .\tools\bootstrap-windows.ps1 -VSVersion '2022'
+```
+
 **IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows)
 requires a 64-bit operating system. The toolchain is only available for 64-bit
 and it can produce 32-bit or 64-bit binaries.

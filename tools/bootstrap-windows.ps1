@@ -2,6 +2,11 @@
 
 #Requires -RunAsAdministrator
 
+param(
+  [ValidateSet("2019", "2022")]
+  [string]$VSVersion
+)
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
 
 . "$PSScriptRoot\common.ps1"
@@ -59,23 +64,35 @@ function Check-VS {
 }
 
 function Install-VS {
-  $version = ''
+  param([string]$PreferredVersion)
+
+  $version = $PreferredVersion
   $vs_arglist = '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
-  while (1) {
-    $version = Read-Host "Pick the Visual Studio version: 2019 or 2022? [2019/2022] "
-    if ($version -eq '2022') {
-      $vs_url = $vs2022_url
-      break
-    } elseif ($version -eq '2019') {
-      $vs_url = $vs2019_url
-      $vs_arglist += ' --add Microsoft.VisualStudio.Component.Windows11SDK.22000'
-      break
-    } elseif ($version -eq 'q') {
-      return $true
-    } else {
-      Write-Host "Selected invalid version $version, retry or press 'q' to quit"
+
+  # If no version specified, prompt for it
+  if (-not $version) {
+    while (1) {
+      $version = Read-Host "Pick the Visual Studio version: 2019 or 2022? [2019/2022] "
+      if ($version -eq 'q') {
+        return $true
+      } elseif ($version -ne '2019' -and $version -ne '2022') {
+        Write-Host "Selected invalid version $version, retry or press 'q' to quit"
+      } else {
+        break
+      }
     }
   }
+
+  switch ($version) {
+    '2022' {
+      $vs_url = $vs2022_url
+    }
+    '2019' {
+      $vs_url = $vs2019_url
+      $vs_arglist += ' --add Microsoft.VisualStudio.Component.Windows11SDK.22000'
+    }
+  }
+
   Get-Date
   Write-Host "Downloading Visual Studio $version build tools"
   Invoke-WebRequest -Uri $vs_url -OutFile "$env:TEMP\vs_buildtools.exe"
@@ -157,7 +174,7 @@ if (!(Is-Newer 'wix' $wix_req) -and !(Is-Newer "$env:WIX5\wix" $wix_req)) {
 $MSYS2_Dir = (Get-MSYS2)
 if (!$MSYS2_Dir) {
   Write-Host "MSYS2 not found, installing..."
-  choco install msys2 --params "/InstallDir:C:\msys64"
+  choco install -y msys2 --params "/InstallDir:C:\msys64"
   $MSYS2_Dir = "C:\msys64"
 }
 
@@ -171,9 +188,17 @@ if (!((Get-Content "$MSYS2_Dir\ucrt64.ini") -clike "MSYS2_PATH_TYPE=inherit")) {
 Copy-Item "$PSScriptRoot\..\data\msys2\profile.d\aliases.sh" -Destination "$MSYS2_Dir\etc\profile.d"
 
 if (!(Check-VS)) {
-  $confirm = Read-Host "Visual Studio 2019 or 2022 not found, do you want to Visual Studio build tools now? [Y/n] "
-  if ($confirm -ne 'n' -and !(Install-VS)) {
-    exit 1
+  if ($VSVersion) {
+    # Non-interactive mode with specified version
+    if (!(Install-VS -PreferredVersion $VSVersion)) {
+      exit 1
+    }
+  } else {
+    # Interactive mode
+    $confirm = Read-Host "Visual Studio 2019 or 2022 not found, do you want to Visual Studio build tools now? [Y/n] "
+    if ($confirm -ne 'n' -and !(Install-VS)) {
+      exit 1
+    }
   }
 }
 
