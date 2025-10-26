@@ -32,10 +32,6 @@ class Package(custom.GStreamer, package.Package):
             self.files_devel.append('directxmath:files_devel')
             self.files_devel.append('directx-headers:files_devel')
 
-        if self.config.variants.vaapi:
-            self.files.append('gstreamer-vaapi-1.0:plugins_codecs')
-            self.files_devel.append('gstreamer-vaapi-1.0:plugins_codecs_devel')
-
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed by zbar library
             self.files.append('libiconv:libs')

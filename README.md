@@ -298,8 +298,7 @@ if you need to set this, you must set it to point to the directory that
 contains the mediasdk `include` and `lib64` dirs.
 
 For VA-API, the [variant to enable](#enabling-optional-features-with-variants)
-is `vaapi` which will build the gstreamer-vaapi plugins with all
-options enabled if possible.
+is `vaapi` which will build the va plugins from gst-plugins-bad.
 
 ### Nvidia Hardware Codecs
 
