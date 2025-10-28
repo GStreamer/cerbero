@@ -16,6 +16,7 @@ class Recipe(recipe.Recipe):
                      'cairo': 'enabled',  # needed for hb-view
                      'gobject': 'enabled',
                      'icu_builtin': 'false',
+                     'docs': 'disabled',
                      'tests': 'disabled'}
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
