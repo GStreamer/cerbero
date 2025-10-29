@@ -26,7 +26,6 @@ from cerbero.errors import FatalError
 from cerbero.utils.shell import check_output
 from cerbero.utils import messages as m
 
-# We only support Visual Studio 2015 as of now
 VCVARSALLS = {
     'vs15': (
         (
@@ -58,6 +57,16 @@ VCVARSALLS = {
         ),
         r'VC\Auxiliary\Build\vcvarsall.bat',
     ),
+    'vs18': (
+        (
+            r'Microsoft Visual Studio\18\Community',
+            r'Microsoft Visual Studio\18\Professional',
+            r'Microsoft Visual Studio\18\Enterprise',
+            r'Microsoft Visual Studio\18\BuildTools',
+            r'Microsoft Visual Studio\18\Insiders',
+        ),
+        r'VC\Auxiliary\Build\vcvarsall.bat',
+    ),
 }
 
 
@@ -78,6 +87,8 @@ def get_vs_year_version(vcver):
         return '2019'
     if vcver == 'vs17':
         return '2022'
+    if vcver == 'vs18':
+        return '2026'
     raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
 
@@ -101,10 +112,10 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
 
     vswhere_exe = str(vswhere)
     # Get a list of installation paths for all installed Visual Studio
-    # instances, from VS 2013 to the latest one, sorted from newest to
+    # instances, from VS 2017 to the latest one, sorted from newest to
     # oldest, and including preview releases.
     # Will not include BuildTools installations.
-    out = check_output([vswhere_exe, '-legacy', '-prerelease', '-format', 'json', '-utf8'])
+    out = check_output([vswhere_exe, '-prerelease', '-format', 'json', '-utf8'])
     installs = _sort_vs_installs(json.loads(out))
     program_files = get_program_files_dir()
     for install in installs:
@@ -151,8 +162,8 @@ def get_vcvarsall(vs_version, vs_install_path):
     # vswhere is installed by Visual Studio 2017 and newer into a fixed
     # location, and can also be installed separately. For others:
     # - Visual Studio 2013 (can be found by vswhere -legacy, but we don't use it)
-    # - Visual Studio 2015 (can be found by vswhere -legacy)
-    # - Visual Studio 2019 Build Tools (cannot be found by vswhere)
+    # - Visual Studio 2015 (can be found by vswhere -legacy, but we don't use it)
+    # - Visual Studio 2019/22 Build Tools (can be found by adding `-products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64`)
     vswhere = program_files / 'Microsoft Visual Studio' / 'Installer' / 'vswhere.exe'
     if vswhere.is_file():
         ret = _get_vswhere_vs_install(vswhere, vs_versions)
