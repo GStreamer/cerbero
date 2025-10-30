@@ -78,7 +78,7 @@ class Packager(object):
 
 
 from cerbero.packages import rpm, debian, android, disttarball  # noqa: E402
-from cerbero.packages.windows import wix_on_ninja  # noqa: E402
+from cerbero.packages.windows import inno_setup, wix_on_ninja  # noqa: E402
 from cerbero.packages.osx import packager as osx_packager  # noqa: E402
 from cerbero.packages.wheel import packager as wheel  # noqa: E402
 
@@ -89,3 +89,4 @@ debian.register()
 android.register()
 disttarball.register()
 wheel.register()
+inno_setup.register()

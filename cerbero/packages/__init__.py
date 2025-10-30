@@ -58,6 +58,7 @@ class PackagerBase(object):
         self.devel = devel
         self.force = force
         self.keep_temp = keep_temp
+        return []
 
     def files_list(self, package_type, force):
         if package_type == PackageType.DEVEL:

@@ -180,6 +180,8 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             sources = f'{package_name}-fragment.wxs'
         # FIXME (remove this special casing): https://github.com/wixtoolset/issues/issues/8558
         elif isinstance(self.package, VSTemplatePackage):
+            if self.package.year == '2026':
+                raise RuntimeError('VS 2026 is unsupported by WiX')
             mergemodule = VSFragment(self.config, files_list, self.package)
             args = [*self.VS_EXT]
             mergeoutput = Light.Output.WIXLIB
@@ -336,6 +338,9 @@ class MSIWithNinjaPackager(PackagerBase):
         packagedeps = {}
         tmp_dirs = []
         for package in self.packagedeps:
+            if getattr(package, 'year', None) == '2026':
+                # m.warning('VS 2026 is unsupported by WiX, skipping')
+                continue
             package.set_mode(package_type)
             package.wix_use_fragment = self.package.wix_use_fragment
             m.action('Creating Merge Module for %s' % package)

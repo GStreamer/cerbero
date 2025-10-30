@@ -40,6 +40,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
                 ('gstreamer-1.0-vs-templates-2017', True, False),
                 ('gstreamer-1.0-vs-templates-2019', True, False),
                 ('gstreamer-1.0-vs-templates-2022', True, False),
+                ('gstreamer-1.0-vs-templates-2026', True, False),
                 ],
             }
 

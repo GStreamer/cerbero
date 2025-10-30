@@ -36,3 +36,13 @@ class Package2022(custom.GStreamer, VSTemplatePackage):
 
     def prepare(self):
         self.vs_wizard_dir = f'share/vs/{self.year}/wizard'
+
+class Package2026(custom.GStreamer, VSTemplatePackage):
+    year = '2026'
+    name = 'gstreamer-1.0-vs-templates-2026'
+    shortdesc = 'GStreamer 1.0 Visual Studio 2026 templates'
+    vs_template_dir = 'share/vs/2010/gst-sdk-template'
+    vs_template_name = 'gst-sdk-template'
+
+    def prepare(self):
+        self.vs_wizard_dir = f'share/vs/{self.year}/wizard'

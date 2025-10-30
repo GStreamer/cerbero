@@ -312,6 +312,8 @@ class VSMergeModule(MergeModule):
     def __init__(self, config, files_list, package):
         MergeModule.__init__(self, config, files_list, package)
         self.year = self.package.year
+        if self.package.year == '2026':
+            raise RuntimeError('VS 2026 is unsupported by WiX')
 
     def _add_module(self):
         MergeModule._add_module(self)
@@ -348,6 +350,8 @@ class VSFragment(Fragment):
     def __init__(self, config, files_list, package):
         Fragment.__init__(self, config, files_list, package)
         self.year = self.package.year
+        if self.package.year == '2026':
+            raise RuntimeError('VS 2026 is unsupported by WiX')
 
     def _fill(self):
         self._add_root()
