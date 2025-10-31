@@ -159,9 +159,6 @@ cerbero_before_script() {
     echo "local_sources = \"$(pwd_native)/${CERBERO_SOURCES}\"" >> localconf.cbc
     echo "mingw_perl_prefix = \"${CERBERO_HOST_DIR}/${CERBERO_HOME}/mingw/perl\"" >> localconf.cbc
     if [[ $CONFIG == win??.cbc ]] || [[ $CONFIG =~ uwp ]] ; then
-        # Visual Studio 2022 build tools install path
-        echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
-        echo 'vs_install_version = "vs17"' >> localconf.cbc
         # Evade PATH_MAX
         echo "sources = f'{home_dir}/s'" >> localconf.cbc
     fi
