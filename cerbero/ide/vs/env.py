@@ -114,8 +114,19 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
     # Get a list of installation paths for all installed Visual Studio
     # instances, from VS 2017 to the latest one, sorted from newest to
     # oldest, and including preview releases.
-    # Will not include BuildTools installations.
-    out = check_output([vswhere_exe, '-prerelease', '-format', 'json', '-utf8'])
+    out = check_output(
+        [
+            vswhere_exe,
+            '-prerelease',
+            '-format',
+            'json',
+            '-utf8',
+            '-products',
+            '*',
+            '-requires',
+            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+        ]
+    )
     installs = _sort_vs_installs(json.loads(out))
     program_files = get_program_files_dir()
     for install in installs:
