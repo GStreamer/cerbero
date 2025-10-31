@@ -45,8 +45,8 @@ class RustBootstrapper(BootstrapperBase):
     """
 
     SERVER = 'https://static.rust-lang.org'
-    RUSTUP_VERSION = '1.28.1'
-    RUST_VERSION = '1.90.0'
+    RUSTUP_VERSION = '1.28.2'
+    RUST_VERSION = '1.91.0'
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
     CHANNEL_URL_TPL = '{server}/dist/channel-rust-{version}.toml'
@@ -55,17 +55,17 @@ class RustBootstrapper(BootstrapperBase):
     TOMLI_URL = 'https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz'
     DOWNLOAD_CHECKSUMS = {
         # Rust packages metadata
-        'channel-rust-1.90.0.toml': '489c19f20d331765ab2835661eb546de90f6446a107a8db83045e7371e45cae2',
+        'channel-rust-1.91.0.toml': 'd9e59cdf15532aa839c0a4871b0b755e833f914042eb2dcc59f2a0ef8667f9f6',
         # Tomli Python module
         'tomli-2.0.1.tar.gz': 'de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f',
         # Rustup
-        'rustup-init-1.28.1-x86_64-unknown-linux-gnu': 'a3339fb004c3d0bb9862ba0bce001861fe5cbde9c10d16591eb3f39ee6cd3e7f',
-        'rustup-init-1.28.1-aarch64-unknown-linux-gnu': 'c64b33db2c6b9385817ec0e49a84bcfe018ed6e328fe755c3c809580cc70ce7a',
-        'rustup-init-1.28.1-x86_64-apple-darwin': 'e4b1f9ec613861232247e0cb6361c9bb1a86525d628ecd4b9feadc9ef9e0c228',
-        'rustup-init-1.28.1-aarch64-apple-darwin': '966892cda29f0152315f5b4add9b865944c97d5573ae33855b8fc2c0d592ca5a',
-        'rustup-init-1.28.1-x86_64-pc-windows-gnu.exe': 'f47cee05c484fb4dc89267e25f9f2f64e18ac5c03a72bec04d01d3b903a27c9b',
-        'rustup-init-1.28.1-x86_64-pc-windows-msvc.exe': '7b83039a1b9305b0c50f23b2e2f03319b8d7859b28106e49ba82c06d81289df6',
-        'rustup-init-1.28.1-aarch64-pc-windows-msvc.exe': '9054ad509637940709107920176f14cee334bc5cfe50bc0a24a3dc59b6f4d458',
+        'rustup-init-1.28.2-x86_64-unknown-linux-gnu': '20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c',
+        'rustup-init-1.28.2-aarch64-unknown-linux-gnu': 'e3853c5a252fca15252d07cb23a1bdd9377a8c6f3efa01531109281ae47f841c',
+        'rustup-init-1.28.2-x86_64-apple-darwin': '9c331076f62b4d0edeae63d9d1c9442d5fe39b37b05025ec8d41c5ed35486496',
+        'rustup-init-1.28.2-aarch64-apple-darwin': '20ef5516c31b1ac2290084199ba77dbbcaa1406c45c1d978ca68558ef5964ef5',
+        'rustup-init-1.28.2-x86_64-pc-windows-gnu.exe': 'ccbfd951d8024856043b3a0c3903a59f39937bce8d3074768b0d3da55f21e817',
+        'rustup-init-1.28.2-x86_64-pc-windows-msvc.exe': '88d8258dcf6ae4f7a80c7d1088e1f36fa7025a1cfd1343731b4ee6f385121fc0',
+        'rustup-init-1.28.2-aarch64-pc-windows-msvc.exe': 'de9f7d29ccd39efa59a3dda3ec363b396e09b92681229b9b8f6aaa4c84285e9c',
     }
     # The triple for the build platform/arch
     build_triple = None
