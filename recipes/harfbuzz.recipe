@@ -20,11 +20,18 @@ class Recipe(recipe.Recipe):
                      'tests': 'disabled'}
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
-    files_libs = ['libharfbuzz', 'libharfbuzz-gobject']
+    files_libs = [
+        'libharfbuzz',
+        'libharfbuzz-gobject',
+        'libharfbuzz-cairo',
+        'libharfbuzz-subset',
+    ]
     files_devel = [
         'include/harfbuzz/*.h',
         '%(libdir)s/pkgconfig/harfbuzz.pc',
         '%(libdir)s/pkgconfig/harfbuzz-gobject.pc',
+        '%(libdir)s/pkgconfig/harfbuzz-cairo.pc',
+        '%(libdir)s/pkgconfig/harfbuzz-subset.pc',
     ]
     files_typelibs = ['HarfBuzz-0.0']
 
@@ -40,4 +47,10 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('harfbuzz-gobject', None, None, None,
                 self.config.libdir, self.config.target_platform,
                 deps=['gobject-2.0', 'harfbuzz']).save()
+        LibtoolLibrary('harfbuzz-cairo', None, None, None,
+                self.config.libdir, self.config.target_platform,
+                deps=['cairo', 'harfbuzz']).save()
+        LibtoolLibrary('harfbuzz-subset', None, None, None,
+                self.config.libdir, self.config.target_platform,
+                deps=['harfbuzz']).save()
         super().post_install()
