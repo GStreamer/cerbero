@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'cmake'
-    version = '3.22.2'
+    version = '3.31.9'
     licenses = [{License.BSD_3_Clause: ['Copyright.txt']}]
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
     url = 'https://github.com/Kitware/CMake/releases/download/v%(version)s/cmake-%(version)s.tar.gz'
-    tarball_checksum = '3c1c478b9650b107d452c5bd545c72e2fad4e37c09b89a1984b9a2f46df6aced'
+    tarball_checksum = '5d4fdec04247ca8a8e8f63692f0d0f1e9d6d082a2bdd008dff8ab3ba7215aa83'
     deps = ['autoconf']
 
     add_host_build_target = False
