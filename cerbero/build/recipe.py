@@ -47,7 +47,7 @@ def log_step_output(recipe, stepfunc):
         step = stepfunc.__name__
         path = '%s/%s-%s.log' % (recipe.config.logs, recipe.name, step)
         recipe.old_logfile = recipe.logfile  # Allow calling build steps recursively
-        recipe.logfile = open(path, 'w+')
+        recipe.logfile = open(path, 'w+', encoding='utf-8', errors='replace')
 
     def close_file():
         # if logfile is empty, remove it
