@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
     deps = ['glib']
 
     files_libs = ['libgraphene-1.0']
-#    files_typelibs = ['Graphene-1.0']
+    files_typelibs = []
 
     files_devel = [
         'include/graphene-1.0',
@@ -50,6 +50,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")
+            self.files_typelibs = ['Graphene-1.0']
 
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
