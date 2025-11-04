@@ -195,7 +195,7 @@ if (!(Check-VS)) {
     }
   } else {
     # Interactive mode
-    $confirm = Read-Host "Visual Studio 2019 or 2022 not found, do you want to Visual Studio build tools now? [Y/n] "
+    $confirm = Read-Host "Visual Studio 2019 or 2022 not found, do you want to install Visual Studio build tools now? [Y/n] "
     if ($confirm -ne 'n' -and !(Install-VS)) {
       exit 1
     }
