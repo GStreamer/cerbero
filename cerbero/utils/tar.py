@@ -3,10 +3,11 @@ import os
 import tarfile
 import tempfile
 import shutil
+import traceback
 
 from cerbero.enums import Distro, Platform
-from cerbero.errors import UsageError, FatalError
-from cerbero.utils import shell
+from cerbero.errors import CommandError, UsageError, FatalError
+from cerbero.utils import shell, to_unixpath
 
 
 class Tar:
@@ -18,6 +19,9 @@ class Tar:
 
     STOCK_TAR = (None, 'tar')
     HOMEBREW_TAR = ('brew', 'gtar')
+    # We cannot use this, it hangs when combined with xz from MSYS2. Added here
+    # just for completeness.
+    WIN32_BSD_TAR = ('win32', r'C:\Windows\System32\tar.exe')
     MSYS_BSD_TAR = ('msys', 'bsdtar')
     MSYS_GNU_TAR = ('msys', 'tar')
     TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz', 'tar.zst', 'tar.zstd')
@@ -57,19 +61,63 @@ class Tar:
     def uses_ancient_msys_tar():
         return shell.DISTRO == Distro.MSYS and Tar.get_cmd() == Tar.STOCK_TAR
 
-    async def unpack(self, output_dir, force_tarfile=False):
-        # Recent versions of tar are much faster than the tarfile module, but we
-        # can't use tar on Windows because MSYS tar is ancient and buggy.
-        if Tar.uses_ancient_msys_tar() or force_tarfile:
-            cmode = 'bz2' if self.filename.endswith('bz2') else self.filename[-2:]
-            tf = tarfile.open(self.filename, mode='r:' + cmode)
-            tf.extractall(path=output_dir)
-        else:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+    async def unpack_tarfile(self, output_dir):
+        cmode = 'bz2' if self.filename.endswith('bz2') else self.filename[-2:]
+        tf = tarfile.open(self.filename, mode='r:' + cmode)
+        # Unfortunately this is not async, so it will block
+        tf.extractall(path=output_dir)
+
+    async def unpack(self, output_dir, logfile=None):
+        if Tar.uses_ancient_msys_tar():
+            # We can't use MSYS tar (not MSYS2) on Windows because it is
+            # ancient and buggy.
+            await self.unpack_tarfile(output_dir)
+            return
+
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        tar_cmd = self.get_cmd()
+        try:
             await shell.async_call(
-                [self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args, env=os.environ.copy()
+                [tar_cmd[1], '-C', output_dir, '-f', self.filename] + self.decompress_args,
+                env=os.environ.copy(),
+                logfile=logfile,
             )
+            return
+        except CommandError as e:
+            if logfile:
+                traceback.print_exception(e, file=logfile)
+                logfile.write('tar command {} failed, trying next'.format(tar_cmd[1]))
+
+        if shell.PLATFORM == Platform.WINDOWS:
+            if tar_cmd != self.MSYS_BSD_TAR:
+                try:
+                    await shell.async_call(
+                        [self.MSYS_BSD_TAR[1], '-f', self.filename, '-C', output_dir] + self.decompress_args,
+                        env=os.environ.copy(),
+                        logfile=logfile,
+                    )
+                    return
+                except CommandError as e:
+                    if logfile:
+                        traceback.print_exception(e, file=logfile)
+                        logfile.write('MSYS2 bsdtar command failed, trying next')
+            if tar_cmd != self.MSYS_GNU_TAR:
+                try:
+                    await shell.async_call(
+                        [self.MSYS_GNU_TAR[1], '-f', to_unixpath(self.filename), '-C', to_unixpath(output_dir)]
+                        + self.decompress_args,
+                        env=os.environ.copy(),
+                        logfile=logfile,
+                    )
+                    return
+                except CommandError as e:
+                    if logfile:
+                        traceback.print_exception(e, file=logfile)
+                        logfile.write('MSYS2 tar command failed, trying next')
+        # Finally, try tarfile
+        await self.unpack_tarfile(output_dir)
 
     def unpack_sync(self, output_dir):
         if not os.path.exists(output_dir):
@@ -185,11 +233,13 @@ class Tar:
     @staticmethod
     @lru_cache()
     def get_cmd():
-        if shell.DISTRO == Distro.MSYS2:
+        # Try various BSD tars first on Windows, since they seem to have better perf
+        if shell.PLATFORM == Platform.WINDOWS:
+            if shell.DISTRO == Distro.MSYS2:
+                return Tar.MSYS_BSD_TAR
             return Tar.MSYS_GNU_TAR
         # Allow using Homebrewed tar since it's GNU compatible
         # (macOS uses FreeBSD tar)
-        elif shutil.which(Tar.HOMEBREW_TAR):
+        if shutil.which(Tar.HOMEBREW_TAR[1]):
             return Tar.HOMEBREW_TAR
-        else:
-            return Tar.STOCK_TAR
+        return Tar.STOCK_TAR

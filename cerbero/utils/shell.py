@@ -350,7 +350,7 @@ def apply_patch(patch, directory, strip=1, logfile=None):
     new_call([PATCH, f'-p{strip}', '-f', '-i', patch], cmd_dir=directory, logfile=logfile)
 
 
-async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
+async def unpack(filepath, output_dir, logfile=None):
     """
     Extracts a tarball
 
@@ -358,13 +358,11 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
     @type filepath: str
     @param output_dir: output directory
     @type output_dir: str
-    @param force_tarfile: forces use of tarfile
-    @type force_tarfile: bool
     """
     m.log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
     if filepath.endswith(Tar.TARBALL_SUFFIXES):
-        await Tar(filepath).unpack(output_dir, force_tarfile)
+        await Tar(filepath).unpack(output_dir, logfile)
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, 'r')
         zf.extractall(path=output_dir)

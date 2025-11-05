@@ -15,10 +15,6 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/ladspa.h']
     library_type = LibraryType.NONE
 
-    def prepare(self):
-        if self.config.distro == Distro.MSYS2:
-            self.force_tarfile = True
-
     async def install(self):
         include_path =  os.path.join(self.config.prefix, 'include')
         if not os.path.exists(include_path):

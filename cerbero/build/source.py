@@ -330,9 +330,6 @@ class BaseTarball(object):
 
     @cvar tarball_is_bomb: the tarball is a tarbomb and will extract contents into the current directory
     @type tarball_is_bomb: bool
-
-    @cvar force_tarfile: forces the use of python's tarfile instead of tar
-    @type force_tarfile: bool
     """
 
     url = None
@@ -340,7 +337,6 @@ class BaseTarball(object):
     tarball_dirname = None
     tarball_is_bomb = False
     tarball_checksum = None
-    force_tarfile = False
     untrusted_protocols = ('http', 'ftp')
 
     def __init__(self):
@@ -406,7 +402,7 @@ class BaseTarball(object):
         fname = self._get_download_path(self.tarball_name)
         logfile = get_logfile(self)
         try:
-            await shell.unpack(fname, unpack_dir, logfile=logfile, force_tarfile=self.force_tarfile)
+            await shell.unpack(fname, unpack_dir, logfile=logfile)
         except (CommandError, tarfile.ReadError, zipfile.BadZipFile):
             movedto = fname + '.failed-extract'
             os.replace(fname, movedto)

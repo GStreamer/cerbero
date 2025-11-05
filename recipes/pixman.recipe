@@ -47,10 +47,6 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm',
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
-        # Can't create 'pixman-0.44.0/.gitlab-ci.d/meson-cross/linux-386-gnu.meson': No such file or directory
-        # (Those are symlinks)
-        if self.config.platform == Platform.WINDOWS:
-            self.force_tarfile = True
 
     def post_install(self):
         pixman_deps = []
