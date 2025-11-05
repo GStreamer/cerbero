@@ -19,11 +19,6 @@ class Recipe(recipe.Recipe):
 
     patches = []
 
-    def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            # COPYING is a symlink
-            self.force_tarfile = True
-
     def post_install (self):
         lib = LibtoolLibrary('json-glib-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gio-2.0', 'gobject-2.0', 'glib-2.0', '-lm', '-pthread'])
