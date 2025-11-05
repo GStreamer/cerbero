@@ -67,7 +67,9 @@ class Tar:
         else:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await shell.async_call([self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args)
+            await shell.async_call(
+                [self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args, env=os.environ.copy()
+            )
 
     def unpack_sync(self, output_dir):
         if not os.path.exists(output_dir):
