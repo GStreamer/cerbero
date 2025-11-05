@@ -29,8 +29,12 @@ class Tar:
     def __init__(self, filename):
         self.filename = filename
         self.decompress_args = ['--no-same-owner', '-x']
+        # Exclude symlinks on Windows
         if shell.PLATFORM == Platform.WINDOWS:
-            self.decompress_args += ['--exclude=*.so']
+            self.decompress_args += [
+                '--exclude=*.so',
+                '--exclude=.gitlab-ci.d/meson-cross/*',
+            ]
 
     def configure(self, config, files_prefix, compress=None):
         self.distro = config.distro

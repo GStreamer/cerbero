@@ -7,11 +7,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
-    version = '0.46.0'
+    version = '0.46.4'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://www.x.org/releases/individual/lib/pixman-%(version)s.tar.xz'
-    tarball_checksum = 'd2eab57e1ce79de991f8ceb3fcd726a6978b970382c8ac8c8f112b61ceaa9167'
+    tarball_checksum = 'a098c33924754ad43f981b740f6d576c70f9ed1006e12221b1845431ebce1239'
     meson_options = {'openmp': 'disabled',
                      'gtk': 'disabled',
                      'libpng': 'disabled',
