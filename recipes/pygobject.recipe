@@ -2,15 +2,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'pygobject'
-    version = '3.50.0'
+    version = '3.50.2'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = f'https://download.gnome.org/sources/pygobject/{version[0:4]}/pygobject-{version}.tar.xz'
-    url = 'gnome://'
+    url = 'gnome://pygobject/%(maj_ver)s/pygobject-%(version)s.tar.gz'
     licenses = [{License.LGPLv2_1Plus: ['COPYING']}]
 
     deps = ['pycairo', 'gobject-introspection', 'libffi']
-    tarball_checksum = '8d836e75b5a881d457ee1622cae4a32bcdba28a0ba562193adb3bbb472472212'
+    tarball_checksum = 'ece6b860aab77cb649fdfc6e88d8a83765e7a62f7ffd39a628d6e2a0d397a7ff'
     meson_options = {
         'tests': False,
     }
@@ -54,6 +53,8 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/415
         'pygobject/0001-gi-Call-os.add_dll_directory-on-Windows-when-possibl.patch',
+        # https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/463
+        'pygobject/0002-Fix-syntax-error-for-missing.patch',
     ]
 
     def prepare(self):
