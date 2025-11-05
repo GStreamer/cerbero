@@ -22,11 +22,6 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/soundtouch', '%(libdir)s/pkgconfig/soundtouch.pc']
 
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            # tar and bsdtar fail extracting the symbolic link in
-            # source/SoundTouchDLL/LazarusTest/libSoundTouchDll.so
-            # as it's a placeholder
-            self.force_tarfile = True
         # FIXME: change to self.using_msvc() once the Windows cross
         # builds update their GCC
         if self.config.target_platform == Platform.WINDOWS:

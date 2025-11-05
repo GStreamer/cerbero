@@ -24,6 +24,9 @@ class Tar:
 
     def __init__(self, filename):
         self.filename = filename
+        self.decompress_args = ['--no-same-owner', '-x']
+        if shell.PLATFORM == Platform.WINDOWS:
+            self.decompress_args += ['--exclude=*.so']
 
     def configure(self, config, files_prefix, compress=None):
         self.distro = config.distro
@@ -64,12 +67,12 @@ class Tar:
         else:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await shell.async_call([self.get_cmd()[1], '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
+            await shell.async_call([self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args)
 
     def unpack_sync(self, output_dir):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        return shell.new_call([self.get_cmd()[1], '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
+        return shell.new_call([self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args)
 
     def _compress_tar(self, tar_filename):
         compress_cmd = None
