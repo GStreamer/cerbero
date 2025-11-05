@@ -16,9 +16,10 @@ class Tar:
         TAR = 'tar'
         ZSTD = 'zst'
 
-    STOCK_TAR = 'tar'
-    HOMEBREW_TAR = 'gtar'
-    MSYS_BSD_TAR = 'bsdtar'
+    STOCK_TAR = (None, 'tar')
+    HOMEBREW_TAR = ('brew', 'gtar')
+    MSYS_BSD_TAR = ('msys', 'bsdtar')
+    MSYS_GNU_TAR = ('msys', 'tar')
     TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz', 'tar.zst', 'tar.zstd')
 
     def __init__(self, filename):
@@ -63,12 +64,12 @@ class Tar:
         else:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await shell.async_call([self.get_cmd(), '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
+            await shell.async_call([self.get_cmd()[1], '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
 
     def unpack_sync(self, output_dir):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        return shell.new_call([self.get_cmd(), '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
+        return shell.new_call([self.get_cmd()[1], '-C', output_dir, '-xf', self.filename, '--no-same-owner'])
 
     def _compress_tar(self, tar_filename):
         compress_cmd = None
@@ -111,7 +112,7 @@ class Tar:
     def _write_tar(self, package_prefix, files):
         tar_filename = self.filename
         tar = self.get_cmd()
-        tar_cmd = [tar, '-C', self.prefix]
+        tar_cmd = [tar[1], '-C', self.prefix]
         # --checkpoint is only supported by GNU tar
         if tar == Tar.HOMEBREW_TAR or (self.platform != Platform.DARWIN and tar == Tar.STOCK_TAR):
             tar_cmd.append('--checkpoint=.250')
@@ -179,16 +180,8 @@ class Tar:
     @staticmethod
     @lru_cache()
     def get_cmd():
-        """
-        Returns the tar command to use
-
-        @return: the tar command
-        @rtype: str
-        """
-        # Use bsdtar with MSYS2 since tar hangs
-        # https://github.com/msys2/MSYS2-packages/issues/1548
         if shell.DISTRO == Distro.MSYS2:
-            return Tar.MSYS_BSD_TAR
+            return Tar.MSYS_GNU_TAR
         # Allow using Homebrewed tar since it's GNU compatible
         # (macOS uses FreeBSD tar)
         elif shutil.which(Tar.HOMEBREW_TAR):
