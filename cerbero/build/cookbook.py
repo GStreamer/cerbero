@@ -278,7 +278,7 @@ class CookBook(object):
         @rtype: list
         """
         recipe = self.get_recipe(recipe_name)
-        return [r for r in list(self.recipes.values()) if recipe.name in r.deps]
+        return [r for r in list(self.recipes.values()) if recipe.name in r.list_deps()]
 
     def get_closest_recipe(self, name):
         """
