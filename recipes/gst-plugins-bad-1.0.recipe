@@ -646,8 +646,7 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.WINDOWS, Platform.LINUX):
             if self.config.target_arch == Architecture.X86_64:
-                # self.enable_plugin('svt-jpeg-xs', 'codecs', dep='svt-jpeg-xs')
-                self.deps.append('svt-jpeg-xs')
+                self.enable_plugin('svtjpegxs', 'codecs', dep='svt-jpeg-xs')
 
     def post_install(self):
         LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
