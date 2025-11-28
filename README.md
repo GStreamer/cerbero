@@ -21,18 +21,18 @@ minimum base to bootstrap on top of.
 
 ### Linux Setup
 
-On Linux, you will only need a distribution with python >= 3.7. Cerbero will
+On Linux, you will only need a distribution with python >= 3.9. Cerbero will
 use your package manager to install all other required packages during
 [bootstrap](#Bootstrap).
 
 ### macOS Setup
 
-On macOS you will need to have install the following software:
-
-* XCode
-* Python 3.7+ https://www.python.org/downloads/
+On macOS we use the Python 3 that ships with Xcode, so you only need to install
+Xcode Command Line Tool.
 
 Cerbero will build all other required packages during [bootstrap](#Bootstrap).
+You do **not** need anything from Homebrew or MacPorts, and in fact having too
+many packages installed in either of those can cause problems.
 
 Note that introspection and python support will only be enabled when building
 on ARM64 (Apple Silicon).
@@ -308,12 +308,6 @@ contains the mediasdk `include` and `lib64` dirs.
 
 For VA-API, the [variant to enable](#enabling-optional-features-with-variants)
 is `vaapi` which will build the va plugins from gst-plugins-bad.
-
-### Nvidia Hardware Codecs
-
-Since 1.17.1, the `nvcodec` plugin does not need access to the Nvidia Video SDK
-or the CUDA SDK. It now loads everything at runtime. Hence, it is now enabled
-by default on all platforms.
 
 ## Building without Visual Studio
 
