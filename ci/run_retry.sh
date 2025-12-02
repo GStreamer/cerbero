@@ -12,6 +12,8 @@ ERRORS=(
     "LINK : fatal error LNK1104: cannot open file"
     # Mono on Wine is flaky
     "ShellExecuteEx failed"
+    # crates.io flakiness
+    "warning: spurious network error"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
