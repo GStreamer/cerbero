@@ -64,6 +64,8 @@ if sys.platform.startswith('win'):
     os.path.abspath = abspath
     os.path.realpath = realpath
     os.path.relpath = relpath
+    if sys.version_info > (3, 14):
+        pathlib.os.path.join = oldjoin
 
     # On windows, python transforms all enviroment variables to uppercase,
     # but we need lowercase ones to override configure options like
