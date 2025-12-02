@@ -257,6 +257,16 @@ manylinux_2_28 image:
   rules:
     - if: '$CI_GSTREAMER_TRIGGERED != "true"'
 
+.base_changes_paths: &changes_paths
+  - .gitlab-ci.yml
+  - .gitlab-image-tags.yml
+  - cerbero/**
+  - config/**
+  - data/**
+  - recipes/**
+  - packages/**
+  - ci/**
+
 # Template for all Cerbero GStreamer builds
 #
 # Parameters:
@@ -311,6 +321,10 @@ manylinux_2_28 image:
     exclude:
       - .git
       - .git/**/*
+  rules:
+    - changes:
+        paths:
+          *changes_paths
 
 .cerbero fedora base:
   extends:
@@ -377,6 +391,16 @@ pre-commit checks:
   variables:
     PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
   tags: [ 'placeholder-job' ]
+  rules:
+    - changes:
+        paths:
+          *changes_paths
+    - changes:
+        paths:
+          - ruff.toml
+          - .pre-commit-config.yaml
+          - "*.py"
+          - "*/**.py"
 
 tests:
   extends:
@@ -396,6 +420,13 @@ tests:
     CONFIG: "linux.config"
     ARCH: "linux_x86_64"
   tags: ['gstreamer']
+  rules:
+    - changes:
+        paths:
+          *changes_paths
+    - changes:
+        paths:
+          - test/**
   artifacts:
     when: always
     paths:
