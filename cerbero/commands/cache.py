@@ -344,7 +344,7 @@ class GenCache(BaseCache):
 
     def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
         cmd = [
-            Tar.get_cmd(),
+            Tar.get_cmd()[1],
             '-C',
             workdir,
             '--use-compress-program=xz --threads=0',
