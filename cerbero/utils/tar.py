@@ -244,6 +244,7 @@ class Tar:
             return Tar.MSYS_GNU_TAR
         # Allow using Homebrewed tar since it's GNU compatible
         # (macOS uses FreeBSD tar)
-        if shutil.which(Tar.HOMEBREW_TAR[1]):
-            return Tar.HOMEBREW_TAR
+        if shell.PLATFORM == Platform.DARWIN:
+            if shutil.which(Tar.HOMEBREW_TAR[1]):
+                return Tar.HOMEBREW_TAR
         return Tar.STOCK_TAR
