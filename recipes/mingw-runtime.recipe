@@ -13,9 +13,8 @@ class Recipe(recipe.Recipe):
 
     files_bins = []
     files_libs = ['libwinpthread-1', 'libstdc++-6']
-    files_devel = ['lib/libstdc++.a', 'lib/libstdc++.la']
-    files_static = []
-    files_headers = ['include/GL', 'include/KHR']
+    files_devel = ['%(libdir)s/libstdc++.a', '%(libdir)s/libstdc++.la']
+    files_headers_devel = ['include/GL', 'include/KHR',]
 
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
@@ -42,7 +41,7 @@ class Recipe(recipe.Recipe):
                                    'libmoldname.a']
         self.gcc_static_files = [gcclib + 'libgcc.a',
                                  gcclib + 'libgcc_eh.a']
-        self.files_static += [os.path.join('lib', os.path.basename(f))
+        self.files_devel += [f'%(libdir)s/{os.path.basename(f)}'
                               for f in self.mingw_static_files + self.gcc_static_files]
 
         self.files_libs.append(self._ehlib)
@@ -119,7 +118,7 @@ class Recipe(recipe.Recipe):
                     with open(dest, 'w+') as d:
                         d.writelines(content)
         # install headers and static libraries
-        for f in self.files_headers:
+        for f in self.files_headers_devel:
             src = os.path.join(sysroot, f)
             dest = os.path.join(self.config.prefix, f)
             if os.path.exists(dest):
