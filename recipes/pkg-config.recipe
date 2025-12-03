@@ -31,7 +31,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_bins = ['pkg-config']
-    files_share = ['share/aclocal/pkg.m4']
+    files_devel = ['share/aclocal/pkg.m4']
 
     def prepare(self):
         if not self.using_msvc():

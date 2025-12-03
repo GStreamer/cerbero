@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.STATIC
 
     files_libs = ['WebView2LoaderStatic']
-    files_headers = ['include/WebView2.h', 'include/WebView2EnvironmentOptions.h']
+    files_headers_devel = ['include/WebView2.h', 'include/WebView2EnvironmentOptions.h']
 
     can_msvc = True
 
@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
             shutil.copy2(str(libdir / (f + '.lib')), self.config.libdir)
 
         # Copy headers
-        for d in self.files_headers:
+        for d in self.files_headers_devel:
             dst = Path(self.config.prefix) / d
             src = bdir / d
             shutil.copy2(str(src), str(dst))

@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '5f4635195aa1ee37f9bbf17fce23ca5a957890860bb8f237e3fa5aee4b197349'
 
     files_libs = ['libEGL', 'libGLESv2']
-    files_headers = ['include/EGL', 'include/GLES', 'include/GLES2', 'include/GLES3', 'include/KHR']
+    files_headers_devel = ['include/EGL', 'include/GLES', 'include/GLES2', 'include/GLES3', 'include/KHR']
 
     can_msvc = True
 
@@ -56,7 +56,7 @@ class Recipe(recipe.Recipe):
                     os.path.join(self.config.libdir, impname))
 
         # Copy headers
-        for d in self.files_headers:
+        for d in self.files_headers_devel:
             dst = Path(self.config.prefix) / d
             if dst.exists():
                 shutil.rmtree(str(dst))
