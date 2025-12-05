@@ -1,0 +1,26 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(custom.GStreamer, package.Package):
+
+    name = 'gstreamer-1.0-codecs-gpl-restricted'
+    shortdesc = 'GStreamer 1.0 codecs under the GPL license + with patent issues'
+    longdesc = 'GStreamer 1.0 codecs under the GPL license + with patent issues'
+    uuid = 'e2525263-6eed-520b-97b7-0e954302192d'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['x264:libs', 'x265:libs', 'x265-src:libs', 
+             'gst-plugins-base-1.0:plugins_codecs_gpl_restricted',
+             'gst-plugins-good-1.0:plugins_codecs_gpl_restricted',
+             'gst-plugins-bad-1.0:plugins_codecs_gpl_restricted',
+             'gst-plugins-ugly-1.0:plugins_codecs_gpl_restricted']
+    files_devel = ['gst-plugins-base-1.0:plugins_codecs_gpl_restricted_devel',
+             'gst-plugins-good-1.0:plugins_codecs_gpl_restricted_devel',
+             'gst-plugins-bad-1.0:plugins_codecs_gpl_restricted_devel',
+             'gst-plugins-ugly-1.0:plugins_codecs_gpl_restricted_devel']
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_codecs_gpl_restricted')
+            self.files_devel.append('gst-plugins-rs:plugins_codecs_gpl_restricted_devel')

@@ -14,28 +14,38 @@ class Recipe(custom.GStreamer):
             'libdvdread', 'x264']
 
     files_plugins_codecs_restricted = [
-             '%(libdir)s/gstreamer-1.0/libgsta52dec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstasf%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstdvdsub%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrealmedia%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstx264%(mext)s',
     ]
 
     files_plugins_codecs_restricted_devel = [
-             '%(libdir)s/gstreamer-1.0/libgsta52dec.a', '%(libdir)s/gstreamer-1.0/libgsta52dec.la',
              '%(libdir)s/gstreamer-1.0/libgstasf.a', '%(libdir)s/gstreamer-1.0/libgstasf.la',
              '%(libdir)s/gstreamer-1.0/libgstdvdsub.a', '%(libdir)s/gstreamer-1.0/libgstdvdsub.la',
              '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.a', '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.la',
              '%(libdir)s/gstreamer-1.0/libgstrealmedia.a', '%(libdir)s/gstreamer-1.0/libgstrealmedia.la',
-             '%(libdir)s/gstreamer-1.0/libgstx264.a', '%(libdir)s/gstreamer-1.0/libgstx264.la',
     ]
 
     files_plugins_dvd = [
-             '%(libdir)s/gstreamer-1.0/libgstdvdread%(mext)s',
     ]
 
     files_plugins_dvd_devel = [
+    ]
+
+    files_plugins_codecs_gpl = [
+             '%(libdir)s/gstreamer-1.0/libgsta52dec%(mext)s',
+    ]
+
+    files_plugins_codecs_gpl_devel = [
+             '%(libdir)s/gstreamer-1.0/libgsta52dec.a', '%(libdir)s/gstreamer-1.0/libgsta52dec.la',
+    ]
+
+    files_plugins_dvd_gpl = [
+             '%(libdir)s/gstreamer-1.0/libgstdvdread%(mext)s',
+    ]
+
+    files_plugins_dvd_gpl_devel = [
              '%(libdir)s/gstreamer-1.0/libgstdvdread.a', '%(libdir)s/gstreamer-1.0/libgstdvdread.la',
     ]
 
@@ -43,10 +53,10 @@ class Recipe(custom.GStreamer):
 
     def prepare(self):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
-            self.disable_plugin('dvdread', 'dvd', dep='libdvdread')
+            self.disable_plugin('dvdread', 'dvd_gpl', dep='libdvdread')
 
-        if self.using_uwp():
-            self.disable_plugin('x264', 'codecs_restricted', dep='x264')
+        if not self.using_uwp():
+            self.enable_plugin('x264', 'codecs_gpl_restricted', dep='x264')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

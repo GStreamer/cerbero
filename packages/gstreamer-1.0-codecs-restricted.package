@@ -10,8 +10,8 @@ class Package(custom.GStreamer, package.Package):
     uuid = '0a4e77e8-3c8c-4e7d-890b-1538d36f1816'
     deps = ['gstreamer-1.0-core']
 
-    files = ['a52dec:libs', 'libdca:libs', 'opencore-amr:libs',
-             'vo-aacenc:libs', 'x264:libs', 'x265:libs', 'x265-src:libs', 'vvdec:libs',
+    files = ['libdca:libs', 'opencore-amr:libs',
+             'vo-aacenc:libs', 'vvdec:libs',
              'gst-plugins-ugly-1.0:plugins_codecs_restricted',
              'gst-plugins-bad-1.0:plugins_codecs_restricted']
     files_devel = ['gst-plugins-ugly-1.0:plugins_codecs_restricted_devel',

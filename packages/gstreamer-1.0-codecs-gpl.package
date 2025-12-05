@@ -5,27 +5,22 @@
 class Package(custom.GStreamer, package.Package):
 
     name = 'gstreamer-1.0-codecs-gpl'
-    shortdesc = 'GStreamer 1.0 codecs under the GPL license and/or with patents issues'
-    longdesc = 'GStreamer 1.0 codecs under the GPL license and/or with patents issues'
+    shortdesc = 'GStreamer 1.0 codecs under the GPL license'
+    longdesc = 'GStreamer 1.0 codecs under the GPL license'
     uuid = 'f685219b-7ee8-46b9-af3c-338e3cbb4f94'
     deps = ['gstreamer-1.0-core']
 
-    files = ['gst-plugins-base-1.0:plugins_codecs_gpl',
+    files = ['a52dec:libs',
+             'gst-plugins-base-1.0:plugins_codecs_gpl',
              'gst-plugins-good-1.0:plugins_codecs_gpl',
              'gst-plugins-bad-1.0:plugins_codecs_gpl',
              'gst-plugins-ugly-1.0:plugins_codecs_gpl']
     files_devel = ['gst-plugins-base-1.0:plugins_codecs_gpl_devel',
              'gst-plugins-good-1.0:plugins_codecs_gpl_devel',
-             'gst-plugins-bad-1.0:plugins_codecs_gpl_devel']
+             'gst-plugins-bad-1.0:plugins_codecs_gpl_devel',
+             'gst-plugins-ugly-1.0:plugins_codecs_gpl_devel']
 
     def prepare(self):
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
-            # Needed by libass
-            self.files.append('libiconv:libs')
-
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_codecs_gpl')
             self.files_devel.append('gst-plugins-rs:plugins_codecs_gpl_devel')
-
-        if self.config.variants.uwp:
-            self.files.remove('libiconv:libs')

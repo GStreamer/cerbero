@@ -33,7 +33,7 @@ class Package(custom.GStreamer, package.Package):
             self.files_devel.append('directx-headers:files_devel')
 
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
-            # Needed by zbar library
+            # Needed by libass and zbar
             self.files.append('libiconv:libs')
 
         if self.config.variants.rust:

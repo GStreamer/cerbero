@@ -102,7 +102,12 @@ class WixBase:
         if replace_dots:
             ret = ret.replace('.', '')
         # For directories starting with a number
-        return '_' + ret
+        ret = '_' + ret
+
+        if len(ret) > 38:
+            return ret[0:37]
+
+        return ret
 
     def _make_unique_id(self, id):
         # Wix Id length is limited to 72 characters which can be short
