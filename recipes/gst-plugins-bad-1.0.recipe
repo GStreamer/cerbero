@@ -313,14 +313,15 @@ class Recipe(custom.GStreamer):
     }
 
     files_plugins_codecs_gpl = [
+        '%(libdir)s/gstreamer-1.0/libgstdtsdec%(mext)s',
     ]
 
     files_plugins_codecs_gpl_devel = [
+        '%(libdir)s/gstreamer-1.0/libgstdtsdec.a', '%(libdir)s/gstreamer-1.0/libgstdtsdec.la',
     ]
 
     files_plugins_codecs_restricted = [
              '%(libdir)s/gstreamer-1.0/libgstasfmux%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstdtsdec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmpegpsmux%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
@@ -330,7 +331,6 @@ class Recipe(custom.GStreamer):
 
     files_plugins_codecs_restricted_devel = [
              '%(libdir)s/gstreamer-1.0/libgstasfmux.a', '%(libdir)s/gstreamer-1.0/libgstasfmux.la',
-             '%(libdir)s/gstreamer-1.0/libgstdtsdec.a', '%(libdir)s/gstreamer-1.0/libgstdtsdec.la',
              '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux.a', '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux.la',
              '%(libdir)s/gstreamer-1.0/libgstmpegpsmux.a', '%(libdir)s/gstreamer-1.0/libgstmpegpsmux.la',
              '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux.a', '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux.la',
@@ -339,10 +339,16 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_dvd = [
-             '%(libdir)s/gstreamer-1.0/libgstresindvd%(mext)s',
     ]
 
     files_plugins_dvd_devel = [
+    ]
+
+    files_plugins_dvd_gpl = [
+             '%(libdir)s/gstreamer-1.0/libgstresindvd%(mext)s',
+    ]
+
+    files_plugins_dvd_gpl_devel = [
              '%(libdir)s/gstreamer-1.0/libgstresindvd.a', '%(libdir)s/gstreamer-1.0/libgstresindvd.la',
     ]
 
@@ -511,7 +517,7 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
         self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
 
-        self.enable_plugin('x265', 'codecs', dep='x265')
+        self.enable_plugin('x265', 'codecs_gpl_restricted', dep='x265')
 
         if not Platform.is_mobile(self.config.target_platform):
             # These need plugins
@@ -598,11 +604,11 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
         if Platform.is_mobile(self.config.target_platform):
-            self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
+            self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
 
         # Recipes that need autoreconf hang on the Windows CI
         if self.config.platform == Platform.WINDOWS:
-            self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
+            self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
 
         # dtls plugin needs openssl, and we pick up the system openssl if on
         # Linux and not cross-compiling.
@@ -623,7 +629,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('assrender', 'codecs', dep='libass')
             self.disable_plugin('closedcaption', 'effects', dep='pango')
             self.disable_plugin('dash', 'codecs', dep='libxml2')
-            self.disable_plugin('dtsdec', 'codecs_restricted', option='dts', dep='libdca')
+            self.disable_plugin('dtsdec', 'codecs_gpl', option='dts', dep='libdca')
             self.disable_plugin('ladspa', 'effects', dep='ladspa')
             self.disable_plugin('openjpeg', 'codecs', dep='openjpeg')
             self.disable_plugin('rtmp', 'net_restricted', option='rtmp', dep='librtmp')
