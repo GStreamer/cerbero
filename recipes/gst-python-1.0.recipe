@@ -1,4 +1,9 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.errors import FatalError
+from cerbero.utils import messages as m
+
+import os
+import glob
 
 class Recipe(custom.GStreamer):
     name = 'gst-python-1.0'
@@ -9,22 +14,60 @@ class Recipe(custom.GStreamer):
     meson_options = {
         'tests': 'disabled',
     }
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-rtsp-server-1.0', 'pygobject']
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0', 'gst-rtsp-server-1.0', 'pygobject']
 
     files_plugins = [
         '%(libdir)s/gstreamer-1.0/libgstpython%(mext)s',
     ]
     files_python = [
         '%(pydir)s/gi/overrides/Gst.py',
+        '%(pydir)s/gi/overrides/GstAnalytics.py',
+        '%(pydir)s/gi/overrides/GstApp.py',
         '%(pydir)s/gi/overrides/GstAudio.py',
         '%(pydir)s/gi/overrides/GstPbutils.py',
         '%(pydir)s/gi/overrides/GstVideo.py',
         '%(pydir)s/gi/overrides/_gi_gst%(pext)s',
+        '%(pydir)s/gi/overrides/_gi_gst_analytics%(pext)s',
     ]
 
     def prepare(self):
         if self.config.variants.rust:
             # runtime dependency gstreamer-webrtc-1.0 is required somewhere down the line, but only if gst-plugins-rs is build ?
-            self.deps += ['gst-plugins-rs', 'gst-plugins-bad-1.0']
+            self.deps += ['gst-plugins-rs']
 
         self.meson_options['python-exe'] = self.config.get_build_python_exe()
+
+    def post_install(self):
+        super().post_install()
+
+        # Verify that all installed override files are declared in files_python
+        pydir = self.config.get_python_prefix()
+        pext = self.config.get_python_ext_suffix()
+
+        overrides_dir = os.path.join(self.config.prefix, pydir, 'gi', 'overrides')
+
+        # Find gst-python override files (start with "Gst" for .py or "_gi_gst" for pext)
+        installed_basenames = set()
+        for pattern in ['Gst*.py', f'_gi_gst*{pext}']:
+            for file_path in glob.glob(os.path.join(overrides_dir, pattern)):
+                basename = os.path.basename(file_path)
+                # Normalize pext to template variable
+                if basename.endswith(pext):
+                    basename = basename[:-len(pext)] + '%(pext)s'
+                installed_basenames.add(basename)
+
+        # Get basenames from files_python
+        declared_basenames = set()
+        for f in self.files_python:
+            if 'gi/overrides' in f:
+                declared_basenames.add(os.path.basename(f))
+
+        # Find missing files
+        missing_in_recipe = installed_basenames - declared_basenames
+        if missing_in_recipe:
+            missing_list = '\n  '.join(sorted(missing_in_recipe))
+            msg = f'The following Python files are installed but not declared in {self.name}.recipe:\n' \
+                  f'  {missing_list}\nPlease add them to the files_python list.'
+            if self.tagged_for_release or custom.running_on_cerbero_ci():
+                raise FatalError(msg)
+            m.warning(msg)
