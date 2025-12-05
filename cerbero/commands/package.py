@@ -109,7 +109,7 @@ class Package(Command):
                     type=str,
                     choices=['default', 'xz', 'bz2', 'zst', 'none'],
                     default='default',
-                    help=_('Select compression method for tarballs'),
+                    help=_('Select compression method when tarball output is selected with --tarball'),
                 ),
                 ArgparseArgument(
                     '--jobs',
@@ -118,6 +118,15 @@ class Package(Command):
                     type=int,
                     default=0,
                     help=_('How many recipes to build concurrently. ' '0 = number of CPUs.'),
+                ),
+                ArgparseArgument(
+                    '--artifact',
+                    type=str,
+                    choices=['tarball', 'msi', 'pkg', 'wheel'],
+                    default=None,
+                    help=_(
+                        'Select installation method (default is tarball for Linux and Android, msi for Windows, pkg for macOS and iOS)'
+                    ),
                 ),
             ],
         )
@@ -147,7 +156,11 @@ class Package(Command):
 
         p.pre_package()
         packager_class = Packager
-        if args.tarball:
+
+        if args.tarball and args.artifact:
+            raise UsageError('Cannot mix --tarball with --artifact')
+
+        if args.tarball or args.artifact == 'tarball':
             if config.target_platform == Platform.ANDROID and config.target_arch == Architecture.UNIVERSAL:
                 packager_class = AndroidPackager
             else:
@@ -161,7 +174,10 @@ class Package(Command):
             packager_class = DistTarball
 
         m.action(_('Creating package for %s') % p.name)
-        pkg = packager_class(config, p, self.store)
+        if packager_class == Packager:
+            pkg = packager_class(config, p, self.store, artifact_type=args.artifact)
+        else:
+            pkg = packager_class(config, p, self.store)
         output_dir = os.path.abspath(args.output_dir)
         if isinstance(pkg, DistTarball):
             paths = pkg.pack(

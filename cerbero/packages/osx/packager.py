@@ -636,6 +636,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
 
 
 class Packager(object):
+    ARTIFACT_TYPE = 'pkg'
+
     def __new__(klass, config, package, store):
         if config.target_platform == Platform.IOS:
             if not isinstance(package, MetaPackage):

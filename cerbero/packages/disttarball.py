@@ -144,6 +144,8 @@ class DistTarball(PackagerBase):
 
 
 class Packager(object):
+    ARTIFACT_TYPE = 'tarball'
+
     def __new__(klass, config, package, store):
         return DistTarball(config, package, store)
 

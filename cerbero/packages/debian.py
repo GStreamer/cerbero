@@ -411,6 +411,8 @@ class DebianPackager(LinuxPackager):
 
 
 class Packager(object):
+    ARTIFACT_TYPE = 'deb'
+
     def __new__(klass, config, package, store):
         return DebianPackager(config, package, store)
 

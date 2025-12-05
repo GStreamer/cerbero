@@ -24,6 +24,8 @@ from cerbero.packages.disttarball import DistTarball
 class AndroidPackager(DistTarball):
     """Creates a distribution tarball for Android"""
 
+    ARTIFACT_TYPE = 'tarball'
+
     def _create_tarball(self, output_dir, package_type, files, force, package_prefix):
         # Filter out some unwanted directories for the development package
         if package_type == PackageType.DEVEL:

@@ -28,11 +28,13 @@ _packagers = {}
 def register_packager(distro, klass, distro_version=None):
     if distro not in _packagers:
         _packagers[distro] = {}
-    _packagers[distro][distro_version] = klass
+    if distro_version not in _packagers[distro]:
+        _packagers[distro][distro_version] = []
+    _packagers[distro][distro_version].append(klass)
 
 
 class Packager(object):
-    def __new__(klass, config, package, store):
+    def __new__(klass, config, package, store, artifact_type=None):
         d = config.target_distro
         v = config.target_distro_version
 
@@ -58,19 +60,27 @@ class Packager(object):
             d = Distro.NONE
             v = None
 
-        if d == Distro.WINDOWS and config.cross_compiling():
+        if d == Distro.WINDOWS and config.cross_compiling() and artifact_type in ('default', 'msi'):
             try:
                 get_wix_prefix(config)
             except Exception:
                 m.warning('Cross-compiling for Windows and WIX not found, overriding Packager')
                 d = Distro.NONE
 
-        return _packagers[d][v](config, package, store)
+        if artifact_type:
+            for p in _packagers[d][v]:
+                if p.ARTIFACT_TYPE == artifact_type:
+                    return p(config, package, store)
+            raise FatalError('No %s packager available for the distro %s %s' % (artifact_type, d, v))
+        else:
+            # Assume first is the default
+            return _packagers[d][v][0](config, package, store)
 
 
 from cerbero.packages import rpm, debian, android, disttarball  # noqa: E402
 from cerbero.packages.windows import wix_on_ninja  # noqa: E402
 from cerbero.packages.osx import packager as osx_packager  # noqa: E402
+from cerbero.packages.wheel import packager as wheel  # noqa: E402
 
 wix_on_ninja.register()
 osx_packager.register()
@@ -78,3 +88,4 @@ rpm.register()
 debian.register()
 android.register()
 disttarball.register()
+wheel.register()

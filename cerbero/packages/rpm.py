@@ -306,6 +306,8 @@ class RPMPackager(LinuxPackager):
 
 
 class Packager(object):
+    ARTIFACT_TYPE = 'rpm'
+
     def __new__(klass, config, package, store):
         return RPMPackager(config, package, store)
 

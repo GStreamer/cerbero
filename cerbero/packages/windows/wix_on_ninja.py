@@ -532,6 +532,8 @@ class MSIWithNinjaPackager(PackagerBase):
 
 
 class Packager(object):
+    ARTIFACT_TYPE = 'msi'
+
     def __new__(klass, config, package, store):
         if isinstance(package, Package):
             return MergeModuleWithNinjaPackager(config, package, store)
