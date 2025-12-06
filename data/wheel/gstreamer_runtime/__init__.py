@@ -1,0 +1,143 @@
+import functools
+import os
+from pathlib import Path
+import sys
+import sysconfig
+import tempfile
+
+
+_module_name = __name__.split('.')[0]
+
+_gstreamer_root = Path(sysconfig.get_path('platlib'), _module_name).as_posix()
+
+if sys.prefix == sys.base_prefix:
+    _gst_registry_filepath = (
+        f'gstreamer-1.0/wheel-registry-{sysconfig.get_python_version()}-{sysconfig.get_platform()}.bin'
+    )
+    _folder = tempfile.gettempdir() if sys.platform == 'win32' else '~/.cache'
+    _gst_registry_10 = Path(_folder, _gst_registry_filepath).expanduser()
+else:
+    # Localise the registry to the venv
+    _gst_registry_filepath = f'gstreamer-1.0/registry-{sysconfig.get_platform()}.bin'
+    _folder = 'Temp' if sys.platform == 'win32' else '.cache'
+    _gst_registry_10 = Path(sys.prefix, _folder, _gst_registry_filepath)
+
+_site_packages_prefix = Path(sysconfig.get_path('platlib')).relative_to(sys.prefix)
+
+"""
+These paths will be prepended by gstreamer[cli,gpl]'s build_environment
+"""
+environment = {
+    'PATH': f'{_gstreamer_root}/bin',
+    'LD_LIBRARY_PATH': f'{_gstreamer_root}/lib',
+    'GST_PLUGIN_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
+    'GST_PLUGIN_SYSTEM_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
+    # No longer valid under sharding
+    # 'GSTREAMER_ROOT': _gstreamer_root,
+    # Specific to gstreamer_runtime
+    'PKG_CONFIG_PATH': [
+        f'{_gstreamer_root}/lib/pkgconfig',
+        f'{_gstreamer_root}/share/pkgconfig',
+    ],
+    'XDG_DATA_DIRS': [
+        f'{_gstreamer_root}/share',
+    ],
+    'XDG_CONFIG_DIRS': [
+        f'{_gstreamer_root}/etc/xdg',
+    ],
+    'GST_REGISTRY_1_0': _gst_registry_10.as_posix(),
+    'GST_PLUGIN_SCANNER_1_0': f'{_gstreamer_root}/libexec/gstreamer-1.0/gst-plugin-scanner',
+    'GIO_EXTRA_MODULES': f'{_gstreamer_root}/lib/gio/modules',
+    'GI_TYPELIB_PATH': f'{_gstreamer_root}/lib/girepository-1.0',
+    'GST_PYTHONPATH_1_0': Path(_gstreamer_root, _site_packages_prefix).as_posix(),
+}
+
+
+@functools.lru_cache()
+def gstreamer_env():
+    """
+    Returns a copy of os.environ, adding all the folders that are necessary
+    for GStreamer to load and run successfully.
+
+    This function is cached, so it will not be updated if os.environ changes.
+    """
+
+    from gstreamer_plugins import environment as gp_env
+
+    try:
+        from gstreamer_cli import environment as gc_env
+    except ImportError:
+        gc_env = {}
+    try:
+        from gstreamer_plugins_restricted import environment as gpr_env
+    except ImportError:
+        gpr_env = {}
+    try:
+        from gstreamer_plugins_gpl import environment as gp_gpl_env
+    except ImportError:
+        gp_gpl_env = {}
+    try:
+        from gstreamer_plugins_gpl_restricted import environment as gp_gplr_env
+    except ImportError:
+        gp_gplr_env = {}
+
+    try:
+        from gstreamer_python import environment as py_env
+    except ImportError:
+        py_env = {}
+
+    if sys.platform == 'win32':
+        from gstreamer_msvc_runtime import environment as gp_msvc_env
+    else:
+        gp_msvc_env = {}
+
+    env = os.environ.copy()
+
+    def prepend(var: str, new_value: str, sep=os.pathsep) -> None:
+        old = env.get(var)
+        if old:
+            env[var] = sep.join([new_value, old])
+        else:
+            env[var] = new_value
+
+    package_keys = [
+        environment.items(),
+        py_env.items(),
+        gp_env.items(),
+        gpr_env.items(),
+        gp_gpl_env.items(),
+        gp_gplr_env.items(),
+        gc_env.items(),
+        gp_msvc_env.items(),
+    ]
+
+    dll_directories = []
+    for i in package_keys:
+        for k, v in i:
+            if k == 'PATH':
+                dll_directories.extend(v.split(os.pathsep))
+            if isinstance(v, str):
+                prepend(k, v)
+            else:
+                for p in v:
+                    prepend(k, p)
+
+    # environment, os.add_dll_directory
+    return (env, list(set(dll_directories)))
+
+
+def setup_python_environment():
+    """
+    Injects the GStreamer binary folders into the current interpreter's
+    environment. On Windows, it also updates the allowed DLL folders list.
+    """
+    env, dlls = gstreamer_env()
+
+    os.environ.update(env)
+
+    # Just in case -- an import gi; will do it too
+    for dll in dlls:
+        if os.path.exists(dll):
+            os.add_dll_directory(dll)
+
+    sys.path.append(env['GST_PYTHONPATH_1_0'])

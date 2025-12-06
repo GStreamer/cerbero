@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 
-from cerbero.enums import Architecture, License, Platform
+from cerbero.enums import Architecture, License
 from cerbero.utils import messages as m, shell
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import SDKPackage
@@ -26,7 +26,7 @@ def _is_executable(source):
         return os.access(source.as_posix(), mode=os.F_OK | os.X_OK)
 
 
-def _is_gstreamer_executable(source):
+def _is_gstreamer_executable(source: Path):
     filename = source.name
     if filename.startswith('gst-') or filename.startswith('ges-'):
         return _is_executable(source)
@@ -66,20 +66,15 @@ class WheelPackager(PackagerBase):
         15: 'Programming Language :: Python :: 3.15',
     }
 
-    LICENSE_CLASSIFIERS = {
-        License.Proprietary: 'License :: Other/Proprietary License',
-        License.LGPLv2_1Plus: 'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
-        License.GPLv2Plus: 'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
-    }
-
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.architecture = config.target_arch
         self.platform = config.target_platform
         self.abi_desc = ' '.join(config._get_toolchain_target_platform_arch(readable=True))
 
+    def _get_classifiers(self, license):
         # complete classifier list: https://pypi.org/pypi?%3Aaction=list_classifiers
-        self.classifiers = [
+        classifiers = [
             'Development Status :: 4 - Beta',
             'Intended Audience :: Developers',
             'Programming Language :: Python :: 3',
@@ -94,13 +89,7 @@ class WheelPackager(PackagerBase):
             'Operating System :: Microsoft :: Windows',
         ]
 
-        self.classifiers += [v for k, v in self.PYTHON_VERSION_CLASSIFIERS.items() if k >= sys.version_info[1]]
-
-        self.license = getattr(self.package, 'license', License.Proprietary)
-
-        self.classifiers.append(self.LICENSE_CLASSIFIERS[self.license])
-        if self.license == License.Proprietary:
-            m.warning('Unknown package license, assuming unredistributable!')
+        return classifiers
 
     def _package_name(self):
         if self.config.variants.uwp:
@@ -112,6 +101,205 @@ class WheelPackager(PackagerBase):
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
         return '-'.join((self.package.name, platform, self.config.target_arch, self.package.version))
+
+    def _create_wheel(
+        self, package_name, files_list=(), license=License.LGPLv2_1Plus, classifiers=(), dependencies=(), features=None
+    ):
+        # Set project up
+        m.action(f'Creating setuptools project for {package_name}')
+        base_tree = Path(self.config.data_dir) / 'wheel'
+        output_dir = self.output_dir / package_name
+
+        # Copy files manually (the last one needs to match the package name)
+        shutil.copy(base_tree / 'setup.py', output_dir)
+        shutil.copy(base_tree / 'pyproject.toml', output_dir)
+        shutil.copytree(base_tree / package_name, output_dir / package_name, dirs_exist_ok=True)
+        m.action(f'Generating MANIFEST.in for {package_name}')
+        with (output_dir / 'MANIFEST.in').open('w', encoding='utf-8', newline='\n') as f:
+            f.write(f'graft {package_name}\n')
+
+        scripts = []
+        entrypoints = []
+        if files_list:
+            m.action(f'Copying distribution payload for {package_name}')
+            for filepath in files_list:
+                source = Path(self.config.prefix, filepath)
+                dirpath, filename = os.path.split(filepath)
+                # If executable
+                if dirpath.startswith('bin') and _is_gstreamer_executable(source):
+                    m.action(f'Adding entrypoint for {filepath}')
+                    entrypoint_name = generate_entrypoint(filepath)
+                    scripts.append(f'{source.stem} = {package_name}.entrypoints:{entrypoint_name}')
+                    entrypoints += [f'def {entrypoint_name}():\n', f"    __run('{filename}')\n"]
+
+        if entrypoints:
+            entrypoints = ['\n', '\n', *entrypoints]
+            m.action('Filling up entrypoints in the Python module')
+            with (output_dir / package_name / 'entrypoints.py').open('a', encoding='utf-8', newline='\n') as f:
+                f.writelines(entrypoints)
+
+        m.action(f'Generating metadata JSON for {package_name}')
+        package_info = {
+            'package_name': package_name,
+            'version': self.package.version,
+            'description': self.package.shortdesc,
+            'long_description': self.package.longdesc,
+            'url': self.package.url,
+            'vendor': self.package.vendor,
+            'spdx_license': license.acronym,
+            'classifiers': classifiers,
+            'python_version': f'>= 3.{sys.version_info[1]}',
+            'install_requires': dependencies,
+            'extras_require': features,
+            'entrypoints': {
+                'console_scripts': scripts,
+            }
+            if scripts
+            else {},
+            # A fancy way of saying "metapackage"
+            'needs_environment': not files_list,
+        }
+        with (output_dir / 'gstreamer_vendor.json').open('w', encoding='utf-8', newline='\n') as f:
+            f.write(json.dumps(package_info))
+
+        # Execute on the chosen output directory
+        m.action(f'Building {package_name} in {self.output_dir}')
+        python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
+        shell.new_call(
+            [python_exe, '-m', 'pip', 'wheel', f'--find-links={self.output_dir.as_posix()}', output_dir],
+            cmd_dir=self.output_dir,
+            env=self.config.env,
+        )
+
+    def _create_wheels(self):
+        packagedeps = self.store.get_package_deps(self.package, True)
+
+        gpl_files_list = []
+        gpl_restricted_files_list = []
+        restricted_files_list = []
+        plugins_list = []
+        runtime_list = []
+        cli_list = []
+
+        for p in packagedeps:
+            m.action(f'Parsing distribution payload for {p.name}')
+            if '-gpl-restricted' in p.name:
+                gpl_restricted_files_list += p.files_list()
+            elif '-restricted' in p.name:
+                restricted_files_list += p.files_list()
+            elif '-gpl' in p.name:
+                gpl_files_list += p.files_list()
+            elif p.name.startswith('base-'):
+                runtime_list += p.files_list()
+            else:
+                for f in p.files_list():
+                    source = Path(self.config.prefix, f)
+                    if _is_gstreamer_executable(source) and 'libexec' not in source.parts:
+                        cli_list.append(f)
+                    elif 'lib/gstreamer-1.0' in f and 'gstcoreelements' not in f:
+                        plugins_list.append(f)
+                    else:
+                        runtime_list.append(f)
+
+        # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
+        # (package name, payload, license (SPDX is acronym?), and dependencies/features)
+        package_files_list = {
+            'gstreamer_plugins_gpl_restricted': gpl_restricted_files_list,
+            'gstreamer_plugins_restricted': restricted_files_list,
+            'gstreamer_plugins_gpl': gpl_files_list,
+            'gstreamer_runtime': runtime_list,
+            'gstreamer_cli': cli_list,
+            'gstreamer_plugins': plugins_list,
+            'gstreamer': [],
+        }
+
+        package_licenses = {
+            'gstreamer_plugins_gpl_restricted': License.GPLv2Plus,
+            'gstreamer_plugins_restricted': License.GPLv2Plus,
+            'gstreamer_plugins_gpl': License.GPLv2Plus,
+            'gstreamer_runtime': License.LGPLv2_1Plus,
+            'gstreamer_cli': License.LGPLv2_1Plus,
+            'gstreamer_plugins': License.LGPLv2_1Plus,
+            'gstreamer': License.LGPLv2_1Plus,
+        }
+
+        package_dependencies = {
+            'gstreamer_runtime': [
+                'setuptools >= 80.9.0',
+                # typing_extensions required on macOS and 3.11 for g-i overrides
+                'typing_extensions >= 4.15.0',
+            ],
+            'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
+            'gstreamer': [
+                f'gstreamer_runtime ~= {self.package.version}',
+                f'gstreamer_plugins ~= {self.package.version}',
+                f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
+                f'gstreamer_plugins_restricted ~= {self.package.version}',
+                f'gstreamer_plugins_gpl ~= {self.package.version}',
+            ],
+        }
+
+        package_features = {
+            'gstreamer': {
+                # 'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
+                # 'cli': [f'gstreamer_cli ~= {self.package.version}'],
+            },
+        }
+
+        with (self.output_dir / 'categories.json').open('w', encoding='utf-8', newline='\n') as f:
+            f.write(json.dumps(package_files_list, indent=1))
+
+        # Process the runtime wheel before anything else to prevent conflicts
+        if self.config.variants.visualstudio:
+            m.action('Adding wheel for Visual C++ Runtime')
+            vc_tools_redist_dir = self.config.msvc_env_for_toolchain['VCToolsRedistDir']
+            if self.config.target_arch == Architecture.X86:
+                redist_path = Path(vc_tools_redist_dir.get(), 'x86')
+            else:
+                redist_path = Path(vc_tools_redist_dir.get(), 'x64')
+
+            package_name = 'gstreamer_msvc_runtime'
+            files_list = [f.as_posix() for f in redist_path.glob('**/*.dll')]
+            license = License.Proprietary
+            dependencies = []
+            features = {}
+
+            output_dir = self.output_dir / package_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            for source in files_list:
+                dest = output_dir / package_name / 'bin'
+                dest.mkdir(parents=True, exist_ok=True)
+                shutil.copy(source, dest)
+
+            classifiers = self._get_classifiers(license)
+
+            self._create_wheel(package_name, files_list, license, classifiers, dependencies, features)
+
+            package_dependencies['gstreamer_runtime'].append(f'{package_name} ~= {self.package.version}')
+
+        for package_name, files_list in package_files_list.items():
+            license = package_licenses[package_name]
+            dependencies = package_dependencies.get(package_name, [])
+            features = package_features.get(package_name, {})
+
+            m.action(f'Copying distribution payload for {package_name}')
+
+            output_dir = self.output_dir / package_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            for filepath in files_list:
+                source = Path(self.config.prefix, filepath)
+                dirpath, _ = os.path.split(filepath)
+                dest = output_dir / package_name / dirpath
+                dest.mkdir(parents=True, exist_ok=True)
+                shutil.copy(source, dest)
+
+            classifiers = self._get_classifiers(license)
+
+            self._create_wheel(package_name, files_list, license, classifiers, dependencies, features)
+
+        return list(self.output_dir.glob('**/gstreamer*.whl'))
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         """
@@ -127,95 +315,14 @@ class WheelPackager(PackagerBase):
         with (self.output_dir / '.gitignore').open('w', encoding='utf-8') as f:
             f.write('*\n')
 
-        # Set project up
-        m.action(f'Creating setuptools project for {self.package.name}')
-        base_tree = Path(self.config.data_dir) / 'wheel'
-        shutil.copytree(base_tree, self.output_dir, dirs_exist_ok=True)
-
-        m.action(f'Generating MANIFEST.in for {self.package.name}')
-
-        with (self.output_dir / 'MANIFEST.in').open('w', encoding='utf-8') as f:
-            # Do I need to copy the whole tree...?
-            # FIXME: girfiles are not runtime! (I think when sharding, we'll
-            # have to copy them all)
-            f.write('graft gstreamer\n')
-
-        scripts = []
-        entrypoints = ['\n', '\n']
-        packagedeps = self.store.get_package_deps(self.package, True)
-        for package in packagedeps:
-            files_list = package.files_list()
-            if not files_list:
-                m.warning('Package %s is empty, skipping payload generation' % package.name)
-                continue
-            m.action(f'Copying distribution payload for {package.name}')
-            for filepath in files_list:
-                source = Path(self.config.prefix, filepath)
-                dirpath, filename = os.path.split(filepath)
-                # FIXME
-                dest: Path = Path(self.output_dir) / 'gstreamer' / dirpath
-                dest.mkdir(parents=True, exist_ok=True)
-                shutil.copy(source, dest)
-
-                # If executable
-                # FIXME: as elsewhere, needs sharding
-                if dirpath.startswith('bin') and _is_gstreamer_executable(source):
-                    m.action(f'Adding entrypoint for {filepath}')
-                    entrypoint_name = generate_entrypoint(filepath)
-                    scripts.append(f'{source.stem} = gstreamer.entrypoints:{entrypoint_name}')
-                    entrypoints += [f'def {entrypoint_name}():\n', f"    __run('{filename}')\n"]
-
-        m.action('Filling up entrypoints in the Python module')
-        # FIXME: as elsewhere, needs sharding
-        with (self.output_dir / 'gstreamer' / 'entrypoints.py').open('a', encoding='utf-8') as f:
-            f.writelines(entrypoints)
-
-        m.action(f'Generating metadata JSON for {self.package.name}')
-        gstreamer_vendor = {
-            'package_name': self.package.name,
-            'version': self.package.version,
-            'description': self.package.shortdesc,
-            'long_description': self.package.longdesc,
-            'url': self.package.url,
-            'vendor': self.package.vendor,
-            'spdx_license': self.license.acronym,
-            'classifiers': self.classifiers,
-            'python_version': f'>= 3.{sys.version_info[1]}',
-            'entrypoints': {
-                'console_scripts': scripts,
-            },
-        }
-        with (self.output_dir / 'gstreamer_vendor.json').open('w', encoding='utf-8') as f:
-            f.write(json.dumps(gstreamer_vendor))
-
-        # Ideally the user will have it installed, but can we rely on that?
-        # Especially with mismatched versions?
-        if self.config.variants.visualstudio:
-            m.action('Embedding Visual C++ Runtime')
-            vc_tools_redist_dir = self.config.msvc_env_for_toolchain['VCToolsRedistDir']
-            if self.config.target_arch == Architecture.X86:
-                redist_path = Path(vc_tools_redist_dir.get(), 'x86')
-            else:
-                redist_path = Path(vc_tools_redist_dir.get(), 'x64')
-            dlls = redist_path.glob('**/*.dll')
-            # FIXME: this needs to go only in the core
-            # FIXME
-            dest: Path = Path(self.output_dir) / 'gstreamer' / 'bin'
-            for dll in dlls:
-                shutil.copy(dll, dest)
-
-        # Execute on the chosen output directory
-        m.action(f'Building {self._package_name()} in {self.output_dir}')
-        python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
-        shell.new_call([python_exe, '-m', 'pip', 'wheel', '.'], cmd_dir=self.output_dir, env=self.config.env)
+        # Create packages here (returns full paths!)
+        paths = self._create_wheels()
 
         # Copy the outputs to the output directory
-        paths = list(f.name for f in self.output_dir.glob('*.whl'))
-        for p in paths:
-            src = self.output_dir / p
-            dst = output_dir / p
-            m.action(f'Moving {src} to {output_dir}')
-            shutil.move(src, dst)
+        for src in paths:
+            dst = output_dir / src.name
+            m.action(f'Moving {src} to {dst}')
+            shutil.copy(src, dst)
 
         # Clean up the temporary build directory
         if keep_temp:
