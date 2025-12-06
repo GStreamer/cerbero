@@ -16,7 +16,10 @@ class Recipe(custom.GStreamer):
                      'theora': 'enabled',
                      'vorbis': 'enabled',
                      # disabled plugins
-                     'tremor': 'disabled'}
+                     'tremor': 'disabled',
+                     # Needs https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1971
+                     # See: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/8540#note_3226704
+                     'drm': 'disabled'}
     deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora',
             'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
