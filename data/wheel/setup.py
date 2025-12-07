@@ -3,6 +3,7 @@ import os
 import setuptools
 from setuptools.dist import Distribution
 from setuptools.command.build_py import build_py
+from setuptools.command.bdist_wheel import bdist_wheel
 
 
 desc = json.load(open('gstreamer_vendor.json', 'r', encoding='utf-8'))
@@ -12,7 +13,21 @@ package_name = desc['package_name']
 
 class BinaryDistribution(Distribution):
     def has_ext_modules(self):
-        return True
+        # FIXME: ask pycairo/g-i/gstpython to use Stable ABI
+        # To do this, we need to convert all uses of the Python API
+        # to match the Limited API; usually means dropping all macros
+        # and using functions whenever possible.
+        # See https://docs.python.org/3/c-api/stable.html#limited-c-api
+        #
+        # This is (perhaps) easy with PyCairo/gstpython but definitely not with
+        # G-I because they define new Python types on the stack.
+        # See https://gitlab.gnome.org/GNOME/pygobject/-/blob/main/gi/pygi-util.h#L32
+        # and https://doc.qt.io/qtforpython-6/developer/limited_api.html for
+        # a gist of what porting would imply.
+        return package_name == 'gstreamer_python'
+
+    def has_c_libraries(self):
+        return package_name not in ('gstreamer', 'gstreamer_python')
 
 
 class InjectGStreamerWheels(build_py):
@@ -25,7 +40,17 @@ class InjectGStreamerWheels(build_py):
         with open(sitecustomize_path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(self.IMPORT_SHIM)
 
-cmdclass = {}
+
+class MakeStableAbiWheel(bdist_wheel):
+    def finalize_options(self):
+        # FIXME: See BinaryDistribution above
+        # if package_name != 'gstreamer_python':
+        self.py_limited_api = 'cp39'
+
+        super().finalize_options()
+
+
+cmdclass = {'bdist_wheel': MakeStableAbiWheel}
 
 if desc['needs_environment']:
     cmdclass['build_py'] = InjectGStreamerWheels  # type: ignore
