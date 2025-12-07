@@ -25,6 +25,11 @@ class InjectGStreamerWheels(build_py):
         with open(sitecustomize_path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(self.IMPORT_SHIM)
 
+cmdclass = {}
+
+if desc['needs_environment']:
+    cmdclass['build_py'] = InjectGStreamerWheels  # type: ignore
+
 
 # https://setuptools.pypa.io/en/latest/references/keywords.html
 # https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
@@ -38,9 +43,10 @@ setuptools.setup(
     install_requires=desc['install_requires'],
     extras_require=desc['extras_require'],
     distclass=BinaryDistribution,
-    cmdclass={'build_py': InjectGStreamerWheels} if desc['needs_environment'] else {},
+    cmdclass=cmdclass,
     version=desc['version'],
     include_package_data=True,
     python_requires=desc['python_version'],
     entry_points=desc['entrypoints'],
+    libraries=[],
 )

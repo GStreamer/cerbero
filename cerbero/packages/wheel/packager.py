@@ -179,6 +179,7 @@ class WheelPackager(PackagerBase):
         restricted_files_list = []
         plugins_list = []
         runtime_list = []
+        python_list = []
         cli_list = []
 
         for p in packagedeps:
@@ -198,6 +199,8 @@ class WheelPackager(PackagerBase):
                         cli_list.append(f)
                     elif 'lib/gstreamer-1.0' in f and 'gstcoreelements' not in f:
                         plugins_list.append(f)
+                    elif 'site-packages' in f or 'gstpython' in f:
+                        python_list.append(f)
                     else:
                         runtime_list.append(f)
 
@@ -210,6 +213,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_runtime': runtime_list,
             'gstreamer_cli': cli_list,
             'gstreamer_plugins': plugins_list,
+            'gstreamer_python': python_list,
             'gstreamer': [],
         }
 
@@ -220,6 +224,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_runtime': License.LGPLv2_1Plus,
             'gstreamer_cli': License.LGPLv2_1Plus,
             'gstreamer_plugins': License.LGPLv2_1Plus,
+            'gstreamer_python': License.LGPLv2_1Plus,
             'gstreamer': License.LGPLv2_1Plus,
         }
 
@@ -230,12 +235,14 @@ class WheelPackager(PackagerBase):
                 'typing_extensions >= 4.15.0',
             ],
             'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
+            'gstreamer_python': [],  # f'gstreamer_runtime ~= {self.package.version}'
             'gstreamer': [
                 f'gstreamer_runtime ~= {self.package.version}',
                 f'gstreamer_plugins ~= {self.package.version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_gpl ~= {self.package.version}',
+                f'gstreamer_python ~= {self.package.version}',
             ],
         }
 
@@ -243,6 +250,8 @@ class WheelPackager(PackagerBase):
             'gstreamer': {
                 # 'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
                 # 'cli': [f'gstreamer_cli ~= {self.package.version}'],
+                # If we want extra sharding
+                # 'python': [f'gstreamer_python ~= {self.package.version}'],
             },
         }
 
