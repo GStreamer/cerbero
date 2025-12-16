@@ -651,6 +651,10 @@ class Recipe(custom.GStreamer):
             if self.config.target_arch == Architecture.X86_64:
                 self.enable_plugin('svtjpegxs', 'codecs', dep='svt-jpeg-xs')
 
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86:
+                self.disable_plugin('lcevcdecoder', 'codecs', dep='lcevcdec')
+
         if self.config.target_platform != Platform.WINDOWS:
             self.enable_plugin('unixfd', 'effects')
 
