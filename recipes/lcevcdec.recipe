@@ -4,22 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'lcevcdec'
-    version = '4.0.3'
+    version = '4.0.4'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://github.com/v-novaltd/LCEVCdec/archive/refs/tags/%(version)s.tar.gz'
-    tarball_checksum = 'd85f7e484f2150fc120ff5bd56b21297f6261533875957621e21df7020db9f6c'
+    tarball_checksum = '513f71531c66f226ec258289fd6c889844570029faf00ba2d7ebe501008c7db1'
     tarball_dirname = 'LCEVCdec-%(version)s'
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
-
-    patches = [
-        'lcevcdec/0001-win32-Make-it-build-on-32-bit-Windows.patch',
-        'lcevcdec/0002-cmake-Don-t-modify-CMAKE_MODULE_PATH-before-running-.patch',
-        'lcevcdec/0003-pc-file-Put-C-lib-in-private-deps-when-doing-static-.patch',
-        'lcevcdec/0004-cmake-Use-libc-on-Apple-platforms.patch',
-    ]
 
     licenses = [{License.BSD: ['COPYING']}]
     deps = ['fmt']
