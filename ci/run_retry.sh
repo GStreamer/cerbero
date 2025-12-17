@@ -14,6 +14,8 @@ ERRORS=(
     "ShellExecuteEx failed"
     # crates.io flakiness
     "warning: spurious network error"
+    # Weird xcode toolchain bug 
+    "otool: unknown char"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
