@@ -940,16 +940,19 @@ class Config(object):
         if filenames is not None:
             for f in filenames:
                 # Check if the config specified is a complete path, else search
-                # in the user config directory
+                # in the user config directory and then in the environ_dir (cerbero_share/config/)
                 if os.path.exists(f):
                     self._parse(f, reset=False)
                 else:
                     uf = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
+                    ef = os.path.join(self.environ_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT)
 
                     if os.path.exists(uf):
                         self._parse(uf, reset=False)
+                    elif os.path.exists(ef):
+                        self._parse(ef, reset=False)
                     else:
-                        raise ConfigurationError(_('Configuration file %s or fallback %s not found') % (f, uf))
+                        raise ConfigurationError(_('Configuration file %s or fallbacks %s, %s not found') % (f, uf, ef))
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' % self.target_platform)
@@ -1012,22 +1015,43 @@ class Config(object):
         return '.exe'
 
     def _find_data_dir(self):
+        """
+        Find the directory containing cerbero's data files (recipes, packages, config, data).
+
+        Handles two installation scenarios:
+        1. Uninstalled (running from git checkout): data/ is sibling to cerbero/ package
+        2. Pip install: data files are in site-packages/cerbero_share/data/
+        """
         if self.uninstalled:
+            # Running from git checkout - data is ../data relative to this file
             self.data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
             self.data_dir = os.path.abspath(self.data_dir)
             return
+
         curdir = os.path.dirname(__file__)
-        while not os.path.exists(os.path.join(curdir, 'share', 'cerbero', 'config')):
-            curdir = os.path.abspath(os.path.join(curdir, '..'))
-            if curdir == '/' or curdir[1:] == ':/':
-                # We reached the root without finding the data dir, which
-                # shouldn't happen
-                raise FatalError('Data dir not found')
-        self.data_dir = os.path.join(curdir, 'share', 'cerbero')
+
+        # Check if data files are in cerbero_share package (pip install)
+        # In this case, recipes/, packages/, config/, data/ are inside cerbero_share/
+        parent_dir = os.path.abspath(os.path.join(curdir, '..'))
+        cerbero_share_dir = os.path.join(parent_dir, 'cerbero_share')
+        if (
+            os.path.exists(os.path.join(cerbero_share_dir, 'config'))
+            and os.path.exists(os.path.join(cerbero_share_dir, 'recipes'))
+            and os.path.exists(os.path.join(cerbero_share_dir, 'data'))
+        ):
+            # Data directory points to cerbero_share/data/ for pip installs
+            self.data_dir = os.path.join(cerbero_share_dir, 'data')
+            return
+
+        # If we get here, something is wrong
+        raise FatalError('Data dir not found. Cerbero must be run from git checkout or installed via pip.')
 
     def _relative_path(self, path):
         if not self.uninstalled:
-            p = os.path.join(self.data_dir, path)
+            # For pip installs, use cerbero_share as base (parent of data_dir)
+            # data_dir is cerbero_share/data, so we go up one level to get cerbero_share
+            cerbero_share = os.path.dirname(self.data_dir)
+            p = os.path.join(cerbero_share, path)
         else:
             p = os.path.join(os.path.dirname(__file__), '..', path)
         return os.path.abspath(p)

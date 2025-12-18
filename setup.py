@@ -1,14 +1,32 @@
 import os
-import sys
 import shutil
 from setuptools import setup, find_packages
 from setuptools.command import sdist as setuptools_sdist
-from cerbero.utils import shell
-from cerbero.enums import CERBERO_VERSION
-from distutils.dir_util import copy_tree
-import distutils.log
+from setuptools.command.build_py import build_py
 
-sys.path.insert(0, './cerbero')
+# Import logging for setup commands
+try:
+    from setuptools import logging
+except ImportError:
+    # Fallback for older setuptools
+    import logging
+
+    logging.basicConfig(level=logging.INFO)
+
+log = logging.getLogger(__name__)
+
+
+# Get version directly from enums.py without importing it
+def get_version():
+    version_file = os.path.join(os.path.dirname(__file__), 'cerbero', 'enums.py')
+    with open(version_file) as f:
+        for line in f:
+            if line.startswith('CERBERO_VERSION'):
+                return line.split('=')[1].strip().strip('\'"')
+    return '0.0.0'
+
+
+CERBERO_VERSION = get_version()
 
 
 # Utility function to read the README file.
@@ -16,96 +34,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-# Utility function to parse directories
-def parse_dir(dirpath, extension=None):
-    if os.path.exists('.git'):
-        files = shell.check_output(['git', 'ls-files', dirpath]).split('\n')
-        files.remove('')
-    else:
-        files = shell.check_output(['find', dirpath, '-type', 'f']).split('\n')
-        files.remove('')
-    if extension is None:
-        return files
-    return [f for f in files if f.endswith(extension)]
-
-
-# Utility function to create the list of data files
-def datafiles(prefix):
-    files = []
-    datadir = os.path.join(prefix, 'share', 'cerbero')
-    for dirname, extension in [('recipes', '.recipe'), ('packages', '.package')]:
-        for f in parse_dir(dirname, extension):
-            files.append((os.path.join(datadir, dirname), [f]))
-    for dirname in ['config']:
-        for f in parse_dir(dirname):
-            files.append((os.path.join(datadir, dirname), [f]))
-    for dirname in ['data']:
-        for f in parse_dir(dirname):
-            dirpath = os.path.split(f.split('/', 1)[1])[0]
-            files.append((os.path.join(datadir, dirpath), [f]))
-    return files
-
-
-# Intercept packages and recipes
-packages = [x[len('--package=') :] for x in sys.argv if x.startswith('--package=')]
-recipes = [x[len('--recipe=') :] for x in sys.argv if x.startswith('--recipe=')]
-if len(packages) == 0:
-    packages = None
-if len(recipes) == 0:
-    recipes = None
-sys.argv = [x for x in sys.argv if not x.startswith('--package=') and not x.startswith('--recipe=')]
-
-
-# Fill manifest
-shutil.copy('MANIFEST.in.in', 'MANIFEST.in')
-with open('MANIFEST.in', 'a+') as f:
-    for dirname in ['data', 'config', 'tools']:
-        f.write('\n'.join(['include %s' % x for x in parse_dir(dirname)]))
-        f.write('\n')
-
-    for dirname, suffix in [('packages', '.package'), ('recipes', '.recipe')]:
-        filenames = parse_dir(dirname)
-        requested = globals()[dirname]
-        if requested:
-            # Separator must match Git's
-            requested_filenames = tuple(['/' + x + suffix for x in requested])
-
-            # Add special directories
-            if dirname == 'packages':
-                requested_dir = requested + ['gstreamer-1.0']
-            else:
-                requested_dir = requested + ['build-tools', 'toolchain']
-            requested_directories = tuple(os.path.join(dirname, x, '') for x in requested_dir)
-
-            filenames = [
-                p
-                for p in filenames
-                if p.startswith(requested_directories) or p.endswith(requested_filenames) or p.endswith('.py')
-            ]
-
-            missing_files = [p for p in requested_filenames if not [True for m in filenames if m.endswith(p)]]
-
-            # Special case these as they're all in the same file
-            if all(f.startswith('/gstreamer-1.0-vs-templates') for f in missing_files):
-                missing_files = []
-                filenames.append('packages/gstreamer-1.0-vs-templates.package')
-
-            assert not missing_files, 'Not all %s from the command line (%s) exist' % (
-                dirname,
-                ', '.join(missing_files),
-            )
-        f.write('\n'.join(['include %s' % x for x in filenames]))
-        f.write('\n')
-
-
-# Intercept prefix
-prefix = [x for x in sys.argv if x.startswith('--prefix=')]
-if len(prefix) == 1:
-    prefix = prefix[0].split('--prefix=')[1]
-else:
-    prefix = '/usr/local'
-
-
+# Extended sdist for bundlesource command compatibility
 class extended_sdist(setuptools_sdist.sdist):
     user_options = setuptools_sdist.sdist.user_options + [
         ('source-dirs=', None, 'Comma-separated list of source directories to add to the package'),
@@ -123,11 +52,55 @@ class extended_sdist(setuptools_sdist.sdist):
 
     def make_release_tree(self, base_dir, files):
         setuptools_sdist.sdist.make_release_tree(self, base_dir, files)
-        for d in self.source_dirs:
-            src = d.rstrip().rstrip(os.sep)
-            dest = os.path.join(base_dir, 'sources', os.path.basename(src))
-            distutils.log.info('Copying %s -> %s', src, dest)
-            copy_tree(src, dest, update=not self.force, verbose=0, dry_run=self.dry_run)
+        if self.source_dirs:
+            for d in self.source_dirs:
+                src = d.rstrip().rstrip(os.sep)
+                dest = os.path.join(base_dir, 'sources', os.path.basename(src))
+                log.info('Copying %s -> %s', src, dest)
+                if not self.dry_run:
+                    if os.path.exists(dest):
+                        shutil.rmtree(dest)
+                    shutil.copytree(src, dest)
+
+
+# Custom build_py to copy data directories into cerbero_share package
+class build_with_data(build_py):
+    """Custom build that copies data directories into cerbero_share package"""
+
+    def run(self):
+        # Run the standard build first
+        build_py.run(self)
+
+        # Remove any top-level data directories that setuptools might have copied
+        for unwanted in ['recipes', 'packages', 'config', 'data', 'tools', 'ci', 'venv']:
+            unwanted_dir = os.path.join(self.build_lib, unwanted)
+            if os.path.exists(unwanted_dir):
+                log.info(f'Removing unwanted {unwanted}/ from build')
+                shutil.rmtree(unwanted_dir)
+
+        # Create cerbero_share package directory
+        package_dir = os.path.join(self.build_lib, 'cerbero_share')
+        os.makedirs(package_dir, exist_ok=True)
+
+        # Create __init__.py for cerbero_share package
+        init_file = os.path.join(package_dir, '__init__.py')
+        with open(init_file, 'w') as f:
+            f.write('# This package contains data files (recipes, packages, config, data, tools)\n')
+            f.write('# that are installed alongside the cerbero Python package.\n')
+
+        # Data directories to copy into cerbero_share
+        data_dirs = ['recipes', 'packages', 'config', 'data', 'tools']
+
+        # Copy each data directory
+        for data_dir in data_dirs:
+            src = os.path.join(os.path.dirname(__file__), data_dir)
+            if not os.path.exists(src):
+                raise FileNotFoundError(f'Required data directory not found: {src}')
+            dest = os.path.join(package_dir, data_dir)
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            log.info(f'Copying {data_dir}/ -> cerbero_share/{data_dir}/')
+            shutil.copytree(src, dest)
 
 
 setup(
@@ -138,16 +111,30 @@ setup(
     description=('Multi platform build system for Open Source projects'),
     license='LGPL',
     url='http://gstreamer.freedesktop.org/',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'test', 'recipes', 'packages', 'config', 'data', 'tools'])
+    + ['cerbero_share'],
+    py_modules=[],  # Don't auto-discover top-level modules
     long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     zip_safe=False,
     include_package_data=True,
-    data_files=datafiles(prefix),
-    entry_points="""
-        [console_scripts]
-        cerbero = cerbero.main:main""",
+    entry_points={
+        'console_scripts': [
+            'cerbero=cerbero.main:main',
+        ],
+    },
     classifiers=[
-        'License :: OSI Approved :: LGPL License',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
     ],
-    cmdclass={'sdist': extended_sdist},
+    python_requires='>=3.9',
+    cmdclass={
+        'sdist': extended_sdist,
+        'build_py': build_with_data,
+    },
 )

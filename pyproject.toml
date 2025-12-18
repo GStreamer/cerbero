@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "distro"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cerbero"
+version = "1.27.50.1"  # Keep in sync with cerbero/enums.py::CERBERO_VERSION
+description = "Multi platform build system for Open Source projects"
+readme = "README.md"
+license = {text = "LGPL-2.0-or-later"}
+authors = [
+    {name = "Andoni Morales", email = "amorales@fluendo.com"},
+]
+classifiers = [
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "distro ; sys_platform == 'linux'",
+]
+
+[project.urls]
+Homepage = "https://gstreamer.freedesktop.org/"
+Repository = "https://gitlab.freedesktop.org/gstreamer/cerbero"
+
+[project.scripts]
+cerbero = "cerbero.main:main"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.packages.find]
+exclude = ["test*", "build*", "output*", "tmp*"]
