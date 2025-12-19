@@ -10,7 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'f685219b-7ee8-46b9-af3c-338e3cbb4f94'
     deps = ['gstreamer-1.0-core']
 
-    files = ['a52dec:libs',
+    files = ['a52dec:libs', 'libdca:libs',
              'gst-plugins-base-1.0:plugins_codecs_gpl',
              'gst-plugins-good-1.0:plugins_codecs_gpl',
              'gst-plugins-bad-1.0:plugins_codecs_gpl',
