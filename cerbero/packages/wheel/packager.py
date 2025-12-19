@@ -73,9 +73,21 @@ class WheelPackager(PackagerBase):
         self.abi_desc = ' '.join(config._get_toolchain_target_platform_arch(readable=True))
 
     def _get_classifiers(self, license):
-        # complete classifier list: https://pypi.org/pypi?%3Aaction=list_classifiers
-        classifiers = [
-            'Development Status :: 4 - Beta',
+        """
+        Complete classifier list: https://pypi.org/pypi?%3Aaction=list_classifiers
+        """
+        versions = list(map(int, self.package.version.split('.', maxsplit=3)))
+        classifiers = []
+        if versions[1] % 2 == 0:
+            classifiers += ['Development Status :: 5 - Production/Stable']
+        elif versions[2] == 0:
+            classifiers += ['Development Status :: 2 - Pre-Alpha']
+        elif versions[2] >= 50:
+            classifiers += ['Development Status :: 4 - Beta']
+        else:
+            classifiers += ['Development Status :: 3 - Alpha']
+
+        classifiers += [
             'Intended Audience :: Developers',
             'Programming Language :: Python :: 3',
             'Topic :: Multimedia :: Graphics',
