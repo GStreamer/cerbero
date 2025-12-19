@@ -29,8 +29,13 @@ class Recipe(recipe.Recipe):
         else:
             self.library_type = LibraryType.SHARED
 
-        if self.config.target_platform in (Platform.IOS, Platform.DARWIN):
-            # Bitcode breaks xcodebuild archiving
+        # Bitcode breaks xcodebuild archiving
+        #
+        # -flto is broken on x86 windows:
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/2014#note_3245062
+        if self.config.target_platform in (Platform.IOS, Platform.DARWIN) or \
+            (self.config.target_platform == Platform.WINDOWS and
+             self.config.target_arch == Architecture.X86):
             self.configure_options.append('-DVVDEC_ENABLE_LINK_TIME_OPT=OFF')
 
         if self.config.target_platform == Platform.ANDROID:
