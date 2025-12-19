@@ -244,7 +244,7 @@ class Config(object):
         'git_root',
         'distro',
         'target_distro',
-        'environ_dir',
+        'config_dir',
         'cache_file',
         'toolchain_prefix',
         'toolchain_version',
@@ -320,6 +320,10 @@ class Config(object):
         'system_build_tools',
     ]
 
+    _deprecated_properties = [
+        ('environ_dir', 'config_dir'),
+    ]
+
     cookbook = None
 
     def __init__(self, is_build_tools_config=False):
@@ -345,6 +349,19 @@ class Config(object):
         self.config_env = os.environ.copy()
         # Initialize variants
         self.variants = Variants([])
+
+    def _warn_deprecated_properties(self, config_dict):
+        """
+        Warn about deprecated properties and map them to new properties.
+
+        Args:
+            config_dict: Dict from parsed config file to check for deprecated properties.
+        """
+        for old_prop, new_prop in self._deprecated_properties:
+            if old_prop in config_dict:
+                m.deprecation(f'{old_prop} is deprecated, use {new_prop} instead')
+                # Map the old property value to the new property in the config dict
+                config_dict[new_prop] = config_dict[old_prop]
 
     def _copy(self, arch):
         c = copy.deepcopy(self)
@@ -681,7 +698,7 @@ class Config(object):
         self.set_property('exe_suffix', self._get_exe_suffix())
         self.set_property('data_dir', self._find_data_dir())
         self.set_property('cached_sources', self._relative_path('sources'))
-        self.set_property('environ_dir', self._relative_path('config'))
+        self.set_property('config_dir', self._relative_path('config'))
         self.set_property('recipes_dir', self._relative_path('recipes'))
         self.set_property('packages_dir', self._relative_path('packages'))
         self.set_property('allow_system_libs', True)
@@ -897,6 +914,10 @@ class Config(object):
             parse_file(filename, config)
         except Exception:
             raise ConfigurationError(_('Could not include config file (%s)') % filename)
+
+        # Handle deprecated properties from config file first
+        self._warn_deprecated_properties(config)
+
         for key in self._properties:
             if key in config:
                 self.set_property(key, config[key], True)
@@ -940,23 +961,19 @@ class Config(object):
         if filenames is not None:
             for f in filenames:
                 # Check if the config specified is a complete path, else search
-                # in the user config directory and then in the environ_dir (cerbero_share/config/)
-                if os.path.exists(f):
-                    self._parse(f, reset=False)
+                # in the user config directory and then in the config_dir (cerbero_share/config/)
+                uf = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
+                ef = os.path.join(self.config_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT)
+                for config_file in [f, uf, ef]:
+                    if os.path.exists(config_file):
+                        self._parse(config_file, reset=False)
+                        break
                 else:
-                    uf = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
-                    ef = os.path.join(self.environ_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT)
-
-                    if os.path.exists(uf):
-                        self._parse(uf, reset=False)
-                    elif os.path.exists(ef):
-                        self._parse(ef, reset=False)
-                    else:
-                        raise ConfigurationError(_('Configuration file %s or fallbacks %s, %s not found') % (f, uf, ef))
+                    raise ConfigurationError(_('Configuration file %s or fallbacks %s, %s not found') % (f, uf, ef))
 
     def _load_platform_config(self):
-        platform_config = os.path.join(self.environ_dir, '%s.config' % self.target_platform)
-        arch_config = os.path.join(self.environ_dir, '%s_%s.config' % (self.target_platform, self.target_arch))
+        platform_config = os.path.join(self.config_dir, '%s.config' % self.target_platform)
+        arch_config = os.path.join(self.config_dir, '%s_%s.config' % (self.target_platform, self.target_arch))
 
         for config_path in [platform_config, arch_config]:
             if os.path.exists(config_path):
