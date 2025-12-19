@@ -197,6 +197,26 @@ $ ./cerbero-uninstalled -c config/cross-win-arm64.cbc -v uwp package gstreamer-1
 $ ./cerbero-uninstalled -c config/cross-uwp-universal.cbc package gstreamer-1.0
 ```
 
+# Artifact Types
+
+Starting with the 1.28 release, Cerbero supports outputting various kinds of
+artifact types:
+
+* Tarballs
+  - Default for Android and Linux, available for all targets
+  - Prior to 1.28, this could be selected with the `-t/--tarball` option
+* Windows Installer Packages
+  - Default for, and only available for Windows and cross-Windows targets
+* macOS Installer Packages
+  - Default for, and only available for macOS and iOS targets
+* Python 3 Wheels
+  - Available for macOS, Windows, and Linux targets
+  - The minimum supported Python version for the wheel will be whatever Python
+    version you build the wheel with. The oldest supported by Cerbero is 3.9.
+
+The artifact to output can be controlled with the `--artifact` option. Valid
+choices are: `tarball` `msi` `pkg` `wheel`.
+
 # Enabling and Disabling Optional Features with Variants
 
 Cerbero controls optional and platform-specific features with `variants`. You
