@@ -47,9 +47,9 @@ environment = {
     ],
     'GST_REGISTRY_1_0': _gst_registry_10.as_posix(),
     'GST_PLUGIN_SCANNER_1_0': f'{_gstreamer_root}/libexec/gstreamer-1.0/gst-plugin-scanner',
-    'GIO_EXTRA_MODULES': f'{_gstreamer_root}/lib/gio/modules',
     'GI_TYPELIB_PATH': f'{_gstreamer_root}/lib/girepository-1.0',
-    'GST_PYTHONPATH_1_0': Path(_gstreamer_root, _site_packages_prefix).as_posix(),
+    # The rest will already be filled by the setup_environment shim
+    'PYGI_DLL_DIRS': f'{_gstreamer_root}/bin',
 }
 
 
@@ -80,6 +80,14 @@ def gstreamer_env():
         from gstreamer_plugins_gpl_restricted import environment as gp_gplr_env
     except ImportError:
         gp_gplr_env = {}
+    try:
+        from gstreamer_plugins_runtime import environment as gp_r_env
+    except ImportError:
+        gp_r_env = {}
+    try:
+        from gstreamer_plugins_frei0r import environment as gp_f_env
+    except ImportError:
+        gp_f_env = {}
 
     try:
         from gstreamer_python import environment as py_env
@@ -105,6 +113,8 @@ def gstreamer_env():
         py_env.items(),
         gp_env.items(),
         gpr_env.items(),
+        gp_f_env.items(),
+        gp_r_env.items(),
         gp_gpl_env.items(),
         gp_gplr_env.items(),
         gc_env.items(),

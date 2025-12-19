@@ -190,6 +190,8 @@ class WheelPackager(PackagerBase):
         gpl_restricted_files_list = []
         restricted_files_list = []
         plugins_list = []
+        frei0r_list = []
+        plugins_runtime_list = []
         runtime_list = []
         python_list = []
         cli_list = []
@@ -204,17 +206,21 @@ class WheelPackager(PackagerBase):
                 gpl_files_list += p.files_list()
             elif p.name.startswith('base-'):
                 runtime_list += p.files_list()
+            elif p.name.endswith('-python'):
+                python_list += p.files_list()
             else:
                 for f in p.files_list():
                     source = Path(self.config.prefix, f)
                     if _is_gstreamer_executable(source) and 'libexec' not in source.parts:
                         cli_list.append(f)
-                    elif 'lib/gstreamer-1.0' in f and 'gstcoreelements' not in f:
-                        plugins_list.append(f)
-                    elif 'site-packages' in f or 'gstpython' in f:
-                        python_list.append(f)
-                    else:
+                    elif p.name.endswith('-core') or p.name.endswith('-devtools'):
                         runtime_list.append(f)
+                    elif 'frei0r' in f:
+                        frei0r_list.append(f)
+                    elif 'gstreamer-1.0' in f:
+                        plugins_list.append(f)
+                    else:
+                        plugins_runtime_list.append(f)
 
         # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
         # (package name, payload, license (SPDX is acronym?), and dependencies/features)
@@ -222,6 +228,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl_restricted': gpl_restricted_files_list,
             'gstreamer_plugins_restricted': restricted_files_list,
             'gstreamer_plugins_gpl': gpl_files_list,
+            'gstreamer_plugins_frei0r': frei0r_list,
+            'gstreamer_plugins_runtime': plugins_runtime_list,
             'gstreamer_runtime': runtime_list,
             'gstreamer_cli': cli_list,
             'gstreamer_plugins': plugins_list,
@@ -233,6 +241,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl_restricted': License.GPLv2Plus,
             'gstreamer_plugins_restricted': License.GPLv2Plus,
             'gstreamer_plugins_gpl': License.GPLv2Plus,
+            'gstreamer_plugins_frei0r': License.GPLv2Plus,
+            'gstreamer_plugins_runtime': License.GPLv2Plus,
             'gstreamer_runtime': License.LGPLv2_1Plus,
             'gstreamer_cli': License.LGPLv2_1Plus,
             'gstreamer_plugins': License.LGPLv2_1Plus,
@@ -247,12 +257,14 @@ class WheelPackager(PackagerBase):
                 'typing_extensions >= 4.15.0',
             ],
             'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
-            'gstreamer_python': [],  # f'gstreamer_runtime ~= {self.package.version}'
+            'gstreamer_python': [f'gstreamer_runtime ~= {self.package.version}'],
+            'gstreamer_plugins': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
             'gstreamer': [
                 f'gstreamer_runtime ~= {self.package.version}',
                 f'gstreamer_plugins ~= {self.package.version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_restricted ~= {self.package.version}',
+                f'gstreamer_plugins_frei0r ~= {self.package.version}',
                 f'gstreamer_plugins_gpl ~= {self.package.version}',
                 f'gstreamer_python ~= {self.package.version}',
             ],

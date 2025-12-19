@@ -1,5 +1,4 @@
 from pathlib import Path
-import sys
 import sysconfig
 
 
@@ -7,16 +6,13 @@ _module_name = __name__.split('.')[0]
 
 _gstreamer_root = Path(sysconfig.get_path('platlib'), _module_name).as_posix()
 
-_site_packages_prefix = Path(sysconfig.get_path('platlib')).relative_to(sys.prefix)
-
 """
 These paths will be prepended by gstreamer[cli,gpl]'s build_environment
 """
 environment = {
     'PATH': f'{_gstreamer_root}/bin',
     'LD_LIBRARY_PATH': f'{_gstreamer_root}/lib',
-    'GI_TYPELIB_PATH': f'{_gstreamer_root}/lib/girepository-1.0',
     'GST_PLUGIN_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
     'GST_PLUGIN_SYSTEM_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
-    'GST_PYTHONPATH_1_0': Path(_gstreamer_root, _site_packages_prefix).as_posix(),
+    'FREI0R_PATH': f'{_gstreamer_root}/lib/frei0r-1',
 }
