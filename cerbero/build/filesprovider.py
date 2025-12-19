@@ -470,7 +470,8 @@ class FilesProvider(object):
             files_expanded.append(f % self.extensions)
         fs = {}
         for f in files_expanded:
-            if f.endswith('.dll') and self.using_msvc():
+            # Find frei0r plugins wholesale
+            if f.endswith('.dll') and self.using_msvc() and '*' not in f:
                 fs[self._get_msvc_dll(f)] = None
             else:
                 fs[f] = None

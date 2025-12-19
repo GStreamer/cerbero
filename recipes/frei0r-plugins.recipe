@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     configure_args = '-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON'
     deps = ['cairo']
 
-    files_plugins = ['%(libdir)s/frei0r-1']
+    files_plugins = ['%(libdir)s/frei0r-1/*%(mext)s']
     files_devel = [
         '%(libdir)s/pkgconfig/frei0r.pc',
         'include/frei0r.h',
