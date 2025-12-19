@@ -640,7 +640,7 @@ class CMake(MakefilesBase):
     Build handler for cmake projects
     """
 
-    cmake_generator = 'make'
+    cmake_generator = 'ninja'
     config_sh_needs_shell = False
     config_sh = None
     configure_tpl = (
