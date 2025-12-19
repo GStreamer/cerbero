@@ -115,7 +115,13 @@ class WheelPackager(PackagerBase):
         return '-'.join((self.package.name, platform, self.config.target_arch, self.package.version))
 
     def _create_wheel(
-        self, package_name, files_list=(), license=License.LGPLv2_1Plus, classifiers=(), dependencies=(), features=None
+        self,
+        package_name,
+        files_list=(),
+        license=License.LGPLv2_1Plus.acronym,
+        classifiers=(),
+        dependencies=(),
+        features=None,
     ):
         # Set project up
         m.action(f'Creating setuptools project for {package_name}')
@@ -158,7 +164,7 @@ class WheelPackager(PackagerBase):
             'long_description': self.package.longdesc,
             'url': self.package.url,
             'vendor': self.package.vendor,
-            'spdx_license': license.acronym,
+            'spdx_license': license,
             'classifiers': classifiers,
             'python_version': f'>= 3.{sys.version_info[1]}',
             'install_requires': dependencies,
@@ -196,31 +202,54 @@ class WheelPackager(PackagerBase):
         python_list = []
         cli_list = []
 
+        gpl_restricted_licenses = set()
+        restricted_licenses = set()
+        gpl_licenses = set()
+        python_licenses = set()
+        runtime_licenses = set()
+        plugins_licenses = set()
+        plugins_runtime_licenses = set()
+
+        def _parse_licenses(package):
+            result = set()
+            for _recipe, categories in p.recipes_licenses().items():
+                for _c, lst in categories.items():
+                    result.update(lst)
+            return result
+
         for p in packagedeps:
             m.action(f'Parsing distribution payload for {p.name}')
             if '-gpl-restricted' in p.name:
                 gpl_restricted_files_list += p.files_list()
+                gpl_restricted_licenses.update(_parse_licenses(p))
             elif '-restricted' in p.name:
                 restricted_files_list += p.files_list()
+                restricted_licenses.update(_parse_licenses(p))
             elif '-gpl' in p.name:
                 gpl_files_list += p.files_list()
+                gpl_licenses.update(_parse_licenses(p))
             elif p.name.startswith('base-'):
                 runtime_list += p.files_list()
+                runtime_licenses.update(_parse_licenses(p))
             elif p.name.endswith('-python'):
                 python_list += p.files_list()
+                python_licenses.update(_parse_licenses(p))
             else:
                 for f in p.files_list():
                     source = Path(self.config.prefix, f)
                     if _is_gstreamer_executable(source) and 'libexec' not in source.parts:
                         cli_list.append(f)
                     elif p.name.endswith('-core') or p.name.endswith('-devtools'):
+                        runtime_licenses.update(_parse_licenses(p))
                         runtime_list.append(f)
                     elif 'frei0r' in f:
                         frei0r_list.append(f)
                     elif 'gstreamer-1.0' in f:
                         plugins_list.append(f)
+                        plugins_licenses.update(_parse_licenses(p))
                     else:
                         plugins_runtime_list.append(f)
+                        plugins_runtime_licenses.update(_parse_licenses(p))
 
         # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
         # (package name, payload, license (SPDX is acronym?), and dependencies/features)
@@ -238,16 +267,19 @@ class WheelPackager(PackagerBase):
         }
 
         package_licenses = {
-            'gstreamer_plugins_gpl_restricted': License.GPLv2Plus,
-            'gstreamer_plugins_restricted': License.GPLv2Plus,
-            'gstreamer_plugins_gpl': License.GPLv2Plus,
-            'gstreamer_plugins_frei0r': License.GPLv2Plus,
-            'gstreamer_plugins_runtime': License.GPLv2Plus,
-            'gstreamer_runtime': License.LGPLv2_1Plus,
-            'gstreamer_cli': License.LGPLv2_1Plus,
-            'gstreamer_plugins': License.LGPLv2_1Plus,
-            'gstreamer_python': License.LGPLv2_1Plus,
-            'gstreamer': License.LGPLv2_1Plus,
+            'gstreamer_plugins_gpl_restricted': gpl_restricted_licenses,
+            'gstreamer_plugins_restricted': restricted_licenses,
+            'gstreamer_plugins_gpl': gpl_licenses,
+            # (fixed)
+            'gstreamer_plugins_frei0r': [License.GPLv2Plus],
+            'gstreamer_plugins_runtime': plugins_runtime_licenses,
+            'gstreamer_runtime': runtime_licenses,
+            # GStreamer supplied
+            'gstreamer_cli': [License.LGPLv2_1Plus],
+            'gstreamer_plugins': plugins_licenses,
+            'gstreamer_python': python_licenses,
+            # GStreamer supplied
+            'gstreamer': [License.LGPLv2_1Plus],
         }
 
         package_dependencies = {
@@ -293,7 +325,7 @@ class WheelPackager(PackagerBase):
 
             package_name = 'gstreamer_msvc_runtime'
             files_list = [f.as_posix() for f in redist_path.glob('**/*.dll')]
-            license = License.Proprietary
+            license = License.Proprietary.acronym
             dependencies = []
             features = {}
 
@@ -312,7 +344,7 @@ class WheelPackager(PackagerBase):
             package_dependencies['gstreamer_runtime'].append(f'{package_name} ~= {self.package.version}')
 
         for package_name, files_list in package_files_list.items():
-            license = package_licenses[package_name]
+            license = ' AND '.join(lic.acronym for lic in package_licenses[package_name])
             dependencies = package_dependencies.get(package_name, [])
             features = package_features.get(package_name, {})
 
