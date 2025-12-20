@@ -278,23 +278,5 @@ class Recipe(custom.GStreamer):
             #    completely useless
             self.meson_options['qt-method'] = 'qmake'
 
-        if self.using_uwp():
-            # Uses unavailable APIs
-            self.disable_plugin('directsound', 'sys')
-            # External deps that haven't been ported to UWP
-            self.disable_plugin('adaptivedemux2', 'codecs')
-            self.disable_plugin('amrnb', 'codecs', dep='opencore-amr')
-            self.disable_plugin('amrwbdec', 'codecs', dep='opencore-amr')
-            self.disable_plugin('cairo', 'effects', dep='cairo')
-            self.disable_plugin('flac', 'codecs', dep='flac')
-            self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
-            self.disable_plugin('jpeg', 'codecs', dep='libjpeg-turbo')
-            self.disable_plugin('lame', 'codecs', dep='lame')
-            self.disable_plugin('mpg123', 'codecs', dep='mpg123')
-            self.disable_plugin('png', 'codecs', dep='libpng')
-            self.disable_plugin('soup', 'net', dep='libsoup')
-            self.disable_plugin('speex', 'codecs', dep='speex')
-            self.disable_plugin('wavpack', 'codecs', dep='wavpack')
-
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

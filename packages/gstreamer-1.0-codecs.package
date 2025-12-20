@@ -40,13 +40,6 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('gst-plugins-rs:plugins_codecs')
             self.files_devel.append('gst-plugins-rs:plugins_codecs_devel')
 
-        if self.config.variants.uwp:
-            self.files = [
-                'libvpx:libs', 'openh264:libs', 'opus:libs',
-                'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
-                'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
-            ]
-
         if self.config.target_arch == Architecture.X86_64:
             self.files.append('svt-jpeg-xs:libs')
 

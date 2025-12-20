@@ -18,9 +18,6 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-bad-1.0:plugins_net_restricted_devel']
 
     def prepare(self):
-        if self.config.variants.uwp:
-            self.files.remove('librtmp:libs')
-
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_net_restricted')
             self.files_devel.append('gst-plugins-rs:plugins_net_restricted_devel')

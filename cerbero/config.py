@@ -98,7 +98,6 @@ class Variants(object):
         'rpi',
         'visualstudio',
         'mingw',
-        'uwp',
         'qt5',
         'intelmsdk',
         'python',
@@ -184,12 +183,6 @@ class Variants(object):
             return
 
         self.__overridden_variants.add(attr)
-        # UWP implies Visual Studio
-        if attr == 'uwp' and value:
-            self.visualstudio = True
-            self.__overridden_variants.add('visualstudio')
-            self.mingw = False
-            self.__overridden_variants.add('mingw')
 
     def __getattr__(self, name):
         if name.startswith('no') and name[2:] in self.bools():
@@ -746,10 +739,6 @@ class Config(object):
 
     def cross_compiling(self):
         "Are we building for the host platform or not?"
-        # Building for UWP is always cross-compilation since we can't run the
-        # binaries that we output
-        if self.variants.uwp:
-            return True
         # On Windows, building 32-bit on 64-bit is not cross-compilation since
         # 32-bit Windows binaries run on 64-bit Windows via WOW64.
         if self.platform == Platform.WINDOWS:
@@ -773,9 +762,6 @@ class Config(object):
         """Can the binaries from the target platform can be executed in the
         build env?"""
         if self.target_platform != self.platform:
-            return False
-        # Executables built for UWP cannot be run as-is
-        if self.variants.uwp:
             return False
         if self.target_arch != self.arch:
             if self.target_arch == Architecture.X86 and self.arch == Architecture.X86_64:
@@ -976,17 +962,12 @@ class Config(object):
     def _get_toolchain_target_platform_arch(self, readable=False):
         mingw = 'MinGW' if readable else 'mingw'
         msvc = 'MSVC' if readable else 'msvc'
-        uwp = 'UWP' if readable else 'uwp'
         debug = ' Debug' if readable else '-debug'
         if self.target_platform != Platform.WINDOWS or self._is_build_tools_config:
             return (self.target_platform, self.target_arch)
         if not self.variants.visualstudio:
             return (mingw, self.target_arch)
-        # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
-        if self.variants.uwp:
-            target_platform = uwp
-        else:
-            target_platform = msvc
+        target_platform = msvc
         # Debug CRT needs a separate prefix
         if self.variants.vscrt == 'mdd':
             target_platform += debug

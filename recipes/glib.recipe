@@ -144,41 +144,6 @@ class Recipe(recipe.Recipe):
             self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
             # Old MinGW requires this define for using llu in inttypes.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
-            # TODO: upstream
-            if self.config.variants.uwp:
-                # gdbus is completely disabled at present
-                self.files_bins.remove('gdbus')
-                self.files_bins_devel.remove('bin/gdbus.pdb')
-                self.patches += [
-                    # Ready to upstream
-                    'glib/uwp/0001-gio-Disable-generic-DNS-record-lookup-on-UWP.patch',
-                    'glib/uwp/0002-glib-Never-use-MessageBox-on-UWP-apps.patch',
-                    'glib/uwp/0003-gpoll-UWP-does-not-need-to-poll-a-msg_fd.patch',
-                    'glib/uwp/0004-win_iconv-Use-LoadPackagedLibrary-when-building-UWP-.patch',
-                    'glib/uwp/0005-goption-Do-not-call-GetCommandlineW-on-UWP.patch',
-                    'glib/uwp/0006-gmodule-Fix-some-more-WinRT-incompatibilities.patch',
-                    'glib/uwp/0007-gutils-Can-t-fetch-the-username-on-UWP.patch',
-                    'glib/uwp/0008-gutils-GetWindowsDirectory-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0009-gutils-GetModuleHandle-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0010-glocalfile-File-user-info-is-not-supported-on-WinRT.patch',
-                    'glib/uwp/0011-gwin32-Stub-out-all-version-checking-on-WinRT.patch',
-                    'glib/uwp/0012-gsocket-if_nametoindex-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0013-gio-ginetaddress-Fix-build-on-WinRT.patch',
-                    # Need some more work
-                    'glib/uwp/0014-WIP-gspawn-Do-not-allow-spawning-or-making-pipes-on-.patch',
-                    'glib/uwp/0015-WIP-glib-giowin32-Disallow-invalid-usage-of-GIOChann.patch',
-                    'glib/uwp/0016-WIP-glocalfile-Trash-as-a-concept-does-not-exist-on-.patch',
-                    'glib/uwp/0017-TODO-gdate-gstdio-Abort-when-trying-to-use-unsupport.patch',
-                    'glib/uwp/0018-gio-Disable-win32-API-and-modules-when-unavailable-o.patch',
-                    'glib/uwp/0019-TODO-gdbus-Completely-disable-when-building-for-WinR.patch',
-                    'glib/uwp/0020-WIP-glib-Implement-get_special_folder-for-UWP-apps.patch',
-                    'glib/uwp/0021-WIP-gtimezone-Partially-port-to-WinRT.patch',
-                    'glib/uwp/0022-TODO-gutils-Hard-code-windows-version-detection-in-g.patch',
-                    # Need a lot more work
-                    'glib/uwp/0023-TODO-gio-gcontenttype-Needs-porting-to-WinRT-model.patch',
-                    # Visual Studio 2019 workaround
-                    'glib/uwp/0024-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
-                ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # https://gitlab.gnome.org/GNOME/glib/-/issues/2902
             self.meson_options.update({'tests': 'false'})

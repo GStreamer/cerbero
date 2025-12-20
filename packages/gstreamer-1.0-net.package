@@ -39,13 +39,8 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('gst-plugins-rs:plugins_net')
             self.files_devel.append('gst-plugins-rs:plugins_net_devel')
 
-        if self.config.variants.uwp:
-            self.files = [
-                'glib-networking', 'libsrtp:libs',
-                'libnice:libs:plugins_net', 'gst-plugins-base-1.0:plugins_net',
-                'gst-plugins-good-1.0:plugins_net', 'gst-plugins-ugly-1.0:plugins_net',
-                'gst-plugins-bad-1.0:plugins_net', 'gst-rtsp-server-1.0:libs:plugins_net',
-            ]
+        if self.config.variants.visualstudio and self.config.cross_compiling():
+            self.files.remove('srt:libs')
 
         if not Platform.is_apple_mobile(self.config.target_platform):
             if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():

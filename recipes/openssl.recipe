@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
     deps = ['ca-certificates', 'zlib']
     # Configure script is perl, not shell
     config_sh_needs_shell = False
-    # Can build for MSVC and UWP
+    # Can build for MSVC
     can_msvc = True
 
     patches = [
@@ -29,6 +29,7 @@ class Recipe(recipe.Recipe):
         'openssl/0002-windows-makefile.tmpl-Generate-and-install-pkgconfig.patch',
     ]
 
+    files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
     files_devel = ['include/openssl', '%(libdir)s/pkgconfig/openssl.pc',
                    '%(libdir)s/pkgconfig/libssl.pc', '%(libdir)s/pkgconfig/libcrypto.pc']
@@ -81,22 +82,13 @@ class Recipe(recipe.Recipe):
                 return 'linux-aarch64'
             raise InvalidRecipeError(self, "Unknown Linux platform")
         if self.config.target_platform == Platform.WINDOWS:
-            if self.using_uwp():
-                if self.config.target_arch == Architecture.X86:
-                    return 'VC-WIN32-ONECORE'
-                if self.config.target_arch == Architecture.X86_64:
-                    return 'VC-WIN64A-ONECORE'
-                if self.config.target_arch == Architecture.ARM:
-                    return 'VC-WIN32-ARM'
-                if self.config.target_arch == Architecture.ARMv7:
-                    return 'VC-WIN32-ARM'
-                if self.config.target_arch == Architecture.ARM64:
-                    return 'VC-WIN64-ARM'
-            elif self.using_msvc():
+            if self.using_msvc():
                 if self.config.target_arch == Architecture.X86:
                     return 'VC-WIN32'
                 if self.config.target_arch == Architecture.X86_64:
                     return 'VC-WIN64A'
+                if self.config.target_arch == Architecture.ARM64:
+                    return 'VC-WIN64-ARM'
             else:
                 if self.config.target_arch == Architecture.X86:
                     return 'mingw'
@@ -224,12 +216,6 @@ class Recipe(recipe.Recipe):
 
         if self.config.platform == Platform.WINDOWS:
             config_sh += ' no-tests '
-
-        # https://github.com/openssl/openssl/issues/25785
-        if self.using_msvc() and self.config.variants.uwp:
-            config_sh += ' no-apps '
-        else:
-            self.files_bins = ['openssl']
 
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)

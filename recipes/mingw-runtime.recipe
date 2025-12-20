@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
             raise InvalidRecipeError(self, "Invalid platform")
-        if self.config.variants.uwp:
+        if self.config.variants.visualstudio and self.config.cross_compiling():
             self.runtime_dep = False
         lib_suffix = ''
         if self.config.platform != Platform.WINDOWS:

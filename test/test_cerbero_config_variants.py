@@ -44,8 +44,6 @@ class ConfigVariantsTest(unittest.TestCase):
         self.assertFalse('noalsa' in dir(self.variants))
         self.assertFalse(self.variants.alsa, 'Alsa is disabled by default')
         self.assertTrue(self.variants.noalsa, 'Alsa is disabled by default')
-        self.assertFalse(self.variants.uwp)
-        self.assertFalse(self.variants._is_overridden('uwp'))
         self.assertFalse(self.variants.visualstudio)
         self.assertFalse(self.variants._is_overridden('visualstudio'))
         self.assertFalse(self.variants.mingw)
@@ -105,44 +103,6 @@ class ConfigVariantsTest(unittest.TestCase):
         self.assertTrue(self.variants.nodebug)
         self.assertTrue(self.variants.debug, 'is still true: nodebug being set is a different variant')
 
-    def testSetUWP(self):
-        self.assertFalse(self.variants._is_overridden('uwp'))
-        self.assertFalse(self.variants._is_overridden('nouwp'))
-        self.assertFalse(self.variants._is_overridden('visualstudio'))
-        self.assertFalse(self.variants._is_overridden('novisualstudio'))
-        self.assertFalse(self.variants._is_overridden('mingw'))
-        self.assertFalse(self.variants._is_overridden('nomingw'))
-
-        # setting the same value doesn't chage the situation apart from "is set"
-        self.variants.uwp = False
-        self.assertFalse(self.variants.uwp)
-        self.assertTrue(self.variants._is_overridden('uwp'))
-        self.assertTrue(self.variants.nouwp)
-        self.assertTrue(self.variants._is_overridden('nouwp'))
-        self.assertFalse(self.variants.visualstudio)
-        self.assertFalse(self.variants._is_overridden('visualstudio'))
-        self.assertTrue(self.variants.novisualstudio)
-        self.assertFalse(self.variants._is_overridden('novisualstudio'))
-        self.assertFalse(self.variants.mingw)
-        self.assertFalse(self.variants._is_overridden('mingw'))
-        self.assertTrue(self.variants.nomingw)
-        self.assertFalse(self.variants._is_overridden('nomingw'))
-
-        # changing the value produces some implicit changes
-        self.variants.uwp = True
-        self.assertTrue(self.variants.uwp)
-        self.assertTrue(self.variants._is_overridden('uwp'))
-        self.assertFalse(self.variants.nouwp)
-        self.assertTrue(self.variants._is_overridden('nouwp'))
-        self.assertTrue(self.variants.visualstudio)
-        self.assertTrue(self.variants._is_overridden('visualstudio'))
-        self.assertFalse(self.variants.novisualstudio)
-        self.assertTrue(self.variants._is_overridden('novisualstudio'))
-        self.assertFalse(self.variants.mingw)
-        self.assertTrue(self.variants._is_overridden('mingw'))
-        self.assertTrue(self.variants.nomingw)
-        self.assertTrue(self.variants._is_overridden('nomingw'))
-
     def testSetUnknownVariants(self):
         self.assertFalse(self.variants._is_overridden('n'))
         self.assertFalse(self.variants._is_overridden('non'))
@@ -174,26 +134,6 @@ class ConfigVariantsTest(unittest.TestCase):
         self.assertEqual(self.variants.abracadabra, 'nosense')
         with self.assertRaises(AttributeError):
             self.assertFalse(self.variants.noabracadabra, 'for unknown attribute, the no-* variant is not possible')
-
-    def testSetBoolKnownVariants(self):
-        # testSetUWP() tests is_set() before set
-        self.variants.set_bool('uwp')
-        self.assertTrue(self.variants.uwp)
-        self.assertTrue(self.variants._is_overridden('uwp'))
-        self.assertFalse(self.variants.nouwp)
-        self.assertTrue(self.variants._is_overridden('nouwp'))
-        self.assertTrue(self.variants.visualstudio)
-        self.assertTrue(self.variants._is_overridden('visualstudio'))
-        self.assertFalse(self.variants.novisualstudio)
-        self.assertTrue(self.variants._is_overridden('novisualstudio'))
-        self.assertFalse(self.variants.mingw)
-        self.assertTrue(self.variants._is_overridden('mingw'))
-        self.assertTrue(self.variants.nomingw)
-        self.assertTrue(self.variants._is_overridden('nomingw'))
-
-        self.variants.set_bool('nouwp')
-        self.assertFalse(self.variants.uwp)
-        self.assertTrue(self.variants.nouwp)
 
     def testSetBoolVscrtVariant(self):
         self.variants.set_bool('vscrt')

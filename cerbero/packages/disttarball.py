@@ -92,8 +92,6 @@ class DistTarball(PackagerBase):
 
         if self.config.target_platform != Platform.WINDOWS:
             platform = self.config.target_platform
-        elif self.config.variants.uwp:
-            platform = 'uwp'
         elif self.config.variants.visualstudio:
             platform = 'msvc'
         else:

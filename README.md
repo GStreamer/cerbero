@@ -165,18 +165,15 @@ iOS x86_64                     | `cross-ios-x86-64.cbc`
 #### Windows Targets
 
 On Windows, config files are used to select the architecture and variants are
-used to select the toolchain (MinGW, MSVC, UWP):
+used to select the toolchain (MinGW, MSVC):
 
 Target          | Config file               | Variant
 :---------------|:--------------------------|:-------
 MSVC x86        | `win32.cbc`               |
 MSVC x86_64     | `win64.cbc`               |
+MSVC arm64      | `cross-win-arm64.cbc`     |
 MinGW x86       | `win32.cbc`               | mingw
 MinGW x86_64    | `win64.cbc`               | mingw
-UWP x86         | `win32.cbc`               | uwp
-UWP x86_64      | `win64.cbc`               | uwp
-UWP ARM64       | `cross-win-arm64.cbc`     | uwp
-UWP Universal   | `cross-uwp-universal.cbc` | (implicitly uwp)
 
 Example usage:
 
@@ -187,14 +184,8 @@ $ ./cerbero-uninstalled -c config/win64.cbc package gstreamer-1.0
 # Target MinGW 32-bit
 $ ./cerbero-uninstalled -c config/win32.cbc -v mingw package gstreamer-1.0
 
-# Target UWP, x86_64
-$ ./cerbero-uninstalled -c config/win64.cbc -v uwp package gstreamer-1.0
-
-# Target UWP, Cross ARM64
-$ ./cerbero-uninstalled -c config/cross-win-arm64.cbc -v uwp package gstreamer-1.0
-
-# Target UWP, All Supported Arches
-$ ./cerbero-uninstalled -c config/cross-uwp-universal.cbc package gstreamer-1.0
+# Target MSVC Cross ARM64
+$ ./cerbero-uninstalled -c config/cross-win-arm64.cbc package gstreamer-1.0
 ```
 
 # Artifact Types

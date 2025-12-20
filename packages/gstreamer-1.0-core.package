@@ -30,13 +30,6 @@ class Package(custom.GStreamer, package.Package):
     }
 
     def prepare(self):
-        # UWP cannot build pkg-config because it uses Autotools, and even if we
-        # port it to Meson, the UWP toolchain still can't build a usable pkg-config.
-        # On the other hand, UWP also doesn't need pkg-config because people
-        # will likely only use it from inside Visual Studio.
-        if not self.config.variants.uwp:
-            self.platform_files_devel[Platform.WINDOWS].append('pkg-config')
-
         if self.config.variants.unwind:
             self.files.append('libunwind:libs')
 

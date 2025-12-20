@@ -31,11 +31,3 @@ class Package(custom.GStreamer, package.Package):
 
         if self.config.variants.rust:
             self.files.append('librsvg:libs')
-
-        if self.config.variants.uwp:
-            self.platform_files[Platform.WINDOWS] = ['proxy-libintl:libs:lang']
-            self.files = [
-                'libffi:libs', 'zlib:libs', 'pcre2:libs',
-                'glib:libs:lang:schemas', 'orc:libs', 'bzip2:libs',
-                'json-glib:libs',
-            ]

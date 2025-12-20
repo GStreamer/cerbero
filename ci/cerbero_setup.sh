@@ -162,7 +162,7 @@ cerbero_before_script() {
     echo "home_dir = \"$(pwd_native)/${CERBERO_HOME}\"" > localconf.cbc
     echo "local_sources = \"$(pwd_native)/${CERBERO_SOURCES}\"" >> localconf.cbc
     echo "mingw_perl_prefix = \"${CERBERO_HOST_DIR}/${CERBERO_HOME}/mingw/perl\"" >> localconf.cbc
-    if [[ $CONFIG == win??.cbc ]] || [[ $CONFIG =~ uwp ]] ; then
+    if [[ $CONFIG = win* ]] || [[ $CONFIG = cross-win-* ]] ; then
         # Evade PATH_MAX
         echo "sources = f'{home_dir}/s'" >> localconf.cbc
     fi
@@ -258,15 +258,6 @@ cerbero_deps_script() {
     # Deps that don't get picked up automatically because are only listed in
     # the package files
     local more_deps="glib-networking"
-    # UWP target doesn't support building ffmpeg yet
-    if ! [[ $CONFIG =~ uwp ]]; then
-        build_deps="$build_deps gst-libav-1.0"
-        # Deps that don't get picked up automatically because they are
-        # a runtime dep
-        if [[ $ARCH =~ darwin|msvc|mingw ]]; then
-            more_deps="$more_deps pkg-config"
-        fi
-    fi
 
     show_ccache_sum
 

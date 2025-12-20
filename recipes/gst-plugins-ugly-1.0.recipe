@@ -55,8 +55,7 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('dvdread', 'dvd_gpl', dep='libdvdread')
 
-        if not self.using_uwp():
-            self.enable_plugin('x264', 'codecs_gpl_restricted', dep='x264')
+        self.enable_plugin('x264', 'codecs_gpl_restricted', dep='x264')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

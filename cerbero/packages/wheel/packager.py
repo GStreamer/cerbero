@@ -104,9 +104,7 @@ class WheelPackager(PackagerBase):
         return classifiers
 
     def _package_name(self):
-        if self.config.variants.uwp:
-            platform = 'uwp'
-        elif self.config.variants.visualstudio:
+        if self.config.variants.visualstudio:
             platform = 'msvc'
         else:
             platform = 'mingw'

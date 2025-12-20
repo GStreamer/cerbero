@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
     async def install(self):
         import shutil
         from cerbero.commands.genvsprops import GenVSProps
-        # archdir has to be toolchain-specific: mingw_x86_64, uwp-debug_arm64, etc
+        # archdir has to be toolchain-specific: mingw_x86_64, msvc-debug_arm64, etc
         platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
         env_var = ('GSTREAMER_1_0_ROOT_' + platform_arch).upper()
         vspropsdir =  os.path.join(self.config.prefix, self.vsprefix, 'libs')

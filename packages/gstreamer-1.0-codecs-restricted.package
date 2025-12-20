@@ -20,9 +20,3 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_codecs_restricted')
             self.files_devel.append('gst-plugins-rs:plugins_codecs_restricted_devel')
-
-        if self.config.variants.uwp:
-            self.files = [
-                'gst-plugins-ugly-1.0:plugins_codecs_restricted',
-                'gst-plugins-bad-1.0:plugins_codecs_restricted',
-            ]

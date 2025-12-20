@@ -67,11 +67,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['libunwind'] = 'disabled'
 
         if self.using_msvc():
-            if self.config.variants.uwp:
-                # Most symbols in DbgHelp.h are not allowed for UWP
-                self.meson_options['dbghelp'] = 'disabled'
-            else:
-                self.meson_options['dbghelp'] = 'enabled'
+            self.meson_options['dbghelp'] = 'enabled'
 
         # Ship the PTP helper process if the rust variant is enabled and this
         # is not a mobile platform.

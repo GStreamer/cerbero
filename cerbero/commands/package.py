@@ -165,13 +165,6 @@ class Package(Command):
                 packager_class = AndroidPackager
             else:
                 packager_class = DistTarball
-        elif config.variants.uwp:
-            # Split devel/runtime packages are useless for UWP since we will
-            # need both when building the package, and all needed runtime DLLs
-            # are packaged with the app as assets.
-            m.warning('Forcing single-tarball output for UWP package')
-            args.no_split = True
-            packager_class = DistTarball
 
         m.action(_('Creating package for %s') % p.name)
         if packager_class == Packager:
