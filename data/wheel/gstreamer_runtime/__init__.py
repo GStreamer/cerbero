@@ -8,7 +8,7 @@ import tempfile
 
 _module_name = __name__.split('.')[0]
 
-_gstreamer_root = Path(sysconfig.get_path('platlib'), _module_name).as_posix()
+_gstreamer_root = Path(__file__).parent.as_posix()
 
 if sys.prefix == sys.base_prefix:
     _gst_registry_filepath = (
@@ -21,8 +21,6 @@ else:
     _gst_registry_filepath = f'gstreamer-1.0/registry-{sysconfig.get_platform()}.bin'
     _folder = 'Temp' if sys.platform == 'win32' else '.cache'
     _gst_registry_10 = Path(sys.prefix, _folder, _gst_registry_filepath)
-
-_site_packages_prefix = Path(sysconfig.get_path('platlib')).relative_to(sys.prefix)
 
 """
 These paths will be prepended by gstreamer[cli,gpl]'s build_environment
@@ -124,6 +122,9 @@ def gstreamer_env():
     dll_directories = []
     for i in package_keys:
         for k, v in i:
+            # PATH is used on win32, and rpath on macOS
+            if sys.platform in ('win32', 'darwin') and k == 'LD_LIBRARY_PATH':
+                continue
             if k == 'PATH':
                 dll_directories.extend(v.split(os.pathsep))
             if isinstance(v, str):
@@ -146,8 +147,9 @@ def setup_python_environment():
     os.environ.update(env)
 
     # Just in case -- an import gi; will do it too
-    for dll in dlls:
-        if os.path.exists(dll):
-            os.add_dll_directory(dll)
+    if sys.platform == 'win32':
+        for dll in dlls:
+            if os.path.exists(dll):
+                os.add_dll_directory(dll)
 
     sys.path.append(env['GST_PYTHONPATH_1_0'])

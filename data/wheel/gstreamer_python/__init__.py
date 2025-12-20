@@ -1,13 +1,20 @@
+import os
 from pathlib import Path
-import sys
-import sysconfig
 
 
 _module_name = __name__.split('.')[0]
 
-_gstreamer_root = Path(sysconfig.get_path('platlib'), _module_name).as_posix()
+_gstreamer_root = Path(__file__).parent.as_posix()
 
-_site_packages_prefix = Path(sysconfig.get_path('platlib')).relative_to(sys.prefix)
+
+def _get_site_packages_prefix(base):
+    for root, dirs, files in os.walk(base):
+        if 'gi' in dirs:
+            return root
+    raise RuntimeError(f"Couldn't find site-packages prefix inside {base}")
+
+
+_site_packages_prefix = _get_site_packages_prefix(_gstreamer_root)
 
 """
 These paths will be prepended by gstreamer[cli,gpl]'s build_environment
