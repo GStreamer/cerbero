@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '480b6d25014169300669aa1fc39fb356c142d5028324ea52b3a27648b9beaad8'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.MIT: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib']
     meson_options = {'icu': 'disabled',
                      'glib': 'enabled',

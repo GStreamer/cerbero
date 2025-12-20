@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
 
     name = 'tinyalsa'
     version = '2.0.0'
-    licenses = [{License.BSD_like: ['NOTICE']}]
+    licenses = [{License.BSD_3_Clause: ['NOTICE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = f'https://github.com/tinyalsa/tinyalsa/archive/refs/tags/v{version}.tar.gz'

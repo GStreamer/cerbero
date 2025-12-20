@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     # Building: https://github.com/servo/servo/wiki/Publishing-a-new-ANGLE-NuGet-version
     name = 'angle-uwp'
     version = '2.1.20'
-    licenses = [{License.BSD_like: ['LICENSE']}]
+    licenses = [{License.BSD_3_Clause: ['LICENSE']}]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://www.nuget.org/api/v2/package/ANGLE.WindowsStore.Servo/%(version)s'

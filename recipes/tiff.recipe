@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://download.osgeo.org/libtiff/tiff-%(version)s.tar.gz'
     tarball_checksum = 'c7a1d9296649233979fa3eacffef3fa024d73d05d589cb622727b5b08c423464'
-    licenses = [{License.BSD_like: ['LICENSE.md']}]
+    licenses = [{License.Libtiff: ['LICENSE.md']}]
     deps = [ 'zlib', 'libjpeg-turbo' ]
     btype = BuildType.MESON
     meson_options = {

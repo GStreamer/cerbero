@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'xiph://.tar.gz'
     tarball_checksum = '4b44d4f2b38a370a2d98a78329fefc56a0cf93d1c1be70029217baae6628feea'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
     btype = BuildType.MESON
     meson_options = {
         'test-binaries': 'disabled',

@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     tarball_checksum = 'bf641aa654861be10570bfc137d1441283822418e9757dc71ebb69a6cf84ea6b'
-    licenses = [{License.BSD_like: ['LICENSE']}]
+    licenses = [{License.BSD_3_Clause: ['LICENSE']}]
 
     btype = BuildType.MESON
     meson_options = {

@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'flac'
     version = '1.4.3'
     # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
-    licenses = [{License.BSD_like: ['COPYING.Xiph']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING.Xiph']}]
     stype = SourceType.TARBALL
     url = 'xiph://'
     tarball_checksum = '6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70'

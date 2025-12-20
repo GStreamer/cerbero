@@ -62,7 +62,7 @@ class Recipe(recipe.Recipe):
     files_bins = ['recipe-test']
     licenses_bins = [License.GPLv2Plus]
     platform_files_test = {Platform.LINUX: ['test1']}
-    platform_licenses_test = {Platform.LINUX: [License.BSD]}
+    platform_licenses_test = {Platform.LINUX: [License.BSD_3_Clause]}
 
     async def post_install(self):
         return 'CODEPASS'
@@ -139,8 +139,8 @@ class TestLicenses(unittest.TestCase):
         self.recipe.platform = Platform.LINUX
         self.recipe.config.target_platform = Platform.LINUX
         licenses_test = self.recipe.list_licenses_by_categories(['test'])
-        self.assertEqual(licenses_test['test'], [License.BSD])
-        self.assertEqual(list(licenses_test.values()), [[License.BSD]])
+        self.assertEqual(licenses_test['test'], [License.BSD_3_Clause])
+        self.assertEqual(list(licenses_test.values()), [[License.BSD_3_Clause]])
 
 
 class TestMetaUniversalRecipe(unittest.TestCase):

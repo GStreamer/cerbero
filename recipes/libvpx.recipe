@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
     tarball_checksum = '901747254d80a7937c933d03bd7c5d41e8e6c883e0665fadcb172542167c7977'
-    licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
+    licenses = [{License.BSD_3_Clause: ['LICENSE'], License.Misc: ['PATENTS']}]
 
     btype = BuildType.MESON
     meson_options = {

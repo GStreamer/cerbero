@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/fraunhoferhhi/vvdec/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = '090688c2f9beebd4e8a2ec197a5b9429803498cd3c91fbec62fe7718a8268114'
-    licenses = [{License.BSD_like: ['LICENSE.txt']}]
+    licenses = [{License.BSD_3_Clause_Clear: ['LICENSE.txt']}]
 
     patches = [
         'vvdec/0001-Do-not-set-_WIN32_WINNT-in-CMake.patch',

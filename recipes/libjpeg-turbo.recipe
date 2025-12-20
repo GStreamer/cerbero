@@ -7,7 +7,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'libjpeg-turbo'
     version = '3.1.0'
-    licenses = [{License.BSD_like: ['LICENSE.md']}]
+    licenses = [{License.Libjpeg: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     library_type = LibraryType.BOTH

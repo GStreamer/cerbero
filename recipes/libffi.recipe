@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '3.2.9999'
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/meson-ports/{0}.git'.format(name)}
     commit = 'meson-3.2.9999.3'
-    licenses = [{License.BSD_like: ['LICENSE']}]
+    licenses = [{License.MIT: ['LICENSE']}]
     btype = BuildType.MESON
 
     files_libs = ['libffi']

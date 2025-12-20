@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     patches = []
 
     btype = BuildType.MESON
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
     meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
                      'tools': 'enabled', 'orc-test': 'enabled'}
 

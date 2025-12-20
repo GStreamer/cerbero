@@ -1,7 +1,7 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-sources'
     version = 'v12.0.0'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.ZPL_2_1: ['COPYING']}]
     url = 'https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-%(version)s.tar.bz2'
     tarball_checksum = 'cc41898aac4b6e8dd5cffd7331b9d9515b912df4420a3a612b5ea2955bbeed2f'
     stype = SourceType.TARBALL

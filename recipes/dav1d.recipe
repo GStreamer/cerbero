@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://download.videolan.org/pub/videolan/%(name)s/%(version)s/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '8d407dd5fe7986413c937b14e67f36aebd06e1fa5cfec679d10e548476f2d5f8'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_2_Clause: ['COPYING']}]
 
     btype = BuildType.MESON
     meson_options = {

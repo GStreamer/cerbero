@@ -4,7 +4,7 @@ from cerbero.utils import messages as m
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-headers'
     version = 'v12.0.0'
-    licenses = [{License.BSD_like: ['../COPYING']}]
+    licenses = [{License.ZPL_2_1: ['../COPYING']}]
     stype = SourceType.CUSTOM
     configure_options = [
         '--enable-sdk=all',

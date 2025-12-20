@@ -5,7 +5,7 @@ from cerbero.tools.libtool import get_libtool_versions
 class Recipe(recipe.Recipe):
     name = 'opus'
     version = '1.5.2'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'xiph://.tar.gz'

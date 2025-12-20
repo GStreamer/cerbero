@@ -7,7 +7,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'svt-av1'
     version = '2.1.2'
-    licenses = [{License.BSD_like: ['LICENSE.md']}]
+    licenses = [{License.BSD_3_Clause: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'

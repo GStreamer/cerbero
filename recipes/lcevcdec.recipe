@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
     can_msvc = True
 
-    licenses = [{License.BSD: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause_Clear: ['COPYING']}]
     deps = ['fmt']
 
     configure_options = [

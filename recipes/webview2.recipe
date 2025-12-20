@@ -5,7 +5,7 @@ from pathlib import Path
 class Recipe(recipe.Recipe):
     name = 'webview2'
     version = '1.0.2420.47'
-    licenses = [{License.BSD_like: ['LICENSE.txt']}]
+    licenses = [{License.BSD_3_Clause: ['LICENSE.txt']}]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/%(version)s'

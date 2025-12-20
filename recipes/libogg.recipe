@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'xiph://ogg/%(name)s-%(version)s.tar.xz'
     tarball_checksum = 'c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
     btype = BuildType.MESON
     patches = [
         'libogg/0001-Add-Meson-build-system.patch',

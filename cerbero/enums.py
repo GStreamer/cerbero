@@ -234,26 +234,45 @@ class LicenseDescription:
 
 
 class License:
-    """Enumeration of licensesversions"""
+    """Enumeration of licensesversions.
+    Acronyms were sourced from https://spdx.org/licenses/.
+    Matches were checked against https://packages.msys2.org and with https://formulae.brew.sh/ as fallback.
+    """
 
     Apachev2 = LicenseDescription('Apache-2.0', 'Apache License, version 2.0')
-    BSD = LicenseDescription('BSD', 'BSD License')
+    BSD_1_Clause = LicenseDescription('BSD 1-Clause License', 'BSD 1-Clause License')
+    BSD_2_Clause = LicenseDescription('BSD-2-Clause', 'BSD 2-Clause "Simplified" License')
+    BSD_2_Clause_Patent = LicenseDescription('BSD-2-Clause-Patent', 'BSD-2-Clause Plus Patent License')
+    BSD_3_Clause = LicenseDescription('BSD-3-Clause', 'BSD 3-Clause "New" or "Revised" License')
+    BSD_3_Clause_Clear = LicenseDescription('BSD-3-Clause-Clear', 'BSD 3-Clause Clear License')
+    BSD_3_Clause_FLEX = LicenseDescription('BSD-3-Clause-flex', 'BSD 3-Clause Flex variant')
     BSD_like = LicenseDescription('BSD-like', 'BSD-like License')
-    FreeType = LicenseDescription('FreeType', 'FreeType License')
-    GPLv2Plus = LicenseDescription('GPL-2+', 'GNU General Public License, version 2 or later')
-    GPLv3Plus = LicenseDescription('GPL-3+', 'GNU General Public License, version 3 or later')
-    LGPLv2Plus = LicenseDescription('LGPL-2+', 'GNU Lesser General Public License, version 2 or later')
-    LGPLv2_1Plus = LicenseDescription('LGPL-2.1+', 'GNU Lesser General Public License, version 2.1 or later')
-    LGPLv3 = LicenseDescription('LGPL-3', 'GNU Lesser General Public License, version 3')
-    LGPLv3Plus = LicenseDescription('LGPL-3+', 'GNU Lesser General Public License, version 3 or later')
-    LibPNG = LicenseDescription('LibPNG', 'LibPNG License')
+    BZIP2_1_0_6 = LicenseDescription('bzip2-1.0.6', 'bzip2 and libbzip2 License v1.0.6')
+    FreeType = LicenseDescription('FTL', 'FreeType License')
+    GPLv2Plus = LicenseDescription('GPL-2.0-or-later', 'GNU General Public License, version 2 or later')
+    GPLv3Plus = LicenseDescription('GPL-3.0-or-later', 'GNU General Public License, version 3 or later')
+    ISC = LicenseDescription('ISC', 'ISC License')
+    LGPLv2Plus = LicenseDescription('LGPL-2.0-or-later', 'GNU Lesser General Public License, version 2 or later')
+    LGPLv2_1Plus = LicenseDescription('LGPL-2.1-or-later', 'GNU Lesser General Public License, version 2.1 or later')
+    LGPLv3 = LicenseDescription('LGPL-3.0-only', 'GNU Lesser General Public License, version 3')
+    LGPLv3Plus = LicenseDescription('LGPL-3.0-or-later', 'GNU Lesser General Public License, version 3 or later')
+    Libjpeg = LicenseDescription(
+        'IJG AND Zlib AND BSD-3-Clause',
+        'Independent JPEG Group License and zlib License and BSD 3-Clause "New" or "Revised" License',
+    )
+    LibPNG = LicenseDescription('Libpng', 'LibPNG License')
+    Libtiff = LicenseDescription('libtiff', 'libtiff License')
     MPLv1_1 = LicenseDescription('MPL-1.1', 'Mozilla Public License Version 1.1')
-    MPLv2 = LicenseDescription('MPL-2', 'Mozilla Public License Version 2.0')
+    MPLv2 = LicenseDescription('MPL-2.0', 'Mozilla Public License Version 2.0')
     MIT = LicenseDescription('MIT', 'MIT License')
+    # winpthreads
+    MIT_AND_BSD_Clause_Clear = LicenseDescription('MIT AND BSD-3-Clause-Clear', 'MIT and BSD 3-Clause Clear License')
     OPENSSL = LicenseDescription('OpenSSL', 'OpenSSL License')
-    CURL = LicenseDescription('cURL', 'cURL License')
-    Proprietary = LicenseDescription('Proprietary', 'Proprietary License')
-    PublicDomain = LicenseDescription('PublicDomain', 'Public Domain')
+    CURL = LicenseDescription('curl', 'cURL License')
+    Proprietary = LicenseDescription('LicenseRef-Proprietary', 'Proprietary License')
+    Sqlite = LicenseDescription('blessing', 'SQLite Blessing')
+    Zlib = LicenseDescription('Zlib', 'zlib License')
+    ZPL_2_1 = LicenseDescription('ZPL-2.1', 'Zope Public License 2.1')
     Misc = LicenseDescription('Misc', 'Miscellaneous license information')
 
 

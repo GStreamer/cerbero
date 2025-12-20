@@ -5,7 +5,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'svt-jpeg-xs'
     version = '0.9.0'
-    licenses = [{License.BSD_like: ['LICENSE.md']}]
+    licenses = [{License.BSD_2_Clause_Patent: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'
