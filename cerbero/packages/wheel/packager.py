@@ -291,8 +291,10 @@ class WheelPackager(PackagerBase):
                 # typing_extensions required on macOS and 3.11 for g-i overrides
                 'typing_extensions >= 4.15.0',
             ],
+            # NOTE: gstreamer_python should not depend on gstreamer_runtime,
+            # because people should be able to install it standalone and point
+            # it to their own gstreamer install.
             'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
-            'gstreamer_python': [f'gstreamer_runtime ~= {self.package.version}'],
             'gstreamer_plugins_runtime': [f'gstreamer_runtime ~= {self.package.version}'],
             'gstreamer_plugins': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
             'gstreamer_plugins_frei0r': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
