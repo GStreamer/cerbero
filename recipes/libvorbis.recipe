@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'xiph://vorbis/libvorbis-%(version)s.tar.xz'
     tarball_checksum = 'b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
     deps = ['libogg']
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']

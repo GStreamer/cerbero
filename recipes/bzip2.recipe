@@ -4,7 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'bzip2'
     version = '1.0.8'
-    licenses = [{License.BSD_like: ['LICENSE']}]
+    licenses = [{License.BZIP2_1_0_6: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://sourceware.org/pub/bzip2/bzip2-%(version)s.tar.gz'

@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     meson_options = {'tests': 'disabled'}
-    licenses = [{License.BSD: ['LICENSE']}]
+    licenses = [{License.BSD_2_Clause: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', '%(libdir)s/pkgconfig/openh264.pc']
     patches = [

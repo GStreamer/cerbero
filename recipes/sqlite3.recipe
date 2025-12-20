@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     url = 'https://sqlite.org/2025/sqlite-amalgamation-%(version)s.zip'
     tarball_dirname = 'sqlite-amalgamation-%(version)s'
     tarball_checksum = '6cebd1d8403fc58c30e93939b246f3e6e58d0765a5cd50546f16c00fd805d2c3'
-    licenses = [License.PublicDomain]
+    licenses = [License.Sqlite]
 
     patches = ['sqlite3/0001-Add-meson-build-file-from-wrapdb.patch']
 

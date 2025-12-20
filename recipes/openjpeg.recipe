@@ -7,7 +7,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     version = '2.5.3'
     name = 'openjpeg'
-    licenses = [{License.BSD: ['LICENSE']}]
+    licenses = [{License.BSD_2_Clause: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'

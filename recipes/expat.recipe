@@ -5,7 +5,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'expat'
     version = '2.7.1'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.MIT: ['COPYING']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://github.com/libexpat/libexpat/releases/download/R_2_7_1/%(name)s-%(version)s.tar.xz'

@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'flex'
     version = '2.6.2'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_3_Clause_FLEX: ['COPYING']}]
     stype = SourceType.TARBALL
     url = 'https://github.com/westes/flex/releases/download/v{0}/flex-{0}.tar.gz'.format(version)
     tarball_checksum = '9a01437a1155c799b7dc2508620564ef806ba66250c36bf5f9034b1c207cb2c9'

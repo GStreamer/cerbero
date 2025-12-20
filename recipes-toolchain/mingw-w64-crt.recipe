@@ -1,7 +1,7 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-crt'
     version = 'v12.0.0'
-    licenses = [{License.BSD_like: ['../COPYING']}]
+    licenses = [{License.ZPL_2_1: ['../COPYING']}]
     stype = SourceType.CUSTOM
     add_host_build_target = False
     configure_options = ' --with-default-msvcrt=ucrt '

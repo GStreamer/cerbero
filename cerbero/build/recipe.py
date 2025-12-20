@@ -660,7 +660,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         if lobj == License.Proprietary:
             # No license file needed, binaries will not be publicly redistributed
             return []
-        if lobj == License.PublicDomain:
+        if lobj == License.Sqlite:
             return []
         if lobj.acronym.startswith(('BSD', 'MIT')):
             msg = (

@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.GIT
     remotes = {'origin': 'https://sourceware.org/git/cygwin-apps/%(name)s.git'}
     commit = 'release-6_4'
-    licenses = [{License.BSD_like: ['COPYING']}]
+    licenses = [{License.BSD_1_Clause: ['COPYING']}]
     deps = ['gcc-bootstrap']
     override_libtool = False
 
