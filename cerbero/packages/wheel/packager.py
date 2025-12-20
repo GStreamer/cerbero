@@ -254,14 +254,14 @@ class WheelPackager(PackagerBase):
         # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
         # (package name, payload, license (SPDX is acronym?), and dependencies/features)
         package_files_list = {
+            'gstreamer_runtime': runtime_list,
+            'gstreamer_plugins_runtime': plugins_runtime_list,
+            'gstreamer_plugins': plugins_list,
+            'gstreamer_plugins_frei0r': frei0r_list,
+            'gstreamer_plugins_gpl': gpl_files_list,
             'gstreamer_plugins_gpl_restricted': gpl_restricted_files_list,
             'gstreamer_plugins_restricted': restricted_files_list,
-            'gstreamer_plugins_gpl': gpl_files_list,
-            'gstreamer_plugins_frei0r': frei0r_list,
-            'gstreamer_plugins_runtime': plugins_runtime_list,
-            'gstreamer_runtime': runtime_list,
             'gstreamer_cli': cli_list,
-            'gstreamer_plugins': plugins_list,
             'gstreamer_python': python_list,
             'gstreamer': [],
         }
@@ -290,14 +290,20 @@ class WheelPackager(PackagerBase):
             ],
             'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
             'gstreamer_python': [f'gstreamer_runtime ~= {self.package.version}'],
+            'gstreamer_plugins_runtime': [f'gstreamer_runtime ~= {self.package.version}'],
             'gstreamer_plugins': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
+            'gstreamer_plugins_frei0r': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
+            'gstreamer_plugins_gpl': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
+            'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
+            'gstreamer_plugins_restricted': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
             'gstreamer': [
+                f'gstreamer_cli ~= {self.package.version}',
                 f'gstreamer_runtime ~= {self.package.version}',
                 f'gstreamer_plugins ~= {self.package.version}',
+                f'gstreamer_plugins_gpl ~= {self.package.version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_frei0r ~= {self.package.version}',
-                f'gstreamer_plugins_gpl ~= {self.package.version}',
                 f'gstreamer_python ~= {self.package.version}',
             ],
         }
