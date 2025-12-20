@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 
-from cerbero.enums import Architecture, License
+from cerbero.enums import Architecture, License, Platform
 from cerbero.utils import messages as m, shell
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import SDKPackage
@@ -189,6 +189,9 @@ class WheelPackager(PackagerBase):
             env=self.config.env,
         )
 
+    def get_file_type(self, filepath):
+        return shell.check_output(['file', '-bh', filepath])[:-1]  # remove trailing \n
+
     def _create_wheels(self):
         packagedeps = self.store.get_package_deps(self.package, True)
 
@@ -361,10 +364,42 @@ class WheelPackager(PackagerBase):
 
             for filepath in files_list:
                 source = Path(self.config.prefix, filepath)
-                dirpath, _ = os.path.split(filepath)
+                dirpath = os.path.dirname(filepath)
                 dest = output_dir / package_name / dirpath
                 dest.mkdir(parents=True, exist_ok=True)
                 shutil.copy(source, dest)
+                if self.config.target_platform == Platform.DARWIN:
+                    if source.suffix not in ('.so', '.dylib') and dest.name != 'bin':
+                        continue
+                    if package_name == 'gstreamer_runtime':
+                        continue
+                    # We should not modify this, it's codesigned and copied as-is from the Vulkan SDK
+                    if source.name == 'libMoltenVK.dylib':
+                        continue
+                    destpath = dest / source.name
+                    if dest.name == 'bin':
+                        ftype = self.get_file_type(destpath)
+                        if 'Mach-O' not in ftype:
+                            continue
+                    # We need to route an RPATH from, say,
+                    # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_python/{dirpath}
+                    # to
+                    # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_runtime/lib
+                    relpath = os.path.relpath('gstreamer_runtime/lib', f'{package_name}/{dirpath}')
+                    shell.new_call(
+                        ['install_name_tool', '-add_rpath', f'@loader_path/{relpath}', destpath],
+                        env=self.config.env,
+                    )
+                    for dep in dependencies:
+                        pkg = dep.split('~=')[0].strip()
+                        if pkg == 'gstreamer_runtime':
+                            # Already added above
+                            continue
+                        relpath = os.path.relpath(f'{pkg}/lib', f'{package_name}/{dirpath}')
+                        shell.new_call(
+                            ['install_name_tool', '-add_rpath', f'@loader_path/{relpath}', destpath],
+                            env=self.config.env,
+                        )
 
             classifiers = self._get_classifiers(license)
 
