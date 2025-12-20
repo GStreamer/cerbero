@@ -550,10 +550,8 @@ cerbero cross-android universal examples:
       - "*/sources/**/b/meson-logs/meson-log.txt"
       - "*/sources/**/b/CMakeFiles/CMakeError.log"
       - "*/sources/**/b/CMakeFiles/CMakeLog.log"
-      # Skip uploading these (rather large) build artefacts until fdo
-      # infrastructure gets fixed or we find another workaround
-      # - "gstreamer-1.0-1.*.pkg"
-      # - "gstreamer-1.0-devel-1.*.pkg"
+      - "gstreamer-1.0-1.*.pkg"
+      - "gstreamer-1.0-devel-1.*.pkg"
     exclude:
       - .git
       - .git/**/*
@@ -668,7 +666,7 @@ cerbero cross-ios universal examples arm64-host:
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
-    CERBERO_PACKAGE_ARGS: "-t"
+    CERBERO_PACKAGE_ARGS: ""
   before_script:
     # Test that the powershell script works
     - ./cerbero-uninstalled --help
@@ -682,9 +680,7 @@ cerbero cross-ios universal examples arm64-host:
       - "*/s/**/b/meson-logs/meson-log.txt"
       - "*/s/**/b/CMakeFiles/CMakeError.log"
       - "*/s/**/b/CMakeFiles/CMakeLog.log"
-      # Skip uploading these (rather large) build artefacts until fdo
-      # infrastructure gets fixed or we find another workaround
-      # - "*.msi"
+      - "*.msi"
     exclude:
       - .git
       - .git/**/*
