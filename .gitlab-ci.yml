@@ -552,6 +552,7 @@ cerbero cross-android universal examples:
       - "*/sources/**/b/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
+      - "*.whl"
     exclude:
       - .git
       - .git/**/*
@@ -681,6 +682,7 @@ cerbero cross-ios universal examples arm64-host:
       - "*/s/**/b/CMakeFiles/CMakeError.log"
       - "*/s/**/b/CMakeFiles/CMakeLog.log"
       - "*.msi"
+      - "*.whl"
     exclude:
       - .git
       - .git/**/*
