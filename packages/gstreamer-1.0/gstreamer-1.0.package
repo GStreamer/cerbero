@@ -80,3 +80,5 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
             #self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']
         if self.config.variants.python and self.config.variants.gi:
             self.packages += [('gstreamer-1.0-python', False, True)]
+        if self.config.variants.gtk:
+            self.packages += [('gstreamer-1.0-gtk', False, True)]

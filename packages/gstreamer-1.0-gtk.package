@@ -1,0 +1,18 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Package(custom.GStreamer, package.Package):
+    name = 'gstreamer-1.0-gtk'
+    shortdesc = 'GStreamer 1.0 Gtk'
+    longdesc = 'GStreamer 1.0 Gtk'
+    uuid = '145cbd3f-74d4-47bb-bfd3-51ffac98c8a3'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gtk:libs', 'libepoxy:libs']
+
+    def prepare(self):
+        if self.config.variants.gi:
+            self.files += ['graphene:typelibs', 'gtk:typelibs']
+        if self.config.variants.rust:
+            self.files += ['gst-plugins-rs:plugins_gtk4']
+            self.files_devel += ['gst-plugins-rs:plugins_gtk4_devel']
+            self.files += ['accesskit:libs', 'accesskit-c:libs']

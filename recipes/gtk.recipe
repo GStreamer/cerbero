@@ -1,0 +1,126 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.utils import split_version
+
+class Recipe(recipe.Recipe):
+    name = 'gtk'
+    version = '4.20.3'
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'gnome://'
+    tarball_checksum = '2873f2903088a66c71173ea2ed85ffae266a66b972c3a4842bbb2f6f187ec153'
+    licenses = [{License.LGPLv2_1Plus: ['COPYING']}]
+    library_type = LibraryType.SHARED
+
+    patches = []
+
+    deps = [
+        'cairo',
+        'fribidi',
+        'gdk-pixbuf',
+        'glib',
+        'graphene',
+        'gst-plugins-base-1.0',
+        'gst-plugins-bad-1.0',
+        'harfbuzz',
+        'libpng',
+        'libepoxy',
+        'tiff',
+        'pango',
+        'librsvg',
+    ]
+
+    meson_options = {
+        'media-gstreamer': 'disabled',
+        'x11-backend': 'false',
+        'wayland-backend': 'false',
+        'broadway-backend': 'false',
+        'vulkan': 'disabled',
+        'build-tests': 'false',
+        'build-testsuite': 'false',
+        'build-examples': 'false',
+    }
+
+    files_bins = [
+        'gtk4-path-tool',
+        'gtk4-query-settings',
+        'gtk4-update-icon-cache',
+        'gtk4-rendernode-tool',
+        'gtk4-builder-tool',
+        'gtk4-encode-symbolic-svg',
+        'gtk4-image-tool',
+        'gtk4-demo',
+        'gtk4-demo-application',
+        'gtk4-node-editor',
+        'gtk4-print-editor',
+        'gtk4-widget-factory'
+    ]
+    platform_files_bins = {
+        Platform.DARWIN: ['gtk4-launch']
+    }
+    files_libs = [
+        'libgtk-4',
+    ]
+    files_typelibs = [
+        'Gdk-4.0',
+        'Gsk-4.0',
+        'Gtk-4.0'
+    ]
+    files_share = [
+        'share/gtk-4.0/',
+        'share/gtk-doc/',
+        'share/glib-2.0/schemas/',
+        'share/metainfo/',
+    ]
+    files_devel = [
+        'include/gtk-4.0',
+        '%(libdir)s/pkgconfig/gtk4.pc',
+        '%(libdir)s/pkgconfig/gtk4-accesskit.pc',
+    ]
+    platform_files_devel = {
+        Platform.DARWIN: ['%(libdir)s/pkgconfig/gtk4-macos.pc', '%(libdir)s/pkgconfig/gtk4-unix-print.pc', '%(libdir)s/pkgconfig/gtk4-atspi.pc'],
+        Platform.WINDOWS: ['%(libdir)s/pkgconfig/gtk4-win32.pc']
+    }
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.deps += ['accesskit-c']
+            self.meson_options['accesskit'] = 'enabled'
+
+        if self.config.target_platform == Platform.DARWIN:
+            self.meson_options['macos-backend'] = 'true'
+            self.meson_options['media-gstreamer'] = 'enabled'
+            if split_version(self.config.min_osx_sdk_version) < (10, 15):
+                self.append_env('CFLAGS', '-mmacosx-version-min=10.15')
+                self.append_env('CXXFLAGS', '-mmacosx-version-min=10.15')
+                self.append_env('OBJCFLAGS', '-mmacosx-version-min=10.15')
+                self.append_env('OBJCXXFLAGS', '-mmacosx-version-min=10.15')
+                self.append_env('LDFLAGS', '-mmacosx-version-min=10.15')
+
+        if self.config.target_platform == Platform.WINDOWS:
+            self.files_typelibs += ['GdkWin32-4.0']
+            self.meson_options['win32-backend'] = 'true'
+            # Patches taken from the mingw-w64-gtk4 package
+            self.patches += [
+                'gtk/0001-fix-font-rendering.patch',
+                'gtk/0002-fix_fatal_no_dcomp.patch',
+                'gtk/0003-default-dcomp-off.patch',
+            ]
+            if self.config.variants.mingw:
+                # resolve failure on compiling gdkcairocontext-win32: error incorrect <rpcndr.h> version. use the header that matches with the MIDL compiler
+                # resolve warnings on undefined WINAPI_PARTITION_GAMES
+                self.append_env('CFLAGS', '-D__REQUIRED_RPCNDR_H_VERSION__=475 -DWINAPI_PARTITION_GAMES=0')
+
+        if self.config.target_platform not in (Platform.DARWIN, Platform.WINDOWS):
+            raise InvalidRecipeError(f'Unsupported target platform: {self.config.target_platform}')
+
+    async def extract(self):
+        await super().extract()
+        if self.config.variants.mingw:
+            # resolve failure on redundant declaration warnings while compiling Gdk with d3d12
+            meson_build = os.path.join(self.src_dir, 'meson.build')
+            shell.replace(meson_build, {"'redundant-decls',": "#'redundant-decls',"})
+
+    def post_install(self):
+        LibtoolLibrary('gtk-4', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()

@@ -1,0 +1,22 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    # https://github.com/anholt/libepoxy
+    name = 'libepoxy'
+    version = '1.5.10'
+    url = 'https://github.com/anholt/libepoxy/archive/refs/tags/%(version)s.tar.gz'
+    tarball_checksum = 'a7ced37f4102b745ac86d6a70a9da399cc139ff168ba6b8002b4d8d43c900c15'
+    licenses = [{License.MIT: ['COPYING']}]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+
+    files_libs = ['libepoxy']
+    files_devel = [
+        'include/epoxy',
+        '%(libdir)s/pkgconfig/epoxy.pc'
+    ]
+
+    def post_install(self):
+        LibtoolLibrary('epoxy', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()

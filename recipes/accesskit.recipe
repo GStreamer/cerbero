@@ -1,0 +1,41 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'accesskit'
+    # the required version is specified in the Accesskit-c Cargo.toml file
+    version = '0.21.1'
+    stype = SourceType.TARBALL
+    url = f'https://github.com/AccessKit/accesskit/archive/refs/tags/accesskit-v{version}.tar.gz'
+    tarball_checksum = 'a443cd4c99c65eb998178bd754759a29e78f413d373b1ada3ba755261af3a403'
+    tarball_name = f'accesskit-v{version}.tar.gz'
+    package_name = f'accesskit-accesskit-v{version}'
+    licenses = [
+        {
+            License.BSD_3_Clause: ['LICENSE.chromium'],
+            # MIT or Apachev2
+            License.Apachev2: ['LICENSE-APACHE'],
+        }
+    ]
+    btype = BuildType.CARGO_C
+    can_msvc = True
+
+    patches = ['accesskit/0001-add_capi_feature_to_accesskit_winit.patch']
+
+    cargo_packages = [
+        'accesskit_winit',
+    ]
+    cargo_features = []
+
+    files_libs = ['libaccesskit_winit']
+
+    files_devel = [
+        'include/accesskit_winit',
+        '%(libdir)s/pkgconfig/accesskit_winit.pc',
+    ]
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            # msvc: Could not create 'libaccesskit_winit.dll.a': gendef failed
+            # mingw: Could not create library for 'accesskit_winit', no matching DLLs found
+            self.library_type = LibraryType.STATIC
+

@@ -1,0 +1,39 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'accesskit-c'
+    # the required version is specified in the Gtk meson.build file
+    version = '0.17.0'
+    stype = SourceType.TARBALL
+    url = f'https://github.com/AccessKit/accesskit-c/archive/refs/tags/{version}.tar.gz'
+    tarball_checksum = 'ceea9081320bd984953b18c6949df51284810515399ef03b416232b8b1365396'
+    licenses = [
+        {
+            License.BSD_3_Clause: ['LICENSE.chromium'],
+            # MIT or Apachev2
+            License.Apachev2: ['LICENSE-APACHE'],
+        }
+    ]
+    btype = BuildType.MESON
+    can_msvc = True
+
+    deps = ['accesskit']
+
+    major, minor = version.split('.')[0], version.split('.')[1]
+
+    files_libs = [f'libaccesskit-c-{major}.{minor}']
+
+    files_devel = [
+        f'include/accesskit-c-{major}.{minor}',
+        f'%(libdir)s/pkgconfig/accesskit-c-{major}.{minor}.pc',
+    ]
+
+    def prepare(self):
+        # same as for the librsvg.recipe
+        try:
+            self.target_triple = self.config.rust_triple(self.config.target_arch,
+                self.config.target_platform, self.using_msvc())
+        except FatalError as e:
+            raise InvalidRecipeError(self, e.msg)
+        self.meson_options['triplet'] = self.target_triple
+

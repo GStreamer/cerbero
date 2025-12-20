@@ -197,6 +197,12 @@ class Recipe(recipe.Recipe):
                 'uriplaylistbin',
             ],
         }
+
+        if self.config.variants.gtk:
+            self.deps.append('gtk')
+            plugin_files['gtk4'] = ['gtk4']
+            self.cargo_packages += ['gtk4']
+
         for category, names in plugin_files.items():
             for name in names:
                 package_name = name if name[0:2] != 'rs' else name[2:]
