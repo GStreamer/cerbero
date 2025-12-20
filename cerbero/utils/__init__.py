@@ -974,15 +974,9 @@ def merge_str_env(old_env, new_env, override_env=()):
         old_v = old_env[k]
         if not isinstance(old_v, str):
             raise AssertionError('old value {!r}: {!r}'.format(k, new_v))
-        if new_v == old_v:
-            ret_env[k] = new_v
-        elif EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k):
-            ret_env[k] = new_v
-        else:
-            raise FatalError(
-                "Don't know how to combine the environment "
-                "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
-            )
+        if not (new_v == old_v or EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k)):
+            m.warning(f"Overriding '{k}={old_v}' with '{new_v}'")
+        ret_env[k] = new_v
     for k in old_env.keys():
         if k not in new_env:
             ret_env[k] = old_env[k]
