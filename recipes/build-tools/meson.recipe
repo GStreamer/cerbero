@@ -44,4 +44,5 @@ class Recipe(recipe.Recipe):
                 if os.path.isfile(tof):
                     os.remove(tof)
                 shutil.move(f, tof)
-            os.rmdir(scriptsdir)
+            if os.path.isdir(scriptsdir):
+                os.rmdir(scriptsdir)

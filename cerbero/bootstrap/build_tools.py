@@ -133,7 +133,8 @@ class BuildTools(BootstrapperBase, Fetch):
                 if os.path.isfile(tof):
                     os.remove(tof)
                 shutil.move(f, tof)
-            os.rmdir(scriptsdir)
+            if os.path.isdir(scriptsdir):
+                os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools', 'packaging'])
         if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
