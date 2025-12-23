@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Optional, List
 
 from cerbero.config import Platform, LibraryType
-from cerbero.enums import Symbolication
+from cerbero.enums import Distro, Symbolication
 from cerbero.tools import dsymutil
 from cerbero.utils import shell
 from cerbero.utils import messages as m
@@ -404,8 +404,7 @@ class FilesProvider(object):
     def _list_misc_binaries(self):
         pdbs = []
         if hasattr(self, 'files_misc') and self.extensions['debugext']:
-            files_bins = self.files_list_by_category('files_misc')
-            # dsymutil expects files to exist
+            files_bins = self.files_list_by_category('misc')
             files_bins = dsymutil.symbolicable_files(
                 files_bins,
                 self.config.prefix,
@@ -428,6 +427,43 @@ class FilesProvider(object):
         devfiles.update(self._list_misc_binaries())
         devfiles.update(self._list_plugins_dsyms(files))
         devfiles = self._validate_existing(devfiles, only_existing, True)
+        return sorted(list(set(devfiles)))
+
+    def _debug_files_list_by_category(self, category):
+        if category.endswith(self.DEVEL_CAT):
+            return {}
+        elif category == self.BINS_CAT:
+            return self._list_devel_binaries()
+        elif category == 'files_misc':
+            return self._list_misc_binaries()
+        elif category.startswith(self.LIBS_CAT):
+            _, pdbs = self._list_devel_libraries_by_categories([category])
+            return pdbs
+        else:
+            # FIXME: plugins are derived from devel_files_list
+            pdbs = {}
+            files = {}
+            for k, v in self._list_files_by_category(category).items():
+                if k.endswith(self.extensions['debugext']):
+                    pdbs[k] = v
+                else:
+                    files[k] = v
+            files = self._validate_existing(files)
+            files_bins = dsymutil.symbolicable_files(files, self.config.prefix, self.config.target_platform)
+            files_bins = [os.path.relpath(f, self.config.prefix) for f in files_bins]
+            pdbs.update(self._list_plugins_dsyms(files_bins))
+            return pdbs
+
+    def debug_files_list_by_categories(self, categories, only_existing=True):
+        if not self.have_symbol_files():
+            return []
+        if 'debugext' not in self.extensions:
+            return []
+        files = {}
+        for cat in categories:
+            cat_files = self._debug_files_list_by_category(cat)
+            files.update(cat_files)
+        devfiles = self._validate_existing(files, only_existing, True)
         return sorted(list(set(devfiles)))
 
     def devel_files_list(self, only_existing=True):
@@ -626,21 +662,42 @@ class FilesProvider(object):
         for f in files:
             if f in skip_files:
                 continue
-            # We try to find a pdb file corresponding to the plugin's .a
-            # file instead of the .dll because we want it to go into the
-            # devel package, not the runtime package.
-            m = self._FILES_STATIC_PLUGIN_REGEX.match(f)
-            if m:
-                fdir = os.path.dirname(f)
-                if self.using_msvc():
-                    # Plugin DLLs are required to be foo.dll when the recipe uses MSVC, and
-                    # will be in the same directory as the .a static plugin/library
-                    pdb = '{}/{}{}'.format(fdir, ''.join(m.groups()), self.extensions['debugext'])
-                else:
-                    # Apple and GNU convention is
-                    # prefixfoo.soversion.ext.dSYM
-                    pdb = '{}/lib{}%(mext)s%(debugext)s'.format(fdir, ''.join(m.groups())) % self.extensions
-                fs[pdb] = None
+            # Switching here from a regex to manual checks to allow
+            # for finding frei0r's symbol files.
+            fpath = Path(f)
+            fdir = str(fpath.parent)
+            m = fpath.stem
+            # Skip non plugin files
+            if fpath.parts[0] != 'lib':
+                continue
+            # Skip import libraries etc.
+            if len(fpath.suffixes) != 1:
+                continue
+            # Skip non plugin files
+            if self.config.target_distro == Distro.DEBIAN and len(fpath.parts) != 4:
+                continue
+            elif len(fpath.parts) != 3:
+                continue
+            # Skip non library files
+            if fpath.suffix not in (
+                self.extensions['mext'],
+                self.extensions['smext'],
+                self.extensions['pext'],
+                self.extensions['srext'],
+            ):
+                if not self.extensions['sregex']:
+                    continue
+                if not re.match(self.extensions['sregex'], fpath.name):
+                    continue
+            if self.using_msvc():
+                # Plugin DLLs are required to be foo.dll when the recipe uses MSVC, and
+                # will be in the same directory as the .a static plugin/library
+                pdb = '{}/{}{}'.format(fdir, m.removeprefix('lib'), self.extensions['debugext'])
+            else:
+                # Apple and GNU convention is
+                # prefixfoo.soversion.ext.dSYM
+                pdb = '{}/lib{}%(mext)s%(debugext)s'.format(fdir, m.removeprefix('lib')) % self.extensions
+            fs[pdb] = None
         return fs
 
     def _list_binaries(self, files):
@@ -777,13 +834,16 @@ class FilesProvider(object):
         return files
 
     def _list_devel_libraries(self):
+        return self._list_devel_libraries_by_categories(self.categories)
+
+    def _list_devel_libraries_by_categories(self, categories):
         if self.runtime_dep:
             return ({}, {})
 
         devel_libs = {}
         pdbs = {}
         skip_pdb_files = set(f % self.extensions for f in getattr(self, 'skip_pdb_files', []))
-        for category in self.categories:
+        for category in categories:
             if category != self.LIBS_CAT and not category.startswith(self.LIBS_CAT + '_'):
                 continue
 

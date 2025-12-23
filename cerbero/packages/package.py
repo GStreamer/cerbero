@@ -325,22 +325,21 @@ class Package(PackageBase):
         return sorted(list(set(files)))
 
     def debug_files_list(self):
-        def is_executable(x):
-            return x in (
-                FilesProvider.LIBS_CAT,
-                FilesProvider.BINS_CAT,
-                FilesProvider.PY_CAT,
-            )  # or x.startswith('plugins')
-
         files = []
         for recipe, categories in self._recipes_files.items():
-            if len(categories) == 0 or any(is_executable(c) for c in categories):
-                rfiles = self.cookbook.get_recipe(recipe).debug_files_list()
-                files.extend(rfiles)
+            recipe = self.cookbook.get_recipe(recipe)
+            if len(categories) == 0:
+                rfiles = recipe.debug_files_list()
+            else:
+                rfiles = recipe.debug_files_list_by_categories(categories)
+            files.extend(rfiles)
         for recipe, categories in self._recipes_files_devel.items():
             recipe = self.cookbook.get_recipe(recipe)
-            if not categories:
-                files.extend(recipe.debug_files_list())
+            if len(categories) == 0:
+                rfiles = recipe.debug_files_list()
+            else:
+                rfiles = recipe.debug_files_list_by_categories(categories)
+            files.extend(rfiles)
         return sorted(list(set(files)))
 
     def devel_files_list(self):
