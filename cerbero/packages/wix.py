@@ -19,6 +19,7 @@
 import os
 import uuid
 import shutil
+from pathlib import Path
 
 from cerbero.utils import etree, to_winepath, shell, xmlwrite
 from cerbero.errors import FatalError
@@ -58,7 +59,7 @@ class VSTemplatePackage(Package):
     def devel_files_list(self):
         files = []
         for f in [self.vs_template_dir, self.vs_wizard_dir]:
-            files += shell.ls_dir(os.path.join(self.config.prefix, f), self.config.prefix)
+            files += shell.ls_dir(Path(self.config.prefix, f).as_posix(), self.config.prefix)
         return files
 
 
@@ -220,7 +221,7 @@ class MergeModule(WixBase):
 
         component = etree.SubElement(dirnode, 'Component', Id=self._format_path_id(filepath), Guid=self._get_uuid())
 
-        filepath = os.path.join(self.prefix, filepath)
+        filepath = Path(self.prefix, filepath).as_posix()
         p_id = self._format_path_id(filepath, True)
         if self._with_wine:
             filepath = to_winepath(filepath)
@@ -293,7 +294,7 @@ class Fragment(WixBase):
             Guid=self._get_uuid(),
             Directory=dirid,
         )
-        filepath = os.path.join(self.prefix, filepath)
+        filepath = Path(self.prefix, filepath).as_posix()
         p_id = self._format_dir_id(self.package.name, filepath, True)
         if self._with_wine:
             filepath = to_winepath(filepath)

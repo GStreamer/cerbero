@@ -29,7 +29,7 @@ import glob
 import shutil
 import hashlib
 import collections
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from cerbero.enums import CERBERO_VERSION, Platform, Distro
 from cerbero.utils import _, system_info, split_version, to_winpath, CerberoSemaphore
@@ -304,27 +304,10 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
             logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
             logfile.flush()
 
-        if PLATFORM == Platform.WINDOWS:
-            import cerbero.hacks
-
-            # On Windows, create_subprocess_exec with a PIPE fails while creating
-            # a named pipe using tempfile.mktemp because we override os.path.join
-            # to use / on Windows. Override the tempfile module's reference to the
-            # original implementation, then change it back later so it doesn't leak.
-            # XXX: Get rid of this once we move to Path.as_posix() everywhere
-            tempfile._os.path.join = cerbero.hacks.oldjoin
-            # The tempdir is derived from TMP and TEMP which use / as the path
-            # separator, which fails for the same reason as above. Ensure that \ is
-            # used instead.
-            tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
-
         proc = await asyncio.create_subprocess_exec(
             *cmd, cwd=cmd_dir, stdout=subprocess.PIPE, stderr=logfile, stdin=subprocess.DEVNULL, env=env
         )
         (output, unused_err) = await proc.communicate()
-
-        if PLATFORM == Platform.WINDOWS:
-            os.path.join = cerbero.hacks.join
 
         if sys.stdout.encoding:
             output = output.decode(sys.stdout.encoding, errors='replace')
@@ -496,7 +479,7 @@ def ls_dir(dirpath, prefix):
         _root = root.split(prefix)[1]
         if _root[0] == '/':
             _root = _root[1:]
-        files.extend([os.path.join(_root, x) for x in filenames])
+        files.extend([Path(_root, x).as_posix() for x in filenames])
     return files
 
 
@@ -517,7 +500,7 @@ def replace(filepath, replacements):
 
 
 def find_files(pattern, prefix):
-    return glob.glob(os.path.join(prefix, pattern))
+    return glob.glob(Path(prefix, pattern).as_posix())
 
 
 def prompt(message, options=None):
@@ -650,7 +633,7 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
         else:
             bat_tpl = MSYS2BAT
         with tempfile.TemporaryDirectory() as msysbatdir:
-            bashrc = os.path.join(msysbatdir, 'bash.rc')
+            bashrc = Path(msysbatdir, 'bash.rc').as_posix()
             with open(bashrc, 'w+') as f:
                 f.write(shellrc)
             if os.environ['MSYSTEM'] == 'UCRT64':

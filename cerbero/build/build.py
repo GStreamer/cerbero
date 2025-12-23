@@ -346,7 +346,7 @@ class Build(object):
         self._properties_keys = []
         # Initialize the default build dir
         # The folder where the build artifacts will be generated
-        self.build_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
+        self.build_dir = Path(self.config.sources, self.package_name).absolute().as_posix()
         # The build dir might be different than the theoretical source dir
         Path(self.build_dir).mkdir(parents=True, exist_ok=True)
         # Initialize the default sources dir
@@ -441,7 +441,7 @@ class MakefilesBase(Build, ModifyEnvBase):
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
 
-        self.config_src_dir = os.path.abspath(os.path.join(self.src_dir, self.srcdir))
+        self.config_src_dir = os.path.abspath(Path(self.src_dir, self.srcdir).as_posix())
         self.make = self.make or ['make', 'V=1']
         self.make_install = self.make_install or ['make', 'install']
         self.make_clean = self.make_clean or ['make', 'clean']
@@ -555,7 +555,7 @@ class Makefile(MakefilesBase):
 
     def __init__(self):
         # For a generic Makefile based project, the src dir can not be different than the build dir
-        if self.src_dir != os.path.abspath(os.path.join(self.config.sources, self.package_name)):
+        if self.src_dir != os.path.abspath(Path(self.config.sources, self.package_name).as_posix()):
             raise FatalError('For a Makefile based project, source and build dirs must be the same')
         # For a generic Makefile based project, the srcdir property is also set on the builddir
         MakefilesBase.__init__(self)
@@ -590,7 +590,7 @@ class Autotools(MakefilesBase):
 
     def get_config_sh(self):
         # Use the absolute path for configure as we call it from build_dir
-        return os.path.join(self.config_src_dir, 'configure')
+        return Path(self.config_src_dir, 'configure').as_posix()
 
     def get_configure_dir(self):
         return self.build_dir
@@ -609,8 +609,8 @@ class Autotools(MakefilesBase):
         # Disable automatic dependency tracking, speeding up one-time builds
         self.configure_tpl.append('--disable-dependency-tracking')
         # Only use --disable-maintainer mode for real autotools based projects
-        if os.path.exists(os.path.join(self.src_dir, 'configure.in')) or os.path.exists(
-            os.path.join(self.src_dir, 'configure.ac')
+        if os.path.exists(Path(self.src_dir, 'configure.in').as_posix()) or os.path.exists(
+            Path(self.src_dir, 'configure.ac').as_posix()
         ):
             self.configure_tpl.append('--disable-maintainer-mode')
             self.configure_tpl.append('--disable-silent-rules')
@@ -645,14 +645,14 @@ class Autotools(MakefilesBase):
         cfs = {'config.guess': config_datadir, 'config.sub': config_datadir}
         # ensure our libtool modifications are actually picked up by recipes
         if self.name != 'libtool' and self.override_libtool:
-            cfs['ltmain.sh'] = os.path.join(self.config.build_tools_prefix, 'share/libtool/build-aux')
+            cfs['ltmain.sh'] = Path(self.config.build_tools_prefix, 'share/libtool/build-aux').as_posix()
         for cf, srcdir in cfs.items():
             find_cmd = 'find {} -maxdepth 0 -type f -name {}'.format(self.src_dir, cf)
             files = await shell.async_call_output(find_cmd, logfile=self.logfile, env=self.env)
             files = files.split('\n')
             files.remove('')
             for f in files:
-                o = os.path.join(srcdir, cf)
+                o = Path(srcdir, cf).as_posix()
                 m.log('CERBERO: copying %s to %s' % (o, f), self.logfile)
                 shutil.copy(o, f)
 
@@ -680,7 +680,7 @@ class Autotools(MakefilesBase):
             use_configure_cache = False
 
         if use_configure_cache and self.can_use_configure_cache:
-            cache = os.path.join(self.config.sources, '.configure.cache')
+            cache = Path(self.config.sources, '.configure.cache').as_posix()
             self.configure_tpl.append('--cache-file=%s' % cache)
 
         # Add at the very end to allow recipes to override defaults
@@ -714,7 +714,7 @@ class CMake(MakefilesBase):
 
     def __init__(self):
         MakefilesBase.__init__(self)
-        self.build_dir = os.path.join(self.build_dir, 'b')
+        self.build_dir = Path(self.build_dir, 'b').as_posix()
         self.config_sh = 'cmake'
         self.configure_tpl.append(f'-DCMAKE_INSTALL_LIBDIR={self.config.rel_libdir}')
         self.configure_tpl.append(f'-DCMAKE_BUILD_TYPE={self.build_variant}')
@@ -817,8 +817,8 @@ class CMake(MakefilesBase):
         shared = 'ON' if self.library_type in [LibraryType.SHARED, LibraryType.BOTH] else 'OFF'
         self.configure_options += [f'-DBUILD_SHARED_LIBS={shared}', f'-DBUILD_STATIC_LIBS={static}']
 
-        cmake_cache = os.path.join(self.build_dir, 'CMakeCache.txt')
-        cmake_files = os.path.join(self.build_dir, 'CMakeFiles')
+        cmake_cache = Path(self.build_dir, 'CMakeCache.txt').as_posix()
+        cmake_files = Path(self.build_dir, 'CMakeFiles').as_posix()
         if os.path.exists(cmake_cache):
             os.remove(cmake_cache)
         if os.path.exists(cmake_files):
@@ -889,7 +889,7 @@ class Meson(Build, ModifyEnvBase):
         if not self.meson_sh:
             # meson installs `meson.exe` on windows and `meson` on other
             # platforms that read shebangs
-            self.meson_sh = os.path.join(self.config.build_tools_prefix, 'bin', 'meson')
+            self.meson_sh = Path(self.config.build_tools_prefix, 'bin', 'meson').as_posix()
 
         # Find ninja
         if not self.make:
@@ -909,7 +909,7 @@ class Meson(Build, ModifyEnvBase):
         # Allow CMake dependencies to be found if requested
         if self.need_cmake:
             self.append_env('CMAKE_PREFIX_PATH', self.config.prefix, sep=os.pathsep)
-        self.build_dir = os.path.join(self.build_dir, self.meson_builddir)
+        self.build_dir = Path(self.build_dir, self.meson_builddir).as_posix()
 
     @staticmethod
     def _get_option_value(opt_type, value):
@@ -938,7 +938,7 @@ class Meson(Build, ModifyEnvBase):
         ]
         meson_options = None
         for i in meson_options_files:
-            f = os.path.join(self.config_src_dir, i)
+            f = Path(self.config_src_dir, i).as_posix()
             if os.path.isfile(f):
                 meson_options = f
         if not meson_options:
@@ -1075,9 +1075,9 @@ class Meson(Build, ModifyEnvBase):
                     tools += ['g-ir-compiler', 'g-ir-generate']
                     pytools += ['g-ir-scanner', 'g-ir-annotation-tool']
                 for tool in tools:
-                    binaries[tool] = [os.path.join(self.config.prefix, 'bin', tool)]
+                    binaries[tool] = [Path(self.config.prefix, 'bin', tool).as_posix()]
                 for pytool in pytools:
-                    binaries[pytool] = [self.config.python_exe, os.path.join(self.config.prefix, 'bin', pytool)]
+                    binaries[pytool] = [self.config.python_exe, Path(self.config.prefix, 'bin', pytool).as_posix()]
 
         extra_binaries = ''
         for k, v in binaries.items():
@@ -1187,7 +1187,7 @@ class Meson(Build, ModifyEnvBase):
         return contents
 
     def _write_meson_file(self, contents, fname):
-        fpath = os.path.join(self.build_dir, fname)
+        fpath = Path(self.build_dir, fname).as_posix()
         with open(fpath, 'w', encoding='utf-8') as f:
             f.write(contents)
         return fpath
@@ -1328,8 +1328,8 @@ class Cargo(Build, ModifyEnvBase):
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
 
-        self.config_src_dir = os.path.abspath(os.path.join(self.src_dir, self.srcdir))
-        self.build_dir = os.path.join(self.build_dir, '_builddir')
+        self.config_src_dir = os.path.abspath(Path(self.src_dir, self.srcdir).as_posix())
+        self.build_dir = Path(self.build_dir, '_builddir').as_posix()
         self.cargo = os.path.join(self.config.cargo_home, 'bin', 'cargo' + self.config._get_exe_suffix())
 
         # Debuginfo is enormous, about 0.5GB per plugin, so it's split out
@@ -1383,10 +1383,10 @@ class Cargo(Build, ModifyEnvBase):
         return args
 
     def append_config_toml(self, s):
-        dot_cargo = os.path.join(self.src_dir, '.cargo')
+        dot_cargo = Path(self.src_dir, '.cargo').as_posix()
         os.makedirs(dot_cargo, exist_ok=True)
         # Append so we don't overwrite cargo vendor settings
-        with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
+        with open(Path(dot_cargo, 'config.toml').as_posix(), 'a') as f:
             f.write(s)
 
     def get_llvm_tool(self, tool: str) -> Path:
@@ -1405,7 +1405,7 @@ class Cargo(Build, ModifyEnvBase):
         tomllib = self.config.find_toml_module()
         if not tomllib:
             raise FatalError('toml module not found, try re-running bootstrap')
-        with open(os.path.join(self.src_dir, 'Cargo.toml'), 'r', encoding='utf-8') as f:
+        with open(Path(self.src_dir, 'Cargo.toml').as_posix(), 'r', encoding='utf-8') as f:
             data = tomllib.loads(f.read())
         if 'workspace' in data:
             return data['workspace']['package']['version']
@@ -1460,7 +1460,7 @@ class Cargo(Build, ModifyEnvBase):
     async def install(self):
         self.maybe_add_system_libs(step='configure+install')
         if self.workspace_member:
-            path = os.path.join(self.src_dir, self.workspace_member)
+            path = Path(self.src_dir, self.workspace_member).as_posix()
         else:
             path = self.src_dir
         cmd = [

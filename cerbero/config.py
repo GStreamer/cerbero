@@ -38,7 +38,7 @@ from cerbero.ide.vs.env import get_vs_year_version
 CONFIG_EXT = 'cbc'
 USER_CONFIG_DIR = os.path.expanduser('~/.cerbero')
 USER_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
-USER_CONFIG_FILE = os.path.join(USER_CONFIG_DIR, USER_CONFIG_FILENAME)
+USER_CONFIG_FILE = Path(USER_CONFIG_DIR, USER_CONFIG_FILENAME).as_posix()
 DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
 DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = 'Default <default@change.me>'
@@ -419,7 +419,7 @@ class Config(object):
                         for f in filename:
                             if 'universal' in f:
                                 d = os.path.dirname(f)
-                        arch_config[arch]._load_cmd_config([os.path.join(d, config_file)])
+                        arch_config[arch]._load_cmd_config([Path(d, config_file).as_posix()])
             else:
                 raise ConfigurationError('universal_archs must be a list or a dict')
 
@@ -441,8 +441,8 @@ class Config(object):
 
         for config in list(self.arch_config.values()):
             if self.target_arch == Architecture.UNIVERSAL:
-                config.sources = os.path.join(self.sources, config.target_arch)
-                config.prefix = os.path.join(self.prefix, config.target_arch)
+                config.sources = Path(self.sources, config.target_arch).as_posix()
+                config.prefix = Path(self.prefix, config.target_arch).as_posix()
                 # A universal prefix is only available if arch-prefixes are merged during build
                 if self.cross_universal_type() == 'merged':
                     config.universal_prefix = self.prefix
@@ -514,7 +514,7 @@ class Config(object):
         self._create_paths()
 
         self.rel_libdir = 'lib%s' % self.lib_suffix
-        libdir = os.path.join(self.prefix, self.rel_libdir)
+        libdir = Path(self.prefix, self.rel_libdir).as_posix()
         self.libdir = libdir
 
         self.env = self.get_env(self.prefix, libdir)
@@ -541,24 +541,24 @@ class Config(object):
             env[each] = to_winepath(env[each])
         # NOTE: Ensure that whatever directory this goes into is ignored by the
         # .cerbero deps CI job otherwise we will tar up ~1GB of generated data.
-        env['WINEPREFIX'] = os.path.join(self.build_tools_prefix, 'var', 'tmp', 'wine')
-        env['WINEPATH'] = to_winepath(os.path.join(prefix, 'bin'))
+        env['WINEPREFIX'] = Path(self.build_tools_prefix, 'var', 'tmp', 'wine').as_posix()
+        env['WINEPATH'] = to_winepath(Path(prefix, 'bin').as_posix())
         env['WINEDEBUG'] = 'fixme-all'
         return env
 
     @lru_cache(maxsize=None)
     def get_env(self, prefix, libdir):
         # Get paths for environment variables
-        includedir = os.path.join(prefix, 'include')
-        bindir = os.path.join(prefix, 'bin')
-        manpathdir = os.path.join(prefix, 'share', 'man')
-        infopathdir = os.path.join(prefix, 'share', 'info')
-        typelibpath = os.path.join(libdir, 'girepository-1.0')
-        xdgdatadir = os.path.join(prefix, 'share')
-        xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
-        xcursordir = os.path.join(prefix, 'share', 'icons')
+        includedir = Path(prefix, 'include').as_posix()
+        bindir = Path(prefix, 'bin').as_posix()
+        manpathdir = Path(prefix, 'share', 'man').as_posix()
+        infopathdir = Path(prefix, 'share', 'info').as_posix()
+        typelibpath = Path(libdir, 'girepository-1.0').as_posix()
+        xdgdatadir = Path(prefix, 'share').as_posix()
+        xdgconfigdir = Path(prefix, 'etc', 'xdg').as_posix()
+        xcursordir = Path(prefix, 'share', 'icons').as_posix()
         aclocalflags = '-I{} -I{}'.format(
-            os.path.join(prefix, 'share', 'aclocal'), os.path.join(self.build_tools_prefix, 'share', 'aclocal')
+            Path(prefix, 'share', 'aclocal').as_posix(), Path(self.build_tools_prefix, 'share', 'aclocal').as_posix()
         )
 
         perlversionpath = os.path.join(libdir, 'perl5', 'site_perl', self._perl_version())
@@ -567,12 +567,9 @@ class Config(object):
             # installed in 5.8
             perlversionpath = perlversionpath.rsplit('.', 1)[0]
 
-        perl5lib = ':'.join([to_unixpath(os.path.join(libdir, 'perl5')), to_unixpath(perlversionpath)])
-        gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
-        gstpluginpath10 = os.path.join(libdir, 'gstreamer-1.0')
-        gstregistry = os.path.join('~', '.gstreamer-0.10', 'cerbero-registry-%s' % self.target_arch)
-        gstregistry10 = os.path.join('~', '.cache', 'gstreamer-1.0', 'cerbero-registry-%s' % self.target_arch)
-        gstregistry = os.path.expanduser(gstregistry)
+        perl5lib = ':'.join([to_unixpath(Path(libdir, 'perl5').as_posix()), to_unixpath(perlversionpath)])
+        gstpluginpath10 = Path(libdir, 'gstreamer-1.0').as_posix()
+        gstregistry10 = '~/.cache/gstreamer-1.0/cerbero-registry-{self.target_arch}'
         gstregistry10 = os.path.expanduser(gstregistry10)
 
         pythonpath = []
@@ -580,7 +577,7 @@ class Config(object):
             for pypath in self.py_prefixes:
                 # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
                 # native path separator and must end in a path separator.
-                pythonpath += [os.path.join(p, pypath) + os.sep]
+                pythonpath += [Path(p, pypath).as_posix() + os.sep]
         pythonpath = os.pathsep.join(pythonpath)
 
         if self.platform == Platform.LINUX:
@@ -593,26 +590,26 @@ class Config(object):
 
         path = self.config_env.get('PATH', None)
         if not self._is_build_tools_config:
-            path = self._join_path(os.path.join(self.build_tools_config.prefix, 'bin'), path)
+            path = self._join_path(Path(self.build_tools_config.prefix, 'bin').as_posix(), path)
         if self.variants.rust:
-            path = self._join_path(os.path.join(self.cargo_home, 'bin'), path)
+            path = self._join_path(Path(self.cargo_home, 'bin').as_posix(), path)
         # Add the prefix bindir after the build-tools bindir so that on Windows
         # binaries are run with the same libraries that they are linked with.
         if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
         ld_library_path = ''
         if not self._is_build_tools_config:
-            ld_library_path = os.path.join(self.build_tools_config.libdir)
+            ld_library_path = Path(self.build_tools_config.libdir).as_posix()
         if self.prefix_is_executable():
             ld_library_path = self._join_path(libdir, ld_library_path)
         if self.extra_lib_path is not None:
             ld_library_path = self._join_path(ld_library_path, self.extra_lib_path)
         if self.toolchain_prefix is not None:
-            ld_library_path = self._join_path(ld_library_path, os.path.join(self.toolchain_prefix, 'lib'))
-            includedir = self._join_path(includedir, os.path.join(self.toolchain_prefix, 'include'))
+            ld_library_path = self._join_path(ld_library_path, Path(self.toolchain_prefix, 'lib').as_posix())
+            includedir = self._join_path(includedir, Path(self.toolchain_prefix, 'include').as_posix())
         if self.lib_suffix and self.variants.python:
             # if there is a lib_suffix and a Python build is present it would sit "next" to the lib_suffix dir rather than in it
-            ld_library_path = self._join_path(os.path.join(self.prefix, 'lib'), ld_library_path)
+            ld_library_path = self._join_path(Path(self.prefix, 'lib').as_posix(), ld_library_path)
         # Most of these variables are extracted from jhbuild
         env = {
             'LD_LIBRARY_PATH': ld_library_path,
@@ -627,12 +624,12 @@ class Config(object):
             'ACLOCAL_FLAGS': aclocalflags,
             'ACLOCAL': 'aclocal',
             'PERL5LIB': perl5lib,
-            'GST_PLUGIN_PATH': gstpluginpath,
+            'GST_PLUGIN_PATH': gstpluginpath10,
             'GST_PLUGIN_PATH_1_0': gstpluginpath10,
-            'GST_REGISTRY': gstregistry,
+            'GST_REGISTRY': gstregistry10,
             'GST_REGISTRY_1_0': gstregistry10,
             'PYTHONPATH': pythonpath,
-            'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
+            'MONO_PATH': Path(libdir, 'mono', '4.5').as_posix(),
             'MONO_GAC_PREFIX': prefix,
             'GSTREAMER_ROOT': prefix,
             'CERBERO_PREFIX': self.prefix,
@@ -642,8 +639,8 @@ class Config(object):
         }
 
         PkgConfig.set_executable(env, self)
-        PkgConfig.set_default_search_dir(os.path.join(prefix, 'share', 'pkgconfig'), env, self)
-        PkgConfig.add_search_dir(os.path.join(libdir, 'pkgconfig'), env, self)
+        PkgConfig.set_default_search_dir(Path(prefix, 'share', 'pkgconfig').as_posix(), env, self)
+        PkgConfig.add_search_dir(Path(libdir, 'pkgconfig').as_posix(), env, self)
 
         # Some autotools recipes will call the native (non-cross) compiler to
         # build generators, and we don't want it to use these. We will set the
@@ -820,10 +817,10 @@ class Config(object):
         self._create_path(self.logs)
         # dict universal arches do not have an active prefix
         if not isinstance(self.universal_archs, dict):
-            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+            self._create_path(Path(self.prefix, 'share', 'aclocal').as_posix())
 
         if self._is_build_tools_config:
-            self._create_path(os.path.join(self.prefix, 'var', 'tmp'))
+            self._create_path(Path(self.prefix, 'var', 'tmp').as_posix())
 
     def _create_build_tools_config(self):
         # Use a common prefix for the build tools for all the configurations
@@ -892,7 +889,7 @@ class Config(object):
 
         # Ensure python paths exists because setup.py won't create them
         for path in self.py_prefixes:
-            path = os.path.join(self.prefix, path)
+            path = Path(self.prefix, path).as_posix()
             # dict universal arches do not have an active prefix
             if not isinstance(self.universal_archs, dict):
                 self._create_path(path)
@@ -962,7 +959,7 @@ class Config(object):
             for f in filenames:
                 # Check if the config specified is a complete path, else search
                 # in the user config directory and then in the config_dir (cerbero_share/config/)
-                uf = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
+                uf = Path(USER_CONFIG_DIR, f + '.' + CONFIG_EXT).as_posix()
                 ef = os.path.join(self.config_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT)
                 for config_file in [f, uf, ef]:
                     if os.path.exists(config_file):
@@ -972,7 +969,7 @@ class Config(object):
                     raise ConfigurationError(_('Configuration file %s or fallbacks %s, %s not found') % (f, uf, ef))
 
     def _load_platform_config(self):
-        platform_config = os.path.join(self.config_dir, '%s.config' % self.target_platform)
+        platform_config = Path(self.config_dir, '%s.config' % self.target_platform).as_posix()
         arch_config = os.path.join(self.config_dir, '%s_%s.config' % (self.target_platform, self.target_arch))
 
         for config_path in [platform_config, arch_config]:
@@ -998,22 +995,22 @@ class Config(object):
 
     def _load_last_defaults(self):
         # Set build tools defaults
-        self.set_property('build_tools_prefix', os.path.join(self.home_dir, 'build-tools'))
-        self.set_property('build_tools_sources', os.path.join(self.home_dir, 'sources', 'build-tools'))
-        self.set_property('build_tools_logs', os.path.join(self.home_dir, 'logs', 'build-tools'))
+        self.set_property('build_tools_prefix', Path(self.home_dir, 'build-tools').as_posix())
+        self.set_property('build_tools_sources', Path(self.home_dir, 'sources', 'build-tools').as_posix())
+        self.set_property('build_tools_logs', Path(self.home_dir, 'logs', 'build-tools').as_posix())
         self.set_property('build_tools_cache', 'build-tools.cache')
         # Set target platform defaults
         platform_arch = '_'.join(self._get_toolchain_target_platform_arch())
-        self.set_property('prefix', os.path.join(self.home_dir, 'dist', platform_arch))
-        self.set_property('sources', os.path.join(self.home_dir, 'sources', platform_arch))
-        self.set_property('logs', os.path.join(self.home_dir, 'logs', platform_arch))
+        self.set_property('prefix', Path(self.home_dir, 'dist', platform_arch).as_posix())
+        self.set_property('sources', Path(self.home_dir, 'sources', platform_arch).as_posix())
+        self.set_property('logs', Path(self.home_dir, 'logs', platform_arch).as_posix())
         self.set_property('cache_file', platform_arch + '.cache')
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
-        self.set_property('rust_prefix', os.path.join(self.home_dir, 'rust'))
-        self.set_property('rustup_home', os.path.join(self.rust_prefix, 'rustup'))
-        self.set_property('cargo_home', os.path.join(self.rust_prefix, 'cargo'))
-        self.set_property('tomllib_path', os.path.join(self.rust_prefix, 'tomllib'))
+        self.set_property('rust_prefix', Path(self.home_dir, 'rust').as_posix())
+        self.set_property('rustup_home', Path(self.rust_prefix, 'rustup').as_posix())
+        self.set_property('cargo_home', Path(self.rust_prefix, 'cargo').as_posix())
+        self.set_property('tomllib_path', Path(self.rust_prefix, 'tomllib').as_posix())
         if sys.version_info >= (3, 11, 0):
             self.python_exe = Path(self.build_tools_prefix, 'bin', 'python').as_posix()
         else:
@@ -1024,7 +1021,7 @@ class Config(object):
             and self.target_arch == Architecture.X86_64
         ):
             # Created by the build-tools bootstrapper
-            self.python_exe = os.path.join(self.build_tools_prefix, 'bin', 'python3-x86_64')
+            self.python_exe = Path(self.build_tools_prefix, 'bin', 'python3-x86_64').as_posix()
 
     def _get_exe_suffix(self):
         if self.platform != Platform.WINDOWS:
@@ -1049,15 +1046,15 @@ class Config(object):
 
         # Check if data files are in cerbero_share package (pip install)
         # In this case, recipes/, packages/, config/, data/ are inside cerbero_share/
-        parent_dir = os.path.abspath(os.path.join(curdir, '..'))
-        cerbero_share_dir = os.path.join(parent_dir, 'cerbero_share')
+        parent_dir = os.path.abspath(Path(curdir, '..').as_posix())
+        cerbero_share_dir = Path(parent_dir, 'cerbero_share').as_posix()
         if (
-            os.path.exists(os.path.join(cerbero_share_dir, 'config'))
-            and os.path.exists(os.path.join(cerbero_share_dir, 'recipes'))
-            and os.path.exists(os.path.join(cerbero_share_dir, 'data'))
+            os.path.exists(Path(cerbero_share_dir, 'config').as_posix())
+            and os.path.exists(Path(cerbero_share_dir, 'recipes').as_posix())
+            and os.path.exists(Path(cerbero_share_dir, 'data').as_posix())
         ):
             # Data directory points to cerbero_share/data/ for pip installs
-            self.data_dir = os.path.join(cerbero_share_dir, 'data')
+            self.data_dir = Path(cerbero_share_dir, 'data').as_posix()
             return
 
         # If we get here, something is wrong
@@ -1068,7 +1065,7 @@ class Config(object):
             # For pip installs, use cerbero_share as base (parent of data_dir)
             # data_dir is cerbero_share/data, so we go up one level to get cerbero_share
             cerbero_share = os.path.dirname(self.data_dir)
-            p = os.path.join(cerbero_share, path)
+            p = Path(cerbero_share, path).as_posix()
         else:
             p = os.path.join(os.path.dirname(__file__), '..', path)
         return os.path.abspath(p)
@@ -1085,7 +1082,7 @@ class Config(object):
         # define their own home_dir inside which all cerbero work must be
         # contained; f.ex. ci.gstreamer.net
         if self.home_dir != self._default_home_dir():
-            return os.path.join(self.home_dir, 'sources', 'local')
+            return Path(self.home_dir, 'sources', 'local').as_posix()
         # Default value should be in a user-specific location so that it can
         # be shared across all cerbero directories and invocations
         if self.platform == Platform.WINDOWS and 'USERPROFILE' in os.environ:
@@ -1150,7 +1147,7 @@ class Config(object):
             except ModuleNotFoundError:
                 continue
         if not system_only and os.path.exists(self.tomllib_path):
-            tomli_dir = os.path.join(self.tomllib_path, 'src')
+            tomli_dir = Path(self.tomllib_path, 'src').as_posix()
             sys.path.insert(0, os.path.abspath(tomli_dir))
             return importlib.import_module('tomli')
         return None

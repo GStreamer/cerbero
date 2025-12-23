@@ -20,21 +20,15 @@
 
 import os
 import sys
-import pathlib
 
 
 ### Windows Hacks ###
 
 # we don't want backlashes in paths as it breaks shell commands
-oldjoin = os.path.join
 oldexpanduser = os.path.expanduser
 oldabspath = os.path.abspath
 oldrealpath = os.path.realpath
 oldrelpath = os.path.relpath
-
-
-def join(*args):
-    return pathlib.PurePath(oldjoin(*args)).as_posix()
 
 
 def expanduser(path):
@@ -57,15 +51,10 @@ def relpath(path, start=None):
 
 
 if sys.platform.startswith('win'):
-    # FIXME: replace all usage of os.path.join with pathlib.PurePath.as_posix()
-    # instead of doing this brittle monkey-patching.
-    os.path.join = join
     os.path.expanduser = expanduser
     os.path.abspath = abspath
     os.path.realpath = realpath
     os.path.relpath = relpath
-    if sys.version_info > (3, 14):
-        pathlib.os.path.join = oldjoin
 
     # On windows, python transforms all enviroment variables to uppercase,
     # but we need lowercase ones to override configure options like

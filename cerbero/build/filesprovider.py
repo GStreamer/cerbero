@@ -37,14 +37,14 @@ def find_shlib_regex(config, libname, prefix, libdir, ext, regex):
     # Use globbing to find all files that look like they might match
     # this library to narrow down our exact search
     fpath = os.path.join(libdir, '*{0}*{1}*'.format(libname, ext))
-    found = glob.glob(os.path.join(prefix, fpath))
+    found = glob.glob(Path(prefix, fpath).as_posix())
     # Find which of those actually match via an exact regex
     # Ideally Python should provide a function for regex file 'globbing'
     matches = []
     for each in found:
         fname = os.path.basename(each)
         if re.match(regex.format(re.escape(libname)), fname):
-            matches.append(os.path.join(libdir, fname))
+            matches.append(Path(libdir, fname).as_posix())
     return matches
 
 
@@ -73,7 +73,7 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname)]
     implib_notfound = []
     for implib in implibs:
-        path = os.path.join(prefix, implibdir, implib)
+        path = Path(prefix, implibdir, implib).as_posix()
         if not os.path.exists(path):
             implib_notfound.append(implib)
             continue
@@ -86,14 +86,14 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
         if dllname.endswith('.obj'):
             # Ban .lib that are static libraries e.g. unfixed cURL recipe
             continue
-        return [os.path.join(libdir, dllname)]
+        return [Path(libdir, dllname).as_posix()]
     # If import libraries aren't found, look for a DLL by exactly the specified
     # name. This is to cover cases like libgcc_s_sjlj-1.dll which don't have an
     # import library since they're only used at runtime.
     dllname = 'lib{}.dll'.format(libname)
-    path = os.path.join(prefix, libdir, dllname)
+    path = Path(prefix, libdir, dllname).as_posix()
     if os.path.exists(path):
-        return [os.path.join(libdir, dllname)]
+        return [Path(libdir, dllname).as_posix()]
     if len(implib_notfound) == len(implibs):
         m.warning('No import libraries found for {!r}'.format(libname))
     else:
@@ -108,7 +108,7 @@ def find_pdb_implib(config, libname, prefix):
     pdbs = []
     for dll in dlls:
         pdb = dll[:-3] + 'pdb'
-        if os.path.exists(os.path.join(prefix, pdb)):
+        if os.path.exists(Path(prefix, pdb).as_posix()):
             pdbs.append(pdb)
     return pdbs
 
@@ -233,8 +233,8 @@ class FilesProvider(object):
         directories
         """
         # fill directories
-        if os.path.isdir(os.path.join(self.config.prefix, file)):
-            found = self._ls_dir(os.path.join(self.config.prefix, file))
+        if os.path.isdir(Path(self.config.prefix, file).as_posix()):
+            found = self._ls_dir(Path(self.config.prefix, file).as_posix())
         else:
             found = shell.ls_files([file], self.config.prefix)
         return found
@@ -528,14 +528,14 @@ class FilesProvider(object):
         return libs
 
     def _pyfile_get_name(self, f) -> Optional[List[str]]:
-        if os.path.exists(os.path.join(self.config.prefix, f)):
+        if os.path.exists(Path(self.config.prefix, f).as_posix()):
             return [f]
         for py_prefix in self.py_prefixes:
-            original_path = os.path.join(py_prefix, f)
-            if os.path.exists(os.path.join(self.config.prefix, original_path)):
+            original_path = Path(py_prefix, f).as_posix()
+            if os.path.exists(Path(self.config.prefix, original_path).as_posix()):
                 return [original_path]
             elif '*' in f:
-                fs = glob.glob(os.path.join(self.config.prefix, original_path), recursive=True)
+                fs = glob.glob(Path(self.config.prefix, original_path).as_posix(), recursive=True)
                 if fs:
                     return [os.path.relpath(f, start=self.config.prefix) for f in fs]
             elif os.path.isabs(f):
@@ -549,7 +549,7 @@ class FilesProvider(object):
             splitedext = os.path.splitext(f)
             for ex in ['', 'm']:
                 f = splitedext[0] + '.' + cpythonname + ex + splitedext[1]
-                if os.path.exists(os.path.join(self.config.prefix, f)):
+                if os.path.exists(Path(self.config.prefix, f).as_posix()):
                     return [f]
         return None
 
@@ -680,7 +680,7 @@ class FilesProvider(object):
             _root = root.split(self.config.prefix)[1]
             if _root[0] == '/':
                 _root = _root[1:]
-            files.extend([os.path.join(_root, x) for x in filenames])
+            files.extend([Path(_root, x).as_posix() for x in filenames])
         return files
 
 
