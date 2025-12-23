@@ -820,7 +820,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         if self.runtime_dep:
             return
         # Don't need to generate .dll.a import libraries when cross-compiling with MSVC
-        if self.using_msvc() and self.config.cross_compiling:
+        if self.using_msvc() and self.config.cross_compiling():
             return
         if output_dir is None:
             output_dir = os.path.join(self.config.prefix, 'lib' + self.config.lib_suffix)
