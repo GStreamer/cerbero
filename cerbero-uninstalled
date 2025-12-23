@@ -37,16 +37,40 @@ if [ "$OSTYPE" = "msys" ] || [ "$OSTYPE" = "cygwin" ]; then
    fi
 fi
 
+find_non_msys2_python() {
+    which -a python | while read i; do
+        if (( $(echo $i | cut -f2 -d/ | wc -c) > 2 )); then
+            continue
+        fi
+        echo $i
+        break
+    done
+}
+
 case "$MSYS_VERSION" in
-    1) PYTHON="py -3";;
+    1)
+        if type -p py; then
+            PYTHON="py -3"
+        else
+            PYTHON="python"
+        fi
+        ;;
     2)
+        if type -p py; then
+            PYTHON="py -3"
+        else
+            PYTHON="$(find_non_msys2_python)"
+        fi
+
+        if test -z "$PYTHON"; then
+            echo "Could not find a non-MSYS2 Python"
+            exit 1
+        fi
         # winpty is needed to get stdin working in many cases, but it will
         # immediately bail out if run in an environment without stdin, such as
         # on CI.
-        if [ -n "$CI" ]; then
-            PYTHON="py -3"
-        else
-            PYTHON="winpty py -3"
+        if [ -z "$CI" ]; then
+            PYTHON="winpty $PYTHON"
         fi
         ;;
     *) PYTHON="python3";;
