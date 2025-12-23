@@ -390,7 +390,8 @@ class FilesProvider(object):
         """
         pdbs = []
         if hasattr(self, 'files_bins') and self.extensions['debugext']:
-            files_bins = self._list_files_by_category(self.BINS_CAT)
+            files_bins = self.files_list_by_category(self.BINS_CAT)
+            # dsymutil expects files to exist
             files_bins = dsymutil.symbolicable_files(files_bins, self.config.prefix, self.config.target_platform)
             for f in files_bins:
                 f_rel = os.path.relpath(f, self.config.prefix)
@@ -398,9 +399,15 @@ class FilesProvider(object):
                     # .exe, .dll -> .pdb, .debuginfo
                     f_rel, _ = os.path.splitext(f_rel)
                 pdbs.append('{}{}'.format(f_rel, self.extensions['debugext']))
+        return {k: self._search_binary_pdb for k in pdbs}
+
+    def _list_misc_binaries(self):
+        pdbs = []
         if hasattr(self, 'files_misc') and self.extensions['debugext']:
+            files_bins = self.files_list_by_category('files_misc')
+            # dsymutil expects files to exist
             files_bins = dsymutil.symbolicable_files(
-                self.files_misc,
+                files_bins,
                 self.config.prefix,
                 self.config.target_platform,
             )
@@ -418,6 +425,7 @@ class FilesProvider(object):
         libs, devfiles = self._list_devel_libraries()
         files = self.devel_files_list(False) + list(libs.keys())
         devfiles.update(self._list_devel_binaries())
+        devfiles.update(self._list_misc_binaries())
         devfiles.update(self._list_plugins_dsyms(files))
         devfiles = self._validate_existing(devfiles, only_existing, True)
         return sorted(list(set(devfiles)))
