@@ -13,7 +13,11 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/dyne/frei0r/archive/refs/tags/v%(version)s.tar.gz'
     tarball_dirname = 'frei0r-%(version)s'
     tarball_checksum = 'aeeefe3a9b44761b2cf110017d2b1dfa2ceeb873da96d283ba5157380c5d0ce5'
-    configure_args = '-DWITHOUT_OPENCV=ON -DWITHOUT_GAVL=ON -DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON'
+    configure_args = [
+        '-DWITHOUT_OPENCV=ON',
+        '-DWITHOUT_GAVL=ON',
+        '-DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON'
+    ]
     deps = ['cairo']
 
     files_plugins = ['%(libdir)s/frei0r-1/*%(mext)s']
