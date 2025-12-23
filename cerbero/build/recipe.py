@@ -704,8 +704,11 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                     continue
                 elif len(exact_matches) == 1:
                     match = exact_matches[0]
+                    # frei0r sleid0r-foo_bar plugins
+                    if match.stem == pdb.stem:
+                        dst = match.parent / pdb.name
                     # Rust naming normalization
-                    if match.stem.replace('-', '_') != match.stem:
+                    elif match.stem.replace('-', '_') != match.stem:
                         dst = match.parent / pdb.name.replace('_', '-')
                     else:
                         dst = match.parent / pdb.name
