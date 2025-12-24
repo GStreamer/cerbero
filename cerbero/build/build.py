@@ -498,6 +498,8 @@ class MakefilesBase(Build, ModifyEnvBase):
         When called from a method in deriverd class, that method has to be
         decorated with modify_environment decorator.
         """
+        if self.config.target_arch == Architecture.ARM64 and self.config.variants.visualstudio and not self.can_msvc:
+            raise FatalError(f"Recipe {self.name} doesn't support MSVC, so it cannot target ARM64")
         configure_dir = self.get_configure_dir()
         if not os.path.exists(configure_dir):
             os.makedirs(configure_dir)
