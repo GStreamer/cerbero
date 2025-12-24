@@ -1113,9 +1113,14 @@ class Meson(Build, ModifyEnvBase):
         """
         false = ['false']
         if self.config.platform == Platform.WINDOWS:
+            # Use the full path because we might not have these tools in PATH
+            # when invoking meson.
             cc = self.config.mingw_env_for_build_system['CC']
+            cc[0] = shutil.which(cc[0], path=self.env['PATH'])
             cxx = self.config.mingw_env_for_build_system['CXX']
+            cxx[0] = shutil.which(cxx[0], path=self.env['PATH'])
             ar = self.config.mingw_env_for_build_system['AR']
+            ar[0] = shutil.which(ar[0], path=self.env['PATH'])
             objc = false
             objcxx = false
         elif self.config.platform == Platform.DARWIN:
