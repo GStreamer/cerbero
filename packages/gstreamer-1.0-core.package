@@ -25,8 +25,8 @@ class Package(custom.GStreamer, package.Package):
         Platform.LINUX: ['bash-completion'],
     }
     platform_files_devel = {
-        Platform.DARWIN: ['pkg-config'],
-        Platform.WINDOWS: [],
+        Platform.DARWIN: ['pkg-config:bins:devel'],
+        Platform.WINDOWS: ['pkg-config:bins:devel'],
     }
 
     def prepare(self):
