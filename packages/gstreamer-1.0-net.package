@@ -35,7 +35,9 @@ class Package(custom.GStreamer, package.Package):
         if not Platform.is_apple(self.config.target_platform):
             self.files.append('sqlite3:libs')
 
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files.append('gst-plugins-rs:plugins_net')
             self.files_devel.append('gst-plugins-rs:plugins_net_devel')
 

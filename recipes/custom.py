@@ -5,7 +5,7 @@ from collections import defaultdict
 from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
-from cerbero.enums import License, FatalError
+from cerbero.enums import License, FatalError, Platform, Architecture
 
 
 def running_on_cerbero_ci():
@@ -148,7 +148,9 @@ def list_gstreamer_1_0_plugins_by_category(config):
         'gst-editing-services-1.0',
         'gst-rtsp-server-1.0',
     ]
-    if config.variants.rust:
+    if config.variants.rust and (
+        config.target_platform != Platform.WINDOWS or config.target_arch != Architecture.ARM64
+    ):
         recipes.append('gst-plugins-rs')
     for r in recipes:
         r = cookbook.get_recipe(r)

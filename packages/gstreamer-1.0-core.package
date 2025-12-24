@@ -33,7 +33,9 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.unwind:
             self.files.append('libunwind:libs')
 
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files.append('gst-plugins-rs:libs')
             self.files.append('gst-plugins-rs:plugins_core')
             self.files_devel.append('gst-plugins-rs:files_devel')

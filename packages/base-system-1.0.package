@@ -29,5 +29,7 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.gi:
             self.files.append('gobject-introspection:libs:typelibs')
 
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files.append('librsvg:libs')

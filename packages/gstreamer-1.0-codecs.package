@@ -36,7 +36,9 @@ class Package(custom.GStreamer, package.Package):
             # Needed by libass and zbar
             self.files.append('libiconv:libs')
 
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files.append('gst-plugins-rs:plugins_codecs')
             self.files_devel.append('gst-plugins-rs:plugins_codecs_devel')
 

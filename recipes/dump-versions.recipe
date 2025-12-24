@@ -18,7 +18,9 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.deps.append('gst-plugins-rs')
         if self.config.variants.python:
             self.deps.append('gst-python-1.0')
