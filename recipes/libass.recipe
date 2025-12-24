@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.IOS and \
             self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
             self.append_env('LDFLAGS', '-Wl,-read_only_relocs,suppress')
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
+        if self.config.target_platform == Platform.ANDROID:
             # Needed for codepage conversion support in subtitles
             self.deps.append('libiconv')
         if self.config.target_arch == Architecture.ARMv7:
@@ -36,6 +36,14 @@ class Recipe(recipe.Recipe):
             self.config.target_arch == Architecture.X86:
             # Text relocation errors
             self.meson_options['asm'] = 'disabled'
+
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+                self.meson_options['asm'] = 'disabled'
+            else:
+                # Optional dep, needed for codepage conversion support in subtitles.
+                # libiconv currently needs MinGW, so cannot be enabled for MSVC arm64.
+                self.deps.append('libiconv')
 
     def post_install(self):
         # Meson does not generate la files

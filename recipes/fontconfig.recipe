@@ -32,8 +32,12 @@ class Recipe(recipe.Recipe):
 
 
     def prepare(self):
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
+        if self.config.target_platform == Platform.ANDROID:
             self.deps.append('libiconv')
+        if self.config.target_platform == Platform.WINDOWS:
+            if not self.using_msvc or self.config.target_arch != Architecture.ARM64:
+                # Needs MinGW, so don't pull it for ARM64 MSVC
+                self.deps.append('libiconv')
 
     def post_install(self):
         # Meson does not generate la files
