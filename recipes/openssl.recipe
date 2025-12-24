@@ -237,10 +237,8 @@ class Recipe(recipe.Recipe):
         if self.using_msvc():
             shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'openssl.pc'), {'\\': '/'})
             shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'libcrypto.pc'), {'\\': '/'})
-        # g-ir-scanner expects import libraries to end in .lib when
-        # building a gir for "internal" (same project) libraries
-        # Unfixed OpenSSL breaks introspection for glib-networking and libnice
-        if self.using_msvc() and self.config.variants.gi:
+        # Rename to ssl.lib and crypto.lib, that's what everyone expects
+        if self.using_msvc():
             prefix = Path(self.config.libdir)
             for f in ['libssl.lib', 'libcrypto.lib']:
                 src = prefix / f
