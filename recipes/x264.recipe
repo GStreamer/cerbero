@@ -20,9 +20,11 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
 
     patches = [
-        f'{name}/0001-Add-Meson-build.patch',
+        'x264/0001-Add-Meson-build.patch',
         # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/31
-        f'{name}/fix-textrels.patch',
+        'x264/fix-textrels.patch',
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/32
+        'x264/msvc-arm64-support.patch',
     ]
 
     meson_options = {}
