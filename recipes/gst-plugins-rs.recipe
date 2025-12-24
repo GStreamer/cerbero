@@ -35,10 +35,12 @@ class Recipe(recipe.Recipe):
         'audiofx',
         'audioparsers',
         'aws',
+        'burn',
         'cdg',
         'claxon',
         'closedcaption',
         'dav1d',
+        'demucs',
         'elevenlabs',
         'fallbackswitch',
         'ffv1',
@@ -135,6 +137,7 @@ class Recipe(recipe.Recipe):
             'core': [
                 'fallbackswitch',
                 'gopbuffer',
+                'burn',
                 'livesync',
                 'originalbuffer',
                 'rsanalytics',
@@ -162,6 +165,7 @@ class Recipe(recipe.Recipe):
                 'rswebrtc',
             ],
             'effects': [
+                'demucs',
                 'rsaudiofx',
                 'rsvideofx',
             ],
