@@ -49,6 +49,8 @@ class Recipe(recipe.Recipe):
         'glib/0005-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
         # TODO upstreaming
         'glib/0006-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
+        # TODO upstreaming -- https://gitlab.gnome.org/GNOME/glib/-/issues/3858
+        'glib/0007-glib-compile-resources-Fix-MSVC-heap-exhaustion-when.patch',
     ]
 
     files_libs = [
