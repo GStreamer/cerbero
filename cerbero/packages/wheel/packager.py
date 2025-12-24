@@ -306,7 +306,6 @@ class WheelPackager(PackagerBase):
                 f'gstreamer_plugins_gpl ~= {self.package.version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_restricted ~= {self.package.version}',
-                f'gstreamer_plugins_frei0r ~= {self.package.version}',
                 f'gstreamer_python ~= {self.package.version}',
             ],
         }
@@ -317,6 +316,7 @@ class WheelPackager(PackagerBase):
                 # 'cli': [f'gstreamer_cli ~= {self.package.version}'],
                 # If we want extra sharding
                 # 'python': [f'gstreamer_python ~= {self.package.version}'],
+                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}']
             },
         }
 
