@@ -30,10 +30,8 @@ class Recipe(recipe.Recipe):
             self.files_misc = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders.cache']
 
     def post_install (self):
-        if self.config.platform == Platform.WINDOWS and\
-                self.config.target_platform == Platform.WINDOWS:
-            cache = os.path.join(self.config.libdir, 'gdk-pixbuf-2.0',
-                '2.10.0', 'loaders.cache')
+        cache = os.path.join(self.config.libdir, 'gdk-pixbuf-2.0', '2.10.0', 'loaders.cache')
+        if os.path.exists(cache):
             shell.replace(cache, {self.config.prefix: '../'})
 
         # Meson isn't aware that this is a target platform executable
