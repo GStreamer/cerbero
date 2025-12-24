@@ -44,5 +44,5 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('svt-jpeg-xs:libs')
 
         if self.config.target_platform == Platform.WINDOWS:
-            if self.config.target_arch == Architecture.X86:
+            if self.config.target_arch != Architecture.X86_64:
                 self.files.remove('lcevcdec:libs')
