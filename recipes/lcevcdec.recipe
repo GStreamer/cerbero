@@ -21,7 +21,8 @@ class Recipe(recipe.Recipe):
         '-DVN_SDK_FFMPEG_LIBS_PACKAGE=""',
         '-DVN_SDK_JSON_CONFIG=OFF',
         '-DVN_SDK_EXECUTABLES=OFF',
-        '-DVN_SDK_UNIT_TESTS=OFF '
+        '-DVN_SDK_UNIT_TESTS=OFF',
+        '-DVN_MSVC_RUNTIME_STATIC=OFF',
     ]
 
     files_libs = ['liblcevc_dec_api', 'liblcevc_dec_api_utility', 'liblcevc_dec_extract',
