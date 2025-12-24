@@ -1,0 +1,77 @@
+From 0edb279a18162eb34cbf72a2cfccd5008f921c99 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 21:51:17 +0530
+Subject: [PATCH 2/2] Add VS definition files for MSVC support
+
+libproxy doesn't use __declspec(dllexport/import) correctly, so the
+fastest way to add MSVC support is via definition file.
+---
+ src/backend/meson.build   |  3 ++-
+ src/backend/pxbackend.def | 13 +++++++++++++
+ src/libproxy/meson.build  |  1 +
+ src/libproxy/proxy.def    |  7 +++++++
+ 4 files changed, 23 insertions(+), 1 deletion(-)
+ create mode 100644 src/backend/pxbackend.def
+ create mode 100644 src/libproxy/proxy.def
+
+diff --git a/src/backend/meson.build b/src/backend/meson.build
+index 47e46c4..a4640ea 100644
+--- a/src/backend/meson.build
++++ b/src/backend/meson.build
+@@ -40,7 +40,8 @@ px_backend = shared_library(
+   c_args: px_backend_c_args,
+   install: true,
+   install_dir: pkglibdir,
+-  install_rpath: pkglibdir
++  install_rpath: pkglibdir,
++  vs_module_defs: 'pxbackend.def',
+ )
+ 
+ px_backend_dep = declare_dependency(
+diff --git a/src/backend/pxbackend.def b/src/backend/pxbackend.def
+new file mode 100644
+index 0000000..4bb3be5
+--- /dev/null
++++ b/src/backend/pxbackend.def
+@@ -0,0 +1,13 @@
++EXPORTS
++        px_strv_builder_add_proxy
++        px_pacrunner_get_type
++        px_manager_pac_download
++        px_manager_new_with_options
++        px_manager_new
++        px_manager_is_ignore
++        px_manager_get_type
++        px_manager_get_proxies_sync
++        px_manager_get_configuration
++        px_config_windows_get_type
++        px_config_get_type
++        px_config_env_get_type
+diff --git a/src/libproxy/meson.build b/src/libproxy/meson.build
+index 558719c..117cf02 100644
+--- a/src/libproxy/meson.build
++++ b/src/libproxy/meson.build
+@@ -30,6 +30,7 @@ libproxy = shared_library(
+   link_depends : mapfile,
+   soversion: '1',
+   version: meson.project_version(),
++  vs_module_defs: 'proxy.def',
+   install: true,
+   install_rpath: pkglibdir,
+ )
+diff --git a/src/libproxy/proxy.def b/src/libproxy/proxy.def
+new file mode 100644
+index 0000000..9c85867
+--- /dev/null
++++ b/src/libproxy/proxy.def
+@@ -0,0 +1,7 @@
++EXPORTS
++        px_proxy_factory_copy
++        px_proxy_factory_free
++        px_proxy_factory_free_proxies
++        px_proxy_factory_get_proxies
++        px_proxy_factory_get_type
++        px_proxy_factory_new
+-- 
+2.51.0.windows.1
+

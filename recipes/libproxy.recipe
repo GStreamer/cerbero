@@ -14,10 +14,6 @@ class Recipe(recipe.Recipe):
     # libproxy only builds a dynamic library
     library_type = LibraryType.SHARED
 
-    # Symbol export in MSVS (all compilers) is broken,
-    # relies on -fvisibility=default
-    can_msvc = False
-
     deps = ['glib']
 
     meson_options = {
@@ -32,6 +28,11 @@ class Recipe(recipe.Recipe):
         'curl': 'false',
     }
 
+    patches = [
+        f'{name}/0001-Don-t-use-g_autoptr-for-code-that-will-build-on-wind.patch',
+        f'{name}/0002-Add-VS-definition-files-for-MSVC-support.patch',
+    ]
+
     files_libs = ['libproxy']
     files_devel = ['include/libproxy', '%(libdir)s/pkgconfig/libproxy-1.0.pc']
 
@@ -39,6 +40,10 @@ class Recipe(recipe.Recipe):
         if Platform.is_apple_mobile(self.config.target_platform):
             # https://github.com/libproxy/libproxy/pull/284
             self.meson_options['config-osx'] = 'false'
+        if self.config.target_platform != Platform.LINUX:
+            self.meson_options['config-gnome'] = 'false'
+            self.meson_options['config-kde'] = 'false'
+            self.meson_options['config-sysconfig'] = 'false'
 
     def post_install(self):
         LibtoolLibrary('libproxy', None, None, None, self.config.libdir,

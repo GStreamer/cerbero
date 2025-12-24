@@ -1,0 +1,377 @@
+From f9844a38c931880345285ec8b641013c65cc432c Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 21:37:16 +0530
+Subject: [PATCH 1/2] Don't use g_autoptr for code that will build on windows
+
+---
+ src/backend/plugins/config-env/config-env.c   |  7 +-
+ .../plugins/config-windows/config-windows.c   | 27 +++++--
+ src/backend/px-manager.c                      | 71 ++++++++++++-------
+ src/libproxy/proxy.c                          |  5 +-
+ 4 files changed, 72 insertions(+), 38 deletions(-)
+
+diff --git a/src/backend/plugins/config-env/config-env.c b/src/backend/plugins/config-env/config-env.c
+index deb80ec..bf9fac9 100644
+--- a/src/backend/plugins/config-env/config-env.c
++++ b/src/backend/plugins/config-env/config-env.c
+@@ -103,11 +103,14 @@ px_config_env_get_config (PxConfig     *config,
+     proxy = g_getenv ("NO_PROXY");
+ 
+   if (proxy) {
+-    g_auto (GStrv) no_proxy = g_strsplit (proxy, ",", -1);
++    GStrv no_proxy = g_strsplit (proxy, ",", -1);
+ 
+-    if (px_manager_is_ignore (uri, no_proxy))
++    if (px_manager_is_ignore (uri, no_proxy)) {
++      g_strfreev (no_proxy);
+       return;
++    }
+ 
++    g_strfreev (no_proxy);
+     proxy = NULL;
+   }
+ 
+diff --git a/src/backend/plugins/config-windows/config-windows.c b/src/backend/plugins/config-windows/config-windows.c
+index 55cb24c..7ade9cb 100644
+--- a/src/backend/plugins/config-windows/config-windows.c
++++ b/src/backend/plugins/config-windows/config-windows.c
+@@ -156,7 +156,7 @@ build_proxy_uri (const char *uri)
+ static GHashTable *
+ parse_manual (char *manual)
+ {
+-  g_auto (GStrv) split = NULL;
++  GStrv split = NULL;
+   GHashTable *ret = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+ 
+   /* We have to check for two formats:
+@@ -174,7 +174,7 @@ parse_manual (char *manual)
+       /* it should be used for all schemes that do not have an explicit entry */
+       g_hash_table_insert (ret, g_strdup ("default"), proxy_uri);
+     } else {
+-      g_auto (GStrv) split_kv = g_strsplit (split[idx], "=", -1);
++      GStrv split_kv = g_strsplit (split[idx], "=", -1);
+ 
+       if (g_strv_length (split_kv) == 2) {
+         char *proxy_uri = build_proxy_uri (split_kv[1]);
+@@ -183,13 +183,14 @@ parse_manual (char *manual)
+     }
+   }
+ 
++  g_strfreev (split);
+   return ret;
+ }
+ 
+ static gboolean
+ is_enabled (char type)
+ {
+-  g_autofree char *data = NULL;
++  char *data = NULL;
+   guint32 dlen = 0;
+   gboolean result = FALSE;
+ 
+@@ -199,6 +200,7 @@ is_enabled (char type)
+   if (dlen >= 9)
+     result = (data[8] & type) == type;
+ 
++  g_free (data);
+   return result;
+ }
+ 
+@@ -211,10 +213,14 @@ px_config_windows_get_config (PxConfig     *self,
+   guint32 enabled = 0;
+ 
+   if (get_registry (W32REG_BASEKEY, "ProxyOverride", &tmp, NULL, NULL)) {
+-    g_auto (GStrv) no_proxy = g_strsplit (tmp, ";", -1);
++    GStrv no_proxy = g_strsplit (tmp, ";", -1);
+ 
+-    if (px_manager_is_ignore (uri, no_proxy))
++    if (px_manager_is_ignore (uri, no_proxy)) {
++      g_strfreev (no_proxy);
+       return;
++    }
++
++    g_strfreev (no_proxy);
+   }
+ 
+   /* WPAD */
+@@ -225,38 +231,45 @@ px_config_windows_get_config (PxConfig     *self,
+ 
+   /* PAC */
+   if (is_enabled (W32REG_OFFSET_PAC) && get_registry (W32REG_BASEKEY, "AutoConfigURL", &tmp, NULL, NULL)) {
+-    g_autofree char *pac_uri = g_strconcat ("pac+", tmp, NULL);
++    char *pac_uri = g_strconcat ("pac+", tmp, NULL);
+     GUri *ac_uri = g_uri_parse (tmp, G_URI_FLAGS_NONE, NULL);
+ 
+     if (ac_uri) {
+       px_strv_builder_add_proxy (builder, pac_uri);
++      g_free (pac_uri);
+       return;
+     }
++    g_free (pac_uri);
+   }
+ 
+   /* Manual proxy */
+   if (get_registry (W32REG_BASEKEY, "ProxyEnable", NULL, NULL, &enabled) && enabled && get_registry (W32REG_BASEKEY, "ProxyServer", &tmp, NULL, NULL)) {
+-    g_autoptr (GHashTable) table = parse_manual (tmp);
++    GHashTable *table = parse_manual (tmp);
+     const char *scheme = g_uri_get_scheme (uri);
+ 
+     if (table) {
+       char *ret = g_hash_table_lookup (table, scheme);
+       if (ret) {
+         px_strv_builder_add_proxy (builder, ret);
++        g_hash_table_unref (table);
+         return;
+       }
+ 
+       ret = g_hash_table_lookup (table, "socks");
+       if (ret) {
+         px_strv_builder_add_proxy (builder, ret);
++        g_hash_table_unref (table);
+         return;
+       }
+ 
+       ret = g_hash_table_lookup (table, "default");
+       if (ret) {
+         px_strv_builder_add_proxy (builder, ret);
++        g_hash_table_unref (table);
+         return;
+       }
++
++      g_hash_table_unref (table);
+     }
+   }
+ }
+diff --git a/src/backend/px-manager.c b/src/backend/px-manager.c
+index 242694e..a73dbff 100644
+--- a/src/backend/px-manager.c
++++ b/src/backend/px-manager.c
+@@ -168,11 +168,12 @@ px_manager_constructed (GObject *object)
+     if (!g_messages_debug) {
+       g_setenv ("G_MESSAGES_DEBUG", G_LOG_DOMAIN, TRUE);
+     } else {
+-      g_autofree char *new_g_messages_debug = NULL;
++      char *new_g_messages_debug = NULL;
+ 
+       new_g_messages_debug = g_strconcat (g_messages_debug, " ", G_LOG_DOMAIN, NULL);
+       if (new_g_messages_debug)
+         g_setenv ("G_MESSAGES_DEBUG", new_g_messages_debug, TRUE);
++      g_free (new_g_messages_debug);
+     }
+   }
+ 
+@@ -449,7 +450,7 @@ char **
+ px_manager_get_configuration (PxManager *self,
+                               GUri      *uri)
+ {
+-  g_autoptr (GStrvBuilder) builder = g_strv_builder_new ();
++  GStrvBuilder *builder = g_strv_builder_new ();
+ 
+   for (GList *list = self->config_plugins; list && list->data; list = list->next) {
+     PxConfig *config = PX_CONFIG (list->data);
+@@ -458,7 +459,7 @@ px_manager_get_configuration (PxManager *self,
+     ifc->get_config (config, uri, builder);
+   }
+ 
+-  return g_strv_builder_end (builder);
++  return g_strv_builder_unref_to_strv (builder);
+ }
+ 
+ static void
+@@ -468,7 +469,7 @@ px_manager_run_pac (PxPacRunner  *pacrunner,
+                     GStrvBuilder *builder)
+ {
+   PxPacRunnerInterface *ifc = PX_PAC_RUNNER_GET_IFACE (pacrunner);
+-  g_auto (GStrv) proxies_split = NULL;
++  GStrv proxies_split = NULL;
+   char *pac_response;
+ 
+   pac_response = ifc->run (PX_PAC_RUNNER (pacrunner), uri);
+@@ -478,14 +479,13 @@ px_manager_run_pac (PxPacRunner  *pacrunner,
+ 
+   for (int idx = 0; idx < g_strv_length (proxies_split); idx++) {
+     char *line = g_strstrip (proxies_split[idx]);
+-    g_auto (GStrv) word_split = g_strsplit (line, " ", -1);
++    GStrv word_split = g_strsplit (line, " ", -1);
+ 
+     /* Check for syntax "METHOD SERVER" */
+     if (g_strv_length (word_split) == 2) {
+-      g_autoptr (GUri) proxy_uri = NULL;
+-      g_autofree char *uri_string = NULL;
+-      g_autofree char *proxy_string = NULL;
+-      g_autoptr (GUri) test_uri = NULL;
++      GUri *proxy_uri = NULL;
++      char *uri_string = NULL;
++      char *proxy_string = NULL;
+       char *method;
+       char *server;
+ 
+@@ -494,6 +494,7 @@ px_manager_run_pac (PxPacRunner  *pacrunner,
+ 
+       uri_string = g_strconcat ("http://", server, NULL);
+       proxy_uri = g_uri_parse (uri_string, G_URI_FLAGS_NONE, NULL);
++      g_free (uri_string);
+       if (!proxy_uri)
+         continue;
+ 
+@@ -510,13 +511,21 @@ px_manager_run_pac (PxPacRunner  *pacrunner,
+       }
+ 
+       if (proxy_string) {
+-        test_uri = g_uri_parse (proxy_string, G_URI_FLAGS_NONE, NULL);
++        GUri *test_uri = g_uri_parse (proxy_string, G_URI_FLAGS_NONE, NULL);
+ 
+-        if (test_uri)
++        if (test_uri) {
+           px_strv_builder_add_proxy (builder, proxy_string);
++          g_uri_unref (test_uri);
++        }
+       }
++
++      g_free (proxy_string);
++      g_uri_unref (proxy_uri);
+     }
++
++    g_strfreev (word_split);
+   }
++  g_strfreev (proxies_split);
+ }
+ 
+ static gboolean
+@@ -589,12 +598,13 @@ px_manager_expand_pac (PxManager *self,
+       self->wpad = FALSE;
+ 
+     if (self->pac_data) {
+-      g_autofree char *uri_str = g_uri_to_string (uri);
++      char *uri_str = g_uri_to_string (uri);
+ 
+       if (g_strcmp0 (self->pac_url, uri_str) != 0) {
+         g_clear_pointer (&self->pac_url, g_free);
+         g_clear_pointer (&self->pac_data, g_bytes_unref);
+       }
++      g_free (uri_str);
+     }
+ 
+     if (!self->pac_data) {
+@@ -633,21 +643,22 @@ char **
+ px_manager_get_proxies_sync (PxManager  *self,
+                              const char *url)
+ {
+-  g_autoptr (GStrvBuilder) builder = NULL;
+-  g_autoptr (GUri) uri = NULL;
+-  g_auto (GStrv) config = NULL;
+-  g_autoptr (GError) error = NULL;
++  GStrvBuilder *builder = NULL;
++  GUri *uri = NULL;
++  GStrv config = NULL;
+ 
+   g_mutex_lock (&self->mutex);
+ 
+   builder = g_strv_builder_new ();
+-  uri = g_uri_parse (url, G_URI_FLAGS_NONE, &error);
++  uri = g_uri_parse (url, G_URI_FLAGS_NONE, NULL);
+ 
+   g_debug ("%s: url=%s online=%d", __FUNCTION__, url ? url : "?", self->online);
+   if (!uri || !self->online) {
+     px_strv_builder_add_proxy (builder, "direct://");
+     g_mutex_unlock (&self->mutex);
+-    return g_strv_builder_end (builder);
++    if (uri)
++      g_uri_unref (uri);
++    return g_strv_builder_unref_to_strv (builder);
+   }
+ 
+   config = px_manager_get_configuration (self, uri);
+@@ -678,7 +689,9 @@ px_manager_get_proxies_sync (PxManager  *self,
+     g_debug ("%s: Proxy[%d] = %s", __FUNCTION__, idx, (char *)((GPtrArray *)builder)->pdata[idx]);
+ 
+   g_mutex_unlock (&self->mutex);
+-  return g_strv_builder_end (builder);
++  g_uri_unref (uri);
++  g_strfreev (config);
++  return g_strv_builder_unref_to_strv (builder);
+ }
+ 
+ void
+@@ -697,7 +710,7 @@ static gboolean
+ ignore_domain (GUri *uri,
+                char *ignore)
+ {
+-  g_auto (GStrv) ignore_split = NULL;
++  GStrv ignore_split = NULL;
+   const char *host = g_uri_get_host (uri);
+   char *ignore_host;
+   int ignore_port = -1;
+@@ -716,6 +729,7 @@ ignore_domain (GUri *uri,
+   ignore_host = ignore_split[0];
+   if  (g_strv_length (ignore_split) == 2)
+     ignore_port = atoi (ignore_split[1]);
++  g_strfreev (ignore_split);
+ 
+   /* Hostname match (domain.com or domain.com:80) */
+   if (g_strcmp0 (host, ignore_host) == 0)
+@@ -761,10 +775,10 @@ static gboolean
+ ignore_ip (GUri *uri,
+            char *ignore)
+ {
+-  g_autoptr (GInetAddress) uri_address = NULL;
+-  g_autoptr (GInetAddress) ignore_address = NULL;
+-  g_auto (GStrv) ignore_split = NULL;
+-  g_autoptr (GError) error = NULL;
++  GInetAddress *uri_address = NULL;
++  GInetAddress *ignore_address = NULL;
++  GStrv ignore_split = NULL;
++  GError *error = NULL;
+   const char *uri_host = g_uri_get_host (uri);
+   int port = g_uri_get_port (uri);
+   int ignore_port = 0;
+@@ -788,11 +802,15 @@ ignore_ip (GUri *uri,
+ 
+     if (!address_mask) {
+       g_warning ("Could not parse ignore mask: %s", error->message);
++      g_clear_error (&error);
++      g_object_unref (uri_address);
+       return FALSE;
+     }
+ 
+-    if (g_inet_address_mask_matches (address_mask, uri_address))
++    if (g_inet_address_mask_matches (address_mask, uri_address)) {
++      g_object_unref (uri_address);
+       return TRUE;
++    }
+   }
+ 
+   /*
+@@ -809,10 +827,13 @@ ignore_ip (GUri *uri,
+   ignore_split = g_strsplit (ignore, ":", -1);
+   if  (g_strv_length (ignore_split) == 2)
+     ignore_port = atoi (ignore_split[1]);
++  g_strfreev (ignore_split);
+ 
+   ignore_address = g_inet_address_new_from_string (ignore);
+   result = g_inet_address_equal (uri_address, ignore_address);
+ 
++  g_object_unref (uri_address);
++  g_object_unref (ignore_address);
+   return ignore_port != 0 ? ((port == ignore_port) && result) : result;
+ }
+ 
+diff --git a/src/libproxy/proxy.c b/src/libproxy/proxy.c
+index 6b959f1..3bfb60d 100644
+--- a/src/libproxy/proxy.c
++++ b/src/libproxy/proxy.c
+@@ -55,10 +55,7 @@ char **
+ px_proxy_factory_get_proxies (pxProxyFactory *self,
+                               const char     *url)
+ {
+-  g_auto (GStrv) result = NULL;
+-
+-  result = px_manager_get_proxies_sync (self->manager, url);
+-  return g_steal_pointer (&result);
++  return px_manager_get_proxies_sync (self->manager, url);
+ }
+ 
+ void
+-- 
+2.51.0.windows.1
+
