@@ -1,0 +1,31 @@
+From 213384e02276084f9848d8607b8492879e0d07e4 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 25 Dec 2025 00:29:24 +0530
+Subject: [PATCH] cmake: Fix exception handling mode on MSVC
+
+```
+C:\projects\repos\cerbero.git\build\sources\msvc_arm64\srt-1.5.4\srtcore\api.cpp(4406):
+error C4530: C++ exception handler used, but unwind semantics are not
+enabled. Specify /EHsc
+```
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7ed11ef..f3feb56 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1025,6 +1025,9 @@ list(INSERT HEADERS_srt 0 "${CMAKE_CURRENT_BINARY_DIR}/version.h")
+ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+ 
+ add_library(srt_virtual OBJECT ${SOURCES_srt} ${SOURCES_srt_extra} ${HEADERS_srt} ${SOURCES_haicrypt} ${SOURCES_common})
++if (MSVC)
++        target_compile_options(srt_virtual PRIVATE "/EHsc")
++endif()
+ 
+ if (ENABLE_SHARED)
+ 	# Set this to sources as well, as it won't be automatically handled
+-- 
+2.51.0.windows.1
+
