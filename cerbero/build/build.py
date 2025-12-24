@@ -1143,7 +1143,7 @@ class Meson(Build, ModifyEnvBase):
             cpu=self.config.arch,
             cpu_family=self.config.arch,
             endian='little',
-            toolchain=self.get_env('ANDROID_NDK_TOOLCHAIN_BIN', ''),
+            toolchain=self.env.get('ANDROID_NDK_TOOLCHAIN_BIN', ''),
             CC=cc,
             CXX=cxx,
             OBJC=objc,
