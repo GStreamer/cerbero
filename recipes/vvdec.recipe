@@ -46,7 +46,6 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.ARMv7:
                 self.configure_options.append('-DVVDEC_ENABLE_ARM_SIMD=OFF')
 
-
     def post_install(self):
         libtool_la = LibtoolLibrary('vvdec', None, None, None, self.config.libdir,
                                     self.config.target_platform)

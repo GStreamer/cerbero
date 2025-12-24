@@ -42,6 +42,8 @@ class Recipe(recipe.Recipe):
         elif self.config.target_arch == Architecture.X86:
             # on x86 it tries to use the high bank of AVX
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
+        elif self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+            self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
 
         prefix = '' if self.using_msvc() else 'lib'
         self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')

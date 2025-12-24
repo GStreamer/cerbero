@@ -1,0 +1,25 @@
+From c935bd7281c2c8357f5d49280b0094ac45de0349 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 20:34:53 +0530
+Subject: [PATCH] denormal_disabler: asm syntax is not supported by MSVC ARM64
+
+---
+ webrtc/system_wrappers/source/denormal_disabler.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/webrtc/system_wrappers/source/denormal_disabler.cc b/webrtc/system_wrappers/source/denormal_disabler.cc
+index bb9c056..7ceffb0 100644
+--- a/webrtc/system_wrappers/source/denormal_disabler.cc
++++ b/webrtc/system_wrappers/source/denormal_disabler.cc
+@@ -20,7 +20,7 @@ namespace {
+ #endif
+ 
+ #if defined(WEBRTC_DENORMAL_DISABLER_X86_SUPPORTED) || \
+-    defined(WEBRTC_ARCH_ARM_FAMILY)
++    (defined(WEBRTC_ARCH_ARM_FAMILY) && !defined(_MSC_VER))
+ #define WEBRTC_DENORMAL_DISABLER_SUPPORTED
+ #endif
+ 
+-- 
+2.51.0.windows.1
+

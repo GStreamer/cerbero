@@ -1,0 +1,28 @@
+From 60aaf143900e315db0ecb9039af8a241a1b6380b Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 25 Dec 2025 01:48:11 +0530
+Subject: [PATCH] meson: Disable NEON suport on Windows
+
+Some work is needed.
+---
+ meson.build | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 5a62a28..b8ea92f 100644
+--- a/meson.build
++++ b/meson.build
+@@ -49,8 +49,8 @@ endforeach
+ 
+ cdata.set('HAVE_CPUID_H', cc.check_header('cpuid.h'))
+ cdata.set('HAVE_X86INTRIN_H', cc.check_header('x86intrin.h'))
+-cdata.set10('FLAC__HAS_NEONINTRIN', cc.check_header('arm_neon.h'))
+-cdata.set10('FLAC__HAS_A64NEONINTRIN', cc.check_header('arm_neon.h') and host_machine.cpu_family() == 'aarch64')
++cdata.set10('FLAC__HAS_NEONINTRIN', cc.check_header('arm_neon.h') and host_machine.system() != 'windows')
++cdata.set10('FLAC__HAS_A64NEONINTRIN', cc.check_header('arm_neon.h') and host_machine.cpu_family() == 'aarch64' and host_machine.system() != 'windows')
+ cdata.set('FLAC__USE_ALTIVEC', cc.check_header('altivec.h'))
+ cdata.set('WITH_AVX', cc.check_header('immintrin.h'))
+ 
+-- 
+2.51.0.windows.1
+

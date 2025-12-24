@@ -31,6 +31,8 @@ class Recipe(recipe.Recipe):
         # Always have NEON on ARM64, don't need to detect the CPU at runtime.
         if self.config.target_arch == Architecture.ARM64:
             self.meson_options['rtcd'] = 'disabled'
+            if self.using_msvc():
+                self.meson_options['intrinsics'] = 'disabled'
 
     def post_install(self):
         major, minor, micro = get_libtool_versions(self.version)

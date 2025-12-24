@@ -1,0 +1,26 @@
+From 3321d5fcebf327fd52b3d708a0e7209234af50bd Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 22:45:04 +0530
+Subject: [PATCH] Disable DOTPROD intrinsics on windows arm64
+
+---
+ meson.build | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index d040ddf..e29acb8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -470,8 +470,7 @@ if not opt_intrinsics.disabled()
+         return (int)vgetq_lane_s32(SUMM, 0);
+       }'''
+     intrin_name = 'AArch64 DOTPROD'
+-    if cc.links(intrin_check,
+-                name: 'compiler supports @0@ intrinsics'.format(intrin_name))
++    if host_system != 'windows' and cc.links(intrin_check, name: 'compiler supports @0@ intrinsics'.format(intrin_name))
+       opus_arm_presume_dotprod_intr = opus_can_presume_simd
+       opus_arm_may_have_dotprod_intr = true
+     else
+-- 
+2.51.0.windows.1
+

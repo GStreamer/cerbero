@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
 
     patches = [
         f'{name}/0001-Fix-build-with-GCC-15.1.patch',
+        f'{name}/0001-denormal_disabler-asm-syntax-is-not-supported-by-MSV.patch',
     ]
 
     # webrtc-audio-processing links to abseil statically

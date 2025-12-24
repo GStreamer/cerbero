@@ -21,6 +21,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libdav1d']
     files_devel = ['include/dav1d', '%(libdir)s/pkgconfig/dav1d.pc']
 
+    def prepare(self):
+        if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+            # gas-preprocessor chokes on loopfilter assembly
+            self.meson_options['enable_asm'] = 'false'
+
     def post_install(self):
         libtool_la = LibtoolLibrary('dav1d', None, None, None, self.config.libdir,
                                     self.config.target_platform)

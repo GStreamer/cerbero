@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
 
     patches = [
-        f'{name}/0001-Add-Meson-build.patch',
+        'flac/0001-Add-Meson-build.patch',
+        'flac/0001-meson-Disable-NEON-suport-on-Windows.patch',
     ]
 
     files_libs = ['libFLAC']

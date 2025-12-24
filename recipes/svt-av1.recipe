@@ -43,6 +43,9 @@ class Recipe(recipe.Recipe):
         if Platform.is_mobile(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
+        if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+            self.configure_options += ['-DCOMPILE_C_ONLY=ON']
+
     def post_install(self):
         if self.using_msvc():
             # svt-av1 has a separate (internal) build folder for binaries

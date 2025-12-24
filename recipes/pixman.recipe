@@ -47,6 +47,9 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm',
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
+        if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+            self.meson_options['mmx'] = 'disabled'
+            self.meson_options['a64-neon'] = 'disabled'
 
     def post_install(self):
         pixman_deps = []
