@@ -1,0 +1,26 @@
+From bb3fb183da466a013099195e75ec37bf78a8b59d Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 23:33:18 +0530
+Subject: [PATCH 2/2] Add support for MSVC arm64
+
+lrint, lrintf etc are supported on ARM64.
+---
+ src/spandsp/fast_convert.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/spandsp/fast_convert.h b/src/spandsp/fast_convert.h
+index af54e68..5b3972a 100644
+--- a/src/spandsp/fast_convert.h
++++ b/src/spandsp/fast_convert.h
+@@ -313,7 +313,7 @@ extern "C"
+         };
+         return i;
+     }
+-#elif defined(_M_X64)
++#elif defined(_M_X64) || defined(_M_ARM64)
+     /* Visual Studio x86_64 */
+     /* x86_64 machines will do best with a simple assignment. */
+ #include <intrin.h>
+-- 
+2.51.0.windows.1
+

@@ -1,0 +1,68 @@
+From 1bdc05ea34d1a3479282211ef95e6dc6f2d0089e Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 24 Dec 2025 23:32:01 +0530
+Subject: [PATCH 1/2] meson: Fix building of native executables
+
+The build files were configuring the native (build machine)
+executables with the host compilers.
+---
+ src/meson.build | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index 5162aa8..f6eac24 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -92,14 +92,19 @@ if cc.get_define('_MSC_VER') != ''
+ endif
+ 
+ make_incdirs = [include_dirs, include_directories('.')]
++native_incdirs = make_incdirs
+ 
+ if cc.has_define('_MSC_VER')
+     make_incdirs += include_directories('msvc')
+-    getopt = files(
++endif
++
++getopt = []
++build_cc = meson.get_compiler('c', native: true)
++if build_cc.has_define('_MSC_VER')
++    native_incdirs += include_directories('msvc')
++    getopt += files(
+         'msvc/getopt.c'
+     )
+-else
+-    getopt = []
+ endif
+ 
+ make_at_dictionary = executable(
+@@ -108,7 +113,7 @@ make_at_dictionary = executable(
+         'make_at_dictionary.c',
+     ),
+     c_args: ['-DHAVE_CONFIG_H'],
+-    include_directories: make_incdirs,
++    include_directories: native_incdirs,
+     native: true,
+     install: false,
+ )
+@@ -119,7 +124,7 @@ make_math_fixed_tables = executable(
+         'make_math_fixed_tables.c',
+     ),
+     c_args: ['-DHAVE_CONFIG_H'],
+-    include_directories: make_incdirs,
++    include_directories: native_incdirs,
+     dependencies: m_dep,
+     native: true,
+     install: false,
+@@ -132,7 +137,7 @@ make_modem_filter = executable(
+         'filter_tools.c',
+     ) + getopt,
+     c_args: ['-DHAVE_CONFIG_H', '-DSPANDSP_INTERNAL'],
+-    include_directories: make_incdirs,
++    include_directories: native_incdirs,
+     dependencies: m_dep,
+     native: true,
+     install: false,
+-- 
+2.51.0.windows.1
+

@@ -21,6 +21,9 @@ class Recipe(recipe.Recipe):
         'spandsp/0003-FS-6010-resolve.patch',
         'spandsp/0004-Fix-build-for-windows-using-mingw.patch',
         'spandsp/0005-Add-Meson-build.patch',
+        # Windows arm64 support
+        'spandsp/0001-meson-Fix-building-of-native-executables.patch',
+        'spandsp/0002-Add-support-for-MSVC-arm64.patch',
     ]
 
     files_libs = ['libspandsp']
