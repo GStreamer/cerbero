@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
         'vvdec/0001-Do-not-set-_WIN32_WINNT-in-CMake.patch',
         'vvdec/0002-Remove-include-stdio.h-from-sei.h.patch'
     ]
+    can_msvc = True
 
     btype = BuildType.CMAKE
     configure_options = ['-DVVDEC_TOPLEVEL_OUTPUT_DIRS=OFF']
