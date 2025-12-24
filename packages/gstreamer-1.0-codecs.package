@@ -51,6 +51,8 @@ class Package(custom.GStreamer, package.Package):
             if self.config.target_arch == Architecture.ARM64:
                 # Needs libiconv, which needs MinGW
                 self.files.remove('zbar:libs')
+                # Needs MinGW
+                self.files.remove('mpg123:libs')
             else:
                 # Needed by libass (optionally) and zbar
                 self.files.append('libiconv:libs')

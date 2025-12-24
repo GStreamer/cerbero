@@ -247,6 +247,10 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('ximagesrc', 'capture', variant='x11')
         self.enable_plugin('pulseaudio', 'sys', variant='pulse', option='pulse')
 
+        if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
+            # Needs MinGW
+            self.disable_plugin('mpg123', 'codecs', dep='mpg123')
+
         # Enable qt5 plugin if possible and selected
         can_enable_qt5 = True
         if self.config.target_platform == Platform.IOS:

@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     ]
 
     # Optimizations are supported by GNU assembler only
-    # Make sure to only use 64-bit APIs downstream (MSVC's off_t is 32-bit)
+    # TODO: see if gas-preprocessor.pl works on it
     can_msvc = False
 
     meson_options = {
