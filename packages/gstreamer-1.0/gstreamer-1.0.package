@@ -27,6 +27,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
                ('gstreamer-1.0-codecs-gpl-restricted', False, False),
                ('gstreamer-1.0-net-restricted', False, False),
                ('gstreamer-1.0-dvd', False, False),
+               ('gstreamer-1.0-dvd-gpl', False, False),
                ('gstreamer-1.0-libav', False, False),
                ('gstreamer-1.0-encoding', False, False),
                ('gstreamer-1.0-capture', False, False),
@@ -74,9 +75,8 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
         if self.config.platform != Platform.WINDOWS:
             self.wix_use_fragment = True
 
-        if self.config.variants.visualstudio or \
-           Platform.is_mobile(self.config.target_platform):
-            discard = ['gstreamer-1.0-dvd']
+        if Platform.is_mobile(self.config.target_platform):
+            discard = ['gstreamer-1.0-dvd-gpl']
             self.packages = [x for x in self.packages if x[0] not in discard]
 
         if self.config.target_platform == Platform.IOS:

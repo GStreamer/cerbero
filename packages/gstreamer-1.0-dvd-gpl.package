@@ -1,0 +1,28 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(custom.GStreamer, package.Package):
+
+    name = 'gstreamer-1.0-dvd-gpl'
+    shortdesc = 'GStreamer 1.0 DVD support plugins under the GPL license'
+    longdesc = 'GStreamer 1.0 DVD support plugins under the GPL license'
+    uuid = 'e733c4e0-dddb-588f-a141-59c51f0955a1'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['libdvdnav:libs', 'libdvdread:libs',
+            'gst-plugins-base-1.0:plugins_dvd_gpl',
+            'gst-plugins-good-1.0:plugins_dvd_gpl',
+            'gst-plugins-ugly-1.0:plugins_dvd_gpl',
+            'gst-plugins-bad-1.0:plugins_dvd_gpl']
+    files_devel = ['gst-plugins-base-1.0:plugins_dvd_gpl_devel'
+            'gst-plugins-good-1.0:plugins_dvd_gpl_devel',
+            'gst-plugins-ugly-1.0:plugins_dvd_gpl_devel',
+            'gst-plugins-bad-1.0:plugins_dvd_gpl_devel']
+
+    def prepare(self):
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
+            self.files.append('gst-plugins-rs:plugins_dvd_gpl')
+            self.files_devel.append('gst-plugins-rs:plugins_dvd_gpl_devel')
