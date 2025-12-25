@@ -150,6 +150,14 @@ class Recipe(custom.GStreamer):
         '%(libdir)s/pkgconfig/gstreamer-webrtc-nice-1.0.pc',
     ]
 
+    files_plugins_analytics = [
+             '%(libdir)s/gstreamer-1.0/libgsttensordecoders%(mext)s',
+    ]
+
+    files_plugins_analytics_devel = [
+             '%(libdir)s/gstreamer-1.0/libgsttensordecoders.a', '%(libdir)s/gstreamer-1.0/libgsttensordecoders.la',
+    ]
+
     files_plugins_core = [
              '%(libdir)s/gstreamer-1.0/libgstinsertbin%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstswitchbin%(mext)s',
