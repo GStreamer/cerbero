@@ -293,6 +293,7 @@ class Config(object):
         'ios_min_version',
         'toolchain_path',
         'mingw_perl_prefix',
+        'msvc_gl_prefix',
         'msvc_env_for_toolchain',
         'mingw_env_for_toolchain',
         'msvc_env_for_build_system',
