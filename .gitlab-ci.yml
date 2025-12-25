@@ -703,6 +703,15 @@ cerbero deps msvc x86:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
   when: 'manual'
 
+cerbero deps msvc cross-arm64:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_arm64'
+    CONFIG: 'cross-win-arm64.cbc'
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
+
 cerbero deps mingw x86_64:
   extends: ['.cerbero deps', '.cerbero windows native']
   variables:
@@ -734,6 +743,15 @@ build cerbero msvc x86:
   variables:
     ARCH: 'msvc_x86'
     CONFIG: 'win32.cbc'
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+  when: 'manual'
+
+build cerbero msvc cross-arm64:
+  extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_arm64'
+    CONFIG: 'cross-win-arm64.cbc'
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
   when: 'manual'
