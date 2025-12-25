@@ -15,6 +15,7 @@ class Recipe(custom.GStreamer):
     meson_options = {'gpl': 'enabled',
                      # enabled plugins
                      'aes': 'enabled',
+                     'analyticsoverlay': 'enabled',
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',
@@ -151,10 +152,12 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_analytics = [
+             '%(libdir)s/gstreamer-1.0/libgstanalyticsoverlay%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgsttensordecoders%(mext)s',
     ]
 
     files_plugins_analytics_devel = [
+             '%(libdir)s/gstreamer-1.0/libgstanalyticsoverlay.a', '%(libdir)s/gstreamer-1.0/libgstanalyticsoverlay.la',
              '%(libdir)s/gstreamer-1.0/libgsttensordecoders.a', '%(libdir)s/gstreamer-1.0/libgsttensordecoders.la',
     ]
 
