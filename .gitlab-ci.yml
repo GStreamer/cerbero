@@ -774,27 +774,3 @@ build cerbero mingw x86:
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
   when: 'manual'
-
-# FIXME: UWP build is disabled until build issues with latest GLib version are sorted out
-cerbero deps uwp universal:
-  extends: ['cerbero deps msvc x86_64']
-  variables:
-    CONFIG: 'cross-uwp-universal.cbc'
-    ARCH: 'uwp_universal'
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-  script:
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "CERBERO_ARGS='$CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_deps_script"
-  when: 'manual'
-
-# FIXME: UWP build is disabled until build issues with latest GLib version are sorted out
-build cerbero uwp universal:
-  extends: ['build cerbero msvc x86_64']
-  variables:
-    CONFIG: 'cross-uwp-universal.cbc'
-    ARCH: 'uwp_universal'
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-  script:
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "CERBERO_ARGS='$CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_script"
-  when: 'manual'
