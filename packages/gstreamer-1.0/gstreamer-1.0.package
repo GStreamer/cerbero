@@ -21,6 +21,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
                ('gstreamer-1.0-effects', False, True),
                ('gstreamer-1.0-net', False, True),
                ('gstreamer-1.0-visualizers', False, True),
+               ('gstreamer-1.0-analytics', False, True),
                ('gstreamer-1.0-codecs-gpl', False, False),
                ('gstreamer-1.0-codecs-restricted', False, False),
                ('gstreamer-1.0-codecs-gpl-restricted', False, False),

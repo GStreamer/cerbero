@@ -134,13 +134,15 @@ class Recipe(recipe.Recipe):
             self.deps.append('vvdec')
 
         plugin_files = {
+            'analytics': [
+                'rsanalytics',
+                'burn',
+            ],
             'core': [
                 'fallbackswitch',
                 'gopbuffer',
-                'burn',
                 'livesync',
                 'originalbuffer',
-                'rsanalytics',
                 'rsinter',
                 'rstracers',
                 'streamgrouper',

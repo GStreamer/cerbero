@@ -1,0 +1,19 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(custom.GStreamer, package.Package):
+
+    name = 'gstreamer-1.0-analytics'
+    shortdesc = 'GStreamer 1.0 analytics libraries and plugins'
+    longdesc = 'GStreamer 1.0 analytics libraries and plugins'
+    uuid = 'b4de1682-1a83-4e8c-8a2b-c7a98bc04628'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gst-plugins-bad-1.0:plugins_analytics']
+    files_devel = ['gst-plugins-bad-1.0:plugins_analytics_devel']
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_analytics')
+            self.files_devel.append('gst-plugins-rs:plugins_analytics_devel')
