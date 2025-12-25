@@ -12,7 +12,7 @@ import tempfile
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
-    version = '0.14.3'
+    version = '0.14.4'
     stype = SourceType.GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
     if GStreamer.tagged_for_release:

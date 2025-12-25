@@ -20,7 +20,7 @@ from cerbero.errors import FatalError
 
 
 # Safest place to define this since this file imports very few modules
-CERBERO_VERSION = '1.26.9.1'
+CERBERO_VERSION = '1.26.10'
 
 
 class Platform:
