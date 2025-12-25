@@ -355,8 +355,7 @@ async def unpack(filepath, output_dir, logfile=None):
         out_dir_name = os.path.splitext(os.path.split(filepath)[1])[0]
         with tempfile.TemporaryDirectory() as vol_name:
             output_dir = os.path.join(output_dir, out_dir_name)
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+            os.makedirs(output_dir, exist_ok=True)
             await async_call(
                 ['hdiutil', 'attach', '-readonly', '-mountpoint', vol_name, filepath], logfile=logfile, cpu_bound=False
             )
@@ -391,8 +390,7 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fa
             logging.info('File %s already downloaded.' % dest)
         return
     else:
-        if not os.path.exists(os.path.dirname(dest)):
-            os.makedirs(os.path.dirname(dest))
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         m.log('Downloading {}'.format(url), logfile)
 
     if sys.platform.startswith('win'):
@@ -532,8 +530,7 @@ def copy_dir(src, dest):
     for path in os.listdir(src):
         s = os.path.join(src, path)
         d = os.path.join(dest, path)
-        if not os.path.exists(os.path.dirname(d)):
-            os.makedirs(os.path.dirname(d))
+        os.makedirs(os.path.dirname(d), exist_ok=True)
         if os.path.isfile(s):
             shutil.copy(s, d)
         elif os.path.isdir(s):

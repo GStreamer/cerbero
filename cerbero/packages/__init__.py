@@ -54,8 +54,7 @@ class PackagerBase(object):
         @rtype: list
         """
         self.output_dir = os.path.realpath(output_dir)
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+        os.makedirs(self.output_dir, exist_ok=True)
         self.devel = devel
         self.force = force
         self.keep_temp = keep_temp

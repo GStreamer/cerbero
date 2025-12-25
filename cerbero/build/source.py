@@ -362,8 +362,7 @@ class BaseTarball(object):
             self.verify(fname, self.tarball_checksum)
             m.action(N_('Found %s at %s') % (self.url, fname), logfile=get_logfile(self))
             return
-        if not os.path.exists(self.download_dir):
-            os.makedirs(self.download_dir)
+        os.makedirs(self.download_dir, exist_ok=True)
         await shell.download(
             self.url,
             fname,
@@ -435,8 +434,7 @@ class Tarball(BaseTarball, Source):
 
     async def fetch(self, redownload=False):
         fname = self._get_download_path(self.tarball_name)
-        if not os.path.exists(self.download_dir):
-            os.makedirs(self.download_dir)
+        os.makedirs(self.download_dir, exist_ok=True)
 
         cached_file = os.path.join(self.config.cached_sources, self.package_name, self.tarball_name)
         if (
@@ -594,8 +592,7 @@ class Git(GitCache):
             except Exception:
                 pass
             shutil.rmtree(self.src_dir)
-        if not os.path.exists(self.src_dir):
-            os.makedirs(self.src_dir)
+        os.makedirs(self.src_dir, exist_ok=True)
 
         # checkout the current version
         await git.local_checkout(

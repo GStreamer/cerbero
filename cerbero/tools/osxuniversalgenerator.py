@@ -112,8 +112,7 @@ class OSXUniversalGenerator(object):
     def merge_dirs(self, input_roots, output_root=None):
         if output_root is None:
             output_root = self.output_root
-        if not os.path.exists(output_root):
-            os.makedirs(output_root)
+        os.makedirs(output_root, exist_ok=True)
         self.parse_dirs(input_roots)
 
     async def create_universal_file(self, output, inputlist, dirs):
@@ -181,8 +180,7 @@ class OSXUniversalGenerator(object):
         elif action == 'link':
             self._link(current_file, output_file, filepath)
         elif action == 'merge':
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+            os.makedirs(output_dir, exist_ok=True)
             await self.create_universal_file(output_file, full_filepaths, dirs)
         elif action == 'skip':
             pass  # just pass
@@ -236,8 +234,7 @@ class OSXUniversalGenerator(object):
         run_until_complete(parse_dirs_main())
 
     def _copy(self, src, dest):
-        if not os.path.exists(os.path.dirname(dest)):
-            os.makedirs(os.path.dirname(dest))
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         shutil.copy(src, dest)
 
     def _copy_and_replace_paths(self, src, dest, dirs):
@@ -248,8 +245,7 @@ class OSXUniversalGenerator(object):
         shell.replace(dest, replacements)
 
     def _link(self, src, dest, filepath):
-        if not os.path.exists(os.path.dirname(dest)):
-            os.makedirs(os.path.dirname(dest))
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         if os.path.lexists(dest):
             return  # link exists, skip it
 

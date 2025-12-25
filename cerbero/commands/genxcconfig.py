@@ -45,8 +45,7 @@ class GenXCodeConfig(Command):
         self.runargs(config, args.output_dir, args.filename, args.libraries)
 
     def runargs(self, config, output_dir, filename, libraries):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         if len(libraries) == 0:
             raise UsageError('You need to specify at least one library name')

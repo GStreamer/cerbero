@@ -140,8 +140,8 @@ class ZipFile(zipfile_ZipFile):
 
         # Create all upper directories if necessary.
         upperdirs = os.path.dirname(targetpath)
-        if upperdirs and not os.path.exists(upperdirs):
-            os.makedirs(upperdirs)
+        if upperdirs:
+            os.makedirs(upperdirs, exist_ok=True)
 
         # Unlink before extracting, this ensures that if there is a symbolic
         # link in place it will not be followed to the (possibly non existing)

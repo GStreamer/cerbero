@@ -209,11 +209,8 @@ class MinGWBootstrapper(BootstrapperBase):
             self.fix_mingw()
 
     def check_dirs(self):
-        if not os.path.exists(self.prefix):
-            os.makedirs(self.prefix)
-        etc_path = os.path.join(self.config.prefix, 'etc')
-        if not os.path.exists(etc_path):
-            os.makedirs(etc_path)
+        os.makedirs(self.prefix, exist_ok=True)
+        os.makedirs(os.path.join(self.config.prefix, 'etc'), exist_ok=True)
 
     def fix_mingw(self):
         # On Windows, if the user is not allowed to create symbolic links or if

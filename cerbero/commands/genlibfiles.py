@@ -46,8 +46,8 @@ class GenLibraryFiles(Command):
         if config.target_platform != Platform.WINDOWS:
             raise UsageError(_('%s command can only be used targetting ' 'Windows platforms') % self.name)
 
-        if args.output_dir is not None and not os.path.exists(args.output_dir):
-            os.makedirs(args.output_dir)
+        if args.output_dir is not None:
+            os.makedirs(args.output_dir, exist_ok=True)
 
         cookbook = CookBook(config)
         recipes = cookbook.get_recipes_list()

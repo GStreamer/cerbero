@@ -501,8 +501,7 @@ class MakefilesBase(Build, ModifyEnvBase):
         if self.config.target_arch == Architecture.ARM64 and self.config.variants.visualstudio and not self.can_msvc:
             raise FatalError(f"Recipe {self.name} doesn't support MSVC, so it cannot target ARM64")
         configure_dir = self.get_configure_dir()
-        if not os.path.exists(configure_dir):
-            os.makedirs(configure_dir)
+        os.makedirs(configure_dir, exist_ok=True)
 
         self.maybe_add_system_libs(step='configure')
         configure_cmd = self.get_configure_cmd()
@@ -512,8 +511,7 @@ class MakefilesBase(Build, ModifyEnvBase):
     @modify_environment
     async def compile(self):
         make_dir = self.get_make_dir()
-        if not os.path.exists(make_dir):
-            os.makedirs(make_dir)
+        os.makedirs(make_dir, exist_ok=True)
 
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, make_dir, logfile=self.logfile, env=self.env)

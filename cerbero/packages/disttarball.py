@@ -122,8 +122,7 @@ class DistTarball(PackagerBase):
             orig_file = os.path.join(self.prefix, f)
             tmp_file = os.path.join(tmpdir, f)
             tmp_file_dir = os.path.dirname(tmp_file)
-            if not os.path.exists(tmp_file_dir):
-                os.makedirs(tmp_file_dir)
+            os.makedirs(tmp_file_dir, exist_ok=True)
             shutil.copy(orig_file, tmp_file, follow_symlinks=False)
             s.strip_file(tmp_file)
 

@@ -332,8 +332,7 @@ class CookBook(object):
     def save(self):
         try:
             cache_file = self._cache_file(self.get_config())
-            if not os.path.exists(os.path.dirname(cache_file)):
-                os.makedirs(os.path.dirname(cache_file))
+            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
             with open(cache_file, 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError as ex:

@@ -51,8 +51,7 @@ class BundlePackagerBase(PackagerBase):
 
     def pack(self, output_dir, root=None):
         output_dir = os.path.realpath(output_dir)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         path = self._create_package(output_dir, self.package.get_install_dir(), self.package.version, root)
         return [path, None]
@@ -182,8 +181,7 @@ class ApplicationBundlePackager(object):
         macos = os.path.join(contents, 'MacOS')
         resources = os.path.join(contents, 'Resources')
         for p in [contents, macos, resources]:
-            if not os.path.exists(p):
-                os.makedirs(p)
+            os.makedirs(p, exist_ok=True)
 
         # Create Contents/Info.plist
         # Use the template if provided in the package

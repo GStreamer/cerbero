@@ -78,8 +78,7 @@ class Tar:
             await self.unpack_tarfile(output_dir)
             return
 
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
         tar_cmd = self.get_cmd()
         try:
@@ -124,8 +123,7 @@ class Tar:
         await self.unpack_tarfile(output_dir)
 
     def unpack_sync(self, output_dir):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
         return shell.new_call([self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args)
 
     def _compress_tar(self, tar_filename):
