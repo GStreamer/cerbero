@@ -67,7 +67,7 @@ function Install-VS {
   param([string]$PreferredVersion)
 
   $version = $PreferredVersion
-  $vs_arglist = '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
+  $vs_arglist = '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 --includeRecommended'
 
   # If no version specified, prompt for it
   if (-not $version) {
