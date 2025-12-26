@@ -22,16 +22,9 @@ class Recipe(recipe.Recipe):
         name + '/0005-Fix-debug-build.patch',
         name + '/0006-Add-license-for-vcpkg-changes.patch',
     ]
-    platform_deps = {
-        Platform.LINUX: ['openssl'],
-    }
+    deps = ['openssl']
     files_libs = ['librtmp']
     files_devel = ['include/librtmp', '%(libdir)s/pkgconfig/librtmp.pc']
-
-    def prepare(self):
-        # Pick system openssl if on Linux and not cross-compiling
-        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
-            self.deps.append('openssl')
 
     def post_install(self):
         deps = ['ssl', 'crypto', 'z']

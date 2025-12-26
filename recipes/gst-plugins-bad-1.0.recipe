@@ -88,12 +88,9 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'zlib', 'openh264', 'opus', 'lcevcdec', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
-            'soundtouch', 'vo-aacenc', 'openjpeg',
+            'soundtouch', 'vo-aacenc', 'openjpeg', 'openssl',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar', 'libltc', 'qrencode', 'json-glib']
-    platform_deps = {
-        Platform.LINUX: ['openssl']
-    }
 
     files_lang = ['gst-plugins-bad-1.0']
 
@@ -626,11 +623,6 @@ class Recipe(custom.GStreamer):
 
         if Platform.is_mobile(self.config.target_platform):
             self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
-
-        # dtls plugin needs openssl, and we pick up the system openssl if on
-        # Linux and not cross-compiling.
-        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
-            self.deps.append('openssl')
 
         if self.using_msvc() and self.config.cross_compiling():
             # External deps that haven't been ported to MSVC

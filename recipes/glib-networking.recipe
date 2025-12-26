@@ -15,10 +15,7 @@ class Recipe(recipe.Recipe):
     # https://gitlab.gnome.org/GNOME/glib-networking/-/commit/270d54a5ef9a3c9cb96997dbe0fbcb329dbf80e8
     meson_options = {'libproxy': 'enabled', 'gnome_proxy': 'disabled',
                      'gnutls': 'disabled', 'openssl': 'enabled'}
-    deps = ['glib', 'libproxy']
-    platform_deps = {
-        Platform.LINUX: ['openssl']
-    }
+    deps = ['glib', 'libproxy', 'openssl']
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
@@ -35,9 +32,6 @@ class Recipe(recipe.Recipe):
             self.files_devel.append(
                 '%(libdir)s/gio/modules/pkgconfig/gioopenssl.pc'
             )
-        # Pick system openssl if on Linux and not cross-compiling
-        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
-            self.deps.append('openssl')
 
     def post_install(self):
         if self.config.target_platform != Platform.WINDOWS:

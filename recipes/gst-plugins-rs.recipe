@@ -86,10 +86,7 @@ class Recipe(recipe.Recipe):
         'webrtchttp',
     ]
 
-    platform_deps = {
-        Platform.LINUX: ['openssl']
-    }
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
+    deps = ['openssl', 'gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
     files_libs = []
 
@@ -126,9 +123,6 @@ class Recipe(recipe.Recipe):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.BOTH
-
-        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
-            self.deps.append('openssl')
 
         if 'dav1d' in self.cargo_packages:
             self.deps.append('dav1d')

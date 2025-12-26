@@ -30,18 +30,17 @@ from cerbero.enums import License, LicenseDescription
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalMergedFilesProvider
 from cerbero.config import Distro, Platform
-from cerbero.errors import FatalError, CommandError
+from cerbero.errors import FatalError, CommandError, InvalidRecipeError
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_
-from cerbero.utils import shell, run_tasks, get_system_pc_path
+from cerbero.utils import shell, run_tasks, get_system_pc_path, split_version
 from cerbero.utils import messages as m
 from cerbero.tools import dsymutil
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.enums import LibraryType
-
 
 LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
 
@@ -1337,6 +1336,9 @@ def import_recipe(file, class_name='Recipe'):
 
 class SystemRecipe(Recipe):
     name = None
+    # min_version can be a str to use the same version with all the pkgconfig
+    # files or a dict where the key in the pkgconfig_file and the version
+    min_version = None
     pkgconfig_files = None
 
     def __init__(self, config, env):
@@ -1348,6 +1350,9 @@ class SystemRecipe(Recipe):
         self.platform_deps = {}
         self.config = config
         FilesProvider.__init__(self, config)
+        if config.cross_compiling():
+            raise InvalidRecipeError(self, 'System recipes cannot be used when cross-compiling')
+        self._validate_and_ensure_version()
 
     def get_checksum(self):
         return self.name
@@ -1383,6 +1388,21 @@ class SystemRecipe(Recipe):
             os.unlink(dest)
 
         shell.symlink(pc_path, dest)
+
+    def _validate_and_ensure_version(self):
+        for pkgconfig_file in self.pkgconfig_files:
+            try:
+                get_system_pc_path(self.config, pkgconfig_file)
+            except FatalError:
+                raise InvalidRecipeError(self, f'{pkgconfig_file} not found in the system and required by {self.name}')
+            if not self.min_version:
+                return
+            lib = PkgConfig(pkgconfig_file)
+            version = lib.modversion()
+            if split_version(version) < split_version(self.min_version):
+                raise InvalidRecipeError(
+                    self, f'System pkgconfig file {pkgconfig_file} is too old ({version} < {self.min_version})'
+                )
 
     def __repr__(self):
         return '<SystemRecipe %s>' % self.name

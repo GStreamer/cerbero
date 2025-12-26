@@ -17,6 +17,10 @@ class Recipe(recipe.Recipe):
         f'{name}/0001-meson-add-attributes-h-and-plugin-h.patch',
     ]
 
+    platform_deps = {
+        Platform.LINUX: ['libpulse'],
+    }
+
     meson_options = {
         'docs': 'disabled',
         'examples': 'disabled',
@@ -30,9 +34,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform not in (Platform.LINUX, Platform.ANDROID):
             raise InvalidRecipeError(self, "Invalid platform")
-
-        if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
-            self.deps.append('libpulse')
 
     def post_install(self):
         LibtoolLibrary('tinyalsa', 2, 0, 0, self.config.libdir,

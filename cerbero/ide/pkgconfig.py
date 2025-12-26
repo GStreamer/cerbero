@@ -63,6 +63,12 @@ class PkgConfig(object):
         res = self._exec('--libs-only-l --static', '-l')
         return self._remove_deps(PkgConfig.libraries, res)
 
+    def modversion(self):
+        res = self._exec('--modversion', ' ')
+        out = self._remove_deps(PkgConfig.cflags, res)
+        modversion = out[0] if len(self.libs) == 1 else out[0].split('\n')
+        return modversion
+
     def requires(self):
         res = []
         for x in self._exec('--print-requires', '\n'):
