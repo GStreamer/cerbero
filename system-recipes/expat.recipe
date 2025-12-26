@@ -1,0 +1,10 @@
+import sys
+
+class Recipe(recipe.SystemRecipe):
+    name = 'expat'
+    min_version = '2.7.2'
+    pkgconfig_files = ['expat']
+
+    def prepare(self):
+        if sys.version_info < (3, 13, 0) and self.config.target_distro == Distro.ARCH:
+            raise InvalidRecipeError(self, "system recipe for expat only needed for python 3.13")
