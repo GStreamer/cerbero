@@ -6,7 +6,7 @@ from setuptools.command.build_py import build_py
 
 # Import logging for setup commands
 try:
-    from setuptools import logging
+    from setuptools.logging import logging
 except ImportError:
     # Fallback for older setuptools
     import logging
