@@ -198,6 +198,7 @@ class WheelPackager(PackagerBase):
         restricted_files_list = []
         plugins_list = []
         frei0r_list = []
+        gtk_list = []
         plugins_runtime_list = []
         runtime_list = []
         python_list = []
@@ -206,6 +207,7 @@ class WheelPackager(PackagerBase):
         gpl_restricted_licenses = set()
         restricted_licenses = set()
         gpl_licenses = set()
+        gtk_licenses = set()
         python_licenses = set()
         runtime_licenses = set()
         plugins_licenses = set()
@@ -235,6 +237,9 @@ class WheelPackager(PackagerBase):
             elif p.name.endswith('-python'):
                 python_list += p.files_list()
                 python_licenses.update(_parse_licenses(p))
+            elif p.name.endswith('-gtk'):
+                gtk_list += p.files_list()
+                gtk_licenses.update(_parse_licenses(p))
             else:
                 for f in p.files_list():
                     source = Path(self.config.prefix, f)
@@ -254,6 +259,8 @@ class WheelPackager(PackagerBase):
 
         # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
         # (package name, payload, license (SPDX is acronym?), and dependencies/features)
+        # When adding a new package here, also edit
+        # data/wheel/gstreamer_runtime/__init__.py:gstreamer_env()
         package_files_list = {
             'gstreamer_runtime': runtime_list,
             'gstreamer_plugins_runtime': plugins_runtime_list,
@@ -264,6 +271,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_restricted': restricted_files_list,
             'gstreamer_cli': cli_list,
             'gstreamer_python': python_list,
+            'gstreamer_gtk': gtk_list,
             'gstreamer': [],
         }
 
@@ -279,6 +287,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_cli': [License.LGPLv2_1Plus],
             'gstreamer_plugins': plugins_licenses,
             'gstreamer_python': python_licenses,
+            'gstreamer_gtk': gtk_licenses,
             # GStreamer supplied
             'gstreamer': [License.LGPLv2_1Plus],
         }
@@ -307,6 +316,7 @@ class WheelPackager(PackagerBase):
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
                 f'gstreamer_plugins_restricted ~= {self.package.version}',
                 f'gstreamer_python ~= {self.package.version}',
+                f'gstreamer_gtk ~= {self.package.version}',
             ],
         }
 
@@ -368,10 +378,9 @@ class WheelPackager(PackagerBase):
                 dest = output_dir / package_name / dirpath
                 dest.mkdir(parents=True, exist_ok=True)
                 shutil.copy(source, dest)
+                rpath_args = []
                 if self.config.target_platform == Platform.DARWIN:
                     if source.suffix not in ('.so', '.dylib') and dest.name != 'bin':
-                        continue
-                    if package_name == 'gstreamer_runtime':
                         continue
                     # We should not modify this, it's codesigned and copied as-is from the Vulkan SDK
                     if source.name == 'libMoltenVK.dylib':
@@ -381,25 +390,29 @@ class WheelPackager(PackagerBase):
                         ftype = self.get_file_type(destpath)
                         if 'Mach-O' not in ftype:
                             continue
+                    # Add rpath from the gi loader to other wheels that ship
+                    # libs that have typelibs
+                    if package_name == 'gstreamer_runtime':
+                        if 'girepository' in source.name:
+                            for whl in ('gstreamer_gtk',):
+                                relpath = os.path.relpath(f'{whl}/lib', f'{package_name}/{dirpath}')
+                                rpath_args += ['-add_rpath', f'@loader_path/{relpath}']
+                            shell.new_call(['install_name_tool'] + rpath_args + [destpath], env=self.config.env)
+                        continue
                     # We need to route an RPATH from, say,
                     # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_python/{dirpath}
                     # to
                     # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_runtime/lib
                     relpath = os.path.relpath('gstreamer_runtime/lib', f'{package_name}/{dirpath}')
-                    shell.new_call(
-                        ['install_name_tool', '-add_rpath', f'@loader_path/{relpath}', destpath],
-                        env=self.config.env,
-                    )
+                    rpath_args += ['-add_rpath', f'@loader_path/{relpath}']
                     for dep in dependencies:
                         pkg = dep.split('~=')[0].strip()
                         if pkg == 'gstreamer_runtime':
                             # Already added above
                             continue
                         relpath = os.path.relpath(f'{pkg}/lib', f'{package_name}/{dirpath}')
-                        shell.new_call(
-                            ['install_name_tool', '-add_rpath', f'@loader_path/{relpath}', destpath],
-                            env=self.config.env,
-                        )
+                        rpath_args += ['-add_rpath', f'@loader_path/{relpath}']
+                    shell.new_call(['install_name_tool'] + rpath_args + [destpath], env=self.config.env)
 
             classifiers = self._get_classifiers(license)
 

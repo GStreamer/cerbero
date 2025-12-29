@@ -92,6 +92,11 @@ def gstreamer_env():
     except ImportError:
         py_env = {}
 
+    try:
+        from gstreamer_gtk import environment as gtk_env
+    except ImportError:
+        gtk_env = {}
+
     if sys.platform == 'win32':
         from gstreamer_msvc_runtime import environment as gp_msvc_env
     else:
@@ -108,6 +113,7 @@ def gstreamer_env():
 
     package_keys = [
         environment.items(),
+        gtk_env.items(),
         py_env.items(),
         gp_env.items(),
         gpr_env.items(),
