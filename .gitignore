@@ -22,3 +22,4 @@ MANIFEST.in
 /gstreamer*.tar.bz2
 /gstreamer*.tar.xz
 /gstreamer*.tar.zst
+/gstreamer*.whl
