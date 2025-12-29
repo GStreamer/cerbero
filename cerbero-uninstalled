@@ -49,14 +49,14 @@ find_non_msys2_python() {
 
 case "$MSYS_VERSION" in
     1)
-        if type -p py; then
+        if type -p py &>/dev/null; then
             PYTHON="py -3"
         else
             PYTHON="python"
         fi
         ;;
     2)
-        if type -p py; then
+        if type -p py &>/dev/null; then
             PYTHON="py -3"
         else
             PYTHON="$(find_non_msys2_python)"
