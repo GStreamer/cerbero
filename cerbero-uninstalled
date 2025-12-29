@@ -147,6 +147,19 @@ sys.path.insert(0, os.path.abspath(curdir))
 if sys.argv == ['-c']:
     sys.argv = ['$0'] + shlex.split('$ARGS')
 
+# Env vars that can affect our build
+cleanup = (
+    'GIO_EXTRA_MODULES', 'PYGI_DLL_DIRS', 'GI_TYPELIB_PATH',
+    'GST_PLUGIN_SCANNER', 'GST_PLUGIN_SCANNER_1_0', 'GST_REGISTRY_1_0',
+    'GST_REGISTRY', 'GST_PLUGIN_SYSTEM_PATH', 'GST_PLUGIN_SYSTEM_PATH_1_0',
+    'GST_PLUGIN_PATH', 'GST_PLUGIN_PATH_1_0', 'GST_PYTHONPATH',
+    'GST_PYTHONPATH_1_0', 'LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH',
+    'PKG_CONFIG_PATH', 'PKG_CONFIG_LIBDIR',
+)
+for v in cleanup:
+    if v in os.environ:
+        os.environ.pop(v)
+
 from cerbero.main import main
 main()
 #"""
