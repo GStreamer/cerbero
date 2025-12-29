@@ -30,4 +30,4 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('gobject-introspection:libs:typelibs')
 
         if self.config.variants.rust:
-            self.files.append('librsvg:libs')
+            self.files += ['librsvg:libs', 'dav1d:libs']

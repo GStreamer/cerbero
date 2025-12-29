@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.60.0'
     licenses = [License.LGPLv2Plus]
-    deps = ['gdk-pixbuf', 'pango', 'cairo', 'libxml2']
+    deps = ['gdk-pixbuf', 'pango', 'cairo', 'libxml2', 'dav1d']
     btype = BuildType.MESON
     stype = SourceType.GIT
     stype = SourceType.TARBALL
