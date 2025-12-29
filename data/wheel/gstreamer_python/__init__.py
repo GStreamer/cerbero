@@ -20,6 +20,9 @@ _site_packages_prefix = _get_site_packages_prefix(_gstreamer_root)
 These paths will be prepended by gstreamer[cli,gpl]'s build_environment
 """
 environment = {
+    'PYTHONPATH': os.pathsep.join(
+        [Path(__file__).parent.parent.as_posix(), Path(_gstreamer_root, _site_packages_prefix).as_posix()]
+    ),
     'PATH': f'{_gstreamer_root}/bin',
     'LD_LIBRARY_PATH': f'{_gstreamer_root}/lib',
     'GI_TYPELIB_PATH': f'{_gstreamer_root}/lib/girepository-1.0',
