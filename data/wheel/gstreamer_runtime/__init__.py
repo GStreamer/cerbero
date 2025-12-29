@@ -98,7 +98,10 @@ def gstreamer_env():
         gtk_env = {}
 
     if sys.platform == 'win32':
-        from gstreamer_msvc_runtime import environment as gp_msvc_env
+        try:
+            from gstreamer_msvc_runtime import environment as gp_msvc_env
+        except ImportError:
+            gp_msvc_env = {}
     else:
         gp_msvc_env = {}
 
