@@ -681,10 +681,14 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 # Rust has a different convention e.g. cargo-capi.exe == cargo_capi.pdb
                 # And CMake can result in wavpack.pdb -> libwavpack.dll
                 def possible_names(binary):
+                    suffixes = ''.join(binary.suffixes)
+                    real_stem = binary.name[: -len(suffixes)]
                     return (
                         binary.stem in pdb.stem
                         or binary.stem.replace('-', '_') in pdb.stem
                         or pdb.stem == binary.stem[3:]
+                        # cargo-c unSOversioned
+                        or real_stem in pdb.stem
                     )
 
                 def exact_names(binary):
@@ -702,13 +706,21 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
 
                 # Allow fuzzy matches...
                 is_fuzzy_match = len(potential_matches) == 1
+                suffixes = None
+                real_name = None
                 # Except on Apple platforms where we can have prefix matches
                 # with unrelated Rust-generated symbols
                 # (eg. gst-ptp-helper-test)
                 if is_fuzzy_match and Platform.is_apple(self.config.target_platform):
                     match = potential_matches[0]
+                    suffixes = ''.join(match.suffixes)
+                    real_name = match.name[: -len(suffixes)] + match.suffix
                     # Unless it's an executable renamed by Meson (gst-dots-viewer)
-                    is_fuzzy_match = pdb.stem.startswith(match.stem.replace('-', '_'))
+                    if pdb.stem.startswith(match.stem.replace('-', '_')):
+                        is_fuzzy_match = True
+                    # Or a cargo-c generated dylib that forgot its soversion)
+                    elif pdb.stem == real_name:
+                        is_fuzzy_match = True
 
                 if not potential_matches:
                     continue
@@ -725,7 +737,15 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 elif is_fuzzy_match:
                     match = potential_matches[0]
                     dst = match.parent / pdb.name
-                    if pdb.stem != match.stem[3:]:  # If not CMake (wavpack)
+                    # If Cargo-C
+                    needs_cargo_c_fix = pdb.stem == real_name
+                    # If CMake (wavpack) or Meson (gst-devtools-1.0)
+                    needs_relocating = (
+                        match.stem.startswith('lib') and pdb.stem != match.stem[3:]
+                    ) or pdb.stem.startswith(match.stem.replace('-', '_'))
+                    if needs_cargo_c_fix:
+                        dst = dst.with_stem(match.name)
+                    elif needs_relocating:
                         dst = dst.with_stem(match.stem)
                 else:
                     m.warning(

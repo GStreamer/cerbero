@@ -1,5 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.enums import Symbolication
+
+
 class Recipe(recipe.Recipe):
     name = 'accesskit'
     # the required version is specified in the Accesskit-c Cargo.toml file
@@ -32,6 +35,10 @@ class Recipe(recipe.Recipe):
         'include/accesskit_winit',
         '%(libdir)s/pkgconfig/accesskit_winit.pc',
     ]
+
+    symbolication_patterns = {
+        Symbolication.MANUAL: ['accesskit_winit']
+    }
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
