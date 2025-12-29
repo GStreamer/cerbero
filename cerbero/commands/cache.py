@@ -24,6 +24,7 @@ import pickle
 import shutil
 import shlex
 from hashlib import sha256
+from pathlib import Path
 
 from cerbero.commands import Command, register_command
 from cerbero.enums import Platform, Distro
@@ -66,7 +67,7 @@ class BaseCache(Command):
         cerbero's home_dir. If it doesn't exist, we will error out loudly,
         since it indicates a corrupted cache.
         """
-        cache_file = os.path.join(config.build_tools_prefix, 'pyvenv.cfg')
+        cache_file = Path(config.build_tools_prefix, 'pyvenv.cfg').as_posix()
         with open(cache_file, 'r', encoding='utf-8') as f:
             for line in f:
                 if not line.startswith('command = '):
@@ -74,7 +75,7 @@ class BaseCache(Command):
                 _, cmd = line.split(' = ')
                 cache_build_tools_prefix = shlex.split(cmd)[-1]
                 return os.path.dirname(cache_build_tools_prefix)
-        cache_file = os.path.join(config.build_tools_prefix, 'bin', 'meson')
+        cache_file = Path(config.build_tools_prefix, 'bin', 'meson').as_posix()
         with open(cache_file, 'r', encoding='utf-8') as f:
             line = f.readline()
             if line.startswith('#!'):
@@ -84,7 +85,7 @@ class BaseCache(Command):
 
     def get_gnu_sed(self, config):
         if config.platform == Platform.DARWIN:
-            return os.path.join(config.build_tools_prefix, 'bin', 'sed')
+            return Path(config.build_tools_prefix, 'bin', 'sed').as_posix()
         return 'sed'
 
     # FIXME: move this to utils
@@ -110,7 +111,7 @@ class BaseCache(Command):
         m.message('GET %s' % url)
 
         tmpdir = tempfile.mkdtemp()
-        tmpfile = os.path.join(tmpdir, 'deps.json')
+        tmpfile = Path(tmpdir, 'deps.json').as_posix()
         run_until_complete(shell.download(url, tmpfile))
         m.message(f'{tmpfile} downloaded')
 
@@ -159,10 +160,10 @@ class BaseCache(Command):
         return deps
 
     def get_deps_filepath(self, config):
-        return os.path.join(config.home_dir, self.deps_filename)
+        return Path(config.home_dir, self.deps_filename).as_posix()
 
     def get_log_filepath(self, config):
-        return os.path.join(config.home_dir, self.log_filename)
+        return Path(config.home_dir, self.log_filename).as_posix()
 
     def run(self, config, args):
         self.dry_run = args.dry_run
@@ -228,13 +229,13 @@ class FetchCache(BaseCache):
         binaries there.
         """
         paths = [
-            os.path.join(config.build_tools_prefix, 'bin'),
-            os.path.join(config.build_tools_prefix, 'lib'),
+            Path(config.build_tools_prefix, 'bin').as_posix(),
+            Path(config.build_tools_prefix, 'lib').as_posix(),
         ]
         for dir_path in paths:
             for dirpath, _dirnames, filenames in os.walk(dir_path):
                 for f in filenames:
-                    object_file = os.path.join(dirpath, f)
+                    object_file = Path(dirpath, f).as_posix()
                     if not self._is_mach_o_file(object_file):
                         continue
                     for path in old_paths:
@@ -246,7 +247,7 @@ class FetchCache(BaseCache):
         pip-installed Python programs, which need to be rebuilt for the current
         prefix. Currently, this is just Meson in build-tools.
         """
-        cache_file = os.path.join(config.home_dir, config.build_tools_cache)
+        cache_file = Path(config.home_dir, config.build_tools_cache).as_posix()
         with open(cache_file, 'rb+') as f:
             p = pickle.load(f)
             # Reset the recipe status
@@ -429,7 +430,7 @@ class UploadCache(BaseCache):
 
         tmpdir = tempfile.mkdtemp()
         private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY')
-        private_key_path = os.path.join(tmpdir, 'id_rsa')
+        private_key_path = Path(tmpdir, 'id_rsa').as_posix()
 
         deps_filepath = self.get_deps_filepath(config)
         log_filepath = self.get_log_filepath(config)
@@ -456,14 +457,14 @@ class UploadCache(BaseCache):
                 shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir], verbose=True)
 
             # Upload the deps files first
-            remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
+            remote_deps_filepath = Path(base_dir, f'{sha}-{self.deps_filename}').as_posix()
             upload_cmd = scp_cmd + [deps_filepath, f'{self.ssh_address}:{remote_deps_filepath}']
             m.message(f'Uploading deps file: {upload_cmd!r}')
             if not self.dry_run:
                 shell.new_call(upload_cmd, verbose=True)
 
             # Upload the new log
-            remote_tmp_log_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
+            remote_tmp_log_filepath = Path(base_dir, f'{sha}-{self.log_filename}').as_posix()
             upload_cmd = scp_cmd + [log_filepath, f'{self.ssh_address}:{remote_tmp_log_filepath}']
             m.message(f'Uploading deps log: {upload_cmd!r}')
             if not self.dry_run:
@@ -471,7 +472,7 @@ class UploadCache(BaseCache):
 
             # Override the new log in a way that we reduce the risk of corrupted
             # fetch.
-            remote_log_filepath = os.path.join(base_dir, self.log_filename)
+            remote_log_filepath = Path(base_dir, self.log_filename).as_posix()
             rename_cmd = ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath]
             m.message(f'Renaming deps log: {rename_cmd!r}')
             if not self.dry_run:
@@ -480,7 +481,7 @@ class UploadCache(BaseCache):
 
             # Now remove the obsoleted dep file if needed
             for dep in deps[self.log_size - 1 :]:
-                old_remote_deps_filepath = os.path.relpath(dep['url'], self.base_url)
+                old_remote_deps_filepath = Path(os.path.relpath(dep['url'], self.base_url)).as_posix()
                 rm_cmd = ['rm', '-f', old_remote_deps_filepath]
                 m.message(f'Removing obsolete dep file: {rm_cmd!r}')
                 if not self.dry_run:
