@@ -17,7 +17,7 @@ def _get_site_packages_prefix(base):
 _site_packages_prefix = _get_site_packages_prefix(_gstreamer_root)
 
 """
-These paths will be prepended by gstreamer[cli,gpl]'s build_environment
+These paths will be prepended by gstreamer's build_environment
 """
 environment = {
     'PYTHONPATH': os.pathsep.join(

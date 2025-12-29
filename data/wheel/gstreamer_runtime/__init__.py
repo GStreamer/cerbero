@@ -23,7 +23,7 @@ else:
     _gst_registry_10 = Path(sys.prefix, _folder, _gst_registry_filepath)
 
 """
-These paths will be prepended by gstreamer[cli,gpl]'s build_environment
+These paths will be prepended by gstreamer's build_environment
 """
 environment = {
     'PATH': f'{_gstreamer_root}/bin',
