@@ -700,6 +700,16 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 # for frei0r plugins where they have "3dflippo" and "flippo"
                 exact_matches = list(filter(exact_names, potential_matches))
 
+                # Allow fuzzy matches...
+                is_fuzzy_match = len(potential_matches) == 1
+                # Except on Apple platforms where we can have prefix matches
+                # with unrelated Rust-generated symbols
+                # (eg. gst-ptp-helper-test)
+                if is_fuzzy_match and Platform.is_apple(self.config.target_platform):
+                    match = potential_matches[0]
+                    # Unless it's an executable renamed by Meson (gst-dots-viewer)
+                    is_fuzzy_match = pdb.stem.startswith(match.stem.replace('-', '_'))
+
                 if not potential_matches:
                     continue
                 elif len(exact_matches) == 1:
@@ -712,13 +722,16 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                         dst = match.parent / pdb.name.replace('_', '-')
                     else:
                         dst = match.parent / pdb.name
-                elif len(potential_matches) == 1:
+                elif is_fuzzy_match:
                     match = potential_matches[0]
                     dst = match.parent / pdb.name
                     if pdb.stem != match.stem[3:]:  # If not CMake (wavpack)
                         dst = dst.with_stem(match.stem)
                 else:
-                    m.warning(f'Too many matches for dSYM file {pdb}: {potential_matches}', logfile=self.logfile)
+                    m.warning(
+                        f'Too many matches for dSYM file {pdb} or fuzzy matching not applicable: {potential_matches}',
+                        logfile=self.logfile,
+                    )
                     continue
 
                 if pdb.is_dir():
