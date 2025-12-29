@@ -12,6 +12,16 @@ var
 const
   vsargs = '-prerelease -utf8 -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property resolvedInstallationPath -format value';
 
+function is_portable_mode_enabled: Boolean;
+begin
+  Result := ExpandConstant('{param:portable|0}') = '1';
+end;
+
+function is_admin_install: Boolean;
+begin
+  Result := IsAdminInstallMode and not is_portable_mode_enabled;
+end;
+
 function gst_vs_find_vswhere(): String;
 var
   vswhere: String;

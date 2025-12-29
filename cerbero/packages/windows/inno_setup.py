@@ -110,7 +110,7 @@ class InnoSetup(PackagerBase):
             listing['flags'] = ['fixed']
 
         if isinstance(package, VSTemplatePackage):
-            listing['check'] = f"gst_is_vs_version_installed('{package.year}')"
+            listing['check'] = f"gst_is_vs_version_installed('{package.year}') and is_admin_install"
 
         files = {}
         for filepath in files_list:
@@ -245,8 +245,11 @@ class InnoSetup(PackagerBase):
             rules.write('SetupLogging=yes\n')
             rules.write('UninstallLogging=yes\n')
 
+            # Detect portable mode
+            rules.write('Uninstallable=not is_portable_mode_enabled\n')
             # Template install and registration requires admin access
             rules.write('PrivilegesRequired=admin\n')
+            rules.write('PrivilegesRequiredOverridesAllowed=dialog\n')
 
             # Generate Runtime + Devel package
             rules.write('\n[Types]\n')
@@ -285,7 +288,7 @@ class InnoSetup(PackagerBase):
                 types = ' '.join(feature['types'])
                 rules.write(f'Name: {name}; Description: "{description}"; Types: {types};')
                 if 'check' in feature.keys():
-                    rules.write(f" Check: {feature['check']};")
+                    rules.write(f" Check: {feature['check']}; ")
                 if 'flags' in feature.keys():
                     flags = ' '.join(feature['flags'])
                     rules.write(f'Flags: {flags};')
@@ -316,7 +319,7 @@ class InnoSetup(PackagerBase):
                 m.action('Embedding Visual C++ Redistributable')
                 rules.write('\n[Tasks]\n')
                 rules.write(
-                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: gstreamer_1_0_core;\n'
+                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: gstreamer_1_0_core; Check: is_admin_install;\n'
                 )
                 rules.write('\n[Files]\n')
                 rules.write(
@@ -334,10 +337,10 @@ class InnoSetup(PackagerBase):
             rules.write('ChangesEnvironment=yes\n')
             rules.write('\n[Tasks]\n')
             rules.write(
-                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core; Flags: checkedonce;\n'
+                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write(
-                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core; Flags: checkedonce;\n'
+                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write('\n[Registry]\n')
             rules.write(
