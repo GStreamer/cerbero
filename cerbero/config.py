@@ -571,7 +571,7 @@ class Config(object):
 
         perl5lib = ':'.join([to_unixpath(Path(libdir, 'perl5').as_posix()), to_unixpath(perlversionpath)])
         gstpluginpath10 = Path(libdir, 'gstreamer-1.0').as_posix()
-        gstregistry10 = '~/.cache/gstreamer-1.0/cerbero-registry-{self.target_arch}'
+        gstregistry10 = f'~/.cache/gstreamer-1.0/cerbero-registry-{self.target_arch}'
         gstregistry10 = os.path.expanduser(gstregistry10)
 
         pythonpath = []
