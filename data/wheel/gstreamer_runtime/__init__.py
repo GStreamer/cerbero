@@ -30,13 +30,6 @@ environment = {
     'LD_LIBRARY_PATH': f'{_gstreamer_root}/lib',
     'GST_PLUGIN_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
     'GST_PLUGIN_SYSTEM_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
-    # No longer valid under sharding
-    # 'GSTREAMER_ROOT': _gstreamer_root,
-    # Specific to gstreamer_runtime
-    'PKG_CONFIG_PATH': [
-        f'{_gstreamer_root}/lib/pkgconfig',
-        f'{_gstreamer_root}/share/pkgconfig',
-    ],
     'XDG_DATA_DIRS': [
         f'{_gstreamer_root}/share',
     ],
