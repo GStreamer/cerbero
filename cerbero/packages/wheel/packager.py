@@ -145,7 +145,11 @@ class WheelPackager(PackagerBase):
                 if dirpath.startswith('bin') and _is_gstreamer_executable(source):
                     m.action(f'Adding entrypoint for {filepath}')
                     entrypoint_name = generate_entrypoint(filepath)
-                    scripts.append(f'{source.stem} = {package_name}.entrypoints:{entrypoint_name}')
+                    if source.name.endswith('.exe'):
+                        source_name = source.stem
+                    else:
+                        source_name = source.name
+                    scripts.append(f'{source_name} = {package_name}.entrypoints:{entrypoint_name}')
                     entrypoints += [f'def {entrypoint_name}():\n', f"    __run('{filename}')\n"]
 
         if entrypoints:
