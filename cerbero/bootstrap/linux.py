@@ -291,6 +291,7 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         'ccache',
         'openssl-devel',
         'clang',
+        'pkg-config',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -329,6 +330,7 @@ class ArchBootstrapper(UnixBootstrapper):
         'libpulse',
         'clang',
         'curl',
+        'pkgconf',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -373,6 +375,7 @@ class GentooBootstrapper(UnixBootstrapper):
         'dev-libs/openssl',
         'media-libs/alsa-lib',
         'sys-devel/clang',
+        'dev-util/pkgconf',
     ]
 
     def __init__(self, config, offline, assume_yes):
