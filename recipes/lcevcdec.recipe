@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/v-novaltd/LCEVCdec/archive/refs/tags/%(version)s.tar.gz'
     tarball_checksum = '513f71531c66f226ec258289fd6c889844570029faf00ba2d7ebe501008c7db1'
     tarball_dirname = 'LCEVCdec-%(version)s'
-    library_type = LibraryType.BOTH
+    library_type = LibraryType.SHARED
     cmake_generator = 'ninja'
     can_msvc = True
 
@@ -25,12 +25,10 @@ class Recipe(recipe.Recipe):
         '-DVN_MSVC_RUNTIME_STATIC=OFF',
     ]
 
-    files_libs = ['liblcevc_dec_api', 'liblcevc_dec_api_utility', 'liblcevc_dec_extract',
-                 'liblcevc_dec_pipeline_cpu', 'liblcevc_dec_pipeline_legacy',
-                 'liblcevc_dec_legacy', 'liblcevc_dec_enhancement',
-                 'liblcevc_dec_pixel_processing', 'liblcevc_dec_common',
-                 'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline'
-                  ]
+    files_libs = [
+        'liblcevc_dec_api', 'liblcevc_dec_pipeline_cpu',
+        'liblcevc_dec_pipeline_legacy', 'liblcevc_dec_legacy',
+    ]
     files_devel = ['include/LCEVC', '%(libdir)s/pkgconfig/lcevc_dec.pc']
 
     def prepare(self):
@@ -40,6 +38,12 @@ class Recipe(recipe.Recipe):
         # We only want static libs on iOS and Android
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             self.library_type = LibraryType.STATIC
+            self.files_libs += ['liblcevc_dec_api_utility',
+                'liblcevc_dec_extract', 'liblcevc_dec_enhancement',
+                'liblcevc_dec_pixel_processing', 'liblcevc_dec_common',
+                'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline',
+            ]
+
 
     def post_install(self):
         # CMake does not generate la files
@@ -51,11 +55,13 @@ class Recipe(recipe.Recipe):
             deps = None
 
         if deps:
-            deps += ['lcevc_dec_api_utility', 'lcevc_dec_extract',
-                     'lcevc_dec_pipeline_cpu', 'lcevc_dec_pipeline_legacy',
-                     'lcevc_dec_legacy', 'lcevc_dec_enhancement',
-                     'lcevc_dec_pixel_processing', 'lcevc_dec_common',
-                     'lcevc_dec_sequencer', 'lcevc_dec_pipeline']
+            deps += [
+                'lcevc_dec_pipeline_cpu', 'lcevc_dec_pipeline_legacy',
+                'lcevc_dec_legacy', 'liblcevc_dec_api_utility',
+                'liblcevc_dec_extract', 'liblcevc_dec_enhancement',
+                'liblcevc_dec_pixel_processing', 'liblcevc_dec_common',
+                'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline',
+            ]
 
 
         libtool_la = LibtoolLibrary('liblcevc_dec_api', None, None, None,
