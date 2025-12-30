@@ -12,4 +12,4 @@ def __run(program: str):
     if not fullpath:
         raise RuntimeError(f'{program} was not found in {runtime_path}')
     fullpath = str(Path(fullpath).resolve())
-    subprocess.check_call([fullpath, *sys.argv], env=env)
+    subprocess.check_call([fullpath, *sys.argv[1:]], env=env)

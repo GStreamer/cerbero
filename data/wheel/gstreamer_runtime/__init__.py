@@ -143,7 +143,7 @@ def gstreamer_env():
                     prepend(k, p)
 
     # environment, os.add_dll_directory
-    return (env, list(set(dll_directories)))
+    return (env, os.pathsep.join(list(set(dll_directories))))
 
 
 def setup_python_environment():
