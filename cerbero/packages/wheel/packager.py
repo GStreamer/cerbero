@@ -397,7 +397,7 @@ class WheelPackager(PackagerBase):
                     # Add rpath from the gi loader to other wheels that ship
                     # libs that have typelibs
                     if package_name == 'gstreamer_runtime':
-                        if 'girepository' in source.name:
+                        if 'girepository' in source.name or 'gmodule' in source.name:
                             for whl in ('gstreamer_gtk',):
                                 relpath = os.path.relpath(f'{whl}/lib', f'{package_name}/{dirpath}')
                                 rpath_args += ['-add_rpath', f'@loader_path/{relpath}']
