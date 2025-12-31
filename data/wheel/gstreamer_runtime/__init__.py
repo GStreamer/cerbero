@@ -128,7 +128,10 @@ def gstreamer_env():
             if sys.platform in ('win32', 'darwin') and k == 'LD_LIBRARY_PATH':
                 continue
             if k == 'PATH':
-                dll_directories.extend(v.split(os.pathsep))
+                for p in v.split(os.pathsep):
+                    if p == '.':
+                        continue
+                    dll_directories.append(p)
             if isinstance(v, str):
                 prepend(k, v)
             else:
