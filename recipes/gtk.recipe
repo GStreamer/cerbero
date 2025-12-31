@@ -112,7 +112,7 @@ class Recipe(recipe.Recipe):
                 self.append_env('CFLAGS', '-D__REQUIRED_RPCNDR_H_VERSION__=475 -DWINAPI_PARTITION_GAMES=0')
 
         if self.config.target_platform not in (Platform.DARWIN, Platform.WINDOWS):
-            raise InvalidRecipeError(f'Unsupported target platform: {self.config.target_platform}')
+            raise InvalidRecipeError(self, f'Unsupported target platform: {self.config.target_platform}')
 
     async def extract(self):
         await super().extract()
