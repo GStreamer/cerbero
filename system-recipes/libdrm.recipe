@@ -1,0 +1,4 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'libdrm'
+    min_version = '2.4.98'
+    pkgconfig_files = ['libdrm']

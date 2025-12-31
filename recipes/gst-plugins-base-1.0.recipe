@@ -16,15 +16,12 @@ class Recipe(custom.GStreamer):
                      'theora': 'enabled',
                      'vorbis': 'enabled',
                      # disabled plugins
-                     'tremor': 'disabled',
-                     # Needs https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/1971
-                     # See: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/8540#note_3226704
-                     'drm': 'disabled'}
+                     'tremor': 'disabled'}
     deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora',
             'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
     platform_deps = {
-        Platform.LINUX: ['alsa', 'x11'],
+        Platform.LINUX: ['alsa', 'libdrm', 'x11'],
     }
 
     files_bins = ['gst-discoverer-1.0', 'gst-play-1.0', 'gst-device-monitor-1.0']

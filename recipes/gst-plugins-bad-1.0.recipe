@@ -91,6 +91,9 @@ class Recipe(custom.GStreamer):
             'soundtouch', 'vo-aacenc', 'openjpeg', 'openssl',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar', 'libltc', 'qrencode', 'json-glib']
+    platform_deps = {
+        Platform.LINUX: ['libdrm']
+    }
 
     files_lang = ['gst-plugins-bad-1.0']
 
