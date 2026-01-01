@@ -89,6 +89,8 @@ class InnoSetup(PackagerBase):
         # FIXME: this should be an Inno Setup subclass returning just the list
         if package_type == PackageType.DEVEL:
             files_list = package.devel_files_list()
+        elif package_type == PackageType.DEBUG:
+            files_list = package.debug_files_list()
         else:
             files_list = package.files_list()
         if not files_list:
@@ -101,10 +103,10 @@ class InnoSetup(PackagerBase):
         listing['description'] = package.shortdesc
         if package_type == PackageType.DEVEL:
             listing['types'] = ['devel', 'custom']
-        # elif package_type == PackageType.DEBUG:
-        #     listing['types'] = ['devel', 'debug', 'runtime', 'custom']
+        elif package_type == PackageType.DEBUG:
+            listing['types'] = ['devel', 'custom', 'debug']
         else:
-            listing['types'] = ['devel', 'runtime', 'custom']  # , 'debug',
+            listing['types'] = ['devel', 'custom', 'debug', 'runtime']
 
         if required:
             listing['flags'] = ['fixed']
@@ -254,14 +256,12 @@ class InnoSetup(PackagerBase):
             # Generate Runtime + Devel package
             rules.write('\n[Types]\n')
             rules.write('Name: "devel"; Description: "Runtime, debug symbols, and development headers"\n')
-            # FIXME uncomment when my split debuginfo MR is merged
-            # rules.write('Name: "debug"; Description: "Runtime + debug symbols"\n')
+            rules.write('Name: "debug"; Description: "Runtime + debug symbols"\n')
             rules.write('Name: "runtime"; Description: "Only runtime"\n')
             rules.write('Name: "custom"; Description: "Custom installation"; Flags: iscustom\n')
 
-            # FIXME: this needs to cycle between runtime, debug, devel
             features = []
-            for t in [PackageType.RUNTIME, PackageType.DEVEL]:
+            for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
 
             # Now take all the files in each feature, label them by component
