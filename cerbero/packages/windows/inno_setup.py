@@ -43,8 +43,8 @@ def format_inno_feature_id(string):
 def format_win32_version(version):
     # The heuristics to generate a valid version can get
     # very complicated, so we leave it to the user
-    url = 'https://docs.microsoft.com/en-us/windows/desktop/Msi/productversion'
-    versions = (version.split('.', 3) + ['0', '0', '0'])[:3]
+    url = 'https://jrsoftware.org/ishelp/topic_setup_versioninfoversion.htm'
+    versions = (version.split('.', 4) + ['0', '0', '0'])[:4]
     for idx, val in enumerate(versions):
         i = int(val)
         if idx in [0, 1] and i > 255:
@@ -199,6 +199,7 @@ class InnoSetup(PackagerBase):
             rules.write(f'AppId={self.package.get_wix_upgrade_code()}\n')
             rules.write(f'AppName="{self.package.shortdesc} ({self.abi_desc})"\n')
             rules.write(f'AppVersion={format_win32_version(self.package.version)}\n')
+            rules.write(f'VersionInfoVersion={format_win32_version(self.package.version)}\n')
             if getattr(self.package, 'vendor', None):
                 rules.write(f'AppPublisher={self.package.vendor}\n')
             if getattr(self.package, 'url', None):
