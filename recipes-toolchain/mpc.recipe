@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'mpc'
     version = '1.1.0'
-    url = 'https://ftp.gnu.org/gnu/mpc/mpc-%(version)s.tar.gz'
+    url = 'https://ftpmirror.gnu.org/mpc/mpc-%(version)s.tar.gz'
     tarball_checksum = '6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv2_1Plus]

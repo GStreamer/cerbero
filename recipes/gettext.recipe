@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'gettext'
     version = '0.21'
     stype = SourceType.TARBALL
-    url = 'https://ftp.gnu.org/pub/gnu/gettext/gettext-{0}.tar.gz'.format(version)
+    url = 'https://ftpmirror.gnu.org/gettext/gettext-{0}.tar.gz'.format(version)
     tarball_checksum = 'c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12'
     srcdir = 'gettext-runtime'
 
