@@ -2,7 +2,7 @@
 
 class Package(package.Package):
     name = 'wpewebkit-core'
-    version = '2.50.0'
+    version = '2.51.90'
     shortdesc = 'Web Platform for Embedded'
     longdesc = 'WPE WebKit allows embedders to create simple and performant \
         systems based on Web platform technologies. It is a WebKit port designed \

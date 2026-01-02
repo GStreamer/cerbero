@@ -2,11 +2,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.50.0'
+    version = '2.51.90'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = f'https://wpewebkit.org/releases/wpewebkit-{version}.tar.xz'
-    tarball_checksum = 'a9af62c5e18551b7386b7db864e8ba8156f219b8e6c639934bf6f3a567969922'
+    tarball_checksum = 'bb0e158ad26cdd2e80794435df4d3b30fd5ee2241ab2cfc9c184c3dd1966f0b7'
+    patches = [
+        f'{name}/0001-WPE-Cannot-build-on-Android-due-to-close-being-undef.patch',
+    ]
     deps = [
         'icu',
         'cairo',
@@ -28,7 +31,7 @@ class Recipe(recipe.Recipe):
         'libwpe',
         'openjpeg',
     ]
-    # TODO: support accessibility woff2
+    # TODO: support accessibility, woff2, hyphenation
     configure_options = '\
         -DPORT=WPE \
         -DUSE_GSTREAMER_GL=ON \
@@ -42,13 +45,17 @@ class Recipe(recipe.Recipe):
         -DUSE_LCMS=OFF \
         -DUSE_AVIF=OFF \
         -DUSE_GBM=OFF \
+        -DUSE_LIBHYPHEN=OFF \
         -DUSE_LIBDRM=OFF \
         -DUSE_JPEGXL=OFF \
         -DUSE_LIBBACKTRACE=OFF \
         -DUSE_SKIA_OPENTYPE_SVG=OFF \
         -DUSE_SYSPROF_CAPTURE=OFF \
         -DENABLE_WEBDRIVER=ON \
-        -DENABLE_WPE_PLATFORM=OFF \
+        -DENABLE_WPE_PLATFORM=ON \
+        -DENABLE_WPE_PLATFORM_DRM=OFF \
+        -DENABLE_WPE_PLATFORM_WAYLAND=OFF \
+        -DENABLE_WPE_PLATFORM_HEADLESS=ON \
         -DCMAKE_BUILD_TYPE=Release \
     '
     cmake_generator = 'ninja'
@@ -69,7 +76,9 @@ class Recipe(recipe.Recipe):
     files_devel = [
         'include/wpe-webkit-2.0',
         'lib/pkgconfig/wpe-webkit-2.0.pc',
-        'lib/pkgconfig/wpe-web-process-extension-2.0.pc'
+        'lib/pkgconfig/wpe-web-process-extension-2.0.pc',
+        'lib/pkgconfig/wpe-platform-2.0.pc',
+        'lib/pkgconfig/wpe-platform-headless-2.0.pc',
     ]
 
     files_libexec = [

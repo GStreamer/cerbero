@@ -1,0 +1,24 @@
+From 9326051d70f97cf5a6dcc5abe383a198c1d28875 Mon Sep 17 00:00:00 2001
+From: Adrian Perez de Castro <aperez@igalia.com>
+Date: Sun, 25 Jan 2026 00:16:46 +0200
+Subject: [WPE] Cannot build on Android due to close being undefined
+
+---
+ Source/WTF/wtf/glib/RunLoopGLib.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Source/WTF/wtf/glib/RunLoopGLib.cpp b/Source/WTF/wtf/glib/RunLoopGLib.cpp
+index 04d27a01..4d46a008 100644
+--- a/Source/WTF/wtf/glib/RunLoopGLib.cpp
++++ b/Source/WTF/wtf/glib/RunLoopGLib.cpp
+@@ -30,6 +30,7 @@
+ #include <wtf/RunLoop.h>
+ 
+ #include <glib.h>
++#include <unistd.h>
+ #include <wtf/BubbleSort.h>
+ #include <wtf/MainThread.h>
+ #include <wtf/SafeStrerror.h>
+-- 
+2.52.0
+
