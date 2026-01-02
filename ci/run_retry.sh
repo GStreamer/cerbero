@@ -16,6 +16,8 @@ ERRORS=(
     "warning: spurious network error"
     # Weird xcode toolchain bug 
     "otool: unknown char"
+    # Wine is flaky
+    "The explorer process failed to start."
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
