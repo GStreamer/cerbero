@@ -696,7 +696,7 @@ class FilesProvider(object):
             else:
                 # Apple and GNU convention is
                 # prefixfoo.soversion.ext.dSYM
-                pdb = '{}/lib{}%(mext)s%(debugext)s'.format(fdir, m.removeprefix('lib')) % self.extensions
+                pdb = '{}/{}%(mext)s%(debugext)s'.format(fdir, m) % self.extensions
             fs[pdb] = None
         return fs
 
