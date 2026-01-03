@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import sys
 from pathlib import Path
 import venv
 import glob
@@ -119,6 +120,7 @@ class BuildTools(BootstrapperBase, Fetch):
         python_glob = os.path.join(self.config.build_tools_prefix, 'bin', 'python*')
         for f in glob.glob(python_glob):
             os.remove(f)
+        m.action(f'Creating virtual env for Python {sys.version}')
         # Python relies on symlinks to work on macOS. See e.g.
         # https://github.com/python-poetry/install.python-poetry.org/issues/24#issuecomment-1226504499
         venv.create(self.config.build_tools_prefix, symlinks=self.config.platform != Platform.WINDOWS, with_pip=True)
