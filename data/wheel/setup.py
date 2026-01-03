@@ -43,10 +43,11 @@ class InjectGStreamerWheels(build_py):
 
 class MakeStableAbiWheel(bdist_wheel):
     def finalize_options(self):
-        # FIXME: See BinaryDistribution above
-        # if package_name != 'gstreamer_python':
-        self.py_limited_api = 'cp39'
-
+        # XXX: See BinaryDistribution above
+        # This ensures that we only generate Python-version-specific wheels for
+        # wheels with shared libraries that use Python's C API.
+        if package_name != 'gstreamer_python':
+            self.py_limited_api = 'cp39'
         super().finalize_options()
 
 
