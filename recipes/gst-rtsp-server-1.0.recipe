@@ -3,7 +3,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-rtsp-server-1.0'
     btype = BuildType.MESON
-    tarball_checksum = 'bca8da5d0c606124e9f5bd89eb94ad0960e0943ef25a103e16968cfcdf1053fc'
+    tarball_checksum = 'bb61b513ee41129213dd8e6a09b14eb3116db6616202d7f3a7fa30b888999944'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
     files_devel = ['include/gstreamer-1.0/gst/rtsp-server', '%(libdir)s/pkgconfig/gstreamer-rtsp-server-1.0.pc']
