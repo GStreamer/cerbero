@@ -36,9 +36,9 @@ from cerbero.ide.vs.env import get_vs_year_version
 
 
 CONFIG_EXT = 'cbc'
-USER_CONFIG_DIR = os.path.expanduser('~/.cerbero')
+USER_CONFIG_DIR = Path('~/.cerbero').expanduser()
 USER_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
-USER_CONFIG_FILE = Path(USER_CONFIG_DIR, USER_CONFIG_FILENAME).as_posix()
+USER_CONFIG_FILE = (USER_CONFIG_DIR / USER_CONFIG_FILENAME).as_posix()
 DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
 DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = 'Default <default@change.me>'
@@ -578,7 +578,7 @@ class Config(object):
         perl5lib = ':'.join([to_unixpath(Path(libdir, 'perl5').as_posix()), to_unixpath(perlversionpath)])
         gstpluginpath10 = Path(libdir, 'gstreamer-1.0').as_posix()
         gstregistry10 = f'~/.cache/gstreamer-1.0/cerbero-registry-{self.target_arch}'
-        gstregistry10 = os.path.expanduser(gstregistry10)
+        gstregistry10 = Path(gstregistry10).expanduser().as_posix()
 
         pythonpath = []
         for p in (self.prefix, self.build_tools_prefix):
@@ -748,14 +748,14 @@ class Config(object):
             recipes_dir['system'] = (self.system_recipes_dir, self.system_recipes_priority)
         recipes_dir['default'] = (self.recipes_dir, 0)
         for name, (path, priority) in self.external_recipes.items():
-            path = os.path.abspath(os.path.expanduser(path))
+            path = Path(os.path.abspath(os.path.expanduser(path))).as_posix()
             recipes_dir[name] = (path, priority)
         return recipes_dir
 
     def get_packages_repos(self):
         packages_dir = {'default': (self.packages_dir, 0)}
         for name, (path, priority) in self.external_packages.items():
-            path = os.path.abspath(os.path.expanduser(path))
+            path = Path(os.path.abspath(os.path.expanduser(path))).as_posix()
             packages_dir[name] = (path, priority)
         return packages_dir
 
@@ -984,8 +984,8 @@ class Config(object):
             for f in filenames:
                 # Check if the config specified is a complete path, else search
                 # in the user config directory and then in the config_dir (cerbero_share/config/)
-                uf = Path(USER_CONFIG_DIR, f + '.' + CONFIG_EXT).as_posix()
-                ef = os.path.join(self.config_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT)
+                uf = (USER_CONFIG_DIR / (f + '.' + CONFIG_EXT)).as_posix()
+                ef = Path(self.config_dir, f if f.endswith('.' + CONFIG_EXT) else f + '.' + CONFIG_EXT).as_posix()
                 for config_file in [f, uf, ef]:
                     if os.path.exists(config_file):
                         self._parse(config_file, reset=False)
@@ -994,8 +994,8 @@ class Config(object):
                     raise ConfigurationError(_('Configuration file %s or fallbacks %s, %s not found') % (f, uf, ef))
 
     def _load_platform_config(self):
-        platform_config = Path(self.config_dir, '%s.config' % self.target_platform).as_posix()
-        arch_config = os.path.join(self.config_dir, '%s_%s.config' % (self.target_platform, self.target_arch))
+        platform_config = Path(self.config_dir, f'{self.target_platform}.config').as_posix()
+        arch_config = Path(self.config_dir, f'{self.target_platform}_{self.target_arch}.config').as_posix()
 
         for config_path in [platform_config, arch_config]:
             if os.path.exists(config_path):
@@ -1064,14 +1064,13 @@ class Config(object):
         if self.uninstalled:
             # Running from git checkout - data is ../data relative to this file
             self.data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-            self.data_dir = os.path.abspath(self.data_dir)
+            self.data_dir = Path(os.path.abspath(self.data_dir)).as_posix()
             return
 
         curdir = os.path.dirname(__file__)
-
         # Check if data files are in cerbero_share package (pip install)
         # In this case, recipes/, packages/, config/, data/ are inside cerbero_share/
-        parent_dir = os.path.abspath(Path(curdir, '..').as_posix())
+        parent_dir = Path(os.path.abspath(os.path.join(curdir, '..'))).as_posix()
         cerbero_share_dir = Path(parent_dir, 'cerbero_share').as_posix()
         if (
             os.path.exists(Path(cerbero_share_dir, 'config').as_posix())
@@ -1090,17 +1089,17 @@ class Config(object):
             # For pip installs, use cerbero_share as base (parent of data_dir)
             # data_dir is cerbero_share/data, so we go up one level to get cerbero_share
             cerbero_share = os.path.dirname(self.data_dir)
-            p = Path(cerbero_share, path).as_posix()
+            p = os.path.join(cerbero_share, path)
         else:
             p = os.path.join(os.path.dirname(__file__), '..', path)
-        return os.path.abspath(p)
+        return Path(os.path.abspath(p)).as_posix()
 
     def _default_home_dir(self):
         if self.uninstalled:
             p = os.path.join(os.path.dirname(__file__), '..', 'build')
         else:
             p = os.path.expanduser('~/cerbero')
-        return os.path.abspath(p)
+        return Path(os.path.abspath(p)).as_posix()
 
     def _default_local_sources_dir(self):
         # For backwards-compatibility, keep the old value for setups that
@@ -1247,4 +1246,4 @@ class Config(object):
         return None
 
     def get_custom_pkg_config_path(self):
-        return os.path.join(self.libdir, 'system_pkgconfig')
+        return Path(self.libdir, 'system_pkgconfig').as_posix()
