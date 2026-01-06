@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import sysconfig
 import setuptools
 from setuptools.dist import Distribution
 from setuptools.command.build_py import build_py
@@ -48,7 +49,9 @@ class MakeStableAbiWheel(bdist_wheel):
         # This ensures that we only generate Python-version-specific wheels for
         # wheels with shared libraries that use Python's C API.
         if package_name != 'gstreamer_python':
-            self.py_limited_api = 'cp39'
+            # https://github.com/python/cpython/issues/111506
+            if not sysconfig.get_config_var('Py_GIL_DISABLED'):
+                self.py_limited_api = 'cp39'
             # Make it so that bdist_wheel generates the right platform name for
             # wheels that do not link to Python
             if platform.system() == 'Darwin':
