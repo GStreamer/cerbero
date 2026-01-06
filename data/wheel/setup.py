@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import setuptools
 from setuptools.dist import Distribution
 from setuptools.command.build_py import build_py
@@ -48,6 +49,10 @@ class MakeStableAbiWheel(bdist_wheel):
         # wheels with shared libraries that use Python's C API.
         if package_name != 'gstreamer_python':
             self.py_limited_api = 'cp39'
+            # Make it so that bdist_wheel generates the right platform name for
+            # wheels that do not link to Python
+            if platform.system() == 'Darwin':
+                self.plat_name = 'macosx_10_13_universal2'
         super().finalize_options()
 
 
