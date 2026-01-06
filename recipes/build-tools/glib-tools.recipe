@@ -2,15 +2,20 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.80.5'
+    version = '2.82.4'
     stype = SourceType.TARBALL
     url = 'gnome://glib/%(maj_ver)s/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
-    tarball_checksum = '9f23a9de803c695bbfde7e37d6626b18b9a83869689dd79019bf3ae66c3e6771'
+    tarball_checksum = '37dd0877fe964cd15e9a2710b044a1830fb1bd93652a6d0cb6b8b2dff187c709'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'selinux' : 'disabled', 'introspection': 'disabled', 'tests': 'false'}
     deps = ['libffi', 'zlib', 'pkg-config', 'pcre2']
+
+    patches = [
+        # TODO upstreaming -- https://gitlab.gnome.org/GNOME/glib/-/issues/3858
+        'glib-tools/0007-glib-compile-resources-Fix-MSVC-heap-exhaustion-when.patch',
+    ]
 
     # Without these, the relocator won't take effect on macOS
     files_bins = [

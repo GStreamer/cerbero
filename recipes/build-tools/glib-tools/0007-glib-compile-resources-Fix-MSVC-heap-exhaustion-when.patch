@@ -1,0 +1,31 @@
+From e3bffb137e23164ebefa040ae116906d2ef5300c Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 24 Dec 2025 09:36:08 -0300
+Subject: [PATCH] glib-compile-resources: Fix MSVC heap exhaustion when running
+ under MSYS2 with Meson
+
+See:
+
+https://developercommunity.visualstudio.com/t/Long-octal-formatted-strings-DoS-the-use/11021201
+
+https://gitlab.gnome.org/GNOME/glib/-/issues/3858
+---
+ gio/glib-compile-resources.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/glib-compile-resources.c b/gio/glib-compile-resources.c
+index 36f64a491..373e59af8 100644
+--- a/gio/glib-compile-resources.c
++++ b/gio/glib-compile-resources.c
+@@ -759,7 +759,7 @@ get_compiler_id (const char *compiler)
+           const char *compiler_env = g_getenv ("CC");
+ 
+           if (compiler_env == NULL || *compiler_env == '\0')
+-            compiler = "gcc";
++            compiler = "msvc";
+           else
+             compiler = compiler_env;
+         }
+-- 
+2.50.1.windows.1
+
