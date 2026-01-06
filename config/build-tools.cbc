@@ -1,5 +1,5 @@
-import os
+from pathlib import Path
 
-prefix = os.path.join(home_dir, 'build-tools')
-sources = os.path.join(home_dir, 'sources', 'build-tools')
+prefix = Path(home_dir, 'build-tools').as_posix()
+sources = Path(home_dir, 'sources', 'build-tools').as_posix()
 cache_file = 'build-tools.cache'
