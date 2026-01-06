@@ -13,6 +13,9 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.gi:
             self.files += ['graphene:typelibs', 'gtk:typelibs']
         if self.config.variants.rust:
+            self.files += ['accesskit:libs', 'accesskit-c:libs']
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files += ['gst-plugins-rs:plugins_gtk4']
             self.files_devel += ['gst-plugins-rs:plugins_gtk4_devel']
-            self.files += ['accesskit:libs', 'accesskit-c:libs']

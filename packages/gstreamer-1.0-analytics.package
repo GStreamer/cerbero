@@ -14,6 +14,8 @@ class Package(custom.GStreamer, package.Package):
     files_devel = ['gst-plugins-bad-1.0:plugins_analytics_devel']
 
     def prepare(self):
-        if self.config.variants.rust:
+        if self.config.variants.rust and \
+           (self.config.target_platform != Platform.WINDOWS or \
+            self.config.target_arch != Architecture.ARM64):
             self.files.append('gst-plugins-rs:plugins_analytics')
             self.files_devel.append('gst-plugins-rs:plugins_analytics_devel')
