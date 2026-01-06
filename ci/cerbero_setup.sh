@@ -46,7 +46,7 @@ cerbero_package_and_check() {
 
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
-    if [[ $CONFIG = win* ]] || [[ $CONFIG = *macos* ]]; then
+    if [[ $ARCH = msvc* && $CONFIG = win* ]] || [[ $CONFIG = *macos* ]]; then
         ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
     fi
 
