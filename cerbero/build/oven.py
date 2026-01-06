@@ -24,7 +24,7 @@ import asyncio
 import collections
 from subprocess import CalledProcessError
 
-from cerbero.enums import LibraryType
+from cerbero.enums import LibraryType, Platform
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import N_, shell, run_tasks, determine_num_of_cpus
@@ -353,7 +353,7 @@ class Oven(object):
         job_allocation = collections.defaultdict(lambda: 0)
         if self.jobs > 4:
             queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue()
-            job_allocation[BuildSteps.COMPILE[1]] = 2
+            job_allocation[BuildSteps.COMPILE[1]] = 1
         if self.jobs > 7:
             install_queue = asyncio.PriorityQueue()
             for step in install_steps:
@@ -367,7 +367,12 @@ class Oven(object):
             # is a good idea to avoid getting bottlenecked if one of the
             # download mirrors is slow.
             job_allocation[BuildSteps.FETCH[1]] = 2
-            job_allocation[BuildSteps.COMPILE[1]] = 3
+            if self.config.platform == Platform.WINDOWS:
+                # XXX: reduce this to 1 when we eliminate all major make-based
+                # recipes. The remaining ones are: libiconv, openssl.
+                job_allocation[BuildSteps.COMPILE[1]] = 2
+            else:
+                job_allocation[BuildSteps.COMPILE[1]] = 1
             queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue()
 
         # async locks used to synchronize step execution
