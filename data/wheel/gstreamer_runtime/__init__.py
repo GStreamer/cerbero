@@ -147,14 +147,6 @@ def setup_python_environment():
     Injects the GStreamer binary folders into the current interpreter's
     environment. On Windows, it also updates the allowed DLL folders list.
     """
-    env, dlls = gstreamer_env()
-
+    env, _ = gstreamer_env()
     os.environ.update(env)
-
-    # Just in case -- an import gi; will do it too
-    if sys.platform == 'win32':
-        for dll in dlls:
-            if os.path.exists(dll):
-                os.add_dll_directory(dll)
-
     sys.path.append(env['GST_PYTHONPATH_1_0'])
