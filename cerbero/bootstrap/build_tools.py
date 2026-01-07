@@ -144,7 +144,7 @@ class BuildTools(BootstrapperBase, Fetch):
             python_wrapper = os.path.join(self.config.build_tools_prefix, 'bin', 'python3-x86_64')
             with open(python_wrapper, 'w') as f:
                 f.write('#!/bin/sh\n')
-                f.write('arch -x86_64 python3 "$@"\n')
+                f.write(f'arch -x86_64 "{python}" "$@"\n')
             os.chmod(python_wrapper, 0o755)
 
     async def start(self, jobs=0):
