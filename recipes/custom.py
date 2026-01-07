@@ -5,7 +5,7 @@ from collections import defaultdict
 from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
-from cerbero.enums import License, FatalError, Platform, Architecture
+from cerbero.enums import CERBERO_VERSION, License, FatalError, Platform, Architecture
 
 
 def running_on_cerbero_ci():
@@ -21,7 +21,7 @@ def running_on_cerbero_ci():
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.27.90'
+    version = CERBERO_VERSION
     tagged_for_release = True
 
     # Decide what stype to use
