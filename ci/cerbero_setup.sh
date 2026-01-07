@@ -50,6 +50,11 @@ cerbero_package_and_check() {
         ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
     fi
 
+    # Test that generating the source bundle works
+    if [[ $CONFIG = *android* ]]; then
+        ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bundle-source --offline gstreamer-1.0
+    fi
+
     # Run gst-inspect-1.0 for some basic checks. Can't do this for cross-(android|ios)-universal, of course.
     if [[ $CONFIG != *ios-universal* ]] && [[ $CONFIG != *android-universal* ]] && [[ $CONFIG != *cross-win* ]]; then
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX --version

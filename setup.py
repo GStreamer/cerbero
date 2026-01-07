@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 from setuptools import setup, find_packages
 from setuptools.command import sdist as setuptools_sdist
@@ -32,6 +33,16 @@ CERBERO_VERSION = get_version()
 # Utility function to read the README file.
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+# Intercept packages and recipes
+packages = [x[len('--package=') :] for x in sys.argv if x.startswith('--package=')]
+recipes = [x[len('--recipe=') :] for x in sys.argv if x.startswith('--recipe=')]
+if len(packages) == 0:
+    packages = None
+if len(recipes) == 0:
+    recipes = None
+sys.argv = [x for x in sys.argv if not x.startswith('--package=') and not x.startswith('--recipe=')]
 
 
 # Extended sdist for bundlesource command compatibility
