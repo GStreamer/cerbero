@@ -124,7 +124,12 @@ class BuildTools(BootstrapperBase, Fetch):
         # Python relies on symlinks to work on macOS. See e.g.
         # https://github.com/python-poetry/install.python-poetry.org/issues/24#issuecomment-1226504499
         venv.create(self.config.build_tools_prefix, symlinks=self.config.platform != Platform.WINDOWS, with_pip=True)
+        # Need to set PYTHONPATH correctly on (at least) macOS to use the
+        # specified Python inside the venv for pip, but on Windows that
+        # completely breaks Python and it can't find pip.
+        python_env = self.config.env.copy()
         if self.config.platform == Platform.WINDOWS:
+            python_env = None
             # Python insists on using Scripts instead of bin on Windows for
             # scripts. Insist back, and use bin again.
             scriptsdir = os.path.join(self.config.build_tools_prefix, 'Scripts')
@@ -138,7 +143,7 @@ class BuildTools(BootstrapperBase, Fetch):
             if os.path.isdir(scriptsdir):
                 os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
-        shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools', 'packaging'], env=self.config.env)
+        shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools', 'packaging'], env=python_env)
         if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
             # Create an x86_64 python for introspection in universal builds
             python_wrapper = os.path.join(self.config.build_tools_prefix, 'bin', 'python3-x86_64')

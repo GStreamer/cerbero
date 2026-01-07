@@ -29,14 +29,16 @@ class Recipe(recipe.Recipe):
         self.skip_steps = [BuildSteps.DSYMUTIL]
 
     async def install(self):
+        python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         # setup.py barfs if using posix paths on Windows
         if self.config.platform == Platform.WINDOWS:
+            python_env = None
             prefix = str(PurePath(self.config.prefix))
         else:
+            python_env = self.env
             prefix = self.config.prefix
-        python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         await shell.async_call([python_exe, '-m', 'pip', 'install', '--prefix', prefix, '.'],
-                               cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
+                               cmd_dir=self.build_dir, env=python_env, logfile=self.logfile)
         if self.config.platform == Platform.WINDOWS:
             # Python insists on using Scripts instead of bin on Windows for
             # scripts. Insist back, and use bin again.
