@@ -16,11 +16,24 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+import sys
 from cerbero.errors import FatalError
 
 
 # Safest place to define this since this file imports very few modules
 CERBERO_VERSION = '1.27.90'
+
+
+if sys.version_info >= (3, 11) and 'CI' in os.environ:
+    _pyproject = os.path.join(__file__, '..', 'pyproject.toml')
+    if os.path.exists(_pyproject):
+        import tomllib
+
+        with open(_pyproject, 'r', encoding='utf-8') as f:
+            d = tomllib.loads(f.read())
+            if d['project']['version'] != CERBERO_VERSION:
+                raise FatalError("cerbero/enums.py:CERBERO_VERSION doesn't match version in pyproject.toml")
 
 
 class Platform:
