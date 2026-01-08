@@ -1340,6 +1340,7 @@ class SystemRecipe(Recipe):
     # files or a dict where the key in the pkgconfig_file and the version
     min_version = None
     pkgconfig_files = None
+    stype = source.SourceType.CUSTOM
 
     def __init__(self, config, env):
         self.library_type = LibraryType.NONE
