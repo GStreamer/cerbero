@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cerbero"
-version = "1.27.90"  # Keep in sync with cerbero/enums.py::CERBERO_VERSION
+version = "1.27.90.1"  # Keep in sync with cerbero/enums.py::CERBERO_VERSION
 description = "Multi platform build system for Open Source projects"
 readme = "README.md"
 license = {text = "LGPL-2.0-or-later"}
