@@ -103,9 +103,9 @@ class Tar:
                 logfile=logfile,
             )
             return
-        except CommandError as e:
+        except CommandError:
             if logfile:
-                traceback.print_exception(e, file=logfile)
+                traceback.print_exc(file=logfile)
                 logfile.write('tar command {} failed, trying next'.format(tar_cmd[1]))
 
         if shell.PLATFORM == Platform.WINDOWS:
@@ -117,9 +117,9 @@ class Tar:
                         logfile=logfile,
                     )
                     return
-                except CommandError as e:
+                except CommandError:
                     if logfile:
-                        traceback.print_exception(e, file=logfile)
+                        traceback.print_exc(file=logfile)
                         logfile.write('MSYS2 bsdtar command failed, trying next')
             if tar_cmd != self.MSYS_GNU_TAR:
                 try:
@@ -130,9 +130,9 @@ class Tar:
                         logfile=logfile,
                     )
                     return
-                except CommandError as e:
+                except CommandError:
                     if logfile:
-                        traceback.print_exception(e, file=logfile)
+                        traceback.print_exc(file=logfile)
                         logfile.write('MSYS2 tar command failed, trying next')
         # Finally, try tarfile
         await self.unpack_tarfile(output_dir)
