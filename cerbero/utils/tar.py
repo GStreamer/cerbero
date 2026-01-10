@@ -28,7 +28,7 @@ class Tar:
     TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz', 'tar.zst', 'tar.zstd')
 
     def __init__(self, filename):
-        self.filename = filename
+        self.filename = str(filename)
         self.decompress_args = ['--no-same-owner', '-x']
         # Exclude symlinks on Windows
         if shell.PLATFORM == Platform.WINDOWS:
@@ -66,6 +66,20 @@ class Tar:
     def uses_ancient_msys_tar():
         return shell.DISTRO == Distro.MSYS and Tar.get_cmd() == Tar.STOCK_TAR
 
+    def unpack_params(self, output_dir, logfile=None):
+        tar_cmd = self.get_cmd()
+        tar_env = os.environ.copy()
+        tar_args = []
+        if self.filename.endswith('.xz'):
+            if shutil.which('xz'):
+                tar_args += ['--use-compress-program=xz -d -T0']
+            else:
+                if self.config.platform == Platform.DARWIN:
+                    m.warning('Could not find `xz` for parallel lzma decompression with bsdtar')
+                tar_env['XZ_OPT'] = '-T0'
+        tar_args += ['-C', output_dir, '-f', str(self.filename)]
+        return (tar_cmd, tar_args, tar_env)
+
     async def unpack_tarfile(self, output_dir):
         cmode = 'bz2' if self.filename.endswith('bz2') else self.filename[-2:]
         tf = tarfile.open(self.filename, mode='r:' + cmode)
@@ -81,11 +95,11 @@ class Tar:
 
         os.makedirs(output_dir, exist_ok=True)
 
-        tar_cmd = self.get_cmd()
+        tar_cmd, tar_args, tar_env = self.unpack_params(output_dir, logfile)
         try:
             await shell.async_call(
-                [tar_cmd[1], '-C', output_dir, '-f', self.filename] + self.decompress_args,
-                env=os.environ.copy(),
+                [tar_cmd[1]] + self.decompress_args + tar_args,
+                env=tar_env,
                 logfile=logfile,
             )
             return
@@ -125,7 +139,8 @@ class Tar:
 
     def unpack_sync(self, output_dir):
         os.makedirs(output_dir, exist_ok=True)
-        return shell.new_call([self.get_cmd()[1], '-C', output_dir, '-f', self.filename] + self.decompress_args)
+        tar_cmd, tar_args, tar_env = self.unpack_params(output_dir, None)
+        return shell.new_call([tar_cmd[1]] + self.decompress_args + tar_args)
 
     def _compress_tar(self, tar_filename):
         compress_cmd = None
