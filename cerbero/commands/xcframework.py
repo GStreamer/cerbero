@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2024 L. E. Segovia <amy@centricular.com>
 # SPDX-License-Ref: LGPL-2.1-or-later
 
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -84,7 +85,10 @@ class XCFramework(Command):
         m.action(_('Creating package for %s') % p.name)
         output_dir = Path(args.output_dir).absolute()
 
-        dst = Path(output_dir) / 'gstreamer-xcframework.tar.xz'
+        ver_regex = re.compile(r'gstreamer-1.0-([0-9.-]+)-.*')
+        version = ver_regex.match(str(args.source[0])).groups()[0]
+
+        dst = Path(output_dir) / f'gstreamer-{version}-xcframework.tar.xz'
 
         tmp = Path(tempfile.mkdtemp(prefix='xcframework-', dir=output_dir))
         xcfw = tmp / 'GStreamer.xcframework'
