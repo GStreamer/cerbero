@@ -165,11 +165,13 @@ class Recipe(custom.GStreamer):
 
     files_plugins_core = [
              '%(libdir)s/gstreamer-1.0/libgstinsertbin%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstswitchbin%(mext)s',
     ]
 
     files_plugins_core_devel = [
              '%(libdir)s/gstreamer-1.0/libgstinsertbin.a', '%(libdir)s/gstreamer-1.0/libgstinsertbin.la',
+             '%(libdir)s/gstreamer-1.0/libgstmse.a', '%(libdir)s/gstreamer-1.0/libgstmse.la',
              '%(libdir)s/gstreamer-1.0/libgstswitchbin.a', '%(libdir)s/gstreamer-1.0/libgstswitchbin.la',
     ]
 
