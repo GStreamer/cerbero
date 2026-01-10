@@ -8,6 +8,7 @@ import traceback
 from cerbero.enums import Distro, Platform
 from cerbero.errors import CommandError, UsageError, FatalError
 from cerbero.utils import shell, to_unixpath
+from cerbero.utils import messages as m
 
 
 class Tar:
@@ -174,6 +175,7 @@ class Tar:
         # ensure we provide a unique list of files to tar to avoid
         # it creating hard links/copies
         files = sorted(set(files))
+        tar_env = os.environ.copy()
 
         if package_prefix:
             if self.platform == Platform.DARWIN and tar == Tar.STOCK_TAR:
@@ -181,6 +183,7 @@ class Tar:
                 raise UsageError("Apple bsdtar doesn't support --transform")
             # Only transform the files (and not symbolic/hard links)
             tar_cmd += ['--transform', 'flags=r;s|^|{}/|'.format(package_prefix)]
+
         if self.compress == Tar.Compression.BZ2:
             # Use lbzip2 when available for parallel compression
             if shutil.which('lbzip2'):
@@ -188,13 +191,7 @@ class Tar:
             else:
                 tar_cmd += ['--bzip2']
         elif self.compress == Tar.Compression.XZ:
-            if self.platform == Platform.DARWIN and tar == Tar.STOCK_TAR:
-                # libarchive supports parallelism
-                tar_cmd += ['--xz', '--options', 'xz:threads=0']
-            elif self.platform == Platform.WINDOWS and tar == Tar.MSYS_BSD_TAR:
-                # libarchive supports parallelism
-                tar_cmd += ['--xz', '--options', 'xz:threads=0']
-            elif Tar.uses_ancient_msys_tar():
+            if Tar.uses_ancient_msys_tar():
                 # bsdtar hangs when piping to an external compress-program, and
                 # --xz is very slow because it doesn't use XZ_OPT (probably uses
                 # libarchive) and single-threaded xz is 6-10x slower. So we create
@@ -202,10 +199,18 @@ class Tar:
                 tar_filename = os.path.splitext(tar_filename)[0]
             else:
                 if shutil.which('xz'):
-                    # Use xz when available for parallel compression
+                    # Use xz when available for parallel compression. This is
+                    # supported by both BSD tar and GNU tar.
                     tar_cmd += ['--use-compress-program=xz -T0']
                 else:
+                    # GNU tar and bsdtar's built-in xz support via liblzma
+                    # doesn't use parallel compression. However, GNU tar will
+                    # read XZ_OPT and do the right thing. Maybe some day so
+                    # will BSD tar.
+                    if self.config.platform == Platform.DARWIN:
+                        m.warning('Could not find `xz` for parallel lzma compression with bsdtar')
                     tar_cmd += ['--xz']
+                    tar_env['XZ_OPT'] = '-T0'
         elif self.compress == Tar.Compression.ZSTD:
             # zst is MSYS2's default compression algorithm
             if tar == Tar.MSYS_BSD_TAR:
@@ -224,7 +229,7 @@ class Tar:
             try:
                 # Supply the files list using a file else the command can get
                 # too long to invoke, especially on Windows.
-                shell.new_call(tar_cmd + ['-T', fname])
+                shell.new_call(tar_cmd + ['-T', fname], env=tar_env)
             except FatalError:
                 os.replace(tar_filename, tar_filename + '.partial')
                 raise
