@@ -67,8 +67,9 @@ def symbolicate_macho_files(files, logfile=None, env=None):
 
 
 def symbolicate_gnu_files(files, logfile=None, env=None):
+    objcopy_cmd = env.get('OBJCOPY', 'objcopy') if env else 'objcopy'
     compress_flags = []
-    test_flags_output = shell.check_output(['objcopy', '--help'], env=env)
+    test_flags_output = shell.check_output([objcopy_cmd, '--help'], env=env)
     if '--compress-debug-sections' in test_flags_output:
         compress_flags = ['--compress-debug-sections']
     for f in files:
@@ -79,7 +80,7 @@ def symbolicate_gnu_files(files, logfile=None, env=None):
         else:
             dwp = f.with_suffix(f.suffix + '.debuginfo')
         shell.new_call(
-            ['objcopy', *compress_flags, '--only-keep-debug', f.name, dwp.name],
+            [objcopy_cmd, *compress_flags, '--only-keep-debug', f.name, dwp.name],
             cmd_dir=f.parent.as_posix(),
             logfile=logfile,
             env=env,
@@ -89,10 +90,10 @@ def symbolicate_gnu_files(files, logfile=None, env=None):
         # other way around, Windows refuses to execute the binary.
         tmpfile = f.with_suffix('.tmp-cerbero-sym')
         shell.new_call(
-            ['objcopy', '--strip-debug', f.name, tmpfile.name], cmd_dir=f.parent.as_posix(), logfile=logfile, env=env
+            [objcopy_cmd, '--strip-debug', f.name, tmpfile.name], cmd_dir=f.parent.as_posix(), logfile=logfile, env=env
         )
         shell.new_call(
-            ['objcopy', f'--add-gnu-debuglink={dwp.name}', tmpfile.name],
+            [objcopy_cmd, f'--add-gnu-debuglink={dwp.name}', tmpfile.name],
             cmd_dir=f.parent.as_posix(),
             logfile=logfile,
             env=env,
