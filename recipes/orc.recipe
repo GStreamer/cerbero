@@ -17,8 +17,13 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.MESON
     licenses = [{License.BSD_3_Clause: ['COPYING']}]
-    meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
-                     'tools': 'enabled', 'orc-test': 'enabled'}
+    meson_options = {
+        'benchmarks': 'disabled',
+        'tests': 'disabled',
+        'tools': 'enabled',
+        'orc-test': 'enabled',
+        'hotdoc': 'disabled',
+    }
 
     files_libs = ['liborc-0.4']
     files_devel = ['include/orc-0.4', '%(libdir)s/pkgconfig/orc-0.4.pc',
