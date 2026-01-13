@@ -690,6 +690,10 @@ build cerbero cross-ios-sim universal arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-ios-sim universal'
     - '.cerbero macos arm64 image'
+  # Does not work reliably yet it seems
+  # Disable for monorepo sub-pipelines for now
+  rules:
+    - when: 'never'
 
 #
 # Build an xcframework combining iOS ARM64 and iOS Simulator Universal
@@ -725,6 +729,9 @@ build cerbero xcframework:
   needs:
     - 'build cerbero cross-ios arm64-host'
     - 'build cerbero cross-ios-sim universal arm64-host'
+  # Disable for monorepo sub-pipelines for now
+  rules:
+    - when: 'never'
 
 #
 # Build an iOS App using the iOS binaries
