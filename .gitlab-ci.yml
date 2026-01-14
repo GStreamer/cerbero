@@ -651,6 +651,9 @@ build cerbero cross-ios arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-ios'
     - '.cerbero macos arm64 image'
+  # Disable for monorepo sub-pipelines for now
+  rules:
+    - when: 'never'
 
 #
 # Cross iOS Simulator Universal build
