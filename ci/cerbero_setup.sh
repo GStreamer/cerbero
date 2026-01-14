@@ -280,7 +280,10 @@ cerbero_deps_script() {
     # that also pulls gst-plugins-rs in
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps \
             --exclude gst-plugins-rs --exclude gst-android-1.0 --exclude gstreamer-ios-templates
-    upload_cache gst-plugins-rs
+
+    if ! [[ $CONFIG = *ios-sim-universal* ]] && ! [[ $CONFIG = *ios-arm64* ]]; then
+        upload_cache gst-plugins-rs
+    fi
 
     cerbero_package_and_check
 }
