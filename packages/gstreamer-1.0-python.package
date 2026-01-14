@@ -10,7 +10,7 @@ class Package(custom.GStreamer, package.Package):
     files = [
         'gobject-introspection:python',
         'gst-python-1.0:python:plugins:libs',
-        'gst-editing-services-1.0:python',
+        'gst-editing-services-1.0:python:typelibs',
         'pycairo:python:libs',
         'pygobject:python:libs',
         'json-glib:typelibs',

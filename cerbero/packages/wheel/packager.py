@@ -238,6 +238,15 @@ class WheelPackager(PackagerBase):
             elif p.name.startswith('base-'):
                 runtime_list += p.files_list()
                 runtime_licenses.update(_parse_licenses(p))
+            elif p.name.endswith('-editing'):
+                for f in p.files_list():
+                    if 'gstreamer-1.0' in f:
+                        plugins_runtime_list.append(f)
+                    elif f.startswith('bin/'):
+                        cli_list.append(f)
+                    else:
+                        runtime_list.append(f)
+                runtime_licenses.update(_parse_licenses(p))
             elif p.name.endswith('-python'):
                 python_list += p.files_list()
                 python_licenses.update(_parse_licenses(p))
