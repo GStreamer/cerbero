@@ -308,8 +308,6 @@ class WheelPackager(PackagerBase):
         package_dependencies = {
             'gstreamer_runtime': [
                 'setuptools >= 80.9.0',
-                # typing_extensions required on macOS and 3.11 for g-i overrides
-                'typing_extensions >= 4.15.0',
             ],
             # NOTE: gstreamer_python should not depend on gstreamer_runtime,
             # because people should be able to install it standalone and point
