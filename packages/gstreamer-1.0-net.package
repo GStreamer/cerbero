@@ -14,7 +14,7 @@ class Package(custom.GStreamer, package.Package):
             'libnice:libs:plugins_net', 'srt:libs',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
-            'gst-rtsp-server-1.0:libs:typelibs:plugins_net']
+            'gst-rtsp-server-1.0:libs:plugins_net']
     files_devel = ['libnice:plugins_net_devel',
             'gst-plugins-base-1.0:plugins_net_devel',
             'gst-plugins-good-1.0:plugins_net_devel',
