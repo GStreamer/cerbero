@@ -126,14 +126,15 @@ class BaseCache(Command):
         target_arch = config.target_arch
         if distro == Distro.REDHAT:
             distro = 'fedora'
-        elif distro == Distro.OS_X:
-            distro = 'macos'
         elif distro == Distro.WINDOWS:
             # When targeting Windows, we need to differentiate between mingw,
             # and msvc jobs. When cross-compiling this will be
             # 'cross-windows-mingw' or 'cross-windows-msvc'.
             toolchain, _ = config._get_toolchain_target_platform_arch()
             distro = 'windows-' + toolchain
+        elif config.target_subsystem:
+            # macos, ios, ios-sim etc
+            distro = config.target_subsystem
         if config.cross_compiling():
             distro = 'cross-' + distro
         target_distro = f'{distro}_{config.arch}'
