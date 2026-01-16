@@ -33,7 +33,7 @@ class BinaryDistribution(Distribution):
 
 
 class InjectGStreamerWheels(build_py):
-    IMPORT_SHIM = """import sys; import gstreamer_runtime; gstreamer_runtime.setup_python_environment();
+    IMPORT_SHIM = """import sys; import gstreamer_libs; gstreamer_libs.setup_python_environment();
 """
 
     def run(self):

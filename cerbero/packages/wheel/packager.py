@@ -203,8 +203,8 @@ class WheelPackager(PackagerBase):
         plugins_list = []
         frei0r_list = []
         gtk_list = []
-        plugins_runtime_list = []
-        runtime_list = []
+        plugins_libs_list = []
+        libs_list = []
         python_list = []
         cli_list = []
 
@@ -213,9 +213,9 @@ class WheelPackager(PackagerBase):
         gpl_licenses = set()
         gtk_licenses = set()
         python_licenses = set()
-        runtime_licenses = set()
+        libs_licenses = set()
         plugins_licenses = set()
-        plugins_runtime_licenses = set()
+        plugins_libs_licenses = set()
 
         def _parse_licenses(package):
             result = set()
@@ -236,17 +236,17 @@ class WheelPackager(PackagerBase):
                 gpl_files_list += p.files_list()
                 gpl_licenses.update(_parse_licenses(p))
             elif p.name.startswith('base-'):
-                runtime_list += p.files_list()
-                runtime_licenses.update(_parse_licenses(p))
+                libs_list += p.files_list()
+                libs_licenses.update(_parse_licenses(p))
             elif p.name.endswith('-editing'):
                 for f in p.files_list():
                     if 'gstreamer-1.0' in f:
-                        plugins_runtime_list.append(f)
+                        plugins_libs_list.append(f)
                     elif f.startswith('bin/'):
                         cli_list.append(f)
                     else:
-                        runtime_list.append(f)
-                runtime_licenses.update(_parse_licenses(p))
+                        libs_list.append(f)
+                libs_licenses.update(_parse_licenses(p))
             elif p.name.endswith('-python'):
                 python_list += p.files_list()
                 python_licenses.update(_parse_licenses(p))
@@ -259,24 +259,24 @@ class WheelPackager(PackagerBase):
                     if _is_gstreamer_executable(source) and 'libexec' not in source.parts:
                         cli_list.append(f)
                     elif p.name.endswith('-core') or p.name.endswith('-devtools'):
-                        runtime_licenses.update(_parse_licenses(p))
-                        runtime_list.append(f)
+                        libs_licenses.update(_parse_licenses(p))
+                        libs_list.append(f)
                     elif 'frei0r' in f:
                         frei0r_list.append(f)
                     elif 'gstreamer-1.0' in f:
                         plugins_list.append(f)
                         plugins_licenses.update(_parse_licenses(p))
                     else:
-                        plugins_runtime_list.append(f)
-                        plugins_runtime_licenses.update(_parse_licenses(p))
+                        plugins_libs_list.append(f)
+                        plugins_libs_licenses.update(_parse_licenses(p))
 
         # HERE IS THE MAIN SOURCE OF TRUTH. IF ANYTHING NEEDS FIXING IT'S HERE.
         # (package name, payload, license (SPDX is acronym?), and dependencies/features)
         # When adding a new package here, also edit
-        # data/wheel/gstreamer_runtime/__init__.py:gstreamer_env()
+        # data/wheel/gstreamer_libs/__init__.py:gstreamer_env()
         package_files_list = {
-            'gstreamer_runtime': runtime_list,
-            'gstreamer_plugins_runtime': plugins_runtime_list,
+            'gstreamer_libs': libs_list,
+            'gstreamer_plugins_libs': plugins_libs_list,
             'gstreamer_plugins': plugins_list,
             'gstreamer_plugins_frei0r': frei0r_list,
             'gstreamer_plugins_gpl': gpl_files_list,
@@ -294,8 +294,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl': gpl_licenses,
             # (fixed)
             'gstreamer_plugins_frei0r': [License.GPLv2Plus],
-            'gstreamer_plugins_runtime': plugins_runtime_licenses,
-            'gstreamer_runtime': runtime_licenses,
+            'gstreamer_plugins_libs': plugins_libs_licenses,
+            'gstreamer_libs': libs_licenses,
             # GStreamer supplied
             'gstreamer_cli': [License.LGPLv2_1Plus],
             'gstreamer_plugins': plugins_licenses,
@@ -306,22 +306,22 @@ class WheelPackager(PackagerBase):
         }
 
         package_dependencies = {
-            'gstreamer_runtime': [
+            'gstreamer_libs': [
                 'setuptools >= 80.9.0',
             ],
-            # NOTE: gstreamer_python should not depend on gstreamer_runtime,
+            # NOTE: gstreamer_python should not depend on gstreamer_libs,
             # because people should be able to install it standalone and point
             # it to their own gstreamer install.
-            'gstreamer_cli': [f'gstreamer_runtime ~= {self.package.version}'],
-            'gstreamer_plugins_runtime': [f'gstreamer_runtime ~= {self.package.version}'],
-            'gstreamer_plugins': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
-            'gstreamer_plugins_frei0r': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
-            'gstreamer_plugins_gpl': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
-            'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
-            'gstreamer_plugins_restricted': [f'gstreamer_plugins_runtime ~= {self.package.version}'],
+            'gstreamer_cli': [f'gstreamer_libs ~= {self.package.version}'],
+            'gstreamer_plugins_libs': [f'gstreamer_libs ~= {self.package.version}'],
+            'gstreamer_plugins': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_plugins_frei0r': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_plugins_gpl': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_plugins_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
             'gstreamer': [
                 f'gstreamer_cli ~= {self.package.version}',
-                f'gstreamer_runtime ~= {self.package.version}',
+                f'gstreamer_libs ~= {self.package.version}',
                 f'gstreamer_plugins ~= {self.package.version}',
                 f'gstreamer_plugins_gpl ~= {self.package.version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
@@ -371,7 +371,7 @@ class WheelPackager(PackagerBase):
 
             self._create_wheel(package_name, files_list, license, classifiers, dependencies, features)
 
-            package_dependencies['gstreamer_runtime'].append(f'{package_name} ~= {self.package.version}')
+            package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.package.version}')
 
         for package_name, files_list in package_files_list.items():
             license = ' AND '.join(lic.acronym for lic in package_licenses[package_name])
@@ -403,7 +403,7 @@ class WheelPackager(PackagerBase):
                             continue
                     # Add rpath from the gi loader to other wheels that ship
                     # libs that have typelibs
-                    if package_name == 'gstreamer_runtime':
+                    if package_name == 'gstreamer_libs':
                         if 'girepository' in source.name or 'gmodule' in source.name:
                             for whl in ('gstreamer_gtk',):
                                 relpath = os.path.relpath(f'{whl}/lib', f'{package_name}/{dirpath}')
@@ -413,12 +413,12 @@ class WheelPackager(PackagerBase):
                     # We need to route an RPATH from, say,
                     # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_python/{dirpath}
                     # to
-                    # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_runtime/lib
-                    relpath = os.path.relpath('gstreamer_runtime/lib', f'{package_name}/{dirpath}')
+                    # ~/Library/Python/3.9/lib/python/site-packages/gstreamer_libs/lib
+                    relpath = os.path.relpath('gstreamer_libs/lib', f'{package_name}/{dirpath}')
                     rpath_args += ['-add_rpath', f'@loader_path/{relpath}']
                     for dep in dependencies:
                         pkg = dep.split('~=')[0].strip()
-                        if pkg == 'gstreamer_runtime':
+                        if pkg == 'gstreamer_libs':
                             # Already added above
                             continue
                         relpath = os.path.relpath(f'{pkg}/lib', f'{package_name}/{dirpath}')

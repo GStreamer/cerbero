@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 
-from gstreamer_runtime import gstreamer_env
+from gstreamer_libs import gstreamer_env
 
 
 def __run(program: str):
