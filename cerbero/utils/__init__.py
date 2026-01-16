@@ -582,22 +582,6 @@ def split_version(s):
     return tuple(int(e) for e in s.split('.'))
 
 
-def needs_xcode8_sdk_workaround(config):
-    """
-    Returns whether the XCode 8 clock_gettime, mkostemp, getentropy workaround
-    from https://bugzilla.gnome.org/show_bug.cgi?id=772451 is needed
-
-    These symbols are only available on macOS 10.12+ and iOS 10.0+
-    """
-    if config.target_platform == Platform.DARWIN:
-        if split_version(config.min_osx_sdk_version) < (10, 12):
-            return True
-    elif config.target_platform == Platform.IOS:
-        if split_version(config.ios_min_version) < (10, 0):
-            return True
-    return False
-
-
 def _qmake_or_pkgdir(qmake):
     qmake_path = Path(qmake)
     if not qmake_path.is_file():
