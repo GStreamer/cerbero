@@ -60,7 +60,7 @@ class Recipe(recipe.Recipe):
                 original_implib.unlink(missing_ok=True)
 
     def post_install(self):
-        if self.config.platform in (Platform.DARWIN, Platform.IOS):
+        if Platform.is_apple(self.config.target_platform):
             # Neither CMake's build script nor Meson is aware the library is
             # built solely statically.
             pcfile = f'{self.config.libdir}/pkgconfig/libcurl.pc'

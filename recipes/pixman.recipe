@@ -30,10 +30,9 @@ class Recipe(recipe.Recipe):
             self.meson_options['a64-neon'] = 'enabled'
         # clang from xcode has a known bug, avoid codepath that trigger it
         # More info : https://github.com/Homebrew/homebrew/issues/41056
-        if self.config.target_platform in (Platform.DARWIN, Platform.IOS) and \
-           self.config.target_arch in (Architecture.X86, Architecture.X86_64):
+        if Platform.is_apple(self.config.target_platform):
             self.meson_options['mmx'] = 'disabled'
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_app_platform(self.config.target_platform):
             self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:
             self.meson_options['cpu-features-path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')

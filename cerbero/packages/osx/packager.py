@@ -713,3 +713,4 @@ def register():
     register_packager(Distro.OS_X, Packager)
     register_packager(Distro.IOS, Packager)
     register_packager(Distro.IOS, XCPackager)
+    register_packager(Distro.TVOS, XCPackager)

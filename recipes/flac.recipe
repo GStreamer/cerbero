@@ -30,9 +30,6 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            if self.config.target_arch == Architecture.X86:
-                self.append_env('CFLAGS', '-DFLAC__NO_ASM')
         if self.config.target_platform == Platform.WINDOWS:
             # Newer MinGW requires this define for sscanf in stdio.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')

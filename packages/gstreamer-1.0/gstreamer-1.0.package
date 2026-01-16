@@ -48,7 +48,8 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
         Platform.WINDOWS: 'gstreamer',
         Platform.LINUX: '/opt/gstreamer-1.0/',
         Platform.DARWIN: '/Library/Frameworks/GStreamer.framework/',
-        Platform.IOS: '/Library/Developer/GStreamer/iPhone.sdk'}
+        Platform.IOS: '/Library/Developer/GStreamer/iPhone.sdk',
+    }
 
     install_dir_simulator = {
         Platform.IOS: '/Library/Developer/GStreamer/iPhoneSimulator.sdk',

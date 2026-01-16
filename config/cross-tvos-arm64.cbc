@@ -1,0 +1,6 @@
+from cerbero.config import Platform, Subsystem, Architecture, Distro
+
+target_platform = Platform.TVOS
+target_subsystem = Subsystem.TVOS
+target_arch = Architecture.ARM64
+target_distro = Distro.TVOS

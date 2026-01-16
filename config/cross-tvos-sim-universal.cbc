@@ -1,0 +1,10 @@
+from cerbero.config import Platform, Subsystem, Architecture, Distro, DistroVersion
+
+target_platform = Platform.TVOS
+target_subsystem = Subsystem.TVOS_SIMULATOR
+target_arch = Architecture.UNIVERSAL
+target_distro = Distro.TVOS
+universal_archs = {
+    Architecture.ARM64 :  "cross-tvos-sim-arm64.cbc",
+    Architecture.X86_64 :  "cross-tvos-sim-x86-64.cbc"
+}

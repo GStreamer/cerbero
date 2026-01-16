@@ -48,9 +48,6 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
                 self.meson_options['asm'] = 'disabled'
-        elif self.config.target_platform == Platform.IOS:
-            if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
-                self.meson_options['asm'] = 'disabled'
 
     def post_install(self):
         # Meson does not generate la files

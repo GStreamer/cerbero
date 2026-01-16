@@ -80,7 +80,7 @@ class Recipe(recipe.Recipe):
     async def configure(self):
         # AppleClang's nm is too old
         # This should be injected as in android.config
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if Platform.is_apple(self.config.target_platform):
             self.env['NM'] = str(self.get_llvm_tool("llvm-nm"))
         if self.config.target_platform == Platform.DARWIN or self.using_msvc():
             s = '\n[profile.release]\nstrip = "debuginfo"\n'

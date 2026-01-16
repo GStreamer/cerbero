@@ -205,27 +205,33 @@ class Recipe(custom.GStreamer):
     platform_files_plugins_sys = {
         Platform.WINDOWS: [
              '%(libdir)s/gstreamer-1.0/libgstdirectsound%(mext)s',
-            ],
+        ],
         Platform.DARWIN: [
              '%(libdir)s/gstreamer-1.0/libgstosxaudio%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstosxvideo%(mext)s',
-            ],
+        ],
         Platform.IOS: [
              '%(libdir)s/gstreamer-1.0/libgstosxaudio%(mext)s'
-        ]
+        ],
+        Platform.TVOS: [
+             '%(libdir)s/gstreamer-1.0/libgstosxaudio%(mext)s'
+        ],
     }
 
     platform_files_plugins_sys_devel = {
         Platform.WINDOWS: [
              '%(libdir)s/gstreamer-1.0/libgstdirectsound.a', '%(libdir)s/gstreamer-1.0/libgstdirectsound.la',
-            ],
+        ],
         Platform.DARWIN: [
              '%(libdir)s/gstreamer-1.0/libgstosxaudio.a', '%(libdir)s/gstreamer-1.0/libgstosxaudio.la',
              '%(libdir)s/gstreamer-1.0/libgstosxvideo.a', '%(libdir)s/gstreamer-1.0/libgstosxvideo.la',
-            ],
+        ],
         Platform.IOS: [
              '%(libdir)s/gstreamer-1.0/libgstosxaudio.a', '%(libdir)s/gstreamer-1.0/libgstosxaudio.la',
-        ]
+        ],
+        Platform.TVOS: [
+             '%(libdir)s/gstreamer-1.0/libgstosxaudio.a', '%(libdir)s/gstreamer-1.0/libgstosxaudio.la',
+        ],
     }
 
 
@@ -239,7 +245,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['osxaudio'] = 'enabled'
             self.meson_options['osxvideo'] = 'enabled'
             self.enable_plugin('jack', 'sys')
-        elif self.config.target_platform == Platform.IOS:
+        elif Platform.is_apple_app_platform(self.config.target_platform):
             self.meson_options['osxaudio'] = 'enabled'
         elif self.config.target_platform == Platform.LINUX:
             self.enable_plugin('jack', 'sys')

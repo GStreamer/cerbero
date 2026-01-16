@@ -66,10 +66,10 @@ class Recipe(recipe.Recipe):
     files_devel = []
 
     def prepare(self):
-        # Arch-specific flags
-        if self.config.target_arch == Architecture.X86 and self.config.target_platform == Platform.IOS:
-            # Simulator doesn't like shared libs
+        # Simulator doesn't like shared libs
+        if Subsystem.is_apple_simulator(self.config.target_subsystem):
             self.library_type = LibraryType.STATIC
+
         if self.config.target_arch == Architecture.X86 and self.config.target_platform == Platform.ANDROID:
             self.meson_options['asm'] = 'disabled'
 

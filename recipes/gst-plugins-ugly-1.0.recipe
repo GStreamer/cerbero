@@ -52,7 +52,7 @@ class Recipe(custom.GStreamer):
     files_lang = ['gst-plugins-ugly-1.0']
 
     def prepare(self):
-        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if Platform.is_app_platform(self.config.target_platform):
             self.disable_plugin('dvdread', 'dvd_gpl', dep='libdvdread')
 
         self.enable_plugin('x264', 'codecs_gpl_restricted', dep='x264')
