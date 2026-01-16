@@ -49,7 +49,7 @@ class Recipe(recipe.Recipe):
         # CMake does not generate la files
         if self.config.target_platform == Platform.ANDROID:
             deps = ['c++', 'm', 'log']
-        elif self.config.target_platform == Platform.IOS:
+        elif Platform.is_apple_app_platform(self.config.target_platform):
             deps = ['c++', 'm']
         else:
             deps = None

@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+        if not Platform.is_apple(self.config.target_platform):
             raise InvalidRecipeError(self, "Invalid platform")
 
     async def install(self):

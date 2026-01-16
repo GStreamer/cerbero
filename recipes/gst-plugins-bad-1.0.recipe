@@ -473,6 +473,10 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstapplemedia%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstshm%(mext)s',
             ],
+        Platform.TVOS: [
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstshm%(mext)s',
+            ],
         Platform.ANDROID: [
              '%(libdir)s/gstreamer-1.0/libgstopensles%(mext)s',
             ]
@@ -496,6 +500,10 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdecklink.a', '%(libdir)s/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.IOS: [
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia.a', '%(libdir)s/gstreamer-1.0/libgstapplemedia.la',
+             '%(libdir)s/gstreamer-1.0/libgstshm.a', '%(libdir)s/gstreamer-1.0/libgstshm.la',
+            ],
+        Platform.TVOS: [
              '%(libdir)s/gstreamer-1.0/libgstapplemedia.a', '%(libdir)s/gstreamer-1.0/libgstapplemedia.la',
              '%(libdir)s/gstreamer-1.0/libgstshm.a', '%(libdir)s/gstreamer-1.0/libgstshm.la',
             ],
@@ -612,15 +620,11 @@ class Recipe(custom.GStreamer):
 
         if not Platform.is_app_platform(self.config.target_platform):
             self.enable_plugin('curl', 'net', dep='curl')
-            # if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
-            #     self.enable_plugin('curl', 'net')
-            # else:
-            #     self.enable_plugin('curl', 'net', dep='curl')
 
-        if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
+        if self.config.target_platform not in (Platform.ANDROID, Platform.WINDOWS):
             self.meson_options['shm'] = 'enabled'
 
-        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+        if Platform.is_apple(self.config.target_platform):
             self.meson_options['applemedia'] = 'enabled'
             self.deps += ['moltenvk']
         if self.config.target_platform in (Platform.ANDROID):
@@ -628,7 +632,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
 
         # TODO: Vulkan support on Linux and Windows
-        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
+        if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.disable_plugin('vulkan', 'sys', library_name='vulkan')
 
         if Platform.is_app_platform(self.config.target_platform):

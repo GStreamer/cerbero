@@ -17,7 +17,7 @@ class Package(custom.GStreamer, package.Package):
             # deployments and ca-certs will be picked up from there. On iOS
             # and Android people copy the ca-certs from the devel package into
             # their app's asset
-            if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+            if Platform.is_app_platform(self.config.target_platform):
                 platform_files = self.platform_files_devel
             else:
                 platform_files = self.platform_files

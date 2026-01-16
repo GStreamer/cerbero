@@ -61,7 +61,7 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.DARWIN:
             self.append_env('CFLAGS', '-Wno-error=int-conversion')
 
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
+        if Platform.is_apple(self.config.target_platform):
             # Meson doesn't yet introduce rpaths properly.
             # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
             self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')

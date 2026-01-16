@@ -188,8 +188,8 @@ class PackageBase(object):
 
     def get_install_dir(self):
         try:
-            if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
-                return self.install_dir_simulator
+            if Subsystem.is_apple_simulator(self.config.target_subsystem):
+                return self.install_dir_simulator[self.config.target_platform]
             else:
                 return self.install_dir[self.config.target_platform]
         except Exception:

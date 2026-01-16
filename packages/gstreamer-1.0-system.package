@@ -18,8 +18,9 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-bad-1.0:plugins_sys_devel']
 
     platform_files = {
-      Platform.IOS : ['moltenvk:libs'],
-      Platform.DARWIN : ['moltenvk:libs'],
+      Platform.DARWIN: ['moltenvk:libs'],
+      Platform.IOS: ['moltenvk:libs'],
+      Platform.TVOS: ['moltenvk:libs'],
     }
 
     def prepare(self):

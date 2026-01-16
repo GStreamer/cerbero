@@ -25,7 +25,6 @@ class Recipe(recipe.Recipe):
             'spirv-val',
             'vulkaninfo',
         ],
-        Platform.IOS: [],
     }
 
     files_libs = [
@@ -41,17 +40,17 @@ class Recipe(recipe.Recipe):
     def _passthrough_libs(self):
         if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix:
             return True
-        if Platform.is_apple_mobile(self.config.target_platform):
+        if Platform.is_apple_app_platform(self.config.target_platform):
             return self.config.cross_universal_type() == 'merged-homo'
         return False
 
     def prepare(self):
-        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+        if not Platform.is_apple(self.config.target_platform):
             raise InvalidRecipeError(self, f'Invalid platform {self.config.target_platform}')
         if self.config.target_arch not in [Architecture.ARM64, Architecture.X86_64]:
             raise InvalidRecipeError(self, f'Invalid arch {self.config.target_arch}')
 
-        if self.config.target_platform == Platform.IOS:
+        if Platform.is_apple_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         elif self.config.target_platform == Platform.DARWIN:
             self.library_type = LibraryType.BOTH
@@ -134,7 +133,7 @@ class Recipe(recipe.Recipe):
 
         bindir = prefix / 'bin'
         libdir = prefix / lib
-        bins = self.platform_files_bins[self.config.target_platform]
+        bins = self.platform_files_bins.get(self.config.target_platform, [])
 
         to_copy = []
 
@@ -145,17 +144,21 @@ class Recipe(recipe.Recipe):
             to_copy += [(srcdir / 'macOS/include' / d, prefix / 'include')]
 
         src_libdir = srcdir / 'macOS/lib'
-        if self.config.target_platform == Platform.DARWIN:
+        subsystem = self.config.target_subsystem
+        if subsystem == Subsystem.MACOS:
             for f in ('libMoltenVK.dylib', 'MoltenVK.xcframework/macos-arm64_x86_64/libMoltenVK.a'):
                 to_copy += [(src_libdir / f, libdir)]
-        elif self.config.target_platform == Platform.IOS:
-            arch = self.config.target_arch
-            if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+        else:
+            if subsystem == Subsystem.IOS_SIMULATOR:
                 d = 'ios-arm64_x86_64-simulator'
-            elif arch == Architecture.ARM64:
+            elif subsystem == Subsystem.IOS:
                 d = 'ios-arm64'
+            elif subsystem == Subsystem.TVOS_SIMULATOR:
+                d = 'tvos-arm64_x86_64-simulator'
+            elif subsystem == Subsystem.TVOS:
+                d = 'tvos-arm64_arm64e'
             else:
-                raise BuildStepError(f'Unsupported target arch {arch}')
+                raise BuildStepError(f'Unsupported subsystem {subsystem}')
             to_copy += [(src_libdir / 'MoltenVK.xcframework' / d / 'libMoltenVK.a', libdir)]
 
         for (src, dest_dir) in to_copy:
@@ -168,20 +171,24 @@ class Recipe(recipe.Recipe):
                     dest.unlink()
                 shutil.copy2(src, dest, follow_symlinks=False)
 
-        files = []
-
+        files_thinning = []
         if self.config.target_platform == Platform.DARWIN and not self.config.universal_prefix:
-            # Need to thin all libs if we're not building cross-macos-universal,
+            # Need to thin all libs if we're NOT building cross-macos-universal,
             # while skipping symlinks
-            files += [libdir / x for x in ('libMoltenVK.dylib', 'libMoltenVK.a')]
+            files_thinning += [libdir / x for x in ('libMoltenVK.dylib', 'libMoltenVK.a')]
             # Thinning the binaries causes them to become unloadable, so just skip it
-            #files += [bindir / x for x in bins if x != 'glslangValidator']
+            #files_thinning += [bindir / x for x in bins if x != 'glslangValidator']
         elif not self._passthrough_libs() and self.config.target_platform == Platform.IOS \
              and self.config.target_arch == Architecture.X86_64:
-            # Simulator lib is fat (universal), needs thinning
-            files += [libdir / 'libMoltenVK.a']
+            # We are building a legacy framework and the simulator lib is fat
+            # (universal), so it needs thinning
+            files_thinning += [libdir / 'libMoltenVK.a']
+        elif subsystem == Subsystem.TVOS:
+            # MoltenVK ships a fat arm64_arm64e lib, and we only want arm64
+            # since we do not support arm64e at present
+            files_thinning += [libdir / 'libMoltenVK.a']
 
-        for f in files:
+        for f in files_thinning:
             f = str(f)
             # Because we are editing the binary, we need to remove the signature.
             # The process would crash otherwise as not loadable

@@ -43,3 +43,4 @@ class IOSBootstrapper(BootstrapperBase):
 
 def register_all():
     register_toolchain_bootstrapper(Distro.IOS, IOSBootstrapper)
+    register_toolchain_bootstrapper(Distro.TVOS, IOSBootstrapper)

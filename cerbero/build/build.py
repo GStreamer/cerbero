@@ -731,8 +731,10 @@ class CMake(MakefilesBase):
             system_name = 'Darwin'
         elif self.config.target_platform == Platform.IOS:
             system_name = 'iOS'
+        elif self.config.target_platform == Platform.TVOS:
+            system_name = 'tvOS'
 
-        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+        if Platform.is_apple(self.config.target_platform):
             self.configure_options += ['-DCMAKE_OSX_ARCHITECTURES=' + self.config.target_arch]
 
         # We always need a toolchain file because CMakeLists.txt requires these values to be set.
@@ -803,6 +805,7 @@ system = '{system}'
 cpu_family = '{cpu_family}'
 cpu = '{cpu}'
 endian = '{endian}'
+{subsystem}
 
 [constants]
 toolchain = '{toolchain}'
@@ -1050,14 +1053,24 @@ class Meson(Build, ModifyEnvBase):
                 for pytool in pytools:
                     binaries[pytool] = [self.config.python_exe, Path(self.config.prefix, 'bin', pytool).as_posix()]
 
+        system = self.config.target_platform
+        if Platform.is_apple_app_platform(self.config.target_platform):
+            # Differentiation happens with the subsystem
+            system = 'darwin'
+
+        subsystem = ''
+        if system == 'darwin':
+            subsystem = f"subsystem = '{self.config.target_subsystem}'"
+
         extra_binaries = ''
         for k, v in binaries.items():
             extra_binaries += '{} = {}\n'.format(k, str(v))
 
         contents = MESON_FILE_TPL.format(
-            system=self.config.target_platform,
+            system=system,
             cpu=self.config.target_arch,
             cpu_family=self._get_target_cpu_family(),
+            subsystem=subsystem,
             # Assume all supported target archs are little endian
             endian='little',
             toolchain='',
@@ -1119,6 +1132,7 @@ class Meson(Build, ModifyEnvBase):
             cpu=self.config.arch,
             cpu_family=self.config.arch,
             endian='little',
+            subsystem='',
             toolchain=self.env.get('ANDROID_NDK_TOOLCHAIN_BIN', ''),
             CC=cc,
             CXX=cxx,
@@ -1148,6 +1162,7 @@ class Meson(Build, ModifyEnvBase):
             cpu=self.config.arch,
             cpu_family=self.config.arch,
             endian='little',
+            subsystem='',
             toolchain='',
             CC=false,
             CXX=false,

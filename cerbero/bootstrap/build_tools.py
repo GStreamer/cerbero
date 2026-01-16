@@ -55,7 +55,9 @@ class BuildTools(BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('bindgen-cli')
             self.BUILD_TOOLS.append('cargo-c')
 
-        if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
+        if self.config.target_platform == Platform.WINDOWS or Platform.is_apple_app_platform(
+            self.config.target_platform
+        ):
             # Used by ffmpeg and x264 on iOS, and by openh264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
 

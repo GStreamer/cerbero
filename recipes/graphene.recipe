@@ -59,13 +59,12 @@ class Recipe(recipe.Recipe):
 
         # -msse4.1 causes clang to segfault building graphene-matrix.c on OS X
         # when building for x64_64. Disable it for now.
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            arch = self.config.target_arch
-            if arch == Architecture.X86_64:
+        if Platform.is_apple(self.config.target_platform):
+            if self.config.target_arch == Architecture.X86_64:
                 self.set_env('SSE41_CFLAGS', ' ')
 
     def post_install(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if Platform.is_apple(self.config.target_platform):
             # For the universal build we need to ship graphene-config.h of all
             # architectures in a subfolder and include the correct one depending
             # on the compiler architecture

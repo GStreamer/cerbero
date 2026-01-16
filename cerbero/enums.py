@@ -44,17 +44,18 @@ class Platform:
     DARWIN = 'darwin'
     ANDROID = 'android'
     IOS = 'ios'
+    TVOS = 'tvos'
 
     def is_apple(platform):
-        return platform in (Platform.DARWIN, Platform.IOS)
+        return platform in (Platform.DARWIN, Platform.IOS, Platform.TVOS)
 
     def is_app_platform(platform):
         "Platform exclusively targets a sandboxed app ecosystem"
-        return platform in (Platform.ANDROID, Platform.IOS)
+        return platform in (Platform.ANDROID, Platform.IOS, Platform.TVOS)
 
     def is_apple_app_platform(platform):
         "Platform exclusively targets an Apple sandboxed app ecosystem"
-        return platform == Platform.IOS
+        return platform in (Platform.IOS, Platform.TVOS)
 
 
 class Architecture:
@@ -93,6 +94,7 @@ class Distro:
     ARCH = 'arch'
     OS_X = 'osx'
     IOS = 'ios'
+    TVOS = 'tvos'
     ANDROID = 'android'
     GENTOO = 'gentoo'
     NONE = 'none'
@@ -243,6 +245,11 @@ class Subsystem:
     MACOS = 'macos'
     IOS = 'ios'
     IOS_SIMULATOR = 'ios-simulator'
+    TVOS = 'tvos'
+    TVOS_SIMULATOR = 'tvos-simulator'
+
+    def is_apple_simulator(subsystem):
+        return subsystem in (Subsystem.IOS_SIMULATOR, Subsystem.TVOS_SIMULATOR)
 
 
 class LicenseDescription:

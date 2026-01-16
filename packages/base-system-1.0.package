@@ -22,8 +22,9 @@ class Package(custom.GStreamer, package.Package):
         Platform.DARWIN: ['proxy-libintl:libs:lang'],
         Platform.LINUX: [],
         Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang'],
-        Platform.IOS: ['proxy-libintl:libs:lang']
-        }
+        Platform.IOS: ['proxy-libintl:libs:lang'],
+        Platform.TVOS: ['proxy-libintl:libs:lang'],
+    }
 
     def prepare(self):
         if self.config.variants.gi:

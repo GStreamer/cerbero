@@ -21,6 +21,7 @@ class Package(custom.GStreamer, package.Package):
     platform_files = {
         Platform.DARWIN: ['gstreamer-1.0-osx-framework'],
         Platform.IOS: ['gstreamer-ios-templates'],
+        Platform.TVOS: ['gstreamer-ios-templates'],
         Platform.ANDROID: ['gst-android-1.0'],
         Platform.LINUX: ['bash-completion'],
     }

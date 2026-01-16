@@ -197,7 +197,7 @@ class Recipe(recipe.Recipe):
 
         for category, names in plugin_files.items():
             for name in names:
-                if self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+                if Subsystem.is_apple_simulator(self.config.target_subsystem):
                     if name == 'vvdec':
                         # FIXME: bindgen needs to be upgraded in vvdec-sys
                         # See:
@@ -278,7 +278,7 @@ class Recipe(recipe.Recipe):
             self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
             self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
             self.set_env('CMAKE_GENERATOR', 'Ninja')
-        elif self.config.target_subsystem == Subsystem.IOS_SIMULATOR:
+        elif Subsystem.is_apple_simulator(self.config.target_subsystem):
             self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
             self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
 

@@ -59,11 +59,7 @@ class Recipe(recipe.Recipe):
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
         'libgthread-2.0']
     files_bins = ['gsettings', 'gdbus', 'gio-querymodules', 'glib-compile-schemas']
-    platform_files_schemas = {
-        Platform.WINDOWS: ['share/glib-2.0/schemas'],
-        Platform.DARWIN: ['share/glib-2.0/schemas'],
-        Platform.IOS: ['share/glib-2.0/schemas'],
-    }
+    files_schemas = ['share/glib-2.0/schemas']
     # Fill it when needed
     #files_gio = ['%(libdir)s/gio/modules']
     files_devel = [
@@ -92,6 +88,7 @@ class Recipe(recipe.Recipe):
         Platform.ANDROID: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
         Platform.DARWIN: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
         Platform.IOS: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.TVOS: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
     }
 
     files_lang = ['glib20']
@@ -148,9 +145,7 @@ class Recipe(recipe.Recipe):
             self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
             # Old MinGW requires this define for using llu in inttypes.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
-        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            # https://gitlab.gnome.org/GNOME/glib/-/issues/2902
-            self.meson_options.update({'tests': 'false'})
+        elif Platform.is_apple(self.config.target_platform):
             self.files_devel.append('%(libdir)s/glib-2.0/include/*/glibconfig.h')
 
         elif self.config.target_platform == Platform.LINUX:
@@ -204,7 +199,7 @@ class Recipe(recipe.Recipe):
             self.meson_options.update({'glib_checks': 'false'})
 
     def post_install(self):
-        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
+        if Platform.is_apple(self.config.target_platform):
             # For the universal build we need to ship glibconfig.h of both
             # architectures in a subfolder and include the correct one depending
             # on the compiler architecture
@@ -226,7 +221,7 @@ class Recipe(recipe.Recipe):
                                    'include', 'glibconfig.h'), 'w+') as f:
                 f.write(GLIB_CONFIG_UNVERSAL)
 
-        if self.config.platform in (Platform.DARWIN, Platform.IOS):
+        if Platform.is_apple(self.config.target_platform):
             # Meson doesn't yet introduce rpaths properly.
             # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
             files = [

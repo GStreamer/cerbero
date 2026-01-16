@@ -59,6 +59,9 @@ RUST_TRIPLE_MAPPING = {
     (Platform.IOS, Architecture.ARM64, Subsystem.IOS): 'aarch64-apple-ios',
     (Platform.IOS, Architecture.ARM64, Subsystem.IOS_SIMULATOR): 'aarch64-apple-ios-sim',
     (Platform.IOS, Architecture.X86_64, Subsystem.IOS_SIMULATOR): 'x86_64-apple-ios',
+    (Platform.TVOS, Architecture.ARM64, Subsystem.TVOS): 'aarch64-apple-tvos',
+    (Platform.TVOS, Architecture.ARM64, Subsystem.TVOS_SIMULATOR): 'aarch64-apple-tvos-sim',
+    (Platform.TVOS, Architecture.X86_64, Subsystem.TVOS_SIMULATOR): 'x86_64-apple-tvos',
     (Platform.WINDOWS, Architecture.X86_64, 'gnu'): 'x86_64-pc-windows-gnu',
     (Platform.WINDOWS, Architecture.X86_64, 'msvc'): 'x86_64-pc-windows-msvc',
     (Platform.WINDOWS, Architecture.ARM64, 'msvc'): 'aarch64-pc-windows-msvc',
@@ -284,6 +287,7 @@ class Config(object):
         'recipes_commits',
         'recipes_remotes',
         'ios_platform',
+        'tvos_platform',
         'extra_build_tools',
         'override_build_tools',
         'distro_packages_install',
@@ -296,6 +300,7 @@ class Config(object):
         'cached_sources',
         'tools_prefix',
         'ios_min_version',
+        'tvos_min_version',
         'toolchain_path',
         'mingw_perl_prefix',
         'msvc_gl_prefix',
@@ -434,7 +439,7 @@ class Config(object):
         # Fill the defaults in the config which depend on the configuration we
         # loaded above
         self._load_last_defaults()
-        # Load the platform-specific (linux|windows|android|darwin).config
+        # Load the platform-specific (linux|windows|android|darwin|ios|tvos).config
         self._load_platform_config()
         # And validate properties
         self._validate_properties()
