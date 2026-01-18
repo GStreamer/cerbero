@@ -434,14 +434,6 @@ class Recipe(custom.GStreamer):
             ]
     }
 
-    files_plugins_vulkan = [
-        '%(libdir)s/gstreamer-1.0/libgstvulkan%(mext)s',
-    ]
-
-    files_plugins_vulkan_devel = [
-        '%(libdir)s/gstreamer-1.0/libgstvulkan.a', '%(libdir)s/gstreamer-1.0/libgstvulkan.la',
-    ]
-
     files_plugins_vis = [
              '%(libdir)s/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
     ]
@@ -452,10 +444,12 @@ class Recipe(custom.GStreamer):
 
     files_plugins_sys = [
         '%(libdir)s/gstreamer-1.0/libgstipcpipeline%(mext)s',
+        '%(libdir)s/gstreamer-1.0/libgstvulkan%(mext)s',
     ]
 
     files_plugins_sys_devel = [
         '%(libdir)s/gstreamer-1.0/libgstipcpipeline.a', '%(libdir)s/gstreamer-1.0/libgstipcpipeline.la',
+        '%(libdir)s/gstreamer-1.0/libgstvulkan.a', '%(libdir)s/gstreamer-1.0/libgstvulkan.la',
     ]
 
     platform_files_plugins_sys = {
@@ -624,7 +618,7 @@ class Recipe(custom.GStreamer):
 
         # TODO: Vulkan support on Linux and Windows
         if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
-            self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
+            self.disable_plugin('vulkan', 'sys', library_name='vulkan')
 
         if Platform.is_mobile(self.config.target_platform):
             self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
