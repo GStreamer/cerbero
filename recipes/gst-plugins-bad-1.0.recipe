@@ -44,7 +44,6 @@ class Recipe(custom.GStreamer):
                      'resindvd': 'enabled',
                      'rist' : 'enabled',
                      'voaacenc': 'enabled',
-                     'vulkan': 'enabled',
                      'webrtc': 'enabled',
                      'webrtcdsp': 'enabled',
                      'zbar': 'enabled',
@@ -78,6 +77,7 @@ class Recipe(custom.GStreamer):
                      'sndfile': 'disabled',
                      'teletext': 'disabled',
                      'voamrwbenc': 'disabled',
+                     'vulkan': 'disabled',
                      'webview2': 'disabled',
                      'wic': 'disabled',
                      'win32ipc': 'disabled',
@@ -420,14 +420,6 @@ class Recipe(custom.GStreamer):
             ]
     }
 
-    files_plugins_vulkan = [
-        '%(libdir)s/gstreamer-1.0/libgstvulkan%(mext)s',
-    ]
-
-    files_plugins_vulkan_devel = [
-        '%(libdir)s/gstreamer-1.0/libgstvulkan.a', '%(libdir)s/gstreamer-1.0/libgstvulkan.la',
-    ]
-
     files_plugins_vis = [
              '%(libdir)s/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
     ]
@@ -595,15 +587,15 @@ class Recipe(custom.GStreamer):
             self.meson_options['shm'] = 'enabled'
 
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            self.enable_plugin('vulkan', 'sys', dep='moltenvk')
             self.meson_options['applemedia'] = 'enabled'
-            self.deps += ['moltenvk']
         if self.config.target_platform in (Platform.ANDROID):
+            # Keep using the 'vulkan' category on Android for backwards-compat,
+            # since Android API 21 (Lollipop) doesn't ship with libvulkan, and
+            # that's what we use in our tutorials.
+            self.enable_plugin('vulkan', 'vulkan')
             self.deps += ['vulkan-android']
             self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
-
-        # TODO: Vulkan support on Linux and Windows
-        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
-            self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
         if Platform.is_mobile(self.config.target_platform):
             self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
