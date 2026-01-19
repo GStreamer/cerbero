@@ -14,7 +14,7 @@ from cerbero.errors import FatalError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import SDKPackage, Package
 from cerbero.packages.wix import VSTemplatePackage
-from cerbero.utils import decorator_escape_path, m, shell, to_winepath
+from cerbero.utils import decorator_escape_path, determine_num_of_cpus, m, shell, to_winepath
 
 
 @decorator_escape_path
@@ -216,12 +216,13 @@ class InnoSetup(PackagerBase):
                 rules.write('ArchitecturesInstallIn64BitMode=x64compatible\n')
 
             # Compression
-            # Solid compression disabled to skip decompression of unused files
-            rules.write(
-                'Compression=lzma2/max\n'
-                'LZMANumBlockThreads=4\n'
-                'CompressionThreads=auto\nSolidCompression=no\nLZMAUseSeparateProcess=yes\n'
-            )
+            rules.write('Compression=lzma2/max\nCompressionThreads=auto\nLZMAUseSeparateProcess=yes\n')
+            # Solid compression allows parallelization but makes
+            # unused files unable to be skipped during decompression
+            # See https://jrsoftware.org/ishelp/index.php?topic=setup_solidcompression
+            cores = determine_num_of_cpus()
+            if cores > 1:
+                rules.write(f'SolidCompression=yes\nLZMANumBlockThreads={cores}\n')
 
             # Output filename
             rules.write(f'OutputBaseFilename={self._package_name()}\n')
