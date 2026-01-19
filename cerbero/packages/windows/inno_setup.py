@@ -40,24 +40,6 @@ def format_inno_feature_id(string):
     return ret
 
 
-def format_win32_version(version):
-    # The heuristics to generate a valid version can get
-    # very complicated, so we leave it to the user
-    url = 'https://jrsoftware.org/ishelp/topic_setup_versioninfoversion.htm'
-    versions = (version.split('.', 4) + ['0', '0', '0'])[:4]
-    for idx, val in enumerate(versions):
-        i = int(val)
-        if idx in [0, 1] and i > 255:
-            raise FatalError(
-                'Invalid version string, major and minor' 'must have a maximum value of 255.\nSee: {}'.format(url)
-            )
-        elif idx in [2] and i > 65535:
-            raise FatalError(
-                'Invalid version string, build ' 'must have a maximum value of 65535.\nSee: {}'.format(url)
-            )
-    return '.'.join(versions)
-
-
 class InnoSetup(PackagerBase):
     # FIXME: with_wine throughout this
     def __init__(self, config, package, store):
@@ -198,8 +180,10 @@ class InnoSetup(PackagerBase):
             # EXE metadata etc.
             rules.write(f'AppId={self.package.get_wix_upgrade_code()}\n')
             rules.write(f'AppName="{self.package.shortdesc} ({self.abi_desc})"\n')
-            rules.write(f'AppVersion={format_win32_version(self.package.version)}\n')
-            rules.write(f'VersionInfoVersion={format_win32_version(self.package.version)}\n')
+            rules.write(f'AppVersion={self.package.version}\n')
+            # https://jrsoftware.org/ishelp/topic_setup_versioninfoversion.htm
+            # Missing entries (e.g. patch and revision) will be completed with zeros
+            rules.write(f'VersionInfoVersion={self.package.version}\n')
             if getattr(self.package, 'vendor', None):
                 rules.write(f'AppPublisher={self.package.vendor}\n')
             if getattr(self.package, 'url', None):
