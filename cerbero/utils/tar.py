@@ -74,7 +74,7 @@ class Tar:
             if shutil.which('xz'):
                 tar_args += ['--use-compress-program=xz -d -T0']
             else:
-                if self.config.platform == Platform.DARWIN:
+                if shell.PLATFORM == Platform.DARWIN:
                     m.warning('Could not find `xz` for parallel lzma decompression with bsdtar')
                 tar_env['XZ_OPT'] = '-T0'
         tar_args += ['-C', output_dir, '-f', str(self.filename)]
@@ -222,7 +222,7 @@ class Tar:
                     # doesn't use parallel compression. However, GNU tar will
                     # read XZ_OPT and do the right thing. Maybe some day so
                     # will BSD tar.
-                    if self.config.platform == Platform.DARWIN:
+                    if shell.PLATFORM == Platform.DARWIN:
                         m.warning('Could not find `xz` for parallel lzma compression with bsdtar')
                     tar_cmd += ['--xz']
                     tar_env['XZ_OPT'] = '-T0'
