@@ -357,6 +357,7 @@ tests:
     - python3 -m xmlrunner --output-file tests.xml discover -s test
   variables:
     CERBERO_UNINSTALLED: 1
+    CERBERO_TESTSUITE: 1
     PYTHONPATH: ':./test:./cerbero'
     CONFIG: "linux.config"
     ARCH: "linux_x86_64"
