@@ -105,16 +105,20 @@ end;
 procedure gst_test_unset_vs(Param: String);
 begin
   if not gst_is_vs_version_installed(Param) then begin
-    Log('VS ' + Param + ' not found, unchecking');
+    Log('VS ' + Param + ' not found, disabling related components');
     WizardSelectComponents('!gstreamer_1_0_vs_templates_' + Param + '_devel');
   end;
 end;
 
 procedure InitializeWizard();
 begin
+  if is_portable_mode_enabled then
+  begin
+    Log('Portable mode detected, admin install components and tasks will be disabled');
+  end;
   if gst_vs_find_installations() then
   begin
-	  Log('Visual Studio checks completed, updating checks');
+	  Log('Visual Studio checks completed, updating components status');
     gst_test_unset_vs('2017');
     gst_test_unset_vs('2019');
     gst_test_unset_vs('2022');
