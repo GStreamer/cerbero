@@ -226,6 +226,8 @@ class PackageBase(object):
         elif name == 'shortdesc':
             if self.package_mode == PackageType.DEVEL:
                 attr += ' (Development Files)'
+            elif self.package_mode == PackageType.DEBUG:
+                attr += ' (Debugging Files)'
         elif name == 'uuid':
             if self.package_mode == PackageType.DEVEL:
                 if attr is not None:
