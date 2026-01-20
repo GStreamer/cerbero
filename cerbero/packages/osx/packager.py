@@ -260,7 +260,15 @@ class ProductPackage(PackagerBase):
             self.package.set_mode(PackageType.RUNTIME)
             self._create_packages_dmg()
         finally:
-            if not keep_temp:
+            if keep_temp:
+                m.action(f'Temporary build directory is at {self.tmp}')
+            else:
+                # Remove bundle components
+                for _, p in self.packages_paths.items():
+                    for _, f in p.items():
+                        if not f:
+                            continue
+                        os.unlink(f)
                 shutil.rmtree(self.tmp)
 
         return paths
