@@ -151,8 +151,11 @@ class InnoSetup(PackagerBase):
         for package, (required, selected) in packagedeps.items():
             for p in self.store.get_package_deps(package, True):
                 if p not in packagedeps:
-                    # FIXME: assume they're all required/selected equally
-                    transitive_deps[p] = (required, selected)
+                    if p in transitive_deps:
+                        old = transitive_deps[p]
+                        transitive_deps[p] = (old[0] or required, old[1] or selected)
+                    else:
+                        transitive_deps[p] = (required, selected)
         packagedeps.update(transitive_deps)
         features = [
             {
