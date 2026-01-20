@@ -30,14 +30,41 @@ def get_inno_setup_path(config):
     raise FatalError('The required packaging tool Inno Setup 5.0 was not found')
 
 
-def format_inno_feature_id(string):
+def format_inno_feature_id(string, package_type):
+    # Remove suffix if present
+    if package_type and string.endswith(package_type):
+        string = string.removesuffix(package_type)
+    # converting it into a nested component
+    if package_type:
+        package_type = package_type[1:]
+    else:
+        package_type = 'runtime'
+
     ret = string.replace('_', '__')
     for r in ['/', '-', ' ', '@', '+', '.']:
         ret = ret.replace(r, '_')
     # For directories starting with a number
     if re.match(r'[0-9]', ret):
-        return 'innogst' + ret
-    return ret
+        return package_type + '/' + 'innogst' + ret
+    return package_type + '/' + ret
+
+
+def feature_type(package_type):
+    if package_type == PackageType.DEVEL:
+        return ['full', 'custom']
+    elif package_type == PackageType.DEBUG:
+        return ['full', 'custom']
+    else:
+        return ['full', 'compact', 'custom']
+
+
+def description(package_type):
+    if package_type == PackageType.DEVEL:
+        return 'Development'
+    elif package_type == PackageType.DEBUG:
+        return 'Debugging'
+    else:
+        return 'Runtime'
 
 
 class InnoSetup(PackagerBase):
@@ -80,15 +107,10 @@ class InnoSetup(PackagerBase):
             return {}
 
         listing = {}
-        listing['component'] = format_inno_feature_id(package.name)
+        listing['component'] = format_inno_feature_id(package.name, package_type)
         # Shortdesc incorporates the "(Development files)"
         listing['description'] = package.shortdesc
-        if package_type == PackageType.DEVEL:
-            listing['types'] = ['devel', 'custom']
-        elif package_type == PackageType.DEBUG:
-            listing['types'] = ['devel', 'custom', 'debug']
-        else:
-            listing['types'] = ['devel', 'custom', 'debug', 'runtime']
+        listing['types'] = feature_type(package_type)
 
         if required:
             listing['flags'] = ['fixed']
@@ -120,8 +142,6 @@ class InnoSetup(PackagerBase):
                 dirpath = f'{{app}}/{dirpath}'
             files[source] = dirpath
         listing['files'] = files
-
-        listing['requires'] = [format_inno_feature_id(p.name) for p in self.store.get_package_deps(package, True)]
         return listing
 
     def _create_features(self, package_type: str, rules: IOBase, force=False):
@@ -135,9 +155,18 @@ class InnoSetup(PackagerBase):
                     transitive_deps[p] = (required, selected)
         packagedeps.update(transitive_deps)
         features = [
-            self._create_listing(rules, package, package_type, required=required, force=force)
-            for package, (required, _) in packagedeps.items()
+            {
+                'component': package_type[1:] if package_type else 'runtime',
+                'types': feature_type(package_type),
+                'description': description(package_type),
+            }
         ]
+        features.extend(
+            [
+                self._create_listing(rules, package, package_type, required=required, force=force)
+                for package, (required, _) in packagedeps.items()
+            ]
+        )
         # Remove unused features
         return [f for f in features if f]
 
@@ -239,13 +268,6 @@ class InnoSetup(PackagerBase):
             rules.write('PrivilegesRequired=admin\n')
             rules.write('PrivilegesRequiredOverridesAllowed=dialog\n')
 
-            # Generate Runtime + Devel package
-            rules.write('\n[Types]\n')
-            rules.write('Name: "devel"; Description: "Runtime, debug symbols, and development headers"\n')
-            rules.write('Name: "debug"; Description: "Runtime + debug symbols"\n')
-            rules.write('Name: "runtime"; Description: "Only runtime"\n')
-            rules.write('Name: "custom"; Description: "Custom installation"; Flags: iscustom\n')
-
             features = []
             for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
@@ -253,6 +275,8 @@ class InnoSetup(PackagerBase):
             # Now take all the files in each feature, label them by component
             files = {}
             for feature in features:
+                if 'files' not in feature:
+                    continue
                 feature_name = feature['component']
                 m.action(f'Deduplicating files for feature {feature_name}')
                 for file, destdir in feature['files'].items():
@@ -273,11 +297,11 @@ class InnoSetup(PackagerBase):
                 description = feature['description']
                 types = ' '.join(feature['types'])
                 rules.write(f'Name: {name}; Description: "{description}"; Types: {types};')
-                if 'check' in feature.keys():
+                if 'check' in feature:
                     rules.write(f" Check: {feature['check']}; ")
-                if 'flags' in feature.keys():
+                if 'flags' in feature:
                     flags = ' '.join(feature['flags'])
-                    rules.write(f'Flags: {flags};')
+                    rules.write(f' Flags: {flags};')
                 rules.write('\n')
 
             # Then generate the complete [Files] Listing
@@ -305,7 +329,7 @@ class InnoSetup(PackagerBase):
                 m.action('Embedding Visual C++ Redistributable')
                 rules.write('\n[Tasks]\n')
                 rules.write(
-                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: gstreamer_1_0_core; Check: is_admin_install;\n'
+                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: runtime/gstreamer_1_0_core; Check: is_admin_install;\n'
                 )
                 rules.write('\n[Files]\n')
                 rules.write(
@@ -323,10 +347,10 @@ class InnoSetup(PackagerBase):
             rules.write('ChangesEnvironment=yes\n')
             rules.write('\n[Tasks]\n')
             rules.write(
-                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: runtime/gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write(
-                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: runtime/gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write('\n[Registry]\n')
             rules.write(
