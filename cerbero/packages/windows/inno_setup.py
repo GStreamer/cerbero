@@ -236,6 +236,7 @@ class InnoSetup(PackagerBase):
             icon_file = Path(self.package.relative_path('icon.ico'))
             if icon_file.exists():
                 rules.write(f'SetupIconFile={icon_file.as_posix()}\n')
+                rules.write('UninstallDisplayIcon={uninstallexe}\n')
             license_file = Path(self.package.relative_path('license.rtf'))
             if license_file.exists():
                 rules.write(f'LicenseFile={license_file.as_posix()}\n')
