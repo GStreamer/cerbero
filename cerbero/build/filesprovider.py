@@ -347,6 +347,12 @@ class FilesProvider(object):
                 if self.extensions['debugext']:
                     if str(f).endswith(self.extensions['debugext']):
                         continue
+            # Error out on our own CI runs (whether Cerbero, gst-plugins-rs,
+            # gstreamer etc.)
+            elif os.environ.get('CI_PROJECT_NAMESPACE', '') == 'gstreamer' and 'CERBERO_TESTSUITE' not in os.environ:
+                raise RuntimeError(
+                    'Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__)
+                )
             else:
                 m.warning('Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__))
         return vfs
