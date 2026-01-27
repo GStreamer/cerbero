@@ -313,7 +313,7 @@ class ProductPackage(PackagerBase):
         packages = self.package.packages[:] + [(package.name, True, True)]
         self.package.packages = packages
         path = packager.pack(self.output_dir, self.fw_path)
-        if Platform.is_apple_mobile(self.config.target_platform):
+        if Platform.is_apple_app_platform(self.config.target_platform):
             self.packages_paths[PackageType.DEVEL][package] = path[0]
             self.empty_packages[PackageType.RUNTIME].append(package)
             self.empty_packages[PackageType.DEBUG].append(package)
@@ -683,7 +683,7 @@ class Packager(object):
     ARTIFACT_TYPE = 'pkg'
 
     def __new__(klass, config, package, store):
-        if Platform.is_apple_mobile(config.target_platform):
+        if Platform.is_apple_app_platform(config.target_platform):
             if not isinstance(package, MetaPackage):
                 raise FatalError('iOS platform only support packages', 'for MetaPackage')
             return IOSPackage(config, package, store)
@@ -699,7 +699,7 @@ class XCPackager(object):
     ARTIFACT_TYPE = 'xcframework'
 
     def __new__(klass, config, package, store):
-        if not Platform.is_apple_mobile(config.target_platform):
+        if not Platform.is_apple_app_platform(config.target_platform):
             raise FatalError('xcframework is only supported for Apple mobile platforms')
         if not isinstance(package, MetaPackage):
             raise FatalError('iOS platform only support packages for MetaPackage')

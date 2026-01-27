@@ -42,7 +42,7 @@ class Recipe(recipe.Recipe):
             # 10.13 which makes the usage of libstdc++ a hard error.
             self.append_env('LDFLAGS', '-stdlib=libc++')
 
-        if self.config.target_platform == Platform.WINDOWS or Platform.is_mobile(self.config.target_platform):
+        if self.config.target_platform == Platform.WINDOWS or Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
         if self.config.target_platform == Platform.ANDROID:

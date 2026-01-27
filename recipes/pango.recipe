@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
             # Allow using Win10 APIs if dwrite_3.h is found
             self.append_env('CFLAGS', '-U_WIN32_WINNT')
 
-        if self.config.target_platform == Platform.LINUX or Platform.is_mobile(self.config.target_platform):
+        if self.config.target_platform == Platform.LINUX or Platform.is_app_platform(self.config.target_platform):
             self.files_libs.append('libpangoft2-1.0')
             self.files_devel.append('%(libdir)s/pkgconfig/pangoft2.pc')
             self.files_typelibs.append('PangoFT2-1.0')
@@ -47,7 +47,7 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('pango-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gobject-2.0', 'fribidi', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
         pangocairo_deps = ['pango-1.0', 'cairo', 'pixman-1']
-        if self.config.target_platform == Platform.LINUX or Platform.is_mobile(self.config.target_platform):
+        if self.config.target_platform == Platform.LINUX or Platform.is_app_platform(self.config.target_platform):
             pangocairo_deps.append('pangoft2-1.0')
             LibtoolLibrary('pangoft2-1.0', None, None, None, self.config.libdir,
                     self.config.target_platform, deps=['pango-1.0', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()

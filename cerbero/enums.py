@@ -48,10 +48,12 @@ class Platform:
     def is_apple(platform):
         return platform in (Platform.DARWIN, Platform.IOS)
 
-    def is_mobile(platform):
+    def is_app_platform(platform):
+        "Platform exclusively targets a sandboxed app ecosystem"
         return platform in (Platform.ANDROID, Platform.IOS)
 
-    def is_apple_mobile(platform):
+    def is_apple_app_platform(platform):
+        "Platform exclusively targets an Apple sandboxed app ecosystem"
         return platform == Platform.IOS
 
 

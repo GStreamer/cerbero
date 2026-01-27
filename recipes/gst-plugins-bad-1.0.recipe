@@ -534,7 +534,7 @@ class Recipe(custom.GStreamer):
 
         self.enable_plugin('x265', 'codecs_gpl_restricted', dep='x265')
 
-        if not Platform.is_mobile(self.config.target_platform):
+        if not Platform.is_app_platform(self.config.target_platform):
             # These need plugins
             self.enable_plugin('frei0r', 'effects', dep='frei0r-plugins')
 
@@ -610,7 +610,7 @@ class Recipe(custom.GStreamer):
                 'GstHipGL-1.0',
             ]
 
-        if not Platform.is_mobile(self.config.target_platform):
+        if not Platform.is_app_platform(self.config.target_platform):
             self.enable_plugin('curl', 'net', dep='curl')
             # if self.config.target_platform == Platform.LINUX and not self.config.cross_compiling():
             #     self.enable_plugin('curl', 'net')
@@ -631,7 +631,7 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
             self.disable_plugin('vulkan', 'sys', library_name='vulkan')
 
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             self.disable_plugin('resindvd', 'dvd_gpl', dep='libdvdnav')
 
         if self.using_msvc() and self.config.cross_compiling():

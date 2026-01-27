@@ -33,5 +33,5 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('gst-plugins-rs:plugins_effects')
             self.files_devel.append('gst-plugins-rs:plugins_effects_devel')
 
-        if not Platform.is_mobile(self.config.target_platform):
+        if not Platform.is_app_platform(self.config.target_platform):
             self.files.append('frei0r-plugins:plugins')

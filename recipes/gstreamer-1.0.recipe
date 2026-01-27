@@ -59,7 +59,7 @@ class Recipe(custom.GStreamer):
 
 
     def prepare(self):
-        if Platform.is_apple_mobile(self.config.target_platform):
+        if Platform.is_apple_app_platform(self.config.target_platform):
             # iOS only supports static builds so plugins must be linked
             # and registered statically.
             self.meson_options['registry'] = 'false'
@@ -79,7 +79,7 @@ class Recipe(custom.GStreamer):
         # Ship the PTP helper process if the rust variant is enabled and this
         # is not a mobile platform.
         if self.config.variants.rust and \
-           not Platform.is_mobile(self.config.target_platform):
+           not Platform.is_app_platform(self.config.target_platform):
             self.meson_options['ptp-helper'] = 'enabled'
             self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
             self.append_env('RUSTFLAGS', '-g')
