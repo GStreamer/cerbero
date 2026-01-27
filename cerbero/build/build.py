@@ -24,7 +24,7 @@ import asyncio
 from pathlib import Path
 from itertools import chain
 
-from cerbero.enums import Platform, Architecture, Distro, DistroVersion, LibraryType
+from cerbero.enums import Platform, Subsystem, Architecture, Distro, DistroVersion, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import shell, default_cargo_build_jobs
 from cerbero.utils import messages as m
@@ -1061,6 +1061,8 @@ class Meson(Build, ModifyEnvBase):
         subsystem = ''
         if system == 'darwin':
             subsystem = f"subsystem = '{self.config.target_subsystem}'"
+            if self.config.target_subsystem != Subsystem.MACOS:
+                extra_properties += 'needs_exe_wrapper = true\n'
 
         extra_binaries = ''
         for k, v in binaries.items():
