@@ -1,0 +1,33 @@
+From ce3c5c07074480e8e9ca2695643ee458aab5f57f Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 27 Jan 2026 23:20:58 +0530
+Subject: [PATCH 11/14] meson: Remove unused check for iOS
+
+---
+ meson.build | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index da11ddd..4ce36d8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -55,16 +55,6 @@ endif
+ 
+ host_system = host_machine.system()
+ 
+-if host_system == 'darwin'
+-  ios_test_code = '''#include <TargetConditionals.h>
+-  #if ! TARGET_OS_IPHONE
+-  #error "Not iOS/tvOS/watchOS/iPhoneSimulator"
+-  #endif'''
+-  if cc.compiles(ios_test_code, name : 'building for iOS')
+-    host_system = 'ios'
+-  endif
+-endif
+-
+ linux_libc = ''
+ if host_system == 'linux'
+   musl_test_code = '''#include <stdlib.h>
+-- 
+2.39.5 (Apple Git-154)
+

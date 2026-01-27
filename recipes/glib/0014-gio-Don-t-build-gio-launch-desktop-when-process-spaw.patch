@@ -1,0 +1,54 @@
+From 06c512c18a00ddea34eb28c1fcfd09c6fb4a68b7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 27 Jan 2026 23:24:31 +0530
+Subject: [PATCH 14/14] gio: Don't build gio-launch-desktop when process
+ spawning is disallowed
+
+This uses execvp() which is disallowed on tvOS and watchOS.
+---
+ gio/meson.build | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/gio/meson.build b/gio/meson.build
+index 3c9d35c..253f8af 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -408,20 +408,23 @@ if host_system != 'windows'
+     contenttype_sources += files('gcontenttype-fdo.c')
+     unix_sources += files('gdesktopappinfo.c')
+     gio_unix_include_headers += files('gdesktopappinfo.h')
+-    launch_desktop_sources = files('gio-launch-desktop.c')
+ 
+-    if host_system == 'linux'
+-      launch_desktop_sources += files('../glib/gjournal-private.c')
++    if process_spawn_allowed
++      launch_desktop_sources = files('gio-launch-desktop.c')
++
++      if host_system == 'linux'
++        launch_desktop_sources += files('../glib/gjournal-private.c')
++      endif
++
++      gio_launch_desktop = executable('gio-launch-desktop', launch_desktop_sources,
++        include_directories : glibinc,
++        install : true,
++        install_dir : multiarch_libexecdir,
++        install_tag : 'bin',
++        c_args : gio_c_args,
++        # intl.lib is not compatible with SAFESEH
++        link_args : noseh_link_args)
+     endif
+-
+-    gio_launch_desktop = executable('gio-launch-desktop', launch_desktop_sources,
+-      include_directories : glibinc,
+-      install : true,
+-      install_dir : multiarch_libexecdir,
+-      install_tag : 'bin',
+-      c_args : gio_c_args,
+-      # intl.lib is not compatible with SAFESEH
+-      link_args : noseh_link_args)
+   endif
+ 
+   subdir('xdgmime')
+-- 
+2.39.5 (Apple Git-154)
+

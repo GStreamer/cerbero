@@ -1,0 +1,32 @@
+From 159364ed6cada79322b254eb7252f244e4d20e0d Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 27 Jan 2026 23:23:53 +0530
+Subject: [PATCH 13/14] gdbus: Disable testing framework when process spawning
+ is not allowed
+
+Once again, the usage of fork() is the problem on tvOS/watchOS.
+---
+ gio/meson.build | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/gio/meson.build b/gio/meson.build
+index e8b7a16..3c9d35c 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -228,9 +228,12 @@ gdbus_sources = files(
+   'gdbusobjectmanager.c',
+   'gdbusobjectmanagerclient.c',
+   'gdbusobjectmanagerserver.c',
+-  'gtestdbus.c',
+ )
+ 
++if process_spawn_allowed
++  gdbus_sources += files('gtestdbus.c')
++endif
++
+ # Generate gdbus-codegen
+ subdir('gdbus-2.0/codegen')
+ 
+-- 
+2.39.5 (Apple Git-154)
+

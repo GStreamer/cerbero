@@ -53,6 +53,13 @@ class Recipe(recipe.Recipe):
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4987
         'glib/0007-giomodule-Simplify-macro-usage-for-getting-the-giomo.patch',
         'glib/0008-giomodule-Do-not-try-to-use-GIO_MODULE_DIR-on-iOS.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4992
+        'glib/0009-gbacktrace-Don-t-attempt-to-get-a-stack-trace-on-san.patch',
+        'glib/0010-gtestutils-Don-t-implement-g_test_trap_fork-on-tvOS-.patch',
+        'glib/0011-meson-Remove-unused-check-for-iOS.patch',
+        'glib/0012-gspawn-Replace-with-stubs-that-abort-on-tvOS-watchOS.patch',
+        'glib/0013-gdbus-Disable-testing-framework-when-process-spawnin.patch',
+        'glib/0014-gio-Don-t-build-gio-launch-desktop-when-process-spaw.patch',
     ]
 
     files_libs = [

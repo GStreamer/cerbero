@@ -1,0 +1,140 @@
+From 239a5d73b328b18bd8a8cf2236a5c47fd9738350 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 27 Jan 2026 23:22:35 +0530
+Subject: [PATCH 12/14] gspawn: Replace with stubs that abort on tvOS/watchOS
+
+---
+ glib/gspawn-stubs.c | 79 +++++++++++++++++++++++++++++++++++++++++++++
+ glib/meson.build    |  7 +++-
+ meson.build         | 11 +++++++
+ 3 files changed, 96 insertions(+), 1 deletion(-)
+ create mode 100644 glib/gspawn-stubs.c
+
+diff --git a/glib/gspawn-stubs.c b/glib/gspawn-stubs.c
+new file mode 100644
+index 0000000..301f5b6
+--- /dev/null
++++ b/glib/gspawn-stubs.c
+@@ -0,0 +1,79 @@
++/* gspawn.c - Process launching stubs that simply abort
++ *
++ *  Copyright 2026 Nirbheek Chauhan
++ *
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public License
++ * along with this library; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "config.h"
++
++
++#include "gspawn.h"
++#include "gspawn-private.h"
++#include "gtestutils.h"
++
++G_DEFINE_QUARK (g-exec-error-quark, g_spawn_error)
++G_DEFINE_QUARK (g-spawn-exit-error-quark, g_spawn_exit_error)
++
++gboolean
++g_spawn_sync_impl (const gchar           *working_directory,
++                   gchar                **argv,
++                   gchar                **envp,
++                   GSpawnFlags            flags,
++                   GSpawnChildSetupFunc   child_setup,
++                   gpointer               user_data,
++                   gchar                **standard_output,
++                   gchar                **standard_error,
++                   gint                  *wait_status,
++                   GError               **error)
++{
++  g_error ("g_spawn APIs are stubbed out on this platform");
++}
++
++gboolean
++g_spawn_async_with_pipes_and_fds_impl (const gchar           *working_directory,
++                                       const gchar * const   *argv,
++                                       const gchar * const   *envp,
++                                       GSpawnFlags            flags,
++                                       GSpawnChildSetupFunc   child_setup,
++                                       gpointer               user_data,
++                                       gint                   stdin_fd,
++                                       gint                   stdout_fd,
++                                       gint                   stderr_fd,
++                                       const gint            *source_fds,
++                                       const gint            *target_fds,
++                                       gsize                  n_fds,
++                                       GPid                  *child_pid_out,
++                                       gint                  *stdin_pipe_out,
++                                       gint                  *stdout_pipe_out,
++                                       gint                  *stderr_pipe_out,
++                                       GError               **error)
++{
++  g_error ("g_spawn APIs are stubbed out on this platform");
++}
++
++gboolean
++g_spawn_check_wait_status_impl (gint     wait_status,
++                                GError **error)
++{
++  g_error ("g_spawn APIs are stubbed out on this platform");
++}
++
++void
++g_spawn_close_pid_impl (GPid pid)
++{
++  /* no-op */
++}
+diff --git a/glib/meson.build b/glib/meson.build
+index 9f1515b..80b4b31 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -372,7 +372,12 @@ if host_system == 'windows'
+     glib_sources += files('dirent/wdirent.c')
+   endif
+ else
+-  glib_sources += files('glib-unix.c', 'gspawn-posix.c', 'giounix.c')
++  glib_sources += files('glib-unix.c', 'giounix.c')
++  if process_spawn_allowed
++    glib_sources += files('gspawn-posix.c')
++  else
++    glib_sources += files('gspawn-stubs.c')
++  endif
+   platform_deps = []
+ endif
+ 
+diff --git a/meson.build b/meson.build
+index 4ce36d8..da3dd02 100644
+--- a/meson.build
++++ b/meson.build
+@@ -271,6 +271,17 @@ glib_conf.set('ENABLE_NLS', 1)
+ # used by the .rc.in files
+ glibconfig_conf.set('LT_CURRENT_MINUS_AGE', soversion)
+ 
++process_spawn_allowed = true
++if host_system == 'darwin'
++  nofork_test_code = '''#include <TargetConditionals.h>
++  #if !TARGET_OS_TV && !TARGET_OS_WATCH
++  #error "Not tvOS / watchOS"
++  #endif'''
++  if cc.compiles(nofork_test_code, name : 'building for tvOS/watchOS')
++    process_spawn_allowed = false
++  endif
++endif
++
+ glib_conf.set('_GNU_SOURCE', 1)
+ 
+ if host_system in ['windows', 'darwin']
+-- 
+2.39.5 (Apple Git-154)
+
