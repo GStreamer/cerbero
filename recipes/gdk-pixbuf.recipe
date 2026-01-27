@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
     meson_options = {'docs' : 'false',
                      'man' : 'false',
                      'installed_tests' : 'false',
+                     'others': 'enabled',
                      'builtin_loaders' : 'all',
                      'gio_sniffing' : 'false'}
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
