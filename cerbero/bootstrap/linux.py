@@ -191,6 +191,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'perl-IPC-Cmd',
         'libatomic',
         'clang-devel',
+        'expat-devel',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -295,6 +296,7 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         'openssl-devel',
         'clang',
         'pkg-config',
+        'libexpat-devel',
     ]
 
     def __init__(self, config, offline, assume_yes):
