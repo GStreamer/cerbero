@@ -1,7 +1,7 @@
-From 099ef7e9bceae1eddaeedb7ff6c6ef95ced02935 Mon Sep 17 00:00:00 2001
+From 44a886af904b4803d5d64f76205aa4c5b5cc880d Mon Sep 17 00:00:00 2001
 From: Tim-Philipp Muller <tim@centricular.com>
 Date: Mon, 26 Dec 2022 11:56:42 +0000
-Subject: [PATCH 05/11] gtypes.h: workaround for g_uint64_checked_mul() issue
+Subject: [PATCH 4/8] gtypes.h: workaround for g_uint64_checked_mul() issue
  with clang on 32-bit ARM
 
 gdk-pixbuf would fail to build on Android on armv7, with:
@@ -23,7 +23,7 @@ https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/864#note_16982
  1 file changed, 8 insertions(+)
 
 diff --git a/glib/gtypes.h b/glib/gtypes.h
-index 9d912d523..dc923b60e 100644
+index 9d912d5..dc923b6 100644
 --- a/glib/gtypes.h
 +++ b/glib/gtypes.h
 @@ -456,6 +456,14 @@ typedef const gchar *   (*GTranslateFunc)       (const gchar   *str,
@@ -42,5 +42,5 @@ index 9d912d523..dc923b60e 100644
  
  #define g_uint_checked_add(dest, a, b) \
 -- 
-2.44.0.windows.1
+2.52.0
 
