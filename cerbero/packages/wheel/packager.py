@@ -226,6 +226,7 @@ class WheelPackager(PackagerBase):
     def _create_wheels(self):
         packagedeps = self.store.get_package_deps(self.package, True)
 
+        debuginfo_files_list = []
         gpl_files_list = []
         gpl_restricted_files_list = []
         restricted_files_list = []
@@ -255,6 +256,7 @@ class WheelPackager(PackagerBase):
 
         for p in packagedeps:
             m.action(f'Parsing distribution payload for {p.name}')
+            debuginfo_files_list += p.debug_files_list()
             if '-gpl-restricted' in p.name:
                 gpl_restricted_files_list += p.files_list()
                 gpl_restricted_licenses.update(_parse_licenses(p))
@@ -306,6 +308,7 @@ class WheelPackager(PackagerBase):
         package_files_list = {
             'gstreamer_libs': libs_list,
             'gstreamer_plugins_libs': plugins_libs_list,
+            'gstreamer_debuginfo': debuginfo_files_list,
             'gstreamer_plugins': plugins_list,
             'gstreamer_plugins_frei0r': frei0r_list,
             'gstreamer_plugins_gpl': gpl_files_list,
@@ -321,6 +324,7 @@ class WheelPackager(PackagerBase):
         package_desc = {
             'gstreamer_libs': 'GStreamer API Libraries',
             'gstreamer_plugins_libs': 'Third-party libraries used by GStreamer Plugins',
+            'gstreamer_debuginfo': 'Debug symbols for all GStreamer wheels',
             'gstreamer_plugins': 'GStreamer plugins',
             'gstreamer_plugins_frei0r': 'GStreamer frei0r plugin, including frei0r-plugins',
             'gstreamer_plugins_gpl': 'GStreamer GPL/AGPL plugins',
@@ -335,6 +339,15 @@ class WheelPackager(PackagerBase):
         package_desc['gstreamer_bundle'] = package_desc['gstreamer']
 
         package_licenses = {
+            'gstreamer_debuginfo': set()
+            .union(gpl_restricted_licenses)
+            .union(restricted_licenses)
+            .union(gpl_licenses)
+            .union(gtk_licenses)
+            .union(python_licenses)
+            .union(libs_licenses)
+            .union(plugins_licenses)
+            .union(plugins_libs_licenses),
             'gstreamer_plugins_gpl_restricted': gpl_restricted_licenses,
             'gstreamer_plugins_restricted': restricted_licenses,
             'gstreamer_plugins_gpl': gpl_licenses,
@@ -353,6 +366,7 @@ class WheelPackager(PackagerBase):
         }
 
         package_dependencies = {
+            'gstreamer_debuginfo': [],
             'gstreamer_libs': [
                 'setuptools >= 80.9.0',
             ],
@@ -386,13 +400,17 @@ class WheelPackager(PackagerBase):
         package_features = {
             'gstreamer_meta': {
                 'cli': [f'gstreamer_cli ~= {self.package.version}'],
+                'debuginfo': [f'gstreamer_debuginfo ~= {self.package.version}'],
                 'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}'],
                 'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
                 'gpl-restricted': [f'gstreamer_plugins_gpl_restricted ~= {self.package.version}'],
                 'gtk': [f'gstreamer_gtk ~= {self.package.version}'],
                 'restricted': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
             },
-            'gstreamer': {'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}']},
+            'gstreamer': {
+                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}'],
+                'debuginfo': [f'gstreamer_debuginfo ~= {self.package.version}'],
+            },
         }
 
         with (self.output_dir / 'categories.json').open('w', encoding='utf-8', newline='\n') as f:
