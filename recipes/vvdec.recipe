@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # We only want static libs on iOS and Android
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.SHARED
@@ -34,7 +34,7 @@ class Recipe(recipe.Recipe):
         #
         # -flto is broken on x86 windows:
         # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/2014#note_3245062
-        if self.config.target_platform in (Platform.IOS, Platform.DARWIN) or \
+        if Platform.is_apple(self.config.target_platform) or \
             (self.config.target_platform == Platform.WINDOWS and
              self.config.target_arch == Architecture.X86):
             self.configure_options.append('-DVVDEC_ENABLE_LINK_TIME_OPT=OFF')

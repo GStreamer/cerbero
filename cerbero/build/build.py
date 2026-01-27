@@ -32,7 +32,7 @@ from cerbero.utils import messages as m
 
 def get_optimization_from_config(config):
     if config.variants.optimization:
-        if Platform.is_mobile(config.target_platform):
+        if Platform.is_app_platform(config.target_platform):
             return 's'
         return '2'
     return '0'
@@ -1335,7 +1335,7 @@ class Cargo(Build, ModifyEnvBase):
             self.cargo_args += [f'-j{jobs}']
 
         # https://github.com/lu-zero/cargo-c/issues/278
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
 
     def num_of_cpus(self):

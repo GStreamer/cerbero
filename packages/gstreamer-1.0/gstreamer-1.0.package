@@ -81,7 +81,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
         if self.config.platform != Platform.WINDOWS:
             self.wix_use_fragment = True
 
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             discard = ['gstreamer-1.0-dvd-gpl']
             self.packages = [x for x in self.packages if x[0] not in discard]
 

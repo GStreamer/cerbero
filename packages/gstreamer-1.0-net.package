@@ -45,6 +45,6 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.visualstudio and self.config.cross_compiling():
             self.files.remove('srt:libs')
 
-        if not Platform.is_apple_mobile(self.config.target_platform):
+        if not Platform.is_apple_app_platform(self.config.target_platform):
             if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
                 self.files.append('curl:libs')

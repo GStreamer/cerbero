@@ -31,7 +31,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # Don't build testing helper library on ios
-        if not Platform.is_apple_mobile(self.config.target_platform):
+        if not Platform.is_apple_app_platform(self.config.target_platform):
             self.files_libs.append('liborc-test-0.4')
             self.files_devel.append('bin/orc-bugreport%(bext)s')
         else:
@@ -45,7 +45,7 @@ class Recipe(recipe.Recipe):
         lib = LibtoolLibrary('orc-0.4', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=dependency_libs)
         lib.save()
-        if not Platform.is_apple_mobile(self.config.target_platform):
+        if not Platform.is_apple_app_platform(self.config.target_platform):
             lib = LibtoolLibrary('orc-test-0.4', None, None, None, self.config.libdir,
                     self.config.target_platform, deps=dependency_libs + ['orc-0.4']).save()
         super().post_install()

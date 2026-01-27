@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
             self.remove_env('CXXFLAGS', '-fno-exceptions')
 
         # We only want static libs on iOS and Android
-        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+        if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
             self.files_libs += ['liblcevc_dec_api_utility',
                 'liblcevc_dec_extract', 'liblcevc_dec_enhancement',

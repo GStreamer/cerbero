@@ -119,7 +119,7 @@ class Recipe(recipe.Recipe):
         return not Platform.is_apple(self.config.target_platform) and self.library_type in (LibraryType.STATIC, LibraryType.BOTH)
 
     def prepare(self):
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.BOTH

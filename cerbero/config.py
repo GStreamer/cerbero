@@ -1031,7 +1031,7 @@ class Config(object):
 
         target_platform = self.target_platform
         # When targeting Apple mobile platform with a subsystem
-        if Platform.is_apple_mobile(self.target_platform):
+        if Platform.is_apple_app_platform(self.target_platform):
             target_platform = self.target_subsystem
         # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
         elif self.target_platform == Platform.WINDOWS:
@@ -1169,7 +1169,7 @@ class Config(object):
                 key = (Platform.WINDOWS, arch, 'msvc')
             else:
                 key = (Platform.WINDOWS, arch, 'gnu')
-        elif Platform.is_apple_mobile(platform):
+        elif Platform.is_apple_app_platform(platform):
             key = (platform, arch, subsystem)
         else:
             key = (platform, arch)

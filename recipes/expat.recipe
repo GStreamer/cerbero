@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # We only want static libs on iOS and Android
-        if Platform.is_mobile(self.config.target_platform):
+        if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         else:
             self.library_type = LibraryType.SHARED
