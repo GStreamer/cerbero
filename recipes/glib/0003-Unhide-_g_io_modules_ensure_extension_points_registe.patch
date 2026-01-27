@@ -1,7 +1,7 @@
-From ebe5171ca93b2b37ffe8bd413610dceb706d3752 Mon Sep 17 00:00:00 2001
+From d76c76c51ebb157dc84ef34c874c9db9c35f4fd3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 7 Mar 2014 13:59:22 +0100
-Subject: [PATCH 04/11] Unhide _g_io_modules_ensure_extension_points_registered
+Subject: [PATCH 3/8] Unhide _g_io_modules_ensure_extension_points_registered
  for calling by gio modules
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 04/11] Unhide _g_io_modules_ensure_extension_points_registered
  1 file changed, 1 insertion(+)
 
 diff --git a/gio/giomodule-priv.h b/gio/giomodule-priv.h
-index e5853fea0..837a72bb2 100644
+index e5853fe..837a72b 100644
 --- a/gio/giomodule-priv.h
 +++ b/gio/giomodule-priv.h
 @@ -27,6 +27,7 @@
@@ -21,5 +21,5 @@ index e5853fea0..837a72bb2 100644
  void _g_io_modules_ensure_loaded                      (void);
  
 -- 
-2.44.0.windows.1
+2.52.0
 

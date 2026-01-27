@@ -43,14 +43,16 @@ class Recipe(recipe.Recipe):
     patches = [
         'glib/0001-Add-support-for-loading-GIO-modules-from-the-distro-.patch',
         'glib/0002-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch',
-        'glib/0003-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
-        'glib/0004-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
+        'glib/0003-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
         # TODO upstreaming
-        'glib/0005-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
+        'glib/0004-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
         # TODO upstreaming
-        'glib/0006-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
-        # TODO upstreaming -- https://gitlab.gnome.org/GNOME/glib/-/issues/3858
-        'glib/0007-glib-compile-resources-Fix-MSVC-heap-exhaustion-when.patch',
+        'glib/0005-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4954
+        'glib/0006-glib-compile-resources-Fix-MSVC-heap-exhaustion-when.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4987
+        'glib/0007-giomodule-Simplify-macro-usage-for-getting-the-giomo.patch',
+        'glib/0008-giomodule-Do-not-try-to-use-GIO_MODULE_DIR-on-iOS.patch',
     ]
 
     files_libs = [
@@ -62,7 +64,7 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['share/glib-2.0/schemas'],
         Platform.IOS: ['share/glib-2.0/schemas'],
     }
-    #FIXME: Fill it when needed
+    # Fill it when needed
     #files_gio = ['%(libdir)s/gio/modules']
     files_devel = [
         'bin/glib-gettextize',
@@ -149,22 +151,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # https://gitlab.gnome.org/GNOME/glib/-/issues/2902
             self.meson_options.update({'tests': 'false'})
-
             self.files_devel.append('%(libdir)s/glib-2.0/include/*/glibconfig.h')
-            arch = self.config.target_arch
-            if arch == Architecture.X86:
-                arch = 'i386'
-            elif arch == Architecture.ARM64:
-                arch = 'arm64'
-            elif Architecture.is_arm(arch):
-                arch = 'arm'
-            extra_flags = []
-            if self.config.target_platform == Platform.IOS:
-                # Disable mac OS X specifics
-                extra_flags = ['-DGST_SDK_IOS=1']
-                # XXX: Why did we disable these for iOS?
-                #self.configure_options += ['--disable-carbon', '--disable-modular-tests', '--disable-cocoa']
-            self.append_env('CFLAGS', *extra_flags)
 
         elif self.config.target_platform == Platform.LINUX:
             path1 = '/usr/lib/gio/modules'
