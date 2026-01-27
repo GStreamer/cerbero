@@ -1,0 +1,89 @@
+From 8e95b1f30d7a98199a8a901adea897e77b496dc0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 27 Jan 2026 22:14:15 +0530
+Subject: [PATCH 09/14] gbacktrace: Don't attempt to get a stack trace on
+ sandboxed platforms
+
+fork(), execvpe() and friends are explicitly banned on tvOS and
+watchOS, but even on iOS and Android you cannot really run a debugger
+this way.
+
+```
+../glib/gbacktrace.c:412:9: error: 'fork' is unavailable: not available on tvOS
+  412 |   pid = fork ();
+      |         ^
+/Applications/Xcode.app/Contents/Developer/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS18.5.sdk/usr/include/unistd.h:451:8: note: 'fork' has been explicitly marked unavailable here
+  451 | pid_t    fork(void) __WATCHOS_PROHIBITED __TVOS_PROHIBITED;
+      |          ^
+../glib/gbacktrace.c:431:7: error: 'execvp' is unavailable: not available on tvOS
+  431 |       execvp (args[0], (char **) args);      /* exec gdb */
+      |       ^
+/Applications/Xcode.app/Contents/Developer/Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS18.5.sdk/usr/include/unistd.h:450:6: note: 'execvp' has been explicitly marked unavailable here
+  450 | int      execvp(const char * __file, char *_LIBC_CSTR const *_LIBC_NULL_TERMINATED __argv) __WATCHOS_PROHIBITED __TVOS_PROHIBITED;
+      |          ^
+2 errors generated.
+```
+---
+ glib/gbacktrace.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/glib/gbacktrace.c b/glib/gbacktrace.c
+index 0f81502..cb25ac3 100644
+--- a/glib/gbacktrace.c
++++ b/glib/gbacktrace.c
+@@ -73,12 +73,9 @@
+ #include "gunicode.h"
+ #include "gutils.h"
+ 
+-#ifndef G_OS_WIN32
+-static void stack_trace (const char * const *args);
+-#endif
+-
+ /* Default to using LLDB for backtraces on macOS. */
+ #ifdef __APPLE__
++#include <TargetConditionals.h>
+ #define USE_LLDB
+ #endif
+ 
+@@ -88,6 +85,11 @@ static void stack_trace (const char * const *args);
+ #define DEBUGGER "gdb"
+ #endif
+ 
++#if defined(G_OS_UNIX) && !defined(__ANDROID__) && (!defined(__APPLE__) || (defined(TARGET_OS_OSX) && TARGET_OS_OSX))
++#define HAVE_STACK_TRACE
++static void stack_trace (const char * const *args);
++#endif
++
+ /* People want to hit this from their debugger... */
+ GLIB_AVAILABLE_IN_ALL volatile gboolean glib_on_error_halt;
+ volatile gboolean glib_on_error_halt = TRUE;
+@@ -260,7 +262,7 @@ g_on_error_query (const gchar *prg_name)
+ void
+ g_on_error_stack_trace (const gchar *prg_name)
+ {
+-#if defined(G_OS_UNIX)
++#ifdef HAVE_STACK_TRACE
+   pid_t pid;
+   gchar buf[16];
+   const gchar *args[5] = { DEBUGGER, NULL, NULL, NULL, NULL };
+@@ -302,14 +304,16 @@ g_on_error_stack_trace (const gchar *prg_name)
+         break;
+     }
+ #else
++#ifdef G_OS_WIN32
+   if (IsDebuggerPresent ())
+     G_BREAKPOINT ();
+   else
++#endif
+     g_abort ();
+ #endif
+ }
+ 
+-#ifndef G_OS_WIN32
++#ifdef HAVE_STACK_TRACE
+ 
+ static gboolean stack_trace_done = FALSE;
+ 
+-- 
+2.39.5 (Apple Git-154)
+
