@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
         # XXX: should we use openssl?
         'crypto-library': 'none',
         'doc': 'disabled',
-        'tests': 'enabled',
+        'tests': 'disabled',
         'pcap-tests': 'disabled'
     }
 
