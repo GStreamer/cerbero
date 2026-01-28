@@ -123,15 +123,9 @@ class Recipe(recipe.Recipe):
             ldflags += '-fPIC'
             ranlib = self.get_env('RANLIB')
             ar = self.get_env('AR')
-            # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
-            # build, and we can't pass arguments via Configure because on Darwin,
-            # Configure reads the `-arch x86_64` as meaning that you want to use
-            # `x86_64` as the platform, and errors out about a redefined platform.
-            cc = self.get_env('CC') + ' ' + srcdir_include + self.get_env('CFLAGS')
-            ld = self.get_env('LD') + ' ' + self.get_env('LDFLAGS')
-            # NOTE: CFLAG and LDFLAG are not typos!
-            self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld,
-                          'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
+            cc = self.get_env('CC') + ' ' + cflags
+            ld = self.get_env('LD') + ' ' + ldflags
+            self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld]
             self.make_install = ['make', 'install_sw', 'RANLIB=' + ranlib]
 
         # We probably don't need and can't use the tools on these platforms
