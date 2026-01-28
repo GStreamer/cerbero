@@ -82,11 +82,11 @@ from cerbero.packages.windows import inno_setup, wix_on_ninja  # noqa: E402
 from cerbero.packages.osx import packager as osx_packager  # noqa: E402
 from cerbero.packages.wheel import packager as wheel  # noqa: E402
 
-wix_on_ninja.register()
 osx_packager.register()
 rpm.register()
 debian.register()
 android.register()
+inno_setup.register()
+wix_on_ninja.register()
 disttarball.register()
 wheel.register()
-inno_setup.register()
