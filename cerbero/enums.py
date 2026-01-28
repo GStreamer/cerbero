@@ -251,6 +251,9 @@ class Subsystem:
     def is_apple_simulator(subsystem):
         return subsystem in (Subsystem.IOS_SIMULATOR, Subsystem.TVOS_SIMULATOR)
 
+    def no_process_spawning(subsystem):
+        return subsystem in (Subsystem.TVOS, Subsystem.TVOS_SIMULATOR)
+
 
 class LicenseDescription:
     def __init__(self, acronym, pretty_name):
