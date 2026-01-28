@@ -120,6 +120,8 @@ class Recipe(recipe.Recipe):
             self.make_install = ['nmake', 'install_sw']
         else:
             cflags += '-fPIC -DOPENSSL_PIC'
+            if Subsystem.no_process_spawning(self.config.target_subsystem):
+                cflags += ' -DHAVE_FORK=0'
             ldflags += '-fPIC'
             ranlib = self.get_env('RANLIB')
             ar = self.get_env('AR')
