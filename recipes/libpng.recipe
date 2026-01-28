@@ -32,6 +32,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.configure_options.append(f'-DZLIB_ROOT={self.config.prefix}')
+        if Platform.is_app_platform(self.config.target_platform):
+            self.configure_options.append('-DPNG_TOOLS=OFF')
 
     async def install(self):
         await super(recipe.Recipe, self).install()
