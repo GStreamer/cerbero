@@ -11,10 +11,15 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'harfbuzz']
     meson_options = {
+        'cairo': 'enabled',
+        'fontconfig': 'enabled',
+        'freetype': 'disabled',
         'build-testsuite': 'false',
         'build-examples': 'false',
     }
-    patches = []
+    patches = [
+        'pango/0001-meson-Use-subsystem-names-when-building-for-Apple-pl.patch',
+    ]
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0']
     files_bins = ['pango-view']
@@ -39,6 +44,7 @@ class Recipe(recipe.Recipe):
             self.append_env('CFLAGS', '-U_WIN32_WINNT')
 
         if self.config.target_platform == Platform.LINUX or Platform.is_app_platform(self.config.target_platform):
+            self.meson_options['freetype'] = 'enabled'
             self.files_libs.append('libpangoft2-1.0')
             self.files_devel.append('%(libdir)s/pkgconfig/pangoft2.pc')
             self.files_typelibs.append('PangoFT2-1.0')
