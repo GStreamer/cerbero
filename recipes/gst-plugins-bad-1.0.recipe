@@ -538,7 +538,15 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('va', 'codecs', 'vaapi')
 
         self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
-        self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
+
+        if self.config.target_subsystem == Subsystem.TVOS_SIMULATOR and self.config.target_arch == Architecture.X86_64:
+            # svtav1 plugin fails to link with the static svt-av1 lib on tvOS
+            # Simulator x86_64
+            self.meson_options['svtav1'] = 'disabled'
+            # universal archs cannot have different deps
+            self.deps.append('svt-av1')
+        else:
+            self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
 
         self.enable_plugin('x265', 'codecs_gpl_restricted', dep='x265')
 
