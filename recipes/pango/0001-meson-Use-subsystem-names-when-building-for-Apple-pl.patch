@@ -1,0 +1,56 @@
+From 418c9eb670e455623408a778d67fa31f4c40ec57 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 28 Jan 2026 15:36:32 +0530
+Subject: [PATCH] meson: Use subsystem names when building for Apple platforms
+
+This automatically adds support for iOS, tvOS, watchOS, and visionOS.
+iOS support was already working when people (incorrectly) set
+`system = 'ios'` but that's not the proper way to do iOS with Meson.
+
+Subsystem names were added in 1.2.0, which is the minimum required
+meson version.
+---
+ meson.build       | 6 +++++-
+ tests/meson.build | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 033597f..be4fe0e 100644
+--- a/meson.build
++++ b/meson.build
+@@ -52,6 +52,10 @@ pango_osxversion = [osx_current, '@0@.@1@.0'.format(osx_current, pango_interface
+ cc = meson.get_compiler('c')
+ cpp = meson.get_compiler('cpp')
+ host_system = host_machine.system()
++subsystem = ''
++if host_system == 'darwin'
++  subsystem = host_machine.subsystem()
++endif
+ 
+ if host_system == 'windows'
+   add_project_arguments('-D_WIN32_WINNT=_WIN32_WINNT_WIN10', language: 'c')
+@@ -332,7 +336,7 @@ if xft_dep.found() and fontconfig_dep.found() and freetype_dep.found()
+ endif
+ 
+ has_core_text = false
+-if host_system == 'darwin'
++if host_system == 'darwin' and subsystem == 'macos'
+   has_core_text = cc.links('''#include <CoreText/CoreText.h>
+                               int main (void) {
+                                 CTGetCoreTextVersion ();
+diff --git a/tests/meson.build b/tests/meson.build
+index 72ea8be..ee63d9d 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -8,7 +8,7 @@ endif
+ 
+ if host_system == 'windows'
+   test_cflags += '-DHAVE_WIN32'
+-elif host_system == 'darwin'
++elif host_system == 'darwin' and subsystem == 'macos'
+   test_cflags += '-DHAVE_CARBON'
+ endif
+ 
+-- 
+2.39.5 (Apple Git-154)
+
