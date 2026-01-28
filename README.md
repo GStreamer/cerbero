@@ -154,13 +154,25 @@ Android x86_64    | `cross-android-x86-64.cbc`
 
 Target                         | Config file
 :------------------------------|:-----------
-macOS Universal (relocatable)  | `cross-macos-universal.cbc`
-macOS x86_64 (relocatable)     | `cross-macos-x86-64.cbc`
-macOS ARM64 (relocatable)      | `cross-macos-arm64.cbc`
+macOS Universal                | `cross-macos-universal.cbc`
+macOS x86_64                   | `cross-macos-x86-64.cbc`
+macOS ARM64                    | `cross-macos-arm64.cbc`
 macOS x86_64 (not-relocatable) | `osx-x86-64.cbc`
-iOS Universal                  | `cross-ios-universal.cbc`
+iOS Universal (deprecated)     | `cross-ios-universal.cbc`
 iOS ARM64                      | `cross-ios-arm64.cbc`
-iOS x86_64                     | `cross-ios-x86-64.cbc`
+iOS Simulator Universal        | `cross-ios-sim-universal.cbc`
+
+The iOS ARM64 and Simulator Universal artifacts can be combined into one with
+the `xcframework` command like so:
+
+```sh
+./cerbero-uninstalled -c config/cross-ios-arm64.cbc package gstreamer-1.0 --artifact=xcframework
+./cerbero-uninstalled -c config/cross-ios-sim-universal.cbc package gstreamer-1.0 --artifact=xcframework
+./cerbero-uninstalled xcframework gstreamer-1.0 --source gstreamer-1.0-1.2*-ios-simulator-universal.xcframework.tar.xz --source gstreamer-1.0-1.2*-ios-arm64.xcframework.tar.xz
+```
+
+This will output `gstreamer-1.2?.?-xcframework.tar.xz` containing iOS ARM64,
+iOS Simulator ARM64, and iOS Simulator x86_64.
 
 #### Windows Targets
 
@@ -200,8 +212,12 @@ artifact types:
   - Default for, and only available for Windows and cross-Windows targets
 * macOS Installer Packages
   - Default for, and only available for macOS and iOS targets
+  - Deprecated on iOS, in favor of xcframework
+* iOS xcframework
+  - Only available for iOS
+  - Use `package --artifact=xcframework` + `xcframework --source ... --source ...`
 * Python 3 Wheels
-  - Available for macOS, Windows, and Linux targets
+  - Available for macOS and Windows
   - The minimum supported Python version for the wheel will be whatever Python
     version you build the wheel with. The oldest supported by Cerbero is 3.9.
 
