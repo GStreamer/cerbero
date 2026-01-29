@@ -505,12 +505,23 @@ class Recipe(custom.GStreamer):
     }
 
     files_typelibs = [
+        'CudaGst-1.0',
         'GstAnalytics-1.0',
+        'GstBadAudio-1.0',
+        'GstCodecs-1.0',
+        'GstCuda-1.0',
+        'GstD3D11-1.0',
+        'GstD3D12-1.0',
+        'GstDxva-1.0',
+        'GstHip-1.0',
+        'GstHipGL-1.0',
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
+        'GstMse-1.0',
         'GstPlay-1.0',
         'GstPlayer-1.0',
         'GstTranscoder-1.0',
+        'GstWebRTC-1.0',
     ]
 
     platform_files_codecs_devel = {
