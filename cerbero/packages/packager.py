@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Distro
+from cerbero.config import Distro, Platform
 from cerbero.errors import FatalError
 from cerbero.utils import _, get_wix_prefix
 from cerbero.utils import messages as m
@@ -66,6 +66,9 @@ class Packager(object):
             except Exception:
                 m.warning('Cross-compiling for Windows and WIX not found, overriding Packager')
                 d = Distro.NONE
+
+        if config.platform == config.target_platform == Platform.WINDOWS:
+            d = config.distro
 
         if artifact_type:
             for p in _packagers[d][v]:

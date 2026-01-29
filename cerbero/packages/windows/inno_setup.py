@@ -405,4 +405,4 @@ def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
 
-    register_packager(Distro.WINDOWS, Packager)
+    register_packager(Distro.MSYS2, Packager)
