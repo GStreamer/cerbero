@@ -260,7 +260,8 @@ class InnoSetup(PackagerBase):
             # Output filename
             rules.write(f'OutputBaseFilename={self._package_name()}\n')
             rules.write('OutputDir=.\n')
-            rules.write('DefaultDirName={autopf}/gstreamer/1.0\n')
+            platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
+            rules.write(f'DefaultDirName={{autopf}}/gstreamer/1.0/{platform_arch}\n')
 
             # Logging
             rules.write('SetupLogging=yes\n')
@@ -345,7 +346,6 @@ class InnoSetup(PackagerBase):
                 )
 
             # Set up environment variables and registry key
-            platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
             root_env_var = self.package.get_root_env_var(platform_arch)
             rules.write('\n[Setup]\n')
             rules.write('ChangesEnvironment=yes\n')
