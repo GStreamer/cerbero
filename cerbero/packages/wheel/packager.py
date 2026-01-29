@@ -185,10 +185,14 @@ class WheelPackager(PackagerBase):
         # Execute on the chosen output directory
         m.action(f'Building {package_name} in {self.output_dir}')
         python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
+        # Need to set PYTHONPATH correctly on (at least) macOS to use the
+        # specified Python inside the venv for pip, but on Windows that
+        # completely breaks Python and it can't find pip.
+        python_env = self.config.env if self.config.platform != Platform.WINDOWS else None
         shell.new_call(
             [python_exe, '-m', 'pip', 'wheel', f'--find-links={self.output_dir.as_posix()}', output_dir],
             cmd_dir=self.output_dir,
-            env=self.config.env,
+            env=python_env,
         )
 
     def get_file_type(self, filepath):
