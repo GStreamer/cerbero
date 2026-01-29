@@ -53,7 +53,7 @@ begin
       Log('Unable to detect Visual Studio installations: ' + AddPeriod(GetExceptionMessage)); //, mbError, MB_OK);
     end
   end;
-  if success and Length(output.StdOut) <> 0 then begin
+  if success and (Length(output.StdOut) <> 0) then begin
     if output.StdOut[0] <> '' then begin
       Log('Found Visual Studio installation: ' + range  + ' ' + output.StdOut[0]); //, mbError, MB_OK);
       Result := output.StdOut[0]
