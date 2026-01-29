@@ -49,7 +49,7 @@ class Recipe(custom.GStreamer):
         'GstCheck-1.0',
         'GstController-1.0',
         'GstNet-1.0'
-        ]
+    ]
 
     symbolication_patterns = {
         # dragonfire generated library, static only

@@ -162,6 +162,7 @@ class Recipe(custom.GStreamer):
     files_typelibs = [
         'GstAllocators-1.0',
         'GstApp-1.0',
+        'GstAudio-1.0',
         'GstGL-1.0',
         'GstPbutils-1.0',
 #        'GstRiff-1.0',         Gir disabled due to incompatibilities
@@ -170,8 +171,7 @@ class Recipe(custom.GStreamer):
         'GstSdp-1.0',
         'GstTag-1.0',
         'GstVideo-1.0',
-        'GstAudio-1.0'
-        ]
+    ]
 
     def prepare(self):
         self.enable_plugin('cdparanoia', 'sys', 'cdparanoia', dep='cdparanoia')
