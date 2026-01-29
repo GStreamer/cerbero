@@ -71,7 +71,7 @@ class Tar:
         tar_env = os.environ.copy()
         tar_args = []
         if self.filename.endswith('.xz'):
-            if shutil.which('xz'):
+            if tar_cmd != Tar.MSYS_BSD_TAR and shutil.which('xz'):
                 tar_args += ['--use-compress-program=xz -d -T0']
             else:
                 if shell.PLATFORM == Platform.DARWIN:
@@ -109,18 +109,6 @@ class Tar:
                 logfile.write('tar command {} failed, trying next'.format(tar_cmd[1]))
 
         if shell.PLATFORM == Platform.WINDOWS:
-            if tar_cmd != self.MSYS_BSD_TAR:
-                try:
-                    await shell.async_call(
-                        [self.MSYS_BSD_TAR[1], '-f', self.filename, '-C', output_dir] + self.decompress_args,
-                        env=os.environ.copy(),
-                        logfile=logfile,
-                    )
-                    return
-                except CommandError:
-                    if logfile:
-                        traceback.print_exc(file=logfile)
-                        logfile.write('MSYS2 bsdtar command failed, trying next')
             if tar_cmd != self.MSYS_GNU_TAR:
                 try:
                     await shell.async_call(
@@ -134,6 +122,18 @@ class Tar:
                     if logfile:
                         traceback.print_exc(file=logfile)
                         logfile.write('MSYS2 tar command failed, trying next')
+            if tar_cmd != self.MSYS_BSD_TAR:
+                try:
+                    await shell.async_call(
+                        [self.MSYS_BSD_TAR[1], '-f', self.filename, '-C', output_dir] + self.decompress_args,
+                        env=os.environ.copy(),
+                        logfile=logfile,
+                    )
+                    return
+                except CommandError:
+                    if logfile:
+                        traceback.print_exc(file=logfile)
+                        logfile.write('MSYS2 bsdtar command failed, trying next')
         # Finally, try tarfile
         await self.unpack_tarfile(output_dir)
 
