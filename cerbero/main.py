@@ -187,6 +187,34 @@ class Main(object):
             self.log_error(exc, False)
 
     def run_command(self):
+        background_build = 'CI' not in os.environ
+        if 'CERBERO_BACKGROUND_BUILD' in os.environ:
+            background_build = os.environ['CERBERO_BACKGROUND_BUILD']
+        if background_build:
+            if sys.platform == 'win32':
+                from ctypes import c_void_p, windll
+
+                current_process = c_void_p(windll.kernel32.GetCurrentProcess())
+                windll.kernel32.SetPriorityClass(current_process, 0x00000040)
+            elif sys.platform == 'darwin':
+                os.setpriority(os.PRIO_DARWIN_PROCESS, 0, os.PRIO_DARWIN_BG)
+            else:
+                from ctypes import CDLL
+
+                # #include <sys/syscall.h>
+                # #include <linux/ioprio.h>
+                # #include <unistd.h>
+                # std::cout << SYS_ioprio_set << " " << IOPRIO_PRIO_VALUE(IOPRIO_CLASS_IDLE, 0) << std::endl;
+                libc = CDLL(None)
+                SYS_ioprio_set = 251
+                IOPRIO_WHO_PGRP = 2
+                IOPRIO_CLASS_IDLE = 24576
+
+                # This covers CPU priority
+                os.setpriority(os.PRIO_PROCESS, 0, 19)
+                # This covers I/O priority (very useful if using GCC or rustc)
+                libc.syscall(SYS_ioprio_set, IOPRIO_WHO_PGRP, 0, IOPRIO_CLASS_IDLE)
+
         command = self.args.command
         try:
             res = commands.run(command, self.config, self.args)
