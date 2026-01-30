@@ -331,6 +331,11 @@ class InnoSetup(PackagerBase):
                     redist_path = Path(vc_tools_redist_dir.get(), 'vc_redist.x86.exe')
                 else:
                     redist_path = Path(vc_tools_redist_dir.get(), 'vc_redist.x64.exe')
+                # 2026 ships arm64 separately
+                if self.config.target_arch == Architecture.ARM64:
+                    opt_redist_path = Path(vc_tools_redist_dir.get(), 'vc_redist.arm64.exe')
+                    if opt_redist_path.exists():
+                        redist_path = opt_redist_path
                 m.action('Embedding Visual C++ Redistributable')
                 rules.write('\n[Tasks]\n')
                 rules.write(
