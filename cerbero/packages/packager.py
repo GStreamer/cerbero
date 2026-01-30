@@ -33,7 +33,6 @@ def register_packager(distro, klass):
 
 class Packager(object):
     def __new__(cls, config, package, store, artifact_type=None):
-        d = config.distro
         td = config.target_distro
 
         if td not in _packagers:
@@ -56,22 +55,15 @@ class Packager(object):
 
         # Return the first packager that matches the artifact type
         if artifact_type:
-            if not config.cross_compiling():
-                for p in _packagers[d]:
-                    if p.ARTIFACT_TYPE == artifact_type:
-                        return p(config, package, store)
             for p in _packagers[td]:
                 if p.ARTIFACT_TYPE == artifact_type:
                     return p(config, package, store)
-            raise FatalError(f'No {artifact_type} packager available for the distro {td} or {d}')
+            raise FatalError(f'No {artifact_type} packager available for the distro {td}')
 
         # Return the first packager
-        if not config.cross_compiling():
-            for p in _packagers[d]:
-                return p(config, package, store)
         for p in _packagers[td]:
             return p(config, package, store)
-        raise FatalError(f'No packager available for the distro {td} or {d}')
+        raise FatalError(f'No packager available for the distro {td}')
 
 
 from cerbero.packages import rpm, debian, android, disttarball  # noqa: E402

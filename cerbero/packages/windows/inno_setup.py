@@ -409,5 +409,9 @@ class Packager(object):
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
+    import sys
 
-    register_packager(Distro.MSYS2, Packager)
+    # Only register this when we're on win32, we do not (yet) support running
+    # Inno Setup on Wine
+    if sys.platform == 'win32':
+        register_packager(Distro.WINDOWS, Packager)
