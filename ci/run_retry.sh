@@ -29,7 +29,7 @@ while true; do
     [[ $ret == 0 ]] && break
     while read line; do
         for error in "${ERRORS[@]}"; do
-            if [[ $line =~ $error ]]; then
+            if [[ "$line" =~ "$error" ]]; then
                 spurious_error=$line
                 break 2
             fi
