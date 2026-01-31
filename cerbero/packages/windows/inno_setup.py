@@ -120,7 +120,7 @@ class InnoSetup(PackagerBase):
 
         files = {}
         for filepath in files_list:
-            source = os.path.join(self.config.prefix, filepath)
+            source = Path(self.config.prefix, filepath).as_posix()
             if self._with_wine:
                 source = to_winepath(source)
             dirpath, _ = os.path.split(filepath)
