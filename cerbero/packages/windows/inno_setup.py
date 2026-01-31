@@ -36,26 +36,27 @@ def format_inno_feature_id(string, package_type):
         string = string.removesuffix(package_type)
     # converting it into a nested component
     if package_type:
-        package_type = package_type[1:]
-    else:
-        package_type = 'runtime'
+        package_type = '/' + package_type[1:]
 
     ret = string.replace('_', '__')
     for r in ['/', '-', ' ', '@', '+', '.']:
         ret = ret.replace(r, '_')
     # For directories starting with a number
     if re.match(r'[0-9]', ret):
-        return package_type + '/' + 'innogst' + ret
-    return package_type + '/' + ret
+        return 'innogst' + ret + package_type
+    return ret + package_type
 
 
 def feature_type(package_type):
     if package_type == PackageType.DEVEL:
-        return ['full', 'custom']
+        return ['debug', 'devel', 'custom']
     elif package_type == PackageType.DEBUG:
-        return ['full', 'custom']
+        return ['debug', 'custom']
     else:
-        return ['full', 'compact', 'custom']
+        # FIXME upstream: Runtime components can get logically
+        # disabled with Flags: fixed *if* one changes installation
+        # type and the new type isn't included in Types
+        return ['debug', 'devel', 'runtime', 'custom']
 
 
 def description(package_type):
@@ -65,6 +66,14 @@ def description(package_type):
         return 'Debugging'
     else:
         return 'Runtime'
+
+
+def is_vs_package(package):
+    return isinstance(package, VSTemplatePackage) or package.name.startswith('vsintegration')
+
+
+def is_toplevel_package(package, package_type):
+    return package_type == PackageType.RUNTIME and not is_vs_package(package)
 
 
 class InnoSetup(PackagerBase):
@@ -107,16 +116,24 @@ class InnoSetup(PackagerBase):
             return {}
 
         listing = {}
-        listing['component'] = format_inno_feature_id(package.name, package_type)
-        # Shortdesc incorporates the "(Development files)"
-        listing['description'] = package.shortdesc
+        listing['component'] = format_inno_feature_id(
+            package.name, '-runtime' if package_type == PackageType.RUNTIME else package_type
+        )
+        if is_vs_package(package):
+            listing['description'] = package.shortdesc
+        else:
+            listing['description'] = description(package_type)
         listing['types'] = feature_type(package_type)
 
-        if required:
+        if package_type == PackageType.RUNTIME and required:
             listing['flags'] = ['fixed']
 
+        # This is a first level component (there's only devel)
         if isinstance(package, VSTemplatePackage):
+            listing['component'] = listing['component'].replace('/', '_')
             listing['check'] = f"gst_is_vs_version_installed('{package.year}') and is_admin_install"
+        elif package.name.startswith('vsintegration'):
+            listing['component'] = listing['component'].replace('/', '_')
 
         files = {}
         for filepath in files_list:
@@ -157,21 +174,23 @@ class InnoSetup(PackagerBase):
                     else:
                         transitive_deps[p] = (required, selected)
         packagedeps.update(transitive_deps)
-        features = [
-            {
-                'component': package_type[1:] if package_type else 'runtime',
-                'types': feature_type(package_type),
-                'description': description(package_type),
-            }
-        ]
-        features.extend(
-            [
-                self._create_listing(rules, package, package_type, required=required, force=force)
-                for package, (required, _) in packagedeps.items()
-            ]
-        )
-        # Remove unused features
-        return [f for f in features if f]
+        features = []
+        for package, (required, _) in packagedeps.items():
+            f = self._create_listing(rules, package, package_type, required=required, force=force)
+            if not f:
+                # Remove unused features
+                continue
+            if is_toplevel_package(package, package_type):
+                features += [
+                    {
+                        'component': format_inno_feature_id(package.name, ''),
+                        'description': package.shortdesc,
+                    },
+                    f,
+                ]
+            else:
+                features.append(f)
+        return features
 
     def _registry_key(self, name):
         return 'Software\\%s\\%s' % (name, self.config.target_arch)
@@ -273,9 +292,25 @@ class InnoSetup(PackagerBase):
             rules.write('PrivilegesRequired=admin\n')
             rules.write('PrivilegesRequiredOverridesAllowed=dialog\n')
 
+            # Generate Runtime + Devel package
+            rules.write('\n[Types]\n')
+            rules.write('Name: "devel"; Description: "Runtime and development headers"\n')
+            rules.write('Name: "debug"; Description: "Runtime, development headers and debug symbols"\n')
+            rules.write('Name: "runtime"; Description: "Only runtime"\n')
+            rules.write('Name: "custom"; Description: "Custom installation"; Flags: iscustom\n')
+
             features = []
             for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
+
+            fixed_features = set(f['component'] for f in features if 'flags' in f and 'fixed' in f['flags'])
+
+            def sort_fixed_first(f):
+                if f['component'].split('/')[0] in fixed_features:
+                    return f"0{f['component']}"
+                return f"1{f['component']}"
+
+            features = sorted(features, key=sort_fixed_first)
 
             # Now take all the files in each feature, label them by component
             files = {}
@@ -300,8 +335,10 @@ class InnoSetup(PackagerBase):
             for feature in features:
                 name = feature['component']
                 description = feature['description']
-                types = ' '.join(feature['types'])
-                rules.write(f'Name: {name}; Description: "{description}"; Types: {types};')
+                rules.write(f'Name: {name}; Description: "{description}";')
+                if 'types' in feature:
+                    types = ' '.join(feature['types'])
+                    rules.write(f' Types: {types};')
                 if 'check' in feature:
                     rules.write(f" Check: {feature['check']}; ")
                 if 'flags' in feature:
@@ -339,7 +376,7 @@ class InnoSetup(PackagerBase):
                 m.action('Embedding Visual C++ Redistributable')
                 rules.write('\n[Tasks]\n')
                 rules.write(
-                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: runtime/gstreamer_1_0_core; Check: is_admin_install;\n'
+                    'Name: "install_vcredist"; Description: "Install the Visual C++ Redistributable (2015-2022)"; Components: gstreamer_1_0_core/runtime; Check: is_admin_install;\n'
                 )
                 rules.write('\n[Files]\n')
                 rules.write(
@@ -356,10 +393,10 @@ class InnoSetup(PackagerBase):
             rules.write('ChangesEnvironment=yes\n')
             rules.write('\n[Tasks]\n')
             rules.write(
-                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: runtime/gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write(
-                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: runtime/gstreamer_1_0_core; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: is_admin_install;\n'
             )
             rules.write('\n[Registry]\n')
             rules.write(
