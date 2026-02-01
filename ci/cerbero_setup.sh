@@ -56,7 +56,7 @@ cerbero_package_and_check() {
     fi
 
     # Run gst-inspect-1.0 for some basic checks. Can't do this for cross builds, of course.
-    if [[ $CONFIG != *-ios-* ]] && [[ $CONFIG != *-android-* ]] && [[ $CONFIG != *cross-win* ]]; then
+    if [[ $CONFIG != *-ios-* ]] && [[ $CONFIG != *-tvos-* ]] && [[ $CONFIG != *-android-* ]] && [[ $CONFIG != *cross-win* ]]; then
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX --version
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX
         for plugin in $dlopen_plugins; do
@@ -282,7 +282,7 @@ cerbero_deps_script() {
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps \
             --exclude gst-plugins-rs --exclude gst-android-1.0 --exclude gstreamer-ios-templates
 
-    if ! [[ $CONFIG = *ios-sim-universal* ]] && ! [[ $CONFIG = *ios-arm64* ]]; then
+    if ! [[ $CONFIG = *ios-sim-universal* ]] && ! [[ $CONFIG = *ios-arm64* ]] && ! [[ $CONFIG = *tvos* ]]; then
         upload_cache gst-plugins-rs
     fi
 
