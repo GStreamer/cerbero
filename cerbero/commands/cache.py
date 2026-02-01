@@ -133,7 +133,7 @@ class BaseCache(Command):
             toolchain, _ = config._get_toolchain_target_platform_arch()
             distro = 'windows-' + toolchain
         elif config.target_subsystem:
-            # macos, ios, ios-sim etc
+            # macos ios ios-sim tvos tvos-sim etc
             distro = config.target_subsystem
         if config.cross_compiling():
             distro = 'cross-' + distro
