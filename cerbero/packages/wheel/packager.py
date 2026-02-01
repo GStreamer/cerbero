@@ -289,6 +289,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_cli': cli_list,
             'gstreamer_python': python_list,
             'gstreamer_gtk': gtk_list,
+            'gstreamer_meta': [],
             'gstreamer': [],
         }
 
@@ -306,6 +307,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_python': python_licenses,
             'gstreamer_gtk': gtk_licenses,
             # GStreamer supplied
+            'gstreamer_meta': [License.LGPLv2_1Plus],
             'gstreamer': [License.LGPLv2_1Plus],
         }
 
@@ -323,6 +325,11 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl': [f'gstreamer_plugins_libs ~= {self.package.version}'],
             'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
             'gstreamer_plugins_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_meta': [
+                f'gstreamer_libs ~= {self.package.version}',
+                f'gstreamer_plugins ~= {self.package.version}',
+                f'gstreamer_python ~= {self.package.version}',
+            ],
             'gstreamer': [
                 f'gstreamer_cli ~= {self.package.version}',
                 f'gstreamer_libs ~= {self.package.version}',
@@ -336,13 +343,15 @@ class WheelPackager(PackagerBase):
         }
 
         package_features = {
-            'gstreamer': {
-                # 'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
-                # 'cli': [f'gstreamer_cli ~= {self.package.version}'],
-                # If we want extra sharding
-                # 'python': [f'gstreamer_python ~= {self.package.version}'],
-                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}']
+            'gstreamer_meta': {
+                'cli': [f'gstreamer_cli ~= {self.package.version}'],
+                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}'],
+                'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
+                'gpl-restricted': [f'gstreamer_plugins_gpl_restricted ~= {self.package.version}'],
+                'gtk': [f'gstreamer_gtk ~= {self.package.version}'],
+                'restricted': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
             },
+            'gstreamer': {'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}']},
         }
 
         with (self.output_dir / 'categories.json').open('w', encoding='utf-8', newline='\n') as f:
