@@ -337,6 +337,7 @@ class FilesProvider(object):
 
         # Validate all the files with the ones in the prefix
         vfs = []
+        novfs = {}
         for f, searchfunc in files.items():
             if not searchfunc:
                 searchfunc = self._search_file
@@ -349,12 +350,16 @@ class FilesProvider(object):
                         continue
             # Error out on our own CI runs (whether Cerbero, gst-plugins-rs,
             # gstreamer etc.)
-            elif os.environ.get('CI_PROJECT_NAMESPACE', '') == 'gstreamer' and 'CERBERO_TESTSUITE' not in os.environ:
-                raise RuntimeError(
-                    'Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__)
-                )
             else:
-                m.warning('Missing on-disk files for {} with search function {}'.format(f, searchfunc.__name__))
+                novfs[f] = searchfunc
+        if novfs:
+            msg = 'Missing on-disk files with search function:'
+            for k, v in novfs.items():
+                msg += f'\n\t {k} => {v}'
+            if os.environ.get('CI_PROJECT_NAMESPACE', '') == 'gstreamer' and 'CERBERO_TESTSUITE' not in os.environ:
+                raise RuntimeError(msg)
+            else:
+                m.warning(msg)
         return vfs
 
     def _dylib_plugins(self):
