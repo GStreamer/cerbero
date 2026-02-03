@@ -505,11 +505,9 @@ class Recipe(custom.GStreamer):
     }
 
     files_typelibs = [
-        'CudaGst-1.0',
         'GstAnalytics-1.0',
         'GstBadAudio-1.0',
         'GstCodecs-1.0',
-        'GstCuda-1.0',
         'GstHip-1.0',
         'GstHipGL-1.0',
         'GstInsertBin-1.0',
@@ -640,6 +638,7 @@ class Recipe(custom.GStreamer):
 
         if self.meson_options['nvcodec'] == 'enabled':
             self.files_libs += ['libgstcuda-1.0']
+            self.files_typelibs += ['CudaGst-1.0', 'GstCuda-1.0']
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
