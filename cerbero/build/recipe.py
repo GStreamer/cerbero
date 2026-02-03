@@ -901,12 +901,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         Runs post installation steps
         """
         self.install_licenses()
-        needs_debian_relocation = self.config.target_distro == Distro.DEBIAN and self.config.extra_properties.get(
-            'site-packages'
-        )
         if (
             self.config.variants.python
-            and (needs_debian_relocation or self.config.target_platform == Platform.DARWIN)
+            and (self.config.target_distro == Distro.DEBIAN or self.config.target_platform == Platform.DARWIN)
             and hasattr(self, 'files_python')
         ):
             self.relocate_site_packages()
