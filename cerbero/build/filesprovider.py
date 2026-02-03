@@ -790,6 +790,11 @@ class FilesProvider(object):
         """
         List translations in share/locale/*/LC_MESSAGES/ '
         """
+
+        # gettext is only supported by the Linux bootstrapper
+        if self.config.target_platform != Platform.LINUX:
+            return {}
+
         pattern = 'share/locale/*/LC_MESSAGES/%s.mo'
         langfiles = {}
         for x in files:
