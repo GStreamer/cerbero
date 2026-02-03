@@ -676,7 +676,8 @@ class FilesProvider(object):
             # Skip non plugin files
             if self.config.target_distro == Distro.DEBIAN and len(fpath.parts) != 4:
                 continue
-            elif len(fpath.parts) != 3:
+            # lib/{frei0r, gstreamer, gio/modules}
+            elif len(fpath.parts) != 3 and 'gio/modules' not in fdir:
                 continue
             # Skip non library files
             if fpath.suffix not in (
