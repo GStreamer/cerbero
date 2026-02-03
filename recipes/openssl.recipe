@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
         'openssl/0002-windows-makefile.tmpl-Generate-and-install-pkgconfig.patch',
     ]
 
-    files_bins = ['openssl']
+    files_bins = []
     files_libs = ['libcrypto', 'libssl']
     files_devel = ['include/openssl', '%(libdir)s/pkgconfig/openssl.pc',
                    '%(libdir)s/pkgconfig/libssl.pc', '%(libdir)s/pkgconfig/libcrypto.pc']
@@ -215,6 +215,9 @@ class Recipe(recipe.Recipe):
 
         if self.config.platform == Platform.WINDOWS:
             config_sh += ' no-tests '
+
+        if not Platform.is_mobile(self.config.target_platform):
+            self.files_bins.append('openssl')
 
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)
