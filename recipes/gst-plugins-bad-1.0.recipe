@@ -510,9 +510,6 @@ class Recipe(custom.GStreamer):
         'GstBadAudio-1.0',
         'GstCodecs-1.0',
         'GstCuda-1.0',
-        'GstD3D11-1.0',
-        'GstD3D12-1.0',
-        'GstDxva-1.0',
         'GstHip-1.0',
         'GstHipGL-1.0',
         'GstInsertBin-1.0',
@@ -574,6 +571,7 @@ class Recipe(custom.GStreamer):
                 self.deps += ['directxmath']
 
             self.files_libs += ['libgstd3d11-1.0']
+            self.files_typelibs += ['GstD3D11-1.0']
             self.files_plugins_devel += [
                 'include/gstreamer-1.0/gst/d3d11',
                 '%(libdir)s/gstreamer-1.0/include/gst/d3d11',
@@ -582,6 +580,7 @@ class Recipe(custom.GStreamer):
 
             # Decoder baseclass library for d3d11 and d3d12 plugins
             self.files_libs += ['libgstdxva-1.0']
+            self.files_typelibs += ['GstDxva-1.0']
 
             # d3d11/d3d12 HLSL shader library
             self.files_libs += ['libgstd3dshader-1.0']
@@ -593,6 +592,7 @@ class Recipe(custom.GStreamer):
                 'include/gstreamer-1.0/gst/d3d12',
                 '%(libdir)s/pkgconfig/gstreamer-d3d12-1.0.pc',
             ]
+            self.files_typelibs += ['GstD3D12-1.0']
 
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
