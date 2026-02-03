@@ -43,6 +43,9 @@ class Recipe(recipe.Recipe):
         '%(pydir)s/gi/overrides/Pango.py',
         '%(pydir)s/gi/overrides/__init__.py',
         '%(pydir)s/gi/overrides/keysyms.py',
+        '%(pydir)s/pygtkcompat/__init__.py',
+        '%(pydir)s/pygtkcompat/generictreemodel.py',
+        '%(pydir)s/pygtkcompat/pygtkcompat.py',
     ]
     files_devel = [
         'include/pygobject-3.0/pygobject.h',
