@@ -508,8 +508,6 @@ class Recipe(custom.GStreamer):
         'GstAnalytics-1.0',
         'GstBadAudio-1.0',
         'GstCodecs-1.0',
-        'GstHip-1.0',
-        'GstHipGL-1.0',
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
         'GstMse-1.0',
@@ -606,6 +604,10 @@ class Recipe(custom.GStreamer):
             self.files_plugins_devel += [
                 'include/gstreamer-1.0/gst/cuda',
                 '%(libdir)s/pkgconfig/gstreamer-cuda-1.0.pc',
+            ]
+            self.files_typelibs += [
+                'GstHip-1.0',
+                'GstHipGL-1.0',
             ]
 
         if not Platform.is_mobile(self.config.target_platform):
