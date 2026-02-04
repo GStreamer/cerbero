@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Felipe Erias <felipeerias@igalia.com>
+Date: Thu, 1 Jan 2026 12:00:00 +0900
+Subject: [PATCH] Fix XKB NULL keymap crash on Android
+
+On Android, XKB data files (rules/evdev) are not available, causing
+xkb_keymap_new_from_names() to return NULL. The code was not checking
+for this case and passed the NULL keymap to xkb_state_new(), which also
+returned NULL. Later code then crashed when trying to use the NULL
+keymap (SIGSEGV at xkb_keymap_ref+0).
+
+Add a NULL check after xkb_keymap_new_from_names() and return NULL from
+wpe_keymap_xkb_new() if keymap creation fails. This allows callers to
+handle the missing keymap gracefully instead of crashing.
+---
+ Source/WebKit/WPEPlatform/wpe/WPEKeymapXKB.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Source/WebKit/WPEPlatform/wpe/WPEKeymapXKB.cpp b/Source/WebKit/WPEPlatform/wpe/WPEKeymapXKB.cpp
+index 1234567890..abcdef1234 100644
+--- a/Source/WebKit/WPEPlatform/wpe/WPEKeymapXKB.cpp
++++ b/Source/WebKit/WPEPlatform/wpe/WPEKeymapXKB.cpp
+@@ -214,6 +214,10 @@ WPEKeymap* wpe_keymap_xkb_new()
+     auto context = createXKBContext();
+     struct xkb_rule_names names = { "evdev", "pc105", "us", "", "" };
+     keymap->priv->xkbKeymap = xkb_keymap_new_from_names(context.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
++    if (!keymap->priv->xkbKeymap) {
++        g_object_unref(keymap);
++        return nullptr;
++    }
+     keymap->priv->xkbState = xkb_state_new(keymap->priv->xkbKeymap);
+
+     return WPE_KEYMAP(keymap);
+--
+2.43.0
+

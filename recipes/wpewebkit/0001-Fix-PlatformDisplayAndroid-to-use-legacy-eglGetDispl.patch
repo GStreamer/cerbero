@@ -1,0 +1,47 @@
+From 533ae8f90661eb80c8c4c49f4441abad1d08af8f Mon Sep 17 00:00:00 2001
+From: Felipe Erias <felipeerias@igalia.com>
+Date: Thu, 11 Dec 2025 16:47:29 +0900
+Subject: [PATCH] Fix PlatformDisplayAndroid to use legacy eglGetDisplay
+
+Use eglGetDisplay(EGL_DEFAULT_DISPLAY) instead of eglGetPlatformDisplay()
+which requires EGL 1.5 or EGL_EXT_platform_base extension. Some Android
+devices advertise EGL_KHR_platform_android in the extension string but
+don't have the eglGetPlatformDisplay function available, causing libepoxy
+to crash when trying to resolve the function pointer.
+
+The legacy eglGetDisplay() is functionally equivalent on Android since
+there's only one native windowing system.
+---
+ .../graphics/android/PlatformDisplayAndroid.cpp  | 16 ++++++----------
+ 1 file changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/Source/WebCore/platform/graphics/android/PlatformDisplayAndroid.cpp b/Source/WebCore/platform/graphics/android/PlatformDisplayAndroid.cpp
+index 3be0c1b2f0..d067770466 100644
+--- a/Source/WebCore/platform/graphics/android/PlatformDisplayAndroid.cpp
++++ b/Source/WebCore/platform/graphics/android/PlatformDisplayAndroid.cpp
+@@ -35,16 +35,12 @@ namespace WebCore {
+ 
+ std::unique_ptr<PlatformDisplayAndroid> PlatformDisplayAndroid::create()
+ {
+-#if defined(EGL_PLATFORM_ANDROID_KHR)
+-    // While not terribly common, custom Android builds other than AOSP
+-    // or official Google ones may support more than one window system,
+-    // so try being explicit before falling back to the default display.
+-    const char* extensions = eglQueryString(nullptr, EGL_EXTENSIONS);
+-    if (GLContext::isExtensionSupported(extensions, "EGL_KHR_platform_android")) [[unlikely]] {
+-        if (auto glDisplay = GLDisplay::create(eglGetPlatformDisplay(EGL_PLATFORM_ANDROID_KHR, EGL_DEFAULT_DISPLAY, nullptr)))
+-            return std::unique_ptr<PlatformDisplayAndroid>(new PlatformDisplayAndroid(glDisplay.releaseNonNull()));
+-    }
+-#endif
++    // Use the legacy eglGetDisplay() which is always available on Android.
++    // eglGetPlatformDisplay() requires EGL 1.5 or EGL_EXT_platform_base which
++    // may not be available on all devices, even if EGL_KHR_platform_android
++    // is advertised in the extension string.
++    if (auto glDisplay = GLDisplay::create(eglGetDisplay(EGL_DEFAULT_DISPLAY)))
++        return std::unique_ptr<PlatformDisplayAndroid>(new PlatformDisplayAndroid(glDisplay.releaseNonNull()));
+ 
+     return nullptr;
+ }
+-- 
+2.43.0
+

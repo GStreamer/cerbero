@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'bb0e158ad26cdd2e80794435df4d3b30fd5ee2241ab2cfc9c184c3dd1966f0b7'
     patches = [
         f'{name}/0001-WPE-Cannot-build-on-Android-due-to-close-being-undef.patch',
+        f'{name}/0001-Fix-PlatformDisplayAndroid-to-use-legacy-eglGetDispl.patch',
+        f'{name}/0002-Fix-XKB-NULL-keymap-crash-on-Android.patch',
     ]
     deps = [
         'icu',
