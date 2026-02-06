@@ -1,0 +1,54 @@
+From 38024608a1c499781853474ea4c7b4798546836c Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 6 Feb 2026 13:14:18 +0530
+Subject: [PATCH 1/2] Fix enum/flags richcompare overflow on Windows
+
+pyg_integer_richcompare() used PyLong_AS_LONG() to extract C long
+values for comparison. On Windows where C long is 32-bit, unsigned
+flags values >= 0x80000000 (such as GStreamer's GST_MESSAGE_EXTENDED,
+GST_MESSAGE_DEVICE_ADDED, etc.) cause an OverflowError. Since the
+function never checks for errors from PyLong_AS_LONG(), it returns a
+valid Py_True/Py_False with the OverflowError still pending, which
+then leaks into subsequent C API calls causing a SystemError.
+
+Delegate to PyLong_Type.tp_richcompare() which handles arbitrary
+precision integers correctly on all platforms.
+---
+ gi/pygi-util.c | 21 +++++----------------
+ 1 file changed, 5 insertions(+), 16 deletions(-)
+
+diff --git a/gi/pygi-util.c b/gi/pygi-util.c
+index 3a297f40..6829a4c2 100644
+--- a/gi/pygi-util.c
++++ b/gi/pygi-util.c
+@@ -35,22 +35,11 @@ pygi_guint_from_pyssize (Py_ssize_t pyval, guint *result)
+ PyObject *
+ pyg_integer_richcompare(PyObject *v, PyObject *w, int op)
+ {
+-    PyObject *result;
+-    gboolean t;
+-
+-    switch (op) {
+-    case Py_EQ: t = PyLong_AS_LONG (v) == PyLong_AS_LONG (w); break;
+-    case Py_NE: t = PyLong_AS_LONG (v) != PyLong_AS_LONG (w); break;
+-    case Py_LE: t = PyLong_AS_LONG (v) <= PyLong_AS_LONG (w); break;
+-    case Py_GE: t = PyLong_AS_LONG (v) >= PyLong_AS_LONG (w); break;
+-    case Py_LT: t = PyLong_AS_LONG (v) <  PyLong_AS_LONG (w); break;
+-    case Py_GT: t = PyLong_AS_LONG (v) >  PyLong_AS_LONG (w); break;
+-    default: g_assert_not_reached();
+-    }
+-
+-    result = t ? Py_True : Py_False;
+-    Py_INCREF(result);
+-    return result;
++    /* Delegate to Python's built-in int comparison, which handles
++     * arbitrary precision and doesn't overflow on platforms where
++     * C long is smaller than the value (e.g. Windows 32-bit long
++     * with unsigned flags values >= 0x80000000). */
++    return PyLong_Type.tp_richcompare(v, w, op);
+ }
+ 
+ PyObject*
+-- 
+2.52.0
+
