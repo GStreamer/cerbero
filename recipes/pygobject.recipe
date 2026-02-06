@@ -57,6 +57,9 @@ class Recipe(recipe.Recipe):
         'pygobject/0001-gi-Call-os.add_dll_directory-on-Windows-when-possibl.patch',
         # https://gitlab.gnome.org/GNOME/pygobject/-/merge_requests/463
         'pygobject/0002-Fix-syntax-error-for-missing.patch',
+        # Not applicable to upstream main branch, code has been completely reworked
+        'pygobject/0001-Fix-enum-flags-richcompare-overflow-on-Windows.patch',
+        'pygobject/0002-Fix-pyg_flags_from_gtype-returning-non-NULL-with-a-p.patch',
     ]
 
     def prepare(self):
