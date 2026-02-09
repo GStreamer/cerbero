@@ -6,7 +6,7 @@ DEFAULT_BRANCH=$3
 
 mkdir -p /android/sources
 
-curl -o /android/sources/android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+curl -o /android/sources/android-ndk.zip https://dl.google.com/android/repository/android-ndk-r29-linux.zip
 unzip /android/sources/android-ndk.zip -d ${ANDROID_NDK_HOME}/
 # remove the intermediate versioned directory
 mv ${ANDROID_NDK_HOME}/*/* ${ANDROID_NDK_HOME}/
