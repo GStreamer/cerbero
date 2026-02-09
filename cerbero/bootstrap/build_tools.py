@@ -122,7 +122,7 @@ class BuildTools(BootstrapperBase, Fetch):
                 shutil.move(f, tof)
             os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
-        shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools', 'packaging'])
+        shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools==80.10.2', 'packaging'])
         if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
             # Create an x86_64 python for introspection in universal builds
             python_wrapper = os.path.join(self.config.build_tools_prefix, 'bin', 'python3-x86_64')
