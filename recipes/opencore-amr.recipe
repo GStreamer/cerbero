@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     meson_options = {
         'examples': 'disabled',
+        'cpp_std' : 'c++11',
     }
 
     patches = ['opencore-amr/0001-Add-Meson-build-system.patch']
