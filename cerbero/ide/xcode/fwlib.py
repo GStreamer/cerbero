@@ -206,6 +206,17 @@ class StaticFrameworkLibrary(FrameworkLibrary):
         if dups:
             m.warning('The static library contains duplicated symbols')
         for k, v in dups.items():
+            # Skip symbols with ___, these are compiler-inserted symbols
+            if k.startswith('___'):
+                continue
+            # Skip C++ duplicated symbols, most of these are spurious
+            skip = False
+            for line in v:
+                if 'cc.o:' in line[0] or 'cpp.o:' in line[0]:
+                    skip = True
+                    break
+            if skip:
+                continue
             m.message(k)  # symbol name
             for line in v:
                 m.message('     %s' % line[0])  # file
