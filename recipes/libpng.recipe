@@ -8,19 +8,20 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'libpng'
     version = '1.6.47'
+    version = '1.6.55'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
     url = 'sf://'
-    tarball_checksum = 'b213cb381fbb1175327bd708a77aab708a05adde7b471bc267bd15ac99893631'
+    tarball_checksum = 'd925722864837ad5ae2a82070d4b2e0603dc72af44bd457c3962298258b8e82d'
 
     licenses = [{License.LibPNG: ['LICENSE']}]
     deps = ['zlib']
     patches = [
-        f'{name}/0002-cmake-Force-enable-pkg-config-modules-everywhere.patch',
-        f'{name}/0003-cmake-Fix-naming-convention-breaking-rustc-library-l.patch',
+        f'{name}/0001-cmake-Force-enable-pkg-config-modules-everywhere.patch',
+        f'{name}/0002-cmake-Fix-naming-convention-breaking-rustc-library-l.patch',
     ]
 
     configure_options = ['-DPNG_TESTS=OFF']
