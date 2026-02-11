@@ -18,6 +18,9 @@ ERRORS=(
     "otool: unknown char"
     # Wine is flaky
     "The explorer process failed to start."
+    # Mac Virtualization bugs where lipo/git etc are spawned instead of clang
+    "lipo: unknown flag: -I"
+    "unknown option: -I"
 )
 RETRIES=3
 LOGFILE="/tmp/logfile.txt"
