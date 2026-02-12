@@ -29,7 +29,7 @@ class BinaryDistribution(Distribution):
         return package_name == 'gstreamer_python'
 
     def has_c_libraries(self):
-        return package_name not in ('gstreamer', 'gstreamer_meta', 'gstreamer_python')
+        return package_name not in ('gstreamer', 'gstreamer_bundle', 'gstreamer_meta', 'gstreamer_python')
 
 
 class InjectGStreamerWheels(build_py):
@@ -54,7 +54,12 @@ class MakeStableAbiWheel(bdist_wheel):
                 self.py_limited_api = 'cp39'
             # Make it so that bdist_wheel generates the right platform name for
             # wheels that do not link to Python
-            if platform.system() == 'Darwin' and package_name not in ('gstreamer', 'gstreamer_meta', 'gstreamer_gtk'):
+            if platform.system() == 'Darwin' and package_name not in (
+                'gstreamer',
+                'gstreamer_bundle',
+                'gstreamer_meta',
+                'gstreamer_gtk',
+            ):
                 self.plat_name = 'macosx_10_13_universal2'
         super().finalize_options()
 

@@ -319,8 +319,10 @@ class WheelPackager(PackagerBase):
             'gstreamer_python': python_list,
             'gstreamer_gtk': gtk_list,
             'gstreamer_meta': [],
+            'gstreamer_bundle': [],
             'gstreamer': [],
         }
+        package_files_list['gstreamer_bundle'] = package_files_list['gstreamer']
 
         package_desc = {
             'gstreamer_libs': 'GStreamer API Libraries',
@@ -365,6 +367,7 @@ class WheelPackager(PackagerBase):
             'gstreamer_meta': [License.LGPLv2_1Plus],
             'gstreamer': [License.LGPLv2_1Plus],
         }
+        package_licenses['gstreamer_bundle'] = package_licenses['gstreamer']
 
         package_dependencies = {
             'gstreamer_debuginfo': [],
@@ -397,6 +400,7 @@ class WheelPackager(PackagerBase):
                 f'gstreamer_gtk ~= {self.package.version}',
             ],
         }
+        package_dependencies['gstreamer_bundle'] = package_dependencies['gstreamer']
 
         package_features = {
             'gstreamer_meta': {
@@ -413,6 +417,7 @@ class WheelPackager(PackagerBase):
                 'debuginfo': [f'gstreamer_debuginfo ~= {self.package.version}'],
             },
         }
+        package_features['gstreamer_bundle'] = package_features['gstreamer']
 
         with (self.output_dir / 'categories.json').open('w', encoding='utf-8', newline='\n') as f:
             f.write(json.dumps(package_files_list, indent=1))
