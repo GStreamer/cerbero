@@ -187,6 +187,7 @@ cerbero_before_script() {
     # a dirty builddir, or tarballs/pkg files, leftover files from an old
     # cerbero commit, etc. Skip the things we actually need to keep.
     time git clean -xdf -e localconf.cbc -e "${CERBERO_SOURCES}"
+    rm -f "${CERBERO_SOURCES}"/*/.git/index.lock
 }
 
 cerbero_script() {
