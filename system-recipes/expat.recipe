@@ -6,5 +6,5 @@ class Recipe(recipe.SystemRecipe):
     pkgconfig_files = ['expat']
 
     def prepare(self):
-        if sys.version_info < (3, 13, 0) and self.config.target_distro == Distro.ARCH:
+        if sys.version_info < (3, 13, 0):
             raise InvalidRecipeError(self, "system recipe for expat only needed for python 3.13")
