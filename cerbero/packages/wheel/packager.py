@@ -120,11 +120,31 @@ class WheelPackager(PackagerBase):
         classifiers=(),
         dependencies=(),
         features=None,
+        desc='',
     ):
         # Set project up
         m.action(f'Creating setuptools project for {package_name}')
         base_tree = Path(self.config.data_dir) / 'wheel'
         output_dir = self.output_dir / package_name
+
+        longdesc = ''
+        if package_name in ('gstreamer', 'gstreamer_bundle'):
+            with open(base_tree / 'gstreamer.md', 'r') as f:
+                longdesc = f.read()
+        elif package_name == 'gstreamer_meta':
+            with open(base_tree / 'gstreamer_meta.md', 'r') as f:
+                longdesc = f.read()
+
+        if longdesc:
+            longdesc += '\n'
+            with open(base_tree / 'about.md', 'r') as f:
+                longdesc += f.read()
+        else:
+            longdesc = (
+                'This wheel is not self-contained, it is meant to be used as part of the '
+                '[gstreamer_bundle](/project/gstreamer-bundle/) or '
+                '[gstreamer_meta](/project/gstreamer-meta/) packages.'
+            )
 
         # Copy files manually (the last one needs to match the package name)
         shutil.copy(base_tree / 'setup.py', output_dir)
@@ -162,8 +182,9 @@ class WheelPackager(PackagerBase):
         package_info = {
             'package_name': package_name,
             'version': self.package.version,
-            'description': self.package.shortdesc,
-            'long_description': self.package.longdesc,
+            'description': desc,
+            'long_description': longdesc,
+            'long_description_content_type': 'text/markdown',
             'url': self.package.url,
             'vendor': self.package.vendor,
             'spdx_license': license,
@@ -295,6 +316,22 @@ class WheelPackager(PackagerBase):
         }
         package_files_list['gstreamer_bundle'] = package_files_list['gstreamer']
 
+        package_desc = {
+            'gstreamer_libs': 'GStreamer API Libraries',
+            'gstreamer_plugins_libs': 'Third-party libraries used by GStreamer Plugins',
+            'gstreamer_plugins': 'GStreamer plugins',
+            'gstreamer_plugins_frei0r': 'GStreamer frei0r plugin, including frei0r-plugins',
+            'gstreamer_plugins_gpl': 'GStreamer GPL/AGPL plugins',
+            'gstreamer_plugins_gpl_restricted': 'GStreamer GPL/AGPL plugins that are known to be patent encumbered',
+            'gstreamer_plugins_restricted': 'GStreamer plugins that are known to be patent encumbered',
+            'gstreamer_cli': 'GStreamer command-line utilities',
+            'gstreamer_python': 'Python bindings and plugins for GStreamer',
+            'gstreamer_gtk': 'GStreamer gtk4paintablesink plugin and dependencies, including GTK4 itself',
+            'gstreamer_meta': "Meta-package to install a subset of GStreamer plugins via 'extras'",
+            'gstreamer': 'Meta-package to install all GStreamer plugins and libraries',
+        }
+        package_desc['gstreamer_bundle'] = package_desc['gstreamer']
+
         package_licenses = {
             'gstreamer_plugins_gpl_restricted': gpl_restricted_licenses,
             'gstreamer_plugins_restricted': restricted_licenses,
@@ -387,7 +424,15 @@ class WheelPackager(PackagerBase):
 
             classifiers = self._get_classifiers(license)
 
-            self._create_wheel(package_name, files_list, license, classifiers, dependencies, features)
+            self._create_wheel(
+                package_name,
+                files_list,
+                license,
+                classifiers,
+                dependencies,
+                features,
+                'MSVC runtime redist for GStreamer',
+            )
 
             package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.package.version}')
 
@@ -444,8 +489,9 @@ class WheelPackager(PackagerBase):
                     shell.new_call(['install_name_tool'] + rpath_args + [destpath], env=self.config.env)
 
             classifiers = self._get_classifiers(license)
-
-            self._create_wheel(package_name, files_list, license, classifiers, dependencies, features)
+            self._create_wheel(
+                package_name, files_list, license, classifiers, dependencies, features, package_desc[package_name]
+            )
 
         return list(self.output_dir.glob('**/gstreamer*.whl'))
 
