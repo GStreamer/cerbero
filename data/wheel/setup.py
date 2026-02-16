@@ -70,6 +70,8 @@ if desc['needs_environment']:
 setuptools.setup(
     name=desc['package_name'],
     description=desc['description'],
+    long_description=desc['long_description'],
+    long_description_content_type=desc['long_description_content_type'],
     url=desc['url'],
     author=desc['vendor'],
     license=desc['spdx_license'],
