@@ -10,8 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'b92c270e-3d91-48ea-bedf-fdc01b41caba'
     deps = ['gstreamer-1.0-core']
 
-    files = ['libdvdnav:libs', 'libdvdread:libs',
-            'gst-plugins-base-1.0:plugins_dvd',
+    files = ['gst-plugins-base-1.0:plugins_dvd',
             'gst-plugins-good-1.0:plugins_dvd',
             'gst-plugins-ugly-1.0:plugins_dvd',
             'gst-plugins-bad-1.0:plugins_dvd']
