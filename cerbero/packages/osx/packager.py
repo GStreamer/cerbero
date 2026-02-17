@@ -72,10 +72,10 @@ class FrameworkHeadersMixin(object):
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
                 # include/cairo/cairo.h -> Headers/cairo.h
                 if os.path.isfile(src):
-                    shutil.copy(src, dest)
+                    shutil.copy(src, dest, follow_symlinks=False)
                 # include/gstreamer-0.10/gst -> Headers/gst
                 elif os.path.isdir(src):
-                    shell.copy_dir(src, dest)
+                    shell.copy_dir(src, dest, follow_symlinks=False)
 
     def _copy_unversioned_headers(self, dirname, include, headers, include_dirs):
         if not os.path.exists(dirname):
@@ -89,7 +89,7 @@ class FrameworkHeadersMixin(object):
                 p = os.path.join(headers, rel_path)
                 d = os.path.dirname(p)
                 os.makedirs(d, exist_ok=True)
-                shutil.copy(path, p)
+                shutil.copy(path, p, follow_symlinks=False)
             # scan sub-directories
             elif os.path.isdir(path):
                 if path in include_dirs:
@@ -201,7 +201,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
             if os.path.isdir(in_path):
                 shell.copy_dir(in_path, out_path)
             else:
-                shutil.copy(in_path, out_path)
+                shutil.copy(in_path, out_path, follow_symlinks=False)
         if package_type == PackageType.DEVEL:
             self._create_framework_headers(self.config.prefix, self.include_dirs, root)
 
@@ -283,6 +283,10 @@ class ProductPackage(PackagerBase):
         self.include_dirs = PkgConfig.list_all_include_dirs(env=env)
         # Make it recognizable for capturing purposes
         self.tmp = tempfile.mkdtemp(prefix=self._package_name('-'), dir=self.output_dir)
+        # Calm Git if you're running this interactively
+        with open(os.path.join(self.tmp, '.gitignore'), 'w', encoding='utf-8') as f:
+            f.write('*\n')
+
         self.fw_path = self.tmp
 
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: [], PackageType.DEBUG: []}
@@ -385,7 +389,7 @@ class ProductPackage(PackagerBase):
         os.makedirs(workdir)
         try:
             for p in paths:
-                shutil.copy(p, workdir)
+                shutil.copy(p, workdir, follow_symlinks=False)
             # Create Disk Image
             cmd = ['hdiutil', 'create', dmg_file, '-ov', '-srcfolder', workdir]
             shell.new_call(cmd)
@@ -442,7 +446,7 @@ class ApplicationPackage(PackagerBase):
             out_path = os.path.join(out_dir, f)
             odir = os.path.split(out_path)[0]
             os.makedirs(odir, exist_ok=True)
-            shutil.copy(in_path, out_path)
+            shutil.copy(in_path, out_path, follow_symlinks=False)
 
     def _create_app_bundle(self):
         """Creates the OS X Application bundle in temporary directory"""
@@ -602,7 +606,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
             if os.path.isdir(f):
                 shell.copy_dir(f, out_path)
             else:
-                shutil.copy(f, out_path)
+                shutil.copy(f, out_path, follow_symlinks=False)
 
     def _copy_templates(self, files):
         templates_prefix = 'share/xcode/templates/ios'
