@@ -524,7 +524,7 @@ def prompt_multiple(message, options):
     return options[int(res)]
 
 
-def copy_dir(src, dest):
+def copy_dir(src, dest, follow_symlinks=True):
     if not os.path.exists(src):
         return
     for path in os.listdir(src):
@@ -532,7 +532,7 @@ def copy_dir(src, dest):
         d = os.path.join(dest, path)
         os.makedirs(os.path.dirname(d), exist_ok=True)
         if os.path.isfile(s):
-            shutil.copy(s, d)
+            shutil.copy(s, d, follow_symlinks=follow_symlinks)
         elif os.path.isdir(s):
             copy_dir(s, d)
 
