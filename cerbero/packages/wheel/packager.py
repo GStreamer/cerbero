@@ -170,7 +170,7 @@ class WheelPackager(PackagerBase):
                     else:
                         source_name = source.name
                     scripts.append(f'{source_name} = {package_name}.entrypoints:{entrypoint_name}')
-                    entrypoints += [f'def {entrypoint_name}():\n', f"    __run('{filename}')\n"]
+                    entrypoints += [f'def {entrypoint_name}():\n', f"    return __run('{filename}')\n"]
 
         if entrypoints:
             entrypoints = ['\n', '\n', *entrypoints]
