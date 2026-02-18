@@ -118,9 +118,9 @@ class Oven(object):
         # enable this.
         self._install_lock = asyncio.Lock()
 
-    async def start_cooking(self):
+    def resolve_tree(self):
         """
-        Cooks the recipe and all its dependencies
+        Parse the dependency tree and list all recipes
         """
         recipes = [self.cookbook.get_recipe(x) for x in self.recipes]
 
@@ -137,9 +137,19 @@ class Oven(object):
         if self.deps_only:
             ordered_recipes = [x for x in ordered_recipes if x not in recipes]
 
+        return ordered_recipes
+
+    async def start_cooking(self):
+        """
+        Cooks the recipe and all its dependencies
+        """
+        ordered_recipes = self.resolve_tree()
+
         m.message(N_('Building the following recipes: %s') % ' '.join([x.name for x in ordered_recipes]))
 
-        steps = [step[1] for step in recipes[0].steps]
+        sample_recipe = self.cookbook.get_recipe(self.recipes[0])
+
+        steps = [step[1] for step in sample_recipe.steps]
         if self.steps_filter is not None:
             steps = [s for s in steps if s in self.steps_filter]
             if len(steps) == 0:
