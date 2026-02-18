@@ -12,4 +12,10 @@ def __run(program: str):
     if not fullpath:
         raise RuntimeError(f'{program} was not found in {runtime_path}')
     fullpath = str(Path(fullpath).resolve())
-    subprocess.check_call([fullpath, *sys.argv[1:]], env=env)
+    try:
+        subprocess.check_call([fullpath, *sys.argv[1:]], env=env)
+    except KeyboardInterrupt:
+        return 130
+    except subprocess.CalledProcessError as e:
+        return e.returncode
+    return 0
