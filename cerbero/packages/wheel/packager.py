@@ -189,7 +189,11 @@ class WheelPackager(PackagerBase):
             'vendor': self.package.vendor,
             'spdx_license': license,
             'classifiers': classifiers,
-            'python_version': f'>= 3.{sys.version_info[1]}',
+            # This should be set to the same version for all wheels for
+            # a particular package/project/"release". It refers to the
+            # source-level compatibility for the project.
+            # https://docs.astral.sh/uv/reference/internals/resolver/#metadata-consistency
+            'python_version': '>= 3.9',
             'install_requires': dependencies,
             'extras_require': features,
             'entrypoints': {
