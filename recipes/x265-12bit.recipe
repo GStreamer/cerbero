@@ -6,10 +6,22 @@ from pathlib import Path
 class Recipe(recipe.Recipe):
     name = 'x265-12bit'
     version = '3.6'
-    licenses = [License.GPLv2Plus]
-    stype = SourceType.CUSTOM
+    licenses = [{License.GPLv2Plus: ['COPYING']}]
+    stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     library_type = LibraryType.STATIC
+    url = 'https://bitbucket.org/multicoreware/x265_git/downloads/x265_3.6.tar.gz'
+    tarball_checksum = '663531f341c5389f460d730e62e10a4fcca3428ca2ca109693867bc5fe2e2807'
+    tarball_dirname = 'x265_%(version)s'
+    patches = [
+        'x265/0001-add-android-support.patch',
+        'x265/0002-install-shared-library-without-tag.patch',
+        'x265/0003-cmake-Use-GNUInstallDirs-to-remove-uncertainty.patch',
+        'x265/0004-cmake-Use-the-Meson-convention-for-exporting-static-.patch',
+        'x265/0005-cmake-Disable-version-detection-using-git.patch',
+        'x265/0006-Fix-CMake-build-error-with-latest-CMake-4.0-release.patch',
+        'x265/0007-Fix-for-CMake-Build-Errors-in-MacOS.patch',
+    ]
     cmake_generator = 'ninja'
     can_msvc = True
     configure_options = [
@@ -20,7 +32,6 @@ class Recipe(recipe.Recipe):
         '-DMAIN12=ON',
         '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
     ]
-    deps = ['x265-src']
 
     # files_libs = ['libx265-12bit']
 
@@ -38,12 +49,11 @@ class Recipe(recipe.Recipe):
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         elif self.using_msvc() and self.config.target_arch == Architecture.ARM64:
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
-        self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')
-        self.configure_dir = self.config_src_dir
+        self.config_src_dir = os.path.join(self.config_src_dir, 'source')
 
     # Set up the HDR library - DO NOT EXECUTE any kind of install
     async def install(self):
         prefix = '' if self.using_msvc() else 'lib'
         src = Path(self.build_dir) / f'{prefix}x265.a'
-        dest = src.with_stem(f"{'' if self.using_msvc() else 'lib'}{self.name}")
+        dest = Path(self.config.libdir, f"{'' if self.using_msvc() else 'lib'}{self.name}.a")
         src.replace(dest)
