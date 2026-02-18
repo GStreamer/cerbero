@@ -31,7 +31,7 @@ class Recipe(recipe.Recipe):
     ]
 
     meson_options = {
-        'media-gstreamer': 'disabled',
+        'media-gstreamer': 'enabled',
         'x11-backend': 'false',
         'wayland-backend': 'false',
         'broadway-backend': 'false',
@@ -89,7 +89,6 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             self.meson_options['macos-backend'] = 'true'
-            self.meson_options['media-gstreamer'] = 'enabled'
             if split_version(self.config.min_osx_sdk_version) < (10, 15):
                 self.append_env('CFLAGS', '-mmacosx-version-min=10.15')
                 self.append_env('CXXFLAGS', '-mmacosx-version-min=10.15')
