@@ -20,13 +20,13 @@ import asyncio
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
+from cerbero.build.oven import Oven
 from cerbero.enums import LibraryType
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import (
     _,
     N_,
     ArgparseArgument,
-    remove_list_duplicates,
     shell,
     determine_num_of_cpus,
     run_until_complete,
@@ -80,12 +80,9 @@ class Fetch(Command):
         fetch_recipes = []
         if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
-        elif no_deps:
-            fetch_recipes = [cookbook.get_recipe(x) for x in recipes]
         else:
-            for recipe in recipes:
-                fetch_recipes += cookbook.list_recipe_deps(recipe)
-            fetch_recipes = remove_list_duplicates(fetch_recipes)
+            oven = Oven(recipes, cookbook, no_deps=no_deps, deps_only=False, jobs=jobs)
+            fetch_recipes = oven.resolve_tree()
         m.message(
             _('Fetching the following recipes using %s async job(s): %s')
             % (jobs, ' '.join([x.name for x in fetch_recipes]))
