@@ -129,7 +129,7 @@ class MetaRecipe(type):
         clsname = '%s.%s' % (dct['__module__'], name)
         recipeclsname = '%s.%s' % (cls.__module__, 'Recipe')
         # only modify it for Recipe's subclasses
-        if clsname != recipeclsname and name == 'Recipe':
+        if clsname != recipeclsname and name.endswith('Recipe'):
             # get the default build and source classes from Recipe
             # Recipe(DefaultSourceType, DefaultBuildType)
             basedict = {'btype': bases[0].btype, 'stype': bases[0].stype}
