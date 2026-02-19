@@ -8,8 +8,7 @@ from cerbero.utils import shell
 from cerbero.tools.libtool import LibtoolLibrary
 
 
-class Recipe(recipe.Recipe):
-    name = 'x265'
+class X265RecipeBase:
     version = '3.6'
     licenses = [{License.GPLv2Plus: ['COPYING']}]
     stype = SourceType.TARBALL
@@ -26,24 +25,10 @@ class Recipe(recipe.Recipe):
         'x265/0006-Fix-CMake-build-error-with-latest-CMake-4.0-release.patch',
         'x265/0007-Fix-for-CMake-Build-Errors-in-MacOS.patch',
     ]
-    library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
-    configure_options = [
-        '-DENABLE_CLI=OFF',
-        '-DLINKED_10BIT=ON',
-        '-DLINKED_12BIT=ON',
-        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5'
-    ]
-    deps = ['x265-10bit', 'x265-12bit']
-
-    files_libs = ['libx265']
-    files_devel = ['%(libdir)s/pkgconfig/x265.pc', 'include/x265.h', 'include/x265_config.h']
 
     def prepare(self):
-        if self.config.target_platform == Platform.LINUX:
-            # Doesn't use GNUInstallDirs so prefix must be manually fixed
-            self.configure_options.append(f'-DLIB_INSTALL_DIR={self.config.libdir}')
         if self.config.target_platform == Platform.ANDROID:
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
             if self.config.target_arch != Architecture.X86_64:
@@ -58,6 +43,33 @@ class Recipe(recipe.Recipe):
         elif self.using_msvc() and self.config.target_arch == Architecture.ARM64:
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
         self.config_src_dir = os.path.join(self.config_src_dir, 'source')
+
+    def _install_hdr_lib(self):
+        prefix = '' if self.using_msvc() else 'lib'
+        src = Path(self.build_dir) / f'{prefix}x265.a'
+        dest = Path(self.config.libdir, f'{"" if self.using_msvc() else "lib"}{self.name}.a')
+        src.replace(dest)
+
+
+class X265Recipe(X265RecipeBase, recipe.Recipe):
+    name = 'x265'
+    library_type = LibraryType.BOTH
+    configure_options = [
+        '-DENABLE_CLI=OFF',
+        '-DLINKED_10BIT=ON',
+        '-DLINKED_12BIT=ON',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+    ]
+    deps = ['x265-10bit', 'x265-12bit']
+
+    files_libs = ['libx265']
+    files_devel = ['%(libdir)s/pkgconfig/x265.pc', 'include/x265.h', 'include/x265_config.h']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.LINUX:
+            # Doesn't use GNUInstallDirs so prefix must be manually fixed
+            self.configure_options.append(f'-DLIB_INSTALL_DIR={self.config.libdir}')
+        super().prepare()
 
         prefix = '' if self.using_msvc() else 'lib'
         self.hdr10lib = Path(self.config.libdir, f'{prefix}x265-10bit.a')
@@ -127,3 +139,34 @@ class Recipe(recipe.Recipe):
                 self.config.target_platform)
         libtool_la.save()
         super().post_install()
+
+
+class X26510BitsRecipe(X265RecipeBase, recipe.Recipe):
+    name = 'x265-10bit'
+    library_type = LibraryType.STATIC
+    configure_options = [
+        '-DENABLE_SHARED=OFF',
+        '-DENABLE_CLI=OFF',
+        '-DHIGH_BIT_DEPTH=ON',
+        '-DEXPORT_C_API=OFF',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+    ]
+
+    async def install(self):
+        self._install_hdr_lib()
+
+
+class X26512BitsRecipe(X265RecipeBase, recipe.Recipe):
+    name = 'x265-12bit'
+    library_type = LibraryType.STATIC
+    configure_options = [
+        '-DENABLE_SHARED=OFF',
+        '-DENABLE_CLI=OFF',
+        '-DHIGH_BIT_DEPTH=ON',
+        '-DEXPORT_C_API=OFF',
+        '-DMAIN12=ON',
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+    ]
+
+    async def install(self):
+        self._install_hdr_lib()
