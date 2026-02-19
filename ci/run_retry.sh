@@ -25,7 +25,12 @@ ERRORS=(
     # temporary files on Windows
     "PermissionError: [Errno 13] Permission denied:"
 )
-RETRIES=3
+ERROR_RETRIES=3
+if [[ $(uname) =~ MINGW* ]]; then
+    WIN32_RETRIES=3
+else
+    WIN32_RETRIES=0
+fi
 LOGFILE="/tmp/logfile.txt"
 
 while true; do
@@ -42,9 +47,18 @@ while true; do
         done
     done < "$LOGFILE"
     rm -f "$LOGFILE"
-    if [[ $spurious_error == '' ]] || [[ $RETRIES == 0 ]]; then
+    if [[ -n $spurious_error ]]; then
+        if [[ $ERROR_RETRIES == 0 ]]; then
+            echo "Exiting with code $ret on persistent spurious error: $spurious_error"
+            exit $ret
+        fi
+        echo "Exit code $ret: retrying, caught spurious failure: $spurious_error"
+        ERROR_RETRIES=$((ERROR_RETRIES-1))
+    elif [[ $WIN32_RETRIES == 0 ]]; then
+        echo "Exiting with code $ret on unknown error"
         exit $ret
+    else
+        echo "Exit code $ret: retrying, possibly a random failure on win32"
+        WIN32_RETRIES=$((WIN32_RETRIES-1))
     fi
-    RETRIES=$((RETRIES-1))
-    echo "Retrying, caught spurious failure: $spurious_error"
 done
