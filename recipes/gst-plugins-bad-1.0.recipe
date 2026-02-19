@@ -638,6 +638,9 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['vulkan-android']
             self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
+            if self.config.target_arch == Architecture.RISCV64:
+                # opensles is deprecated starting Android 30
+                self.append_env('CFLAGS', '-Wno-deprecated-declarations')
 
         # TODO: Vulkan support on Linux and Windows
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
