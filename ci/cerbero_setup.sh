@@ -51,7 +51,7 @@ cerbero_package_and_check() {
     fi
 
     # Test that generating the source bundle works
-    if [[ $CONFIG = *android* ]]; then
+    if [[ $CONFIG = *android-universal* ]]; then
         ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bundle-source --offline gstreamer-1.0
     fi
 
