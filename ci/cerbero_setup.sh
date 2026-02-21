@@ -204,7 +204,7 @@ cerbero_before_script() {
 }
 
 cerbero_bootstrap() {
-    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
+    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=16
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
 }
 
@@ -222,8 +222,8 @@ cerbero_script() {
         return 0
     fi
 
-    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
-    $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
+    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=16
+    $CERBERO $CERBERO_ARGS fetch-package --jobs=16 --deps gstreamer-1.0
     du -sch "${CERBERO_SOURCES}" || true
 
     local project
@@ -268,8 +268,8 @@ cerbero_deps_script() {
     show_ccache_sum
 
     $CERBERO $CERBERO_ARGS show-config
-    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
-    $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
+    $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=16
+    $CERBERO $CERBERO_ARGS fetch-package --jobs=16 --deps gstreamer-1.0
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build --offline $more_deps
