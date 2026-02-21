@@ -21,6 +21,7 @@ ERRORS=(
     # Mac Virtualization bugs where lipo/git etc are spawned instead of clang
     "lipo: unknown flag: -I"
     "unknown option: -I"
+    "ranlib: unknown option character"
     # Random permission errors with g-ir-scanner and other tools that write
     # temporary files on Windows
     "PermissionError: [Errno 13] Permission denied:"
