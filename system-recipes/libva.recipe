@@ -1,0 +1,4 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'libva'
+    min_version = '1.12'
+    pkgconfig_files = ['libva', 'libva-drm']
