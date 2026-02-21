@@ -107,7 +107,7 @@ class Variants(object):
         'intelmsdk',
         'python',
         'werror',
-        'vaapi',
+        'va',
         'rust',
         'qt6',
         'gtk',

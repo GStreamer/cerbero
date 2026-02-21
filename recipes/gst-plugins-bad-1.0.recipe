@@ -535,7 +535,7 @@ class Recipe(custom.GStreamer):
         # Enable hardware codecs if variants are enabled since they have
         # external dependencies such as SDKs.
         self.enable_plugin('msdk', 'codecs', 'intelmsdk')
-        self.enable_plugin('va', 'codecs', 'vaapi')
+        self.enable_plugin('va', 'codecs', 'va', dep='libva')
 
         self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
 
