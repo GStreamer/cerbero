@@ -3,8 +3,8 @@
 set -ex
 
 show_ccache_sum() {
-    if [[ -n ${HAVE_CCACHE} ]]; then
-        ccache -s
+    if type ccache; then
+        ccache --show-stats
     fi
 }
 

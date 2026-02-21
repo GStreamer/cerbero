@@ -295,7 +295,6 @@ manylinux_2_28 image:
     CERBERO_BUILD_ARGS: ""
     CERBERO_RUN_SUFFIX: "" # '.exe' on cross-winXX
     CERBERO_BOOTSTRAP_SYSTEM: "no"
-    HAVE_CCACHE: "yes"
     # location where the cerbero git repo is stored on the image
     CERBERO_HOST_DIR: "/"
   before_script:
@@ -672,7 +671,6 @@ cerbero cross-android universal examples:
     ARCH: "darwin_universal"
     CONFIG: "cross-macos-universal.cbc"
     CERBERO_BUILD_ARGS: "--aggressive-build-cleanup"
-    HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
   needs: [ "manual trigger" ]
@@ -719,7 +717,6 @@ build cerbero cross-macos universal arm64-host:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_BUILD_ARGS: "--aggressive-build-cleanup"
     CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
-    HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
   needs: [ "manual trigger" ]
@@ -759,7 +756,6 @@ build cerbero cross-ios arm64-host:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_BUILD_ARGS: "--aggressive-build-cleanup"
     CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
-    HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
   needs: [ "manual trigger" ]
@@ -799,7 +795,6 @@ build cerbero cross-ios-sim universal arm64-host:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_BUILD_ARGS: "--aggressive-build-cleanup"
     CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
-    HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
   needs: [ "manual trigger" ]
@@ -839,7 +834,6 @@ build cerbero cross-tvos arm64-host:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_BUILD_ARGS: "--aggressive-build-cleanup"
     CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
-    HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
   needs: [ "manual trigger" ]
@@ -941,7 +935,6 @@ build cerbero xcframework:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_BOOTSTRAP_SYSTEM: "no"
-    HAVE_CCACHE: ""
     CERBERO_PACKAGE_ARGS: ""
   before_script:
     # Test that the powershell script works
