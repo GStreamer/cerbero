@@ -39,9 +39,9 @@ cerbero_package_and_check() {
     # explicitly
     local dlopen_plugins=(jack soup adaptivedemux2)
     if [[ $CONFIG = win* ]]; then
-        dlopen_plugins+=(amfcodec mediafoundation msdk nvcodec qsv)
+        dlopen_plugins+=(amfcodec mediafoundation nvcodec qsv)
     elif [[ $CONFIG = linux* ]]; then
-        dlopen_plugins+=(msdk nvcodec qsv va vaapi)
+        dlopen_plugins+=(nvcodec va)
     fi
 
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
@@ -59,7 +59,7 @@ cerbero_package_and_check() {
     if [[ $CONFIG != *-ios-* ]] && [[ $CONFIG != *-tvos-* ]] && [[ $CONFIG != *-android-* ]] && [[ $CONFIG != *cross-win* ]]; then
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX --version
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX
-        for plugin in $dlopen_plugins; do
+        for plugin in "${dlopen_plugins[@]}"; do
             $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX $plugin
         done
     fi
