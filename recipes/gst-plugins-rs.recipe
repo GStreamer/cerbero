@@ -41,6 +41,7 @@ class Recipe(recipe.Recipe):
         'closedcaption',
         'colorlut',
         'dav1d',
+        'debugseimetainserter',
         'demucs',
         'elevenlabs',
         'fallbackswitch',
@@ -135,6 +136,7 @@ class Recipe(recipe.Recipe):
                 'burn',
             ],
             'core': [
+                'debugseimetainserter',
                 'fallbackswitch',
                 'gopbuffer',
                 'livesync',
