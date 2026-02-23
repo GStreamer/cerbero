@@ -12,6 +12,7 @@ from cerbero.enums import Architecture, License, Platform
 from cerbero.utils import messages as m, shell
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import SDKPackage
+from cerbero.tools import dsymutil
 
 
 @functools.lru_cache()
@@ -482,10 +483,8 @@ class WheelPackager(PackagerBase):
                     if source.name == 'libMoltenVK.dylib':
                         continue
                     destpath = dest / source.name
-                    if dest.name == 'bin':
-                        ftype = self.get_file_type(destpath)
-                        if 'Mach-O' not in ftype:
-                            continue
+                    if not dsymutil.is_macho_file(destpath):
+                        continue
                     # Add rpath from the gi loader to other wheels that ship
                     # libs that have typelibs
                     if package_name == 'gstreamer_libs':

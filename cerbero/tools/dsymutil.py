@@ -9,6 +9,15 @@ from cerbero.enums import Platform
 from cerbero.utils import shell
 
 
+@functools.lru_cache()
+def is_macho_file(fp: Path) -> bool:
+    # All files must be checked since .so and .dylib can have .dSYM bundles
+    filedesc = shell.check_output(['file', '-bh', fp.resolve().as_posix()])
+    # gst-ptp-helper is setuid
+    filedesc = filedesc.removeprefix('setuid ')
+    return filedesc.startswith('Mach-O') and 'dSYM companion' not in filedesc
+
+
 def symbolicable_files(files_list, prefix, target_platform: Platform):
     @functools.lru_cache()
     def can_be_symbolicable(fp: str):
@@ -21,15 +30,6 @@ def symbolicable_files(files_list, prefix, target_platform: Platform):
             '.pdb',
             '.dSYM',
         ]
-
-    @functools.lru_cache()
-    def is_macho_file(fp: Path) -> bool:
-        if fp.suffix in ['.so', '.dylib']:
-            return True
-
-        filedesc = shell.check_output(['file', '-bh', fp.resolve().as_posix()])
-        # gst-ptp-helper is setuid
-        return filedesc.removeprefix('setuid ').startswith('Mach-O')
 
     @functools.lru_cache()
     def is_windows_executable(fp: Path) -> bool:
