@@ -474,7 +474,10 @@ class WheelPackager(PackagerBase):
                 dirpath = os.path.dirname(filepath)
                 dest = output_dir / package_name / dirpath
                 dest.mkdir(parents=True, exist_ok=True)
-                shutil.copy(source, dest)
+                if os.path.isfile(source):
+                    shutil.copy(source, dest, follow_symlinks=False)
+                elif os.path.isdir(source):
+                    shell.copy_dir(source, dest, follow_symlinks=False)
                 rpath_args = []
                 if self.config.target_platform == Platform.DARWIN:
                     if source.suffix not in ('.so', '.dylib') and dest.name != 'bin':
@@ -483,6 +486,8 @@ class WheelPackager(PackagerBase):
                     if source.name == 'libMoltenVK.dylib':
                         continue
                     destpath = dest / source.name
+                    if os.path.islink(destpath):
+                        continue
                     if not dsymutil.is_macho_file(destpath):
                         continue
                     # Add rpath from the gi loader to other wheels that ship
