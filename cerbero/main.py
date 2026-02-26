@@ -29,7 +29,7 @@ import time
 from cerbero import config, commands
 from cerbero.enums import Platform
 from cerbero.errors import UsageError, FatalError, BuildStepError, ConfigurationError, CerberoException, AbortedError
-from cerbero.utils import _, N_, user_is_root, git, run_until_complete
+from cerbero.utils import _, N_, user_is_root, git, run_until_complete, strtobool
 from cerbero.utils import messages as m
 from cerbero.utils.manifest import Manifest
 
@@ -189,7 +189,7 @@ class Main(object):
     def run_command(self):
         background_build = 'CI' not in os.environ
         if 'CERBERO_BACKGROUND_BUILD' in os.environ:
-            background_build = os.environ['CERBERO_BACKGROUND_BUILD']
+            background_build = strtobool(os.environ['CERBERO_BACKGROUND_BUILD'])
         if background_build:
             if sys.platform == 'win32':
                 from ctypes import c_void_p, windll
