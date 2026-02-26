@@ -196,8 +196,14 @@ class Main(object):
 
                 current_process = c_void_p(windll.kernel32.GetCurrentProcess())
                 windll.kernel32.SetPriorityClass(current_process, 0x00000040)
-            elif sys.platform == 'darwin' and sys.version_info >= (3, 12):
-                os.setpriority(os.PRIO_DARWIN_PROCESS, 0, os.PRIO_DARWIN_BG)
+            elif sys.platform == 'darwin':
+                if sys.version_info >= (3, 12):
+                    PRIO_DARWIN_PROCESS = os.PRIO_DARWIN_PROCESS
+                    PRIO_DARWIN_BG = os.PRIO_DARWIN_BG
+                else:
+                    PRIO_DARWIN_PROCESS = 4
+                    PRIO_DARWIN_BG = 0x1000
+                os.setpriority(PRIO_DARWIN_PROCESS, 0, PRIO_DARWIN_BG)
             else:
                 from ctypes import CDLL
 
