@@ -22,7 +22,7 @@ from cerbero.errors import FatalError
 
 
 # Safest place to define this since this file imports very few modules
-CERBERO_VERSION = '1.28.0.1'
+CERBERO_VERSION = '1.28.1'
 
 
 if sys.version_info >= (3, 11) and 'CI' in os.environ:
