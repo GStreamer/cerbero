@@ -272,6 +272,11 @@ cerbero_deps_script() {
     local build_deps="gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0
         gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0
         gst-devtools-1.0 gst-editing-services-1.0 libnice gst-plugins-rs"
+    # gtk4 pulls in gstreamer, so we don't want it in the deps cache
+    if [[ $CONFIG = *macos* ]] || [[ $ARCH = msvc* ]] || [[ $ARCH = mingw_x86_64 ]]; then
+        build_deps="$build_deps gtk"
+    fi
+
     # Deps that don't get picked up automatically because are only listed in
     # the package files
     local more_deps="glib-networking"
