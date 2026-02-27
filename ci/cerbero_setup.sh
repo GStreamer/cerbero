@@ -241,6 +241,17 @@ cerbero_script() {
 }
 
 upload_cache() {
+    local project="$1"
+
+    if [[ $project == gstreamer ]]; then
+        local gst_pc=$(find "$CERBERO_HOME/dist" -iname "gstreamer-1.0.pc")
+        if [[ -n "$gst_pc" ]]; then
+            echo "ERROR: Found gstreamer pkgconfig files in artifact cache:"
+            echo "${gst_pc}"
+            exit 1
+        fi
+    fi
+
     # Check that the env var is set. Don't expand this protected variable by
     # doing something silly like [[ -n ${CERBERO_...} ]] because it will get
     # printed in the CI logs due to set -x
@@ -248,9 +259,9 @@ upload_cache() {
         # Don't generate and upload caches for scheduled pipelines on main branch
         if [[ "x${CI_PIPELINE_SOURCE}" != "xschedule" ]]; then
             time $CERBERO $CERBERO_ARGS gen-cache \
-                --project="$1" --branch "${GST_UPSTREAM_BRANCH}"
+                --project="$project" --branch "${GST_UPSTREAM_BRANCH}"
             time $CERBERO $CERBERO_ARGS upload-cache \
-                --project="$1" --branch "${GST_UPSTREAM_BRANCH}"
+                --project="$project" --branch "${GST_UPSTREAM_BRANCH}"
         fi
     fi
 }
