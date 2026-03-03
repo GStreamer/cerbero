@@ -319,7 +319,11 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         if self.config.target_platform == Platform.DARWIN and self.config.prefix == self.config.build_tools_prefix:
             self._steps.append(BuildSteps.CODE_SIGN)
 
-        if self.config.target_platform == Platform.ANDROID or self.config.prefix == self.config.build_tools_prefix:
+        if (
+            self.config.target_platform == Platform.ANDROID
+            or self.config.prefix == self.config.build_tools_prefix
+            or self.config.variants.nodebug
+        ):
             self._steps.remove(BuildSteps.DSYMUTIL)
 
         FilesProvider.__init__(self, config)
@@ -1201,8 +1205,12 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
         if self.is_empty():
             return []
         s = self._proxy_recipe.steps[:]
-        s.remove(BuildSteps.DSYMUTIL)
-        return s + [BuildSteps.MERGE, BuildSteps.DSYMUTIL]
+        s.append(BuildSteps.MERGE)
+        if BuildSteps.DSYMUTIL in s:
+            # Must be the last step
+            s.remove(BuildSteps.DSYMUTIL)
+            s.append(BuildSteps.DSYMUTIL)
+        return s
 
     # The two following steps are not wrapped by the metaclass
     # because they are not part of the default set.
