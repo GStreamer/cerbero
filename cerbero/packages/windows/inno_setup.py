@@ -363,7 +363,7 @@ class InnoSetup(PackagerBase):
             )
             rules.write('\n[Registry]\n')
             rules.write(
-                f'Root: "HKA"; Subkey: "SYSTEM\\CurrentControlSet\\Control\\Session Manager"; ValueType: string; ValueName: "{root_env_var}"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: environment_variables\n'
+                f'Root: "HKA"; Subkey: "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"; ValueType: string; ValueName: "{root_env_var}"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: environment_variables\n'
             )
             rules.write(
                 f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "InstallDir"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: registry_install_dir\n'
