@@ -661,7 +661,7 @@ class FilesProvider(object):
             # don't add the .pc to files_devel. It has the same name, so we can
             # add it using the .la entry.
             if (
-                self.platform == Platform.ANDROID
+                self.platform in [Platform.ANDROID, Platform.LINUX, Platform.DARWIN]
                 and f.startswith(self.extensions['libdir'] + '/gstreamer-1.0/')
                 and f.endswith('.la')
             ):
