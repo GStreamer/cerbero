@@ -98,9 +98,6 @@ build_android_examples() {
 }
 
 build_ios_examples() {
-    # install the binaries
-    installer -pkg gstreamer-1.0-devel-*-ios-universal.pkg -target CurrentUserHomeDirectory -verbose
-
     # Clone gstreamer repository to get gst-examples and gst-docs
     clone_gstreamer
 
@@ -109,13 +106,29 @@ build_ios_examples() {
     xcodebuild -showsdks
     echo ${XCODE_BUILD_ARGS} > xcode_buildargs
 
-    # gst-docs ios tutorials
-    ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
-    ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
+    # extract the xcframework
+    rm -rf GStreamer.xcframework
+    tar -xvf gstreamer-1.*-xcframework.tar.xz
 
-    # gst-examples
-    ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
-    ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
+    local xcodeprojs=(
+        # gst-docs ios tutorials
+        "gstreamer/subprojects/gst-docs/examples/tutorials/xcode iOS/GStreamer iOS Tutorials.xcodeproj"
+        # gst-examples
+        "gstreamer/subprojects/gst-examples/playback/player/ios/GstPlay.xcodeproj"
+    )
+    # TODO: Add "tvOS" "tvOS Simulator" after the next macOS VM image bump
+    local destinations=("iOS" "iOS Simulator")
+
+    for xcodeproj in "${xcodeprojs[@]}"; do
+        ln -sfn "../../../../../../GStreamer.xcframework" "$(dirname "$xcodeproj")"
+        ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project "$xcodeproj" $(cat xcode_buildargs)
+        IFS=$'\n' read -r -d '' -a schemes < <(xcodebuild -list -project "$xcodeproj" -json | jq -r '.project.schemes[]' && printf '\0')
+        for dest in "${destinations[@]}"; do
+            for scheme in "${schemes[@]}"; do
+                ./ci/run_retry.sh xcodebuild -scheme "$scheme" -destination generic/platform="${dest}" -project "$xcodeproj" $(cat xcode_buildargs)
+            done
+        done
+    done
 }
 
 # Run whichever function is asked of us

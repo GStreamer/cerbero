@@ -611,45 +611,6 @@ build cerbero cross-macos universal arm64-host:
     - '.cerbero macos arm64 image'
 
 #
-# Cerbero iOS universal (old-style) build
-#
-.cerbero cross-ios universal:
-  variables:
-    ARCH: "ios_universal"
-    CONFIG: "cross-ios-universal.cbc"
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-    CERBERO_PACKAGE_ARGS: ""
-    HAVE_CCACHE: ""
-    CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
-  cache: []
-  needs: [ "manual trigger" ]
-  artifacts:
-    name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
-    expire_in: '5 days'
-    when: 'always'
-    paths:
-      - "*/logs"
-      - "*/sources/**/b/meson-logs/meson-log.txt"
-      - "*/sources/**/b/CMakeFiles/CMakeError.log"
-      - "*/sources/**/b/CMakeFiles/CMakeLog.log"
-      - "gstreamer-1.0-*-ios-universal.pkg"
-    exclude:
-      - .git
-      - .git/**/*
-
-cerbero deps cross-ios universal arm64-host:
-  extends:
-    - '.cerbero deps'
-    - '.cerbero cross-ios universal'
-    - '.cerbero macos arm64 image'
-
-build cerbero cross-ios universal arm64-host:
-  extends:
-    - '.cerbero mr'
-    - '.cerbero cross-ios universal'
-    - '.cerbero macos arm64 image'
-
-#
 # Cross iOS ARM64-only build
 #
 .cerbero cross-ios:
@@ -687,9 +648,6 @@ build cerbero cross-ios arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-ios'
     - '.cerbero macos arm64 image'
-  # Disable for monorepo sub-pipelines for now
-  rules:
-    - when: 'never'
 
 #
 # Cross iOS Simulator Universal build
@@ -729,10 +687,6 @@ build cerbero cross-ios-sim universal arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-ios-sim universal'
     - '.cerbero macos arm64 image'
-  # Does not work reliably yet it seems
-  # Disable for monorepo sub-pipelines for now
-  rules:
-    - when: 'never'
 
 #
 # Cross tvOS ARM64-only build
@@ -811,23 +765,31 @@ build cerbero cross-tvos-sim universal arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-tvos-sim universal'
     - '.cerbero macos arm64 image'
-  # Does not work reliably yet it seems
-  # Disable for monorepo sub-pipelines for now
-  rules:
-    - when: 'never'
 
 #
-# Build an xcframework combining iOS ARM64 and iOS Simulator Universal
+# Build an xcframework combining iOS ARM64, iOS Simulator Universal, tvOS
+# ARM64, tvOS Simulator Universal. Then build the ios/tvos examples.
 #
 .cerbero xcframework:
   stage: 'integrate'
+  variables:
+    # disable codesigning so we don't need developer identities on the CI
+    # machines
+    XCODE_BUILD_ARGS: >-
+      CODE_SIGNING_REQUIRED="NO"
+      CODE_SIGN_IDENTITY=""
+      CODE_SIGNING_ALLOWED="NO"
+      CODE_SIGN_ENTITLEMENTS=""
   script:
     - ./cerbero-uninstalled xcframework gstreamer-1.0 \
       --source gstreamer-1.0-*-ios-simulator-universal.xcframework.tar.xz \
       --source gstreamer-1.0-*-ios-arm64.xcframework.tar.xz \
       --source gstreamer-1.0-*-tvos-simulator-universal.xcframework.tar.xz \
       --source gstreamer-1.0-*-tvos-arm64.xcframework.tar.xz
-    # TODO: build examples for ios, ios sim, tvos, tvos sim
+    - ci/examples_setup.sh build_ios_examples
+  after_script:
+    - rm -rf gstreamer GStreamer.xcframework
+  cache: []
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -856,45 +818,6 @@ build cerbero xcframework:
     - 'build cerbero cross-ios-sim universal arm64-host'
     - 'build cerbero cross-tvos arm64-host'
     - 'build cerbero cross-tvos-sim universal arm64-host'
-  # Disable for monorepo sub-pipelines for now
-  rules:
-    - when: 'never'
-
-#
-# Build an iOS App using the iOS binaries
-#
-.cross-ios universal examples:
-  stage: 'integrate'
-  variables:
-    EXAMPLES_HOME: gstreamer/subprojects
-    # disable codesigning so we don't need developer identities on the CI
-    # machines
-    XCODE_BUILD_ARGS: >-
-      CODE_SIGNING_REQUIRED="NO"
-      CODE_SIGN_IDENTITY=""
-      CODE_SIGNING_ALLOWED="NO"
-      CODE_SIGN_ENTITLEMENTS=""
-  script:
-    - ci/examples_setup.sh build_ios_examples
-  after_script:
-    - rm -rf gstreamer
-  cache: []
-
-cross-ios universal examples arm64-host:
-  extends:
-    - '.cross-ios universal examples'
-    - '.cerbero macos arm64 image'
-    - '.cerbero mr rules'
-  needs:
-    - "build cerbero cross-ios universal arm64-host"
-
-cerbero cross-ios universal examples arm64-host:
-  extends:
-    - '.cross-ios universal examples'
-    - '.cerbero macos arm64 image'
-    - '.cerbero not-mr rules'
-  needs:
-    - "cerbero deps cross-ios universal arm64-host"
 
 #
 # Cerbero Native Windows builds
