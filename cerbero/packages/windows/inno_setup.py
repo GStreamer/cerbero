@@ -241,7 +241,8 @@ class InnoSetup(PackagerBase):
                 rules.write(f'AppPublisherUrl={self.package.url}\n')
 
             # UI properties
-            rules.write('WizardStyle=modern dynamic\n')
+            rules.write('WizardStyle=modern dynamic windows11\n')
+            rules.write('WizardSizePercent=150\n')
             wizard_image_file = Path(self.package.relative_path('background_inno.png'))
             if wizard_image_file.exists():
                 rules.write(f'WizardImageFile={wizard_image_file.as_posix()}\n')
