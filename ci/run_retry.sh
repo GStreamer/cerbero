@@ -25,6 +25,7 @@ ERRORS=(
     # Random permission errors with g-ir-scanner and other tools that write
     # temporary files on Windows
     "PermissionError: [Errno 13] Permission denied:"
+    "Device or resource busy"
 )
 ERROR_RETRIES=3
 if [[ $(uname) =~ MINGW* ]]; then
