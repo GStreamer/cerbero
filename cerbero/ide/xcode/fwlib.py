@@ -262,7 +262,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                     split_queue.task_done()
                     continue
 
-                obj_files = shell.ls_files(['*.o'], lib_tmpdir)
+                obj_files = shell.ls_files(['*.o', '*.obj'], lib_tmpdir)
                 obj_dict = {}
                 for obj_f in obj_files:
                     obj_path = os.path.join(lib_tmpdir, obj_f)
