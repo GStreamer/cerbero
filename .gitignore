@@ -15,6 +15,7 @@ MANIFEST.in
 /ios-framework-*.pkg
 /ios-simulator-framework-*.pkg
 /gstreamer*.dmg
+/gstreamer*.exe
 /gstreamer*.pkg
 /base*.pkg
 /gstreamer*.msi
