@@ -394,10 +394,10 @@ class InnoSetup(PackagerBase):
             rules.write('ChangesEnvironment=yes\n')
             rules.write('\n[Tasks]\n')
             rules.write(
-                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce;\n'
             )
             rules.write(
-                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: is_admin_install;\n'
+                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce;\n'
             )
             rules.write('\n[Registry]\n')
             rules.write(
