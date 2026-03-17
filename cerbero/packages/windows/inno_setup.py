@@ -401,16 +401,16 @@ class InnoSetup(PackagerBase):
             )
             rules.write('\n[Registry]\n')
             rules.write(
-                f'Root: "HKA"; Subkey: "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"; ValueType: string; ValueName: "{root_env_var}"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: environment_variables\n'
+                f'Root: "HKA"; Subkey: "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"; ValueType: string; ValueName: "{root_env_var}"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype uninsdeletevalue; Tasks: environment_variables\n'
             )
             rules.write(
-                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "InstallDir"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: registry_install_dir\n'
+                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "InstallDir"; ValueData: "{{app}}"; Flags: createvalueifdoesntexist preservestringtype uninsdeletevalue uninsdeletekeyifempty; Tasks: registry_install_dir\n'
             )
             rules.write(
-                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "Version"; ValueData: "{self.package.version}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: registry_install_dir\n'
+                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "Version"; ValueData: "{self.package.version}"; Flags: createvalueifdoesntexist preservestringtype uninsdeletevalue uninsdeletekeyifempty; Tasks: registry_install_dir\n'
             )
             rules.write(
-                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "SdkVersion"; ValueData: "{self.package.sdk_version}"; Flags: createvalueifdoesntexist preservestringtype; Tasks: registry_install_dir\n'
+                f'Root: "HKA"; Subkey: "{registry_subkey}"; ValueType: string; ValueName: "SdkVersion"; ValueData: "{self.package.sdk_version}"; Flags: createvalueifdoesntexist preservestringtype uninsdeletevalue uninsdeletekeyifempty; Tasks: registry_install_dir\n'
             )
 
         # Execute Inno on the chosen output directory
