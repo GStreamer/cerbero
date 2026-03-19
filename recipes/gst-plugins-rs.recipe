@@ -83,10 +83,11 @@ class Recipe(recipe.Recipe):
         # 'vvdec': added conditionally below
         # 'webp',
         'webrtc',
+        'webrtcbin2',
         'webrtchttp',
     ]
 
-    deps = ['openssl', 'gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
+    deps = ['openssl', 'gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0', 'rice-proto']
 
     files_libs = []
 
@@ -167,6 +168,7 @@ class Recipe(recipe.Recipe):
                 'rsrtp',
                 'rsrtsp',
                 'speechmatics', # in the audio subdir, but net seems most fitting
+                'rswebrtcbin2',
                 'webrtchttp',
                 'rswebrtc',
             ],
@@ -277,9 +279,10 @@ class Recipe(recipe.Recipe):
             self.files_plugins_core_devel.append('%(libdir)s/pkgconfig/gstrsworkspace.pc')
             self.skip_pdb_files = ['%(libdir)s/gstreamer-1.0/libgstrsworkspace.a']
 
-        if self.config.platform == Platform.WINDOWS:
-            # For bindgen if it's needed
-            self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.platform == Platform.WINDOWS:
+                # For bindgen if it's needed
+                self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
             # For aws-lc-rs -- uses CMake in the background
             if self.using_msvc():
                 # MSVC is already set up
@@ -303,6 +306,10 @@ class Recipe(recipe.Recipe):
         elif Subsystem.is_apple_simulator(self.config.target_subsystem):
             self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
             self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
+        # for openssl-sys to be able to find openssl
+        self.set_env('OPENSSL_DIR', self.config.prefix)
+        self.set_env('OPENSSL_NO_VENDOR', '1')
+        self.set_env('OPENSSL_STATIC', '0')
 
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version
