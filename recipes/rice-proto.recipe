@@ -1,0 +1,74 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.enums import Symbolication
+from cerbero.utils import messages as m
+from cerbero.utils import shell
+from cerbero.utils.rust import Prelink
+
+import os
+from pathlib import Path
+
+class Recipe(recipe.Recipe):
+    name = 'rice-proto'
+    version = '0.4.3'
+    stype = SourceType.TARBALL
+    url = f'https://github.com/ystreet/librice/archive/refs/tags/v{version}.tar.gz'
+    tarball_checksum = '4671e1835f9ab0f8d87e8d9e22b6bfb06f928aeae442841ab81881dff61e3f4b'
+    tarball_name = f'librice-{version}.tar.gz'
+    package_name = f'librice-{version}'
+    licenses = [
+        {
+            # MIT or Apachev2
+            License.Apachev2: ['LICENSE-APACHE'],
+        }
+    ]
+    btype = BuildType.CARGO_C
+    can_msvc = True
+
+    deps = ['openssl']
+
+    patches = []
+
+    cargo_packages = [
+        'rice-proto',
+    ]
+    cargo_features = []
+
+    files_libs = []
+
+    files_devel = [
+        'include/rice',
+        '%(libdir)s/pkgconfig/rice-proto.pc',
+    ]
+
+    symbolication_patterns = {
+        Symbolication.MANUAL: ['rice_']
+    }
+
+    def prepare(self):
+        self.set_env('OPENSSL_NO_VENDOR', '1')
+        self.set_env('OPENSSL_STATIC', '0')
+        self.set_env('OPENSSL_DIR', self.config.prefix)
+        if self.config.target_platform == Platform.WINDOWS:
+            # For bindgen
+            self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
+        if self.config.target_platform == Platform.WINDOWS and not self.using_msvc():
+            self.files_libs += ['rice-proto']
+        else:
+            self.files_libs += ['librice-proto']
+
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+
+        if self.config.target_platform == Platform.WINDOWS and self.using_msvc():
+            # adjust things for our conventions
+            libdir = Path(self.config.prefix) / self.config.rel_libdir
+            os.replace(libdir / 'rice-proto.lib', libdir / 'librice-proto.a')
+            os.replace(libdir / 'rice-proto.dll.lib', libdir / 'rice-proto.lib')
+        elif self.config.target_subsystem == Subsystem.MACOS:
+            libraries = [f for f in self.devel_files_list(only_existing=False)
+                         if f.endswith('.a')]
+            prelinker = Prelink(self.config, self.env, self.logfile)
+            for f in libraries:
+                prelinker.prelink(f, '_rice*')
+            prelinker.patch_pkgconfig(f'{self.config.libdir}/pkgconfig/rice-proto.pc')
