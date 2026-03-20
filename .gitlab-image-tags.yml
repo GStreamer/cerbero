@@ -13,6 +13,8 @@ variables:
 
   UBUNTU_TAG: '2026-02-21.0'
 
+  MANYLINUX_TAG: '2026-03-18.0'
+
   TESTS_UBUNTU_TAG: '2025-05-14'
 
   WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2026-02-01.0-main'

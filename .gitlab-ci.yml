@@ -5,6 +5,9 @@ include:
   - project: 'freedesktop/ci-templates'
     ref: '3826695f80807d8a4d999f6b6efb3d405d708db9'
     file: '/templates/ubuntu.yml'
+  - project: 'freedesktop/ci-templates'
+    ref: '3826695f80807d8a4d999f6b6efb3d405d708db9'
+    file: '/templates/centos.yml'
   ###
   # IMPORTANT
   # These are the version tags for the docker images the CI runs against.
@@ -116,6 +119,18 @@ default:
     FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
     FDO_UPSTREAM_REPO: "gstreamer/cerbero"
 
+.manylinux_2_28 image:
+  variables:
+    FDO_DISTRIBUTION_TAG: "$MANYLINUX_TAG-$GST_UPSTREAM_BRANCH"
+    FDO_DISTRIBUTION_VERSION: 'manylinux_2_28_x86_64'
+    FDO_DISTRIBUTION_PACKAGES: "sudo git-core lbzip2 rsync which python39 python39-pip"
+    FDO_DISTRIBUTION_EXEC: |
+      alternatives --set python3 /usr/bin/python3.9
+      python3 -m pip install distro distro-info
+      ci/docker_setup.sh
+    FDO_UPSTREAM_REPO: gstreamer/cerbero
+    FDO_BASE_IMAGE: "quay.io/pypa/manylinux_2_28_x86_64"
+
 .tests ubuntu image:
   variables:
     FDO_DISTRIBUTION_TAG: "$TESTS_UBUNTU_TAG-$GST_UPSTREAM_BRANCH"
@@ -217,6 +232,16 @@ ubuntu image:
     GIT_STRATEGY: none
   tags: [ 'kvm' ]
 
+manylinux_2_28 image:
+  stage: "build docker"
+  needs: [ "manual trigger" ]
+  extends:
+    - .manylinux_2_28 image
+    - .fdo.container-build@centos
+  variables:
+    GIT_STRATEGY: none
+  tags: [ 'kvm' ]
+
 # Rules for when to use a specific job
 
 # Used when a GStreamer MR is used using the triggered pipeline
@@ -298,6 +323,13 @@ ubuntu image:
     - .fdo.distribution-image@ubuntu
   needs:
     - "ubuntu image"
+
+.cerbero manylinux_2_28 base:
+  extends:
+    - .manylinux_2_28 image
+    - .fdo.distribution-image@centos
+  needs:
+    - "manylinux_2_28 image"
 
 # Template for Cerbero GStreamer Deps
 #
@@ -398,6 +430,24 @@ cerbero deps ubuntu x86_64:
 build cerbero ubuntu x86_64:
   extends:
     - '.cerbero ubuntu base'
+    - '.cerbero mr'
+  variables:
+    CONFIG: "linux.config"
+
+#
+# Cerbero manylinux_2_28 X86_64 build
+#
+cerbero deps manylinux_2_28 x86_64:
+  extends:
+    - '.cerbero manylinux_2_28 base'
+    - '.cerbero deps'
+  variables:
+    CONFIG: "linux.config"
+    ARCH: "linux_x86_64"
+
+build cerbero manylinux_2_28 x86_64:
+  extends:
+    - '.cerbero manylinux_2_28 base'
     - '.cerbero mr'
   variables:
     CONFIG: "linux.config"

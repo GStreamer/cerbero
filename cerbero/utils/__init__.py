@@ -598,7 +598,26 @@ def get_system_pc_path(config, lib):
 
 
 def split_version(s):
-    return tuple(int(e) for e in s.split('.'))
+    result = []
+    for e in s.split('.'):
+        if e.isnumeric():
+            result.append(int(e))
+        else:
+            # e.g. '1k' -> [1, ord('k')] = [1, 107]
+            # Each non-digit char becomes its ASCII code as a sub-version,
+            # so '1.1.1k' becomes (1, 1, 1, 107) and is always comparable.
+            num = ''
+            for c in e:
+                if c.isdigit():
+                    num += c
+                else:
+                    if num:
+                        result.append(int(num))
+                        num = ''
+                    result.append(ord(c))
+            if num:
+                result.append(int(num))
+    return tuple(result)
 
 
 def _qmake_or_pkgdir(qmake):
