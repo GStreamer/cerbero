@@ -687,19 +687,45 @@ def detect_qt6(platform, arch, is_universal):
 
     Returns None if qmake could not be found.
     """
+    qt6_prefix = os.environ.get('QT6_PREFIX', None)
     qmake6_path = os.environ.get('QMAKE6', None)
-    if not qmake6_path:
+    if not qt6_prefix and not qmake6_path:
         return None
-    try:
-        qt_version = utils.shell.check_output([qmake6_path, '-query', 'QT_VERSION']).strip()
-        qt_version = [int(v) for v in qt_version.split('.')]
-    except CommandError as e:
-        m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake6_path), str(e)))
-        qt_version = [0, 0]
-    if len(qt_version) >= 1 and qt_version[0] != 6:
-        # QMAKE is not for Qt6
+    if qt6_prefix and not os.path.isdir(qt6_prefix):
+        m.warning('QT6_PREFIX={!r} does not exist'.format(qt6_prefix))
         return None
-    return qmake6_path
+    if qmake6_path:
+        try:
+            qt_version = utils.shell.check_output([qmake6_path, '-query', 'QT_VERSION']).strip()
+            qt_version = [int(v) for v in qt_version.split('.')]
+        except CommandError as e:
+            m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake6_path), str(e)))
+            qt_version = [0, 0]
+        if len(qt_version) >= 1 and qt_version[0] != 6:
+            # QMAKE is not for Qt6
+            return None
+        return qmake6_path
+    # qmake path is invalid, find qmake from qt6 prefix
+    if qt6_prefix and platform == Platform.ANDROID:
+        if arch == Architecture.ARMv7:
+            qmake6_suffix = 'android_armv7/bin/qmake'
+        elif arch == Architecture.ARM64:
+            qmake6_suffix = 'android_arm64_v8a/bin/qmake'
+        elif arch == Architecture.X86:
+            qmake6_suffix = 'android_x86/bin/qmake'
+        elif arch == Architecture.X86_64:
+            qmake6_suffix = 'android_x86_64/bin/qmake'
+        else:
+            m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
+            qmake6_suffix = None
+        if qmake6_suffix:
+            qmake6_path = Path(os.path.join(qt6_prefix, qmake6_suffix))
+            if qmake6_path.is_file():
+                return qmake6_path.as_posix()
+            else:
+                m.warning('QMAKE={!r} does not exist'.format(str(qmake6_path)))
+    # nothing found
+    return None
 
 
 def imp_load_source(modname, fname):
