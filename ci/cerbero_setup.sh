@@ -283,7 +283,11 @@ cerbero_deps_script() {
     # plugins (and hence compile against gstreamer)
     local build_deps="gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0
         gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0
-        gst-devtools-1.0 gst-editing-services-1.0 libnice gst-plugins-rs"
+        gst-devtools-1.0 gst-editing-services-1.0 libnice"
+    local have_rust=`$CERBERO $CERBERO_ARGS show-config | grep 'rust : True'`
+    if [[ x$have_rust != x ]]; then
+        build_deps="$build_deps gst-plugins-rs"
+    fi
     # gtk4 pulls in gstreamer, so we don't want it in the deps cache
     if [[ $CONFIG = *macos* ]] || [[ $ARCH = msvc* ]] || [[ $ARCH = mingw_x86_64 ]]; then
         build_deps="$build_deps gtk"
