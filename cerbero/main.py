@@ -195,9 +195,7 @@ class Main(object):
             self.log_error(exc, False)
 
     def run_command(self):
-        background_build = 'CI' not in os.environ
-        if 'CERBERO_BACKGROUND_BUILD' in os.environ:
-            background_build = strtobool(os.environ['CERBERO_BACKGROUND_BUILD'])
+        background_build = strtobool(os.environ.get('CERBERO_BACKGROUND_BUILD', '0'))
         if background_build:
             if sys.platform == 'win32':
                 from ctypes import c_void_p, windll
