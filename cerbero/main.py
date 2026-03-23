@@ -205,13 +205,13 @@ class Main(object):
                 current_process = c_void_p(windll.kernel32.GetCurrentProcess())
                 windll.kernel32.SetPriorityClass(current_process, 0x00000040)
             elif sys.platform == 'darwin':
+                # Using PRIO_DARWIN_BG means the jobs will never be assigned to
+                # the performance/super cores, which we don't want
                 if sys.version_info >= (3, 12):
                     PRIO_DARWIN_PROCESS = os.PRIO_DARWIN_PROCESS
-                    PRIO_DARWIN_BG = os.PRIO_DARWIN_BG
                 else:
                     PRIO_DARWIN_PROCESS = 4
-                    PRIO_DARWIN_BG = 0x1000
-                os.setpriority(PRIO_DARWIN_PROCESS, 0, PRIO_DARWIN_BG)
+                os.setpriority(PRIO_DARWIN_PROCESS, 0, 20)
             else:
                 from ctypes import CDLL
 
