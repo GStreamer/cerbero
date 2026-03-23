@@ -72,7 +72,7 @@ def get_implib_dllname(config, path):
 
 def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     implibdir = 'lib'
-    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname)]
+    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname), libname + '.dll.a']
     implib_notfound = []
     for implib in implibs:
         path = Path(prefix, implibdir, implib).as_posix()
@@ -290,7 +290,7 @@ class FilesProvider(object):
         pattern = r'\*?(?P<libname>[^\*]*)\*?{}\*?'.format(libext)
         m = re.match(pattern, f)
         f = m.group('libname')
-        libsmatch = self._findlibfunc(self.config, f[3:], self.config.prefix, libdir, libext, libregex)
+        libsmatch = self._findlibfunc(self.config, f.removeprefix('lib'), self.config.prefix, libdir, libext, libregex)
         return libsmatch
 
     def _search_library_pdb(self, file):
