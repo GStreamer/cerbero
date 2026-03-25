@@ -72,21 +72,35 @@ class WheelPackager(PackagerBase):
         self.architecture = config.target_arch
         self.platform = config.target_platform
         self.abi_desc = ' '.join(config._get_toolchain_target_platform_arch(readable=True))
+        self.wheel_version = self._get_wheel_version()
+
+    def _get_wheel_version(self):
+        """
+        PEP 440 version with pre-release suffix for development releases.
+        """
+        versions = list(map(int, self.package.version.split('.', maxsplit=3)))
+        if versions[1] % 2 == 0:
+            return self.package.version
+        elif versions[2] == 0:
+            return f'{self.package.version}.dev0'
+        elif versions[2] >= 50:
+            return f'{self.package.version}b0'
+        else:
+            return f'{self.package.version}a0'
 
     def _get_classifiers(self, license):
         """
         Complete classifier list: https://pypi.org/pypi?%3Aaction=list_classifiers
         """
-        versions = list(map(int, self.package.version.split('.', maxsplit=3)))
         classifiers = []
-        if versions[1] % 2 == 0:
-            classifiers += ['Development Status :: 5 - Production/Stable']
-        elif versions[2] == 0:
+        if self.wheel_version.endswith('.dev0'):
             classifiers += ['Development Status :: 2 - Pre-Alpha']
-        elif versions[2] >= 50:
+        elif self.wheel_version.endswith('a0'):
+            classifiers += ['Development Status :: 3 - Alpha']
+        elif self.wheel_version.endswith('b0'):
             classifiers += ['Development Status :: 4 - Beta']
         else:
-            classifiers += ['Development Status :: 3 - Alpha']
+            classifiers += ['Development Status :: 5 - Production/Stable']
 
         classifiers += [
             'Intended Audience :: Developers',
@@ -111,7 +125,7 @@ class WheelPackager(PackagerBase):
             platform = 'mingw'
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
-        return '-'.join((self.package.name, platform, self.config.target_arch, self.package.version))
+        return '-'.join((self.package.name, platform, self.config.target_arch, self.wheel_version))
 
     def _create_wheel(
         self,
@@ -182,7 +196,7 @@ class WheelPackager(PackagerBase):
         m.action(f'Generating metadata JSON for {package_name}')
         package_info = {
             'package_name': package_name,
-            'version': self.package.version,
+            'version': self.wheel_version,
             'description': desc,
             'long_description': longdesc,
             'long_description_content_type': 'text/markdown',
@@ -377,44 +391,44 @@ class WheelPackager(PackagerBase):
             # NOTE: gstreamer_python should not depend on gstreamer_libs,
             # because people should be able to install it standalone and point
             # it to their own gstreamer install.
-            'gstreamer_cli': [f'gstreamer_libs ~= {self.package.version}'],
-            'gstreamer_plugins_libs': [f'gstreamer_libs ~= {self.package.version}'],
-            'gstreamer_plugins': [f'gstreamer_plugins_libs ~= {self.package.version}'],
-            'gstreamer_plugins_frei0r': [f'gstreamer_plugins_libs ~= {self.package.version}'],
-            'gstreamer_plugins_gpl': [f'gstreamer_plugins_libs ~= {self.package.version}'],
-            'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
-            'gstreamer_plugins_restricted': [f'gstreamer_plugins_libs ~= {self.package.version}'],
+            'gstreamer_cli': [f'gstreamer_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_libs': [f'gstreamer_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_frei0r': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_gpl': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_restricted': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
             'gstreamer_meta': [
-                f'gstreamer_libs ~= {self.package.version}',
-                f'gstreamer_plugins ~= {self.package.version}',
-                f'gstreamer_python ~= {self.package.version}',
+                f'gstreamer_libs ~= {self.wheel_version}',
+                f'gstreamer_plugins ~= {self.wheel_version}',
+                f'gstreamer_python ~= {self.wheel_version}',
             ],
             'gstreamer': [
-                f'gstreamer_cli ~= {self.package.version}',
-                f'gstreamer_libs ~= {self.package.version}',
-                f'gstreamer_plugins ~= {self.package.version}',
-                f'gstreamer_plugins_gpl ~= {self.package.version}',
-                f'gstreamer_plugins_gpl_restricted ~= {self.package.version}',
-                f'gstreamer_plugins_restricted ~= {self.package.version}',
-                f'gstreamer_python ~= {self.package.version}',
-                f'gstreamer_gtk ~= {self.package.version}',
+                f'gstreamer_cli ~= {self.wheel_version}',
+                f'gstreamer_libs ~= {self.wheel_version}',
+                f'gstreamer_plugins ~= {self.wheel_version}',
+                f'gstreamer_plugins_gpl ~= {self.wheel_version}',
+                f'gstreamer_plugins_gpl_restricted ~= {self.wheel_version}',
+                f'gstreamer_plugins_restricted ~= {self.wheel_version}',
+                f'gstreamer_python ~= {self.wheel_version}',
+                f'gstreamer_gtk ~= {self.wheel_version}',
             ],
         }
         package_dependencies['gstreamer_bundle'] = package_dependencies['gstreamer']
 
         package_features = {
             'gstreamer_meta': {
-                'cli': [f'gstreamer_cli ~= {self.package.version}'],
-                'debuginfo': [f'gstreamer_debuginfo ~= {self.package.version}'],
-                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}'],
-                'gpl': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
-                'gpl-restricted': [f'gstreamer_plugins_gpl_restricted ~= {self.package.version}'],
-                'gtk': [f'gstreamer_gtk ~= {self.package.version}'],
-                'restricted': [f'gstreamer_plugins_gpl ~= {self.package.version}'],
+                'cli': [f'gstreamer_cli ~= {self.wheel_version}'],
+                'debuginfo': [f'gstreamer_debuginfo ~= {self.wheel_version}'],
+                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.wheel_version}'],
+                'gpl': [f'gstreamer_plugins_gpl ~= {self.wheel_version}'],
+                'gpl-restricted': [f'gstreamer_plugins_gpl_restricted ~= {self.wheel_version}'],
+                'gtk': [f'gstreamer_gtk ~= {self.wheel_version}'],
+                'restricted': [f'gstreamer_plugins_gpl ~= {self.wheel_version}'],
             },
             'gstreamer': {
-                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.package.version}'],
-                'debuginfo': [f'gstreamer_debuginfo ~= {self.package.version}'],
+                'frei0r': [f'gstreamer_plugins_frei0r ~= {self.wheel_version}'],
+                'debuginfo': [f'gstreamer_debuginfo ~= {self.wheel_version}'],
             },
         }
         package_features['gstreamer_bundle'] = package_features['gstreamer']
@@ -457,7 +471,7 @@ class WheelPackager(PackagerBase):
                 'MSVC runtime redist for GStreamer',
             )
 
-            package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.package.version}')
+            package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.wheel_version}')
 
         for package_name, files_list in package_files_list.items():
             license = ' AND '.join(lic.acronym for lic in package_licenses[package_name])
