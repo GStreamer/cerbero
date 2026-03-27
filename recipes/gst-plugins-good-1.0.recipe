@@ -22,11 +22,9 @@ class Recipe(custom.GStreamer):
                      'vpx': 'enabled',
                      'wavpack': 'enabled',
                      # disabled plugins
-                     'aalib': 'disabled',
                      'dv1394': 'disabled',
                      'gtk3': 'disabled',
                      'jack': 'disabled', # Enabled in prepare()
-                     'libcaca': 'disabled',
                      'oss': 'disabled',
                      'oss4': 'disabled',
                      'qt5': 'disabled', # Enabled in prepare()
