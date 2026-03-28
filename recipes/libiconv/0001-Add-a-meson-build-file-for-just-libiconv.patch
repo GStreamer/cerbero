@@ -1,0 +1,211 @@
+From f41cedd28a71105b3ad5e7c5a47420a62398d296 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 28 Mar 2026 09:35:51 +0530
+Subject: [PATCH] Add a meson build file for just libiconv
+
+---
+ lib/config.h.meson |  54 ++++++++++++++++++++++
+ libiconv.def       |   9 ++++
+ meson.build        | 113 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 176 insertions(+)
+ create mode 100644 lib/config.h.meson
+ create mode 100644 libiconv.def
+ create mode 100644 meson.build
+
+diff --git a/lib/config.h.meson b/lib/config.h.meson
+new file mode 100644
+index 0000000..78ec14e
+--- /dev/null
++++ b/lib/config.h.meson
+@@ -0,0 +1,54 @@
++/* Copyright (C) 1999-2003, 2005, 2007, 2010, 2012 Free Software Foundation, Inc.
++   This file is part of the GNU LIBICONV Library.
++
++   The GNU LIBICONV Library is free software; you can redistribute it
++   and/or modify it under the terms of the GNU Library General Public
++   License as published by the Free Software Foundation; either version 2
++   of the License, or (at your option) any later version.
++
++   The GNU LIBICONV Library is distributed in the hope that it will be
++   useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Library General Public License for more details.
++
++   You should have received a copy of the GNU Library General Public
++   License along with the GNU LIBICONV Library; see the file COPYING.LIB.
++   If not, see <http://www.gnu.org/licenses/>.  */
++
++
++/* Define to 1 to enable a few rarely used encodings. */
++#mesondefine ENABLE_EXTRA
++
++/* Define to 1 if the package shall run at any location in the filesystem. */
++#mesondefine ENABLE_RELOCATABLE
++
++/* Define as const if the declaration of iconv() needs const. */
++#define ICONV_CONST /* empty by default */
++
++/* Define to 1 if you have the getc_unlocked() function. */
++#mesondefine HAVE_GETC_UNLOCKED
++
++/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
++#mesondefine HAVE_LANGINFO_CODESET
++
++/* Define if you have the mbrtowc() function. */
++#mesondefine HAVE_MBRTOWC
++
++/* Define to 1 if you have the setlocale() function. */
++#mesondefine HAVE_SETLOCALE
++
++/* Define to 1 or 0, depending whether the compiler supports simple visibility
++   declarations. */
++#mesondefine HAVE_VISIBILITY
++
++/* Define if you have the wcrtomb() function. */
++#mesondefine HAVE_WCRTOMB
++
++/* Define to 1 if O_NOFOLLOW works. */
++#mesondefine HAVE_WORKING_O_NOFOLLOW
++
++/* Define if the machine's byte ordering is little endian. */
++#mesondefine WORDS_LITTLEENDIAN
++
++/* Define to the value of ${prefix}, as a string. */
++#mesondefine INSTALLPREFIX
+diff --git a/libiconv.def b/libiconv.def
+new file mode 100644
+index 0000000..d456fea
+--- /dev/null
++++ b/libiconv.def
+@@ -0,0 +1,9 @@
++EXPORTS
++    iconv_canonicalize
++    libiconv
++    libiconv_close
++    libiconv_open
++    libiconv_open_into
++    libiconv_set_relocation_prefix
++    libiconvctl
++    libiconvlist
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..4408cc2
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,113 @@
++project('libiconv', 'c',
++  version : '1.15',
++  meson_version : '>= 0.62',
++  default_options : ['c_std=c99'],
++)
++
++cc = meson.get_compiler('c')
++
++# libtool version-info 8:0:6
++# soversion = current - age = 2
++# version = (current - age).age.revision = 2.6.0
++lt_current = 8
++lt_revision = 0
++lt_age = 6
++lib_soversion = lt_current - lt_age
++lib_version = '@0@.@1@.@2@'.format(lib_soversion, lt_age, lt_revision)
++
++cdata = configuration_data()
++
++# Feature checks — libiconv uses #if (not #ifdef) for all of these,
++# so they must always be defined to 0 or 1
++cdata.set10('HAVE_LANGINFO_CODESET', cc.has_function('nl_langinfo', prefix : '#include <langinfo.h>'))
++cdata.set10('HAVE_GETC_UNLOCKED', cc.has_function('getc_unlocked'))
++cdata.set10('HAVE_MBRTOWC', cc.has_function('mbrtowc'))
++cdata.set10('HAVE_WCRTOMB', cc.has_function('wcrtomb'))
++cdata.set10('HAVE_SETLOCALE', cc.has_function('setlocale', prefix : '#include <locale.h>'))
++cdata.set10('HAVE_WORKING_O_NOFOLLOW', cc.has_header_symbol('fcntl.h', 'O_NOFOLLOW'))
++cdata.set10('HAVE_VISIBILITY', cc.has_argument('-fvisibility=hidden'))
++
++# Byte order
++if host_machine.endian() == 'little'
++  cdata.set('WORDS_LITTLEENDIAN', 1)
++endif
++
++cdata.set('ENABLE_RELOCATABLE', 1)
++cdata.set('INSTALLPREFIX', '"' + get_option('prefix') + '"')
++
++lib_config_h = configure_file(
++  input : 'lib/config.h.meson',
++  output : 'config.h',
++  configuration : cdata,
++)
++
++# localcharset.h.in has no substitutions, just needs renaming
++localcharset_h = configure_file(
++  input : 'libcharset/include/localcharset.h.in',
++  output : 'localcharset.h',
++  copy : true,
++)
++
++# Configure iconv.h from iconv.h.build.in (includes visibility support)
++iconv_h_data = configuration_data()
++iconv_h_data.set('DLL_VARIABLE', '')
++iconv_h_data.set('ICONV_CONST', '')
++iconv_h_data.set('USE_MBSTATE_T', 1)
++iconv_h_data.set('BROKEN_WCHAR_H', 0)
++iconv_h_data.set('HAVE_WCHAR_T', 1)
++iconv_h_data.set('HAVE_VISIBILITY', cdata.get('HAVE_VISIBILITY'))
++# EILSEQ fallback for systems that lack it; the #ifndef guard in the
++# header means this value is only used when EILSEQ is truly missing.
++iconv_h_data.set('EILSEQ', 'ENOENT')
++
++iconv_h = configure_file(
++  input : 'include/iconv.h.build.in',
++  output : 'iconv.h',
++  configuration : iconv_h_data,
++)
++
++libiconv_args = [
++  '-DBUILDING_LIBICONV',
++  '-DBUILDING_DLL',
++  '-DHAVE_CONFIG_H',
++  '-DIN_LIBRARY',
++  '-DNO_XMALLOC',
++  '-Dset_relocation_prefix=libiconv_set_relocation_prefix',
++  '-Drelocate=libiconv_relocate',
++  '-Dlocale_charset=iconv_locale_charset',
++  '-DLIBDIR="' + get_option('prefix') / get_option('libdir') + '"',
++  '-DINSTALLDIR="' + get_option('prefix') / get_option('libdir') + '"',
++]
++
++# lib/ has converters.h, relocatable.h, and all encoding headers.
++# Generated config.h, iconv.h, localcharset.h are in the build root
++# which meson adds to the include path automatically.
++libiconv_incs = include_directories('lib')
++
++libiconv = library('iconv',
++  'lib/iconv.c',
++  'libcharset/lib/localcharset.c',
++  'lib/relocatable.c',
++  c_args : libiconv_args,
++  include_directories : libiconv_incs,
++  gnu_symbol_visibility : 'hidden',
++  vs_module_defs: 'libiconv.def',
++  version : lib_version,
++  soversion : lib_soversion,
++  install : true,
++)
++
++install_headers(iconv_h)
++
++libiconv_dep = declare_dependency(
++  link_with : libiconv,
++  include_directories : include_directories('.'),
++)
++
++meson.override_dependency('iconv', libiconv_dep)
++
++pkg = import('pkgconfig')
++pkg.generate(libiconv,
++  name : 'libiconv',
++  description : 'Character set conversion library',
++)
+-- 
+2.39.5 (Apple Git-154)
+

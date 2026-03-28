@@ -7,21 +7,15 @@ class Recipe(recipe.Recipe):
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'gnu://.tar.gz'
     tarball_checksum = 'ccf536620a45458d26ba83887a983b96827001e92a13847b45e4925cc8913178'
-    patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
-               'libiconv/0002-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
+    patches = [
+        'libiconv/0001-Add-a-meson-build-file-for-just-libiconv.patch',
+    ]
 
-    configure_options = ['--disable-nls', '--enable-static']
-    autoreconf_sh = './autogen.sh --skip-gnulib && autoreconf -fiv'
-
-    files_bins = ['iconv', ]
-    licenses_bins = [License.GPLv3Plus]
-    files_libs = ['libiconv', 'libcharset', ]
+    #files_bins = ['iconv']
+    #licenses_bins = [License.GPLv3Plus]
+    files_libs = ['libiconv']
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
-
-    def prepare(self):
-        # Don't artificially force a libtool dependency when compiling as a build tool
-        if self.config.prefix == self.config.build_tools_prefix:
-            self.override_libtool = False
