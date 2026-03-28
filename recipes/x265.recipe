@@ -118,7 +118,7 @@ class X265Recipe(X265RecipeBase, recipe.Recipe):
                     f'{self.config.tools_prefix}ar'
                 )
             else:
-                ar = shutil.which('ar')
+                ar = self.env['AR']
             with tempfile.TemporaryDirectory() as tmpdir:
                 whole_lib = os.path.join(self.config.libdir, 'libx265.a')
                 shutil.copy(whole_lib, os.path.join(tmpdir, 'libx265-8bit.a'))
