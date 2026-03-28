@@ -27,8 +27,7 @@ NDK_VERSION = 'r29'
 NDK_BASE_URL = 'https://dl.google.com/android/repository/android-ndk-%s-%s.zip'
 NDK_CHECKSUMS = {
     'android-ndk-r29-linux.zip': '4abbbcdc842f3d4879206e9695d52709603e52dd68d3c1fff04b3b5e7a308ecf',
-    # doesn't ship as a zip file anymore
-    'android-ndk-r29-darwin.dmg': '2d6922da5f95178bea870069f0a463c33d014ddfa364c74320e11c47531db24d',
+    'android-ndk-r29-darwin.zip': 'ce5e4b100ec5fe5be4eb3edcb2c02528824ff9cda3860f5304619be6c3da34d3',
     'android-ndk-r29-windows.zip': '4f83a1a87ea0d33ae2b43812ce27b768be949bc78acf90b955134d19e3068f1c',
 }
 
