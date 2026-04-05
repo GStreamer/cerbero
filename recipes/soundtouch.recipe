@@ -4,15 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
-    version = '2.3.2'
+    version = '2.4.1'
     btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'https://codeberg.org/soundtouch/soundtouch/archive/%(version)s.tar.gz'
     tarball_dirname = 'soundtouch'
-    tarball_checksum = 'ed714f84a3e748de87b24f385ec69d3bdc51ca47b7f4710d2048b84b2761e7ff'
+    tarball_checksum = 'e07abf20ce8f95850c280132e1f61ad400fc1f4011b7fac698a503de6aab6733'
 
     patches = [
-        # https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-4/get_patch
+        # https://wrapdb.mesonbuild.com/v2/soundtouch_2.4.1-1/get_patch
         f'{name}/0001-Add-Meson-build.patch',
     ]
 
