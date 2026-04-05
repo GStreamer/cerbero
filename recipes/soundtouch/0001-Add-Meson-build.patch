@@ -1,20 +1,21 @@
-From bb3c46416624a573c62cb0ad09533a5d433b65e7 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
-Date: Tue, 30 Apr 2024 21:17:12 +0200
-Subject: [PATCH 1/1] Add Meson build
+From 0d347b9152c6354e0b047190818b35d1e46186aa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Mon, 6 Apr 2026 11:18:15 +0100
+Subject: [PATCH] Add meson build from wrapdb
 
+https://wrapdb.mesonbuild.com/v2/soundtouch_2.4.1-1/get_patch
 ---
  LICENSE.build                       |  19 +++++
  include/meson.build                 |  19 +++++
- meson.build                         | 122 ++++++++++++++++++++++++++++
- meson_options.txt                   |   9 ++
- source/Android-lib/meson.build      |  12 +++
- source/SoundStretch/meson.build     |  16 ++++
- source/SoundTouch/meson.build       |  48 +++++++++++
- source/SoundTouchDLL/meson.build    |  47 +++++++++++
+ meson.build                         | 124 ++++++++++++++++++++++++++++
+ meson_options.txt                   |  34 ++++++++
+ source/Android-lib/meson.build      |  13 +++
+ source/SoundStretch/meson.build     |  12 +++
+ source/SoundTouch/meson.build       |  49 +++++++++++
+ source/SoundTouchDLL/meson.build    |  41 +++++++++
  source/SoundTouchDLL/meson/afxres.h |   1 +
  source/meson.build                  |   6 ++
- 10 files changed, 299 insertions(+)
+ 10 files changed, 318 insertions(+)
  create mode 100644 LICENSE.build
  create mode 100644 include/meson.build
  create mode 100644 meson.build
@@ -53,59 +54,64 @@ index 0000000..b59833d
 +SOFTWARE.
 diff --git a/include/meson.build b/include/meson.build
 new file mode 100644
-index 0000000..a395462
+index 0000000..7ceb358
 --- /dev/null
 +++ b/include/meson.build
 @@ -0,0 +1,19 @@
 +soundtouch_headers = files(
-+    'BPMDetect.h',
-+    'FIFOSampleBuffer.h',
-+    'FIFOSamplePipe.h',
-+    'STTypes.h',
-+    'SoundTouch.h',
++  'BPMDetect.h',
++  'FIFOSampleBuffer.h',
++  'FIFOSamplePipe.h',
++  'SoundTouch.h',
++  'STTypes.h',
 +)
 +
 +soundtouch_config_h = configure_file(
-+    output: 'soundtouch_config.h',
-+    configuration: conf,
++  output: 'soundtouch_config.h',
++  configuration: conf,
 +)
 +
 +soundtouch_includes = include_directories('.')
 +
 +install_headers(
-+    [soundtouch_headers, soundtouch_config_h],
-+    subdir: 'soundtouch'
++  [soundtouch_headers, soundtouch_config_h],
++  subdir: 'soundtouch',
 +)
 diff --git a/meson.build b/meson.build
 new file mode 100644
-index 0000000..1977d0d
+index 0000000..c0d521d
 --- /dev/null
 +++ b/meson.build
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,124 @@
 +project(
-+    'soundtouch',
-+    'c', 'cpp',
-+    version: '2.3.2',
-+    license: 'LGPL-2.1-or-later',
-+    default_options: [
-+        'debug=true',
-+        'optimization=3',
-+        'c_std=c11',
-+        # to avoid Meson's warning under MSVC
-+        'cpp_std=c++14',
-+        # See below ("ST_NO_EXCEPTION_HANDLING") for the rationale
-+        'cpp_eh=default',
-+        'pkgconfig.relocatable=true',
-+    ],
-+    meson_version: '>= 0.53',
++  'soundtouch',
++  'c',
++  'cpp',
++  version: '2.4.1',
++  license: 'LGPL-2.1-or-later',
++  default_options: [
++    'c_std=c11',
++    # to avoid Meson's warning under MSVC
++    'cpp_std=c++14',
++    # See below ("ST_NO_EXCEPTION_HANDLING") for the rationale
++    'cpp_eh=default',
++    'pkgconfig.relocatable=true',
++  ],
++  meson_version: '>= 0.56',
 +)
 +
 +cpp = meson.get_compiler('cpp')
 +system = host_machine.system()
 +cpu = host_machine.cpu()
 +
-+openmp = dependency('openmp', required: get_option('openmp'))
-+m = cpp.find_library('m', required: false)
++openmp = dependency(
++  'openmp',
++  required: get_option('openmp'),
++)
++m = cpp.find_library(
++  'm',
++  required: false,
++)
 +
 +soundtouch_args = []
 +
@@ -116,39 +122,39 @@ index 0000000..1977d0d
 +# I prefer here to do so only with these to avoid surprises
 +# at lower levels. -- amyspark
 +if get_option('optimization') in ['2', '3', 's']
-+    soundtouch_args += cpp.get_supported_arguments(
-+        '/fp:fast',
-+        '-ffast-math',
-+    )
++  soundtouch_args += cpp.get_supported_arguments('/fp:fast', '-ffast-math')
 +endif
 +
-+is_android_softfp = cpp.compiles('''
++is_android_softfp = cpp.compiles(
++  '''
 +#if defined(__SOFTFP__) && defined(ANDROID)
 +#else
 +#error "Not under Android soft FP"
-+#endif''', name: 'targeting Android with soft float implementation')
++#endif''',
++  name: 'targeting Android with soft float implementation',
++)
 +
 +if get_option('integer_samples')
-+    conf.set('SOUNDTOUCH_INTEGER_SAMPLES', 1)
-+    soundtouch_args += ['-DSOUNDTOUCH_INTEGER_SAMPLES=1']
++  conf.set('SOUNDTOUCH_INTEGER_SAMPLES', 1)
++  soundtouch_args += ['-DSOUNDTOUCH_INTEGER_SAMPLES=1']
 +else
-+    conf.set('SOUNDTOUCH_FLOAT_SAMPLES', 1)
-+    soundtouch_args += ['-DSOUNDTOUCH_FLOAT_SAMPLES=1']
++  conf.set('SOUNDTOUCH_FLOAT_SAMPLES', 1)
++  soundtouch_args += ['-DSOUNDTOUCH_FLOAT_SAMPLES=1']
 +endif
 +
 +neon_cpu = cpu in ['arm', 'aarch64']
 +
 +# Use ARM instruction set instead of Thumb for improved calculation performance in ARM CPUs
 +if cpu == 'arm' and system == 'android'
-+    if cpp.get_define('__thumb__') != ''
-+        soundtouch_args += cpp.get_supported_arguments('-marm')
-+    endif
++  if cpp.get_define('__thumb__') != ''
++    soundtouch_args += cpp.get_supported_arguments('-marm')
++  endif
 +endif
 +
 +if neon_cpu and get_option('neon')
-+    conf.set('SOUNDTOUCH_USE_NEON', 1)
-+    soundtouch_args += ['-DSOUNDTOUCH_USE_NEON=1']
-+    soundtouch_args += cpp.get_supported_arguments('-mfpu=neon')
++  conf.set('SOUNDTOUCH_USE_NEON', 1)
++  soundtouch_args += ['-DSOUNDTOUCH_USE_NEON=1']
++  soundtouch_args += cpp.get_supported_arguments('-mfpu=neon')
 +endif
 +
 +# GCC, by default, handles exceptions in C++ sources as /EHsc, allowing
@@ -162,35 +168,32 @@ index 0000000..1977d0d
 +# their toolchain does not add it for historical reasons.
 +# https://developer.android.com/ndk/guides/cpp-support?hl=es-419
 +if get_option('cpp_eh') in ['none']
-+    soundtouch_args += ['-DST_NO_EXCEPTION_HANDLING']
++  soundtouch_args += ['-DST_NO_EXCEPTION_HANDLING']
 +elif system == 'android'
-+    soundtouch_args += cpp.get_supported_arguments('-fexceptions')
++  soundtouch_args += cpp.get_supported_arguments('-fexceptions')
 +endif
 +
 +# Work around Android Clang / MS Clang not defining __GNUC__
 +# This affects cpuid detection in x86 and x64 targets
 +# Amyspark: careful with this flag, it may interfere with STTypes.h
 +if cpp.get_define('__clang__') != '' and cpp.get_define('__GNUC__') == ''
-+    soundtouch_args += cpp.get_supported_arguments('-fgnuc-version=10')
++  soundtouch_args += cpp.get_supported_arguments('-fgnuc-version=10')
 +endif
 +
 +# Amyspark: Turn off certain warnings that can trigger Werror
 +soundtouch_args += cpp.get_supported_arguments(
-+    '-Wno-unused-variable',
-+    '-Wno-sign-compare',
-+    '-Wno-unused-but-set-variable',
-+    '-Wno-inconsistent-missing-override',
-+    '-Wno-unused-const-variable',
++  '-Wno-unused-variable',
++  '-Wno-sign-compare',
++  '-Wno-unused-but-set-variable',
++  '-Wno-inconsistent-missing-override',
++  '-Wno-unused-const-variable',
 +)
 +
 +if cpu == 'x86'
-+    soundtouch_args += cpp.get_supported_arguments('-mstackrealign')
++  soundtouch_args += cpp.get_supported_arguments('-mstackrealign')
 +endif
 +
-+deps = [
-+    openmp,
-+    m,
-+]
++deps = [openmp, m]
 +
 +subdir('include')
 +subdir('source')
@@ -198,173 +201,190 @@ index 0000000..1977d0d
 +pkg = import('pkgconfig')
 +
 +pkg.generate(
-+    soundtouch_lib,
-+    name: 'SoundTouch',
-+    description: 'SoundTouch is an open-source audio processing library for changing the Tempo, Pitch and Playback Rates of audio streams or files',
-+    filebase: 'soundtouch',
-+    subdirs: 'soundtouch'
++  soundtouch_lib,
++  name: 'SoundTouch',
++  description: 'SoundTouch is an open-source audio processing library for changing the Tempo, Pitch and Playback Rates of audio streams or files',
++  filebase: 'soundtouch',
++  subdirs: 'soundtouch',
 +)
 diff --git a/meson_options.txt b/meson_options.txt
 new file mode 100644
-index 0000000..9aa9714
+index 0000000..921fbea
 --- /dev/null
 +++ b/meson_options.txt
-@@ -0,0 +1,9 @@
-+option('integer_samples', type: 'boolean', value: false, description: 'Use integers instead of floats for samples')
-+
-+option('neon', type: 'boolean', value: true, description: 'Use ARM Neon SIMD instructions if in ARM CPU')
-+
-+option('soundtouch_dll', type: 'boolean', value: true, description: 'Build SoundTouchDLL C wrapper library.')
-+
-+option('soundstretch', type: 'boolean', value: false, description: 'Build soundstretch command line utility.')
-+
-+option('openmp', type: 'feature', value: 'disabled', description: 'Use parallel multicore calculation through OpenMP')
-diff --git a/source/Android-lib/meson.build b/source/Android-lib/meson.build
-new file mode 100644
-index 0000000..38adee2
---- /dev/null
-+++ b/source/Android-lib/meson.build
-@@ -0,0 +1,12 @@
-+soundtouch_sources_android = files(
-+    'jni/soundtouch-jni.cpp',
+@@ -0,0 +1,34 @@
++option(
++    'integer_samples',
++    type: 'boolean',
++    value: false,
++    description: 'Use integers instead of floats for samples',
 +)
 +
-+log = cpp.find_library('log', required: true)
++option(
++    'neon',
++    type: 'boolean',
++    value: true,
++    description: 'Use ARM Neon SIMD instructions if in ARM CPU',
++)
++
++option(
++    'soundtouch_dll',
++    type: 'boolean',
++    value: true,
++    description: 'Build SoundTouchDLL C wrapper library.',
++)
++
++option(
++    'soundstretch',
++    type: 'boolean',
++    value: false,
++    description: 'Build soundstretch command line utility.',
++)
++
++option(
++    'openmp',
++    type: 'feature',
++    value: 'disabled',
++    description: 'Use parallel multicore calculation through OpenMP',
++)
+diff --git a/source/Android-lib/meson.build b/source/Android-lib/meson.build
+new file mode 100644
+index 0000000..8ca08fc
+--- /dev/null
++++ b/source/Android-lib/meson.build
+@@ -0,0 +1,13 @@
++soundtouch_sources_android = files('jni/soundtouch-jni.cpp')
++
++log = cpp.find_library(
++  'log',
++  required: true,
++)
 +
 +deps += [log]
 +
 +soundtouch_args += cpp.get_supported_arguments(
-+    '-fdata-sections',
-+    '-ffunction-sections',
++  '-fdata-sections',
++  '-ffunction-sections',
 +)
 diff --git a/source/SoundStretch/meson.build b/source/SoundStretch/meson.build
 new file mode 100644
-index 0000000..aebf564
+index 0000000..89ff715
 --- /dev/null
 +++ b/source/SoundStretch/meson.build
-@@ -0,0 +1,16 @@
-+soundstretch_sources = files(
-+    'main.cpp',
-+    'RunParameters.cpp',
-+    'WavFile.cpp',
-+)
+@@ -0,0 +1,12 @@
++soundstretch_sources = files('main.cpp', 'RunParameters.cpp', 'WavFile.cpp')
 +
 +if get_option('soundstretch')
-+    soundstretch_bin = executable(
-+        'soundstretch',
-+        soundstretch_sources,
-+        cpp_args: soundtouch_args,
-+        include_directories: include_directories('.'),
-+        dependencies: soundtouch_dep,
-+        install: true,
-+    )
++  soundstretch_bin = executable(
++    'soundstretch',
++    soundstretch_sources,
++    cpp_args: soundtouch_args,
++    include_directories: include_directories('.'),
++    dependencies: soundtouch_dep,
++    install: true,
++  )
 +endif
 diff --git a/source/SoundTouch/meson.build b/source/SoundTouch/meson.build
 new file mode 100644
-index 0000000..26911bd
+index 0000000..c2e4471
 --- /dev/null
 +++ b/source/SoundTouch/meson.build
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,49 @@
 +soundtouch_sources = files(
-+    'AAFilter.cpp',
-+    'BPMDetect.cpp',
-+    'cpu_detect_x86.cpp',
-+    'FIFOSampleBuffer.cpp',
-+    'FIRFilter.cpp',
-+    'InterpolateCubic.cpp',
-+    'InterpolateLinear.cpp',
-+    'InterpolateShannon.cpp',
-+    'mmx_optimized.cpp',
-+    'PeakFinder.cpp',
-+    'RateTransposer.cpp',
-+    'SoundTouch.cpp',
-+    'sse_optimized.cpp',
-+    'TDStretch.cpp',
++  'AAFilter.cpp',
++  'BPMDetect.cpp',
++  'cpu_detect_x86.cpp',
++  'FIFOSampleBuffer.cpp',
++  'FIRFilter.cpp',
++  'InterpolateCubic.cpp',
++  'InterpolateLinear.cpp',
++  'InterpolateShannon.cpp',
++  'mmx_optimized.cpp',
++  'PeakFinder.cpp',
++  'RateTransposer.cpp',
++  'SoundTouch.cpp',
++  'sse_optimized.cpp',
++  'TDStretch.cpp',
 +)
 +
 +# This library requires WINDOWS_EXPORT_ALL_SYMBOLS to export all the relevant
 +# classes under MSVC. That's beyond mindbending to do for C++, see how it's done:
 +# https://github.com/Kitware/CMake/blob/master/Source/bindexplib.cxx#L237
-+if cpp.get_linker_id() in ['link', 'lld-link'] # MSVC relies on __declspec
-+    soundtouch_lib = static_library(
-+        'SoundTouch',
-+        soundtouch_sources,
-+        cpp_args: soundtouch_args,
-+        dependencies: deps,
-+        include_directories: soundtouch_includes,
-+        install: true
-+    )
-+else # GCC and Clang etc. do not
-+    soundtouch_lib = library(
-+        'SoundTouch',
-+        soundtouch_sources,
-+        cpp_args: soundtouch_args,
-+        dependencies: deps,
-+        include_directories: soundtouch_includes,
-+        version: meson.project_version(),
-+        # DO NOT CHANGE THIS, SEE ABOVE!
-+        # Also the Android.mk file was designed for GCC, not Clang (API 17+)
-+        gnu_symbol_visibility: 'default',
-+        install: true
-+    )
++if cpp.get_linker_id() in ['link', 'lld-link']  # MSVC relies on __declspec
++  soundtouch_lib = static_library(
++    'SoundTouch',
++    soundtouch_sources,
++    cpp_args: soundtouch_args,
++    dependencies: deps,
++    include_directories: soundtouch_includes,
++    install: true,
++  )
++else  # GCC and Clang etc. do not
++  soundtouch_lib = library(
++    'SoundTouch',
++    soundtouch_sources,
++    cpp_args: soundtouch_args,
++    dependencies: deps,
++    include_directories: soundtouch_includes,
++    version: meson.project_version(),
++    # DO NOT CHANGE THIS, SEE ABOVE!
++    # Also the Android.mk file was designed for GCC, not Clang (API 17+)
++    gnu_symbol_visibility: 'default',
++    install: true,
++  )
 +endif
 +
 +soundtouch_dep = declare_dependency(
-+    link_with: soundtouch_lib,
-+    include_directories: soundtouch_includes,
++  link_with: soundtouch_lib,
++  include_directories: soundtouch_includes,
 +)
++meson.override_dependency('soundtouch', soundtouch_dep)
 diff --git a/source/SoundTouchDLL/meson.build b/source/SoundTouchDLL/meson.build
 new file mode 100644
-index 0000000..b0b41b5
+index 0000000..0341ab7
 --- /dev/null
 +++ b/source/SoundTouchDLL/meson.build
-@@ -0,0 +1,47 @@
-+soundtouch_dll_sources = files(
-+    'SoundTouchDLL.cpp',
-+)
+@@ -0,0 +1,41 @@
++soundtouch_dll_sources = files('SoundTouchDLL.cpp')
 +
-+soundtouch_dll_includes = files(
-+    'SoundTouchDLL.h',
-+)
++soundtouch_dll_includes = files('SoundTouchDLL.h')
 +
 +soundtouch_dll_include_directories = [include_directories('.')]
 +
 +windows = import('windows')
 +
 +if system in ['windows', 'cygwin']
-+    if not cpp.has_header('afxres.h')
-+        # Work around lack of afxres.h (ATL/MFC component missing in MSVS)
-+        soundtouch_dll_include_directories += [include_directories('meson')]
-+    endif
++  if not cpp.has_header('afxres.h')
++    # Work around lack of afxres.h (ATL/MFC component missing in MSVS)
++    soundtouch_dll_include_directories += [include_directories('meson')]
++  endif
 +
-+    soundtouch_dll_sources += windows.compile_resources(
-+        files(
-+            'SoundTouchDLL.rc'
-+        ),
-+        include_directories: soundtouch_dll_include_directories
-+    )
++  soundtouch_dll_sources += windows.compile_resources(
++    files('SoundTouchDLL.rc'),
++    include_directories: soundtouch_dll_include_directories,
++  )
 +endif
 +
 +if get_option('soundtouch_dll')
-+    soundtouch_dll_args = [soundtouch_args, '-DDLL_EXPORTS']
++  soundtouch_dll_args = [soundtouch_args, '-DDLL_EXPORTS']
 +
-+    soundtouch_dll_lib = shared_library(
-+        'SoundTouchDLL',
-+        soundtouch_dll_sources,
-+        cpp_args: soundtouch_dll_args,
-+        include_directories: soundtouch_dll_include_directories,
-+        dependencies: soundtouch_dep,
-+        gnu_symbol_visibility: 'inlineshidden',
-+    )
++  soundtouch_dll_lib = shared_library(
++    'SoundTouchDLL',
++    soundtouch_dll_sources,
++    cpp_args: soundtouch_dll_args,
++    include_directories: soundtouch_dll_include_directories,
++    dependencies: soundtouch_dep,
++    gnu_symbol_visibility: 'inlineshidden',
++  )
 +
-+    soundtouch_dll_dep = declare_dependency(
-+        link_with: soundtouch_dll_lib,
-+    )
++  soundtouch_dll_dep = declare_dependency(
++    link_with: soundtouch_dll_lib,
++  )
 +
-+    install_headers(
-+        soundtouch_dll_includes,
-+        subdir: 'soundtouch',
-+    )
++  install_headers(
++    soundtouch_dll_includes,
++    subdir: 'soundtouch',
++  )
 +endif
 diff --git a/source/SoundTouchDLL/meson/afxres.h b/source/SoundTouchDLL/meson/afxres.h
 new file mode 100644
@@ -375,16 +395,16 @@ index 0000000..776a87c
 +#include <windows.h>
 diff --git a/source/meson.build b/source/meson.build
 new file mode 100644
-index 0000000..6b809f5
+index 0000000..54eea71
 --- /dev/null
 +++ b/source/meson.build
 @@ -0,0 +1,6 @@
 +if system == 'android'
-+    subdir('Android-lib')
++  subdir('Android-lib')
 +endif
 +subdir('SoundTouch')
 +subdir('SoundStretch')
 +subdir('SoundTouchDLL')
 -- 
-2.34.1
+2.53.0
 
