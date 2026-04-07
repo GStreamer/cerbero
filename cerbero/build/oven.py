@@ -19,6 +19,7 @@
 import sys
 import tempfile
 import shutil
+import pathlib
 import traceback
 import asyncio
 import collections
@@ -478,7 +479,11 @@ class Oven(object):
                 else:
                     source_dir = recipe.get_for_arch(be.arch, 'build_dir')
                 shell.enter_build_environment(
-                    self.config.target_platform, be.arch, self.config.distro, source_dir, env=environ
+                    self.config.target_platform,
+                    be.arch,
+                    self.config.distro,
+                    pathlib.PurePath(source_dir).as_posix(),
+                    env=environ,
                 )
                 raise be
             elif action == RecoveryActions.RETRY_ALL:
