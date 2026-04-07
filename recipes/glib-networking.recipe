@@ -17,7 +17,10 @@ class Recipe(recipe.Recipe):
                      'gnutls': 'disabled', 'openssl': 'enabled'}
     deps = ['glib', 'libproxy', 'openssl']
 
-    files_plugins = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
+    files_plugins = [
+        '%(libdir)s/gio/modules/libgiolibproxy%(mext)s',
+        '%(libdir)s/gio/modules/libgioopenssl%(mext)s',
+    ]
     files_plugins_devel = []
     files_lang = ['glib-networking']
     files_devel = []
@@ -27,12 +30,15 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.library_type = LibraryType.SHARED
         else:
-            self.files_plugins_devel.append(
-                '%(libdir)s/gio/modules/libgioopenssl.a')
+            self.files_plugins_devel += [
+                '%(libdir)s/gio/modules/libgiolibproxy.a',
+                '%(libdir)s/gio/modules/libgioopenssl.a',
+            ]
             # Only generated when building the static module
-            self.files_plugins_devel.append(
-                '%(libdir)s/gio/modules/pkgconfig/gioopenssl.pc'
-            )
+            self.files_plugins_devel += [
+                '%(libdir)s/gio/modules/pkgconfig/giolibproxy.pc',
+                '%(libdir)s/gio/modules/pkgconfig/gioopenssl.pc',
+            ]
 
     def post_install(self):
         if self.config.target_platform != Platform.WINDOWS:
