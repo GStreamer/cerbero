@@ -101,6 +101,12 @@ class Main(object):
             help=_('Print absolute clock times with every message printed'),
         )
         self.parser.add_argument(
+            '--non-interactive',
+            action='store_true',
+            default=False,
+            help=_('Non-interactive execution, no prompting for input'),
+        )
+        self.parser.add_argument(
             '--list-variants', action='store_true', default=False, help=_('List available variants')
         )
         self.parser.add_argument(
@@ -183,6 +189,8 @@ class Main(object):
                         sys.exit(1)
             if self.args.manifest:
                 self.config.manifest = self.args.manifest
+            if self.args.non_interactive:
+                self.config.interactive = False
         except ConfigurationError as exc:
             self.log_error(exc, False)
 
