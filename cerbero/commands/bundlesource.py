@@ -16,8 +16,9 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import subprocess
 import sys
+import shutil
+import subprocess
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
@@ -26,6 +27,7 @@ from cerbero.packages.packagesstore import PackagesStore
 from cerbero.bootstrap.build_tools import BuildTools
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates
 from cerbero.utils import messages as m
+from cerbero.enums import CERBERO_VERSION
 
 
 class BundleSource(Command):
@@ -106,7 +108,13 @@ class BundleSource(Command):
 
         command = str(config._relative_path('setup.py'))
 
-        subprocess.check_call([sys.executable, command, *setup_args])
+        if shutil.which('xz'):
+            subprocess.check_call([sys.executable, command, *setup_args, '--formats', 'tar'])
+            version = '.'.join(CERBERO_VERSION.split('.')[0:3])
+            outf = str(config._relative_path(f'dist/cerbero-{version}.tar'))
+            subprocess.check_call(['xz', '-f', '-7', '-T0', outf])
+        else:
+            subprocess.check_call([sys.executable, command, *setup_args, '--formats', 'xztar'])
 
 
 register_command(BundleSource)
