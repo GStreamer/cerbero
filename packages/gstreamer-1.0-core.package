@@ -28,6 +28,7 @@ class Package(custom.GStreamer, package.Package):
     platform_files_devel = {
         Platform.DARWIN: ['pkg-config:bins:devel'],
         Platform.WINDOWS: ['pkg-config:bins:devel'],
+        Platform.ANDROID: ['pkg-config-dist:files_devel'],
     }
 
     def prepare(self):
