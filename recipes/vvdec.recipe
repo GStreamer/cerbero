@@ -5,10 +5,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'vvdec'
-    version = '3.0.0'
+    version = '3.1.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/fraunhoferhhi/vvdec/archive/refs/tags/v%(version)s.tar.gz'
-    tarball_checksum = '090688c2f9beebd4e8a2ec197a5b9429803498cd3c91fbec62fe7718a8268114'
+    tarball_checksum = 'e3e5093acfdcbfd2159f3d0166d451d7ccabd293ed30f3762b481c9c6c0a7512'
     licenses = [{License.BSD_3_Clause_Clear: ['LICENSE.txt']}]
 
     patches = [
