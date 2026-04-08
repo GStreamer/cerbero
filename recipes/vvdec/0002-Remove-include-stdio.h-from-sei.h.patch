@@ -22,10 +22,10 @@ index 8dbf9d0..9a3a12e 100644
  #include <stdint.h>
  
  typedef enum
-diff --git a/include/vvdec/vvdec.h b/include/vvdec/vvdec.h
+diff --git a/include/vvdec/vvdec.h.in b/include/vvdec/vvdec.h.in
 index a8b751e..8762025 100644
---- a/include/vvdec/vvdec.h
-+++ b/include/vvdec/vvdec.h
+--- a/include/vvdec/vvdec.h.in
++++ b/include/vvdec/vvdec.h.in
 @@ -46,6 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
  
  #include <stdint.h>
