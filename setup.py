@@ -17,14 +17,13 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-# Get version directly from enums.py without importing it
 def get_version():
-    version_file = os.path.join(os.path.dirname(__file__), 'cerbero', 'enums.py')
-    with open(version_file) as f:
-        for line in f:
-            if line.startswith('CERBERO_VERSION'):
-                return line.split('=')[1].strip().strip('\'"')
-    return '0.0.0'
+    try:
+        from cerbero import enums
+
+        return enums.CERBERO_VERSION
+    except ImportError:
+        return '0.0.0'
 
 
 CERBERO_VERSION = get_version()
