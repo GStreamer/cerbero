@@ -110,8 +110,7 @@ class BundleSource(Command):
 
         if shutil.which('xz'):
             subprocess.check_call([sys.executable, command, *setup_args, '--formats', 'tar'])
-            version = '.'.join(CERBERO_VERSION.split('.')[0:3])
-            outf = str(config._relative_path(f'dist/cerbero-{version}.tar'))
+            outf = str(config._relative_path(f'dist/cerbero-{CERBERO_VERSION}.tar'))
             subprocess.check_call(['xz', '-f', '-7', '-T0', outf])
         else:
             subprocess.check_call([sys.executable, command, *setup_args, '--formats', 'xztar'])
