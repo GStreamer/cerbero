@@ -213,6 +213,14 @@ cerbero_bootstrap() {
 }
 
 cerbero_test() {
+    # Check that version number in cerbero/enums.py matches pyproject.toml
+    local cerbero_version=$(grep ^CERBERO_VERSION cerbero/enums.py | cut -d"'" -f 2)
+    local pyproject_version=$(grep ^version pyproject.toml |  cut -d'"' -f 2)
+    if [[ ${cerbero_version} != ${pyproject_version} ]]; then
+      echo "Version mismatch in cerbero/enums.py and pyproject.toml"
+      exit 1
+    fi
+
     $CERBERO $CERBERO_ARGS show-config
     cerbero_bootstrap
 }
