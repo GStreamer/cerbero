@@ -47,7 +47,11 @@ cerbero_package_and_check() {
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     if [[ $ARCH = msvc* && $CONFIG = win* ]] || [[ $CONFIG = *macos* ]]; then
-        ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
+        if [[ -n ${CI_GSTREAMER_PATH} ]] && [[ -n ${CI_GST_PLUGINS_RS_PATH} ]]; then
+            echo "Trigger CI, skipping wheel packaging"
+        else
+            ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
+        fi
     fi
 
     # Test that generating the source bundle works
