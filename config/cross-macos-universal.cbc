@@ -1,7 +1,8 @@
-from cerbero.config import Platform, Architecture, Distro, DistroVersion
+from cerbero.config import Platform, Architecture, Distro, DistroVersion, Subsystem
 
 target_platform = Platform.DARWIN
 target_arch = Architecture.UNIVERSAL
+target_subsystem = Subsystem.MACOS
 
 universal_archs = {
     # Path is relative to this file

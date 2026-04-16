@@ -237,6 +237,7 @@ class Config(object):
     _properties = [
         'platform',
         'target_platform',
+        'subsystem',
         'target_subsystem',
         'arch',
         'target_arch',
@@ -407,6 +408,10 @@ class Config(object):
         # Next, if a config file is provided use it to override the settings
         # again (set the target, f.ex.)
         self._load_cmd_config(filename)
+
+        # When not cross-compiling on macOS, we need to set target_subsystem
+        if self.platform == Platform.DARWIN and self.target_subsystem is None:
+            self.target_subsystem = Subsystem.MACOS
 
         # Create a copy of the config for each architecture in case we are
         # building Universal binaries
@@ -693,10 +698,10 @@ class Config(object):
         if platform == Platform.WINDOWS:
             target_distro = Distro.WINDOWS
         self.set_property('platform', platform)
+        self.set_property('subsystem', subsystem)
         self.set_property('num_of_cpus', num_of_cpus)
         self.set_property('cargo_build_jobs', None)
         self.set_property('target_platform', platform)
-        self.set_property('target_subsystem', subsystem)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
