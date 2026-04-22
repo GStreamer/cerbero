@@ -26,6 +26,17 @@ from cerbero.utils import shell
 INT_CMD = 'install_name_tool'
 OTOOL_CMD = 'otool'
 
+PYTHON_FRAMEWORK = '/Library/Frameworks/Python.framework/Versions/'
+
+
+def is_absolute_python_framework(dylib):
+    """
+    e.g. Python.org's, Homebrew's, which both build a framework and
+    link against it with an absolute dylib ID.
+    These need relocation AND a rpath entry.
+    """
+    return dylib.startswith('/') and 'Python.framework/Versions' in dylib and dylib.endswith('/Python')
+
 
 class OSXRelocator(object):
     """
@@ -136,19 +147,24 @@ class OSXRelocator(object):
             shell.new_call(cmd, fail=False, logfile=self.logfile)
         # Change dependencies' paths from absolute to @rpath/
         for lib in self.list_shared_libraries(object_file):
-            new_lib = lib.replace(self.install_prefix, '@rpath').replace('@rpath/lib/', '@rpath/')
+            # Is it an absolute Python path that requires recasting?
+            if is_absolute_python_framework(lib):
+                # -change <lib> @rpath/libpythonX.YY.dylib
+                _, path = lib.split('/Versions/')
+                new_lib = f'@rpath/libpython{path}'.replace('/Python', '.dylib')
+            else:
+                new_lib = lib.replace(self.install_prefix, '@rpath').replace('@rpath/lib/', '@rpath/')
             # These are leftovers from meson thinking RPATH == prefix
             if new_lib == lib:
                 continue
+            # needs splitting into <framework prefix>/Python
+            # -add-rpath <framework prefix>/lib (below)
+            if is_absolute_python_framework(lib):
+                p = f"{lib.removesuffix('/Python')}/lib"
+                cmd = [INT_CMD, '-add_rpath', p, object_file]
+                shell.new_call(cmd, fail=False, logfile=self.logfile)
             cmd = [INT_CMD, '-change', lib, new_lib, object_file]
             shell.new_call(cmd, fail=False, logfile=self.logfile)
-
-    def change_lib_path(self, object_file, old_path, new_path):
-        for lib in self.list_shared_libraries(object_file):
-            if old_path in lib:
-                new_path = lib.replace(old_path, new_path)
-                cmd = [INT_CMD, '-change', lib, new_path, object_file]
-                shell.new_call(cmd, fail=True, logfile=self.logfile)
 
     def parse_dir(self, dir_path, filters=None):
         for dirpath, dirnames, filenames in os.walk(dir_path):
