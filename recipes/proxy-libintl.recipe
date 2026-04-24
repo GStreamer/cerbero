@@ -3,13 +3,13 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'proxy-libintl'
-    version = '0.4'
+    version = '0.5'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/frida/proxy-libintl/archive/refs/tags/%(version)s.tar.gz'
     tarball_name = 'proxy-libintl-%(version)s.tar.gz'
-    tarball_checksum = '13ef3eea0a3bc0df55293be368dfbcff5a8dd5f4759280f28e030d1494a5dffb'
+    tarball_checksum = 'f7a1cbd7579baaf575c66f9d99fb6295e9b0684a28b095967cfda17857595303'
 
     patches = ['proxy-libintl/0001-Rename-symbols-for-compatibility-with-gettext.patch']
 
