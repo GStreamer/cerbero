@@ -3,12 +3,13 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.2.9999'
-    remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/meson-ports/{0}.git'.format(name)}
-    commit = 'meson-3.2.9999.3'
+    version = '3.2.9999.5'
     licenses = [{License.MIT: ['LICENSE']}]
+    stype = SourceType.TARBALL
     btype = BuildType.MESON
-    patches = [name + '/Add-risc-v-target-support.patch']
+    url = f'https://gitlab.freedesktop.org/gstreamer/meson-ports/libffi/-/archive/meson-{version}/libffi-meson-{version}.tar.bz2'
+    tarball_dirname = f'libffi-meson-{version}'
+    tarball_checksum = 'b4d403932a8860589e571300e807e40bb4f7d9d2630c8ec19c29fb9e7b0fd227'
 
     files_libs = ['libffi']
     files_devel = ['include/ffi*.h', '%(libdir)s/pkgconfig/libffi.pc']
