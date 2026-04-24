@@ -5,17 +5,14 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
 
     name = 'tinyalsa'
-    version = '2.0.0'
+    version = '2.0.0.r28'
     licenses = [{License.BSD_3_Clause: ['NOTICE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = f'https://github.com/tinyalsa/tinyalsa/archive/refs/tags/v{version}.tar.gz'
-    tarball_checksum = '573ae0b2d3480851c1d2a12503ead2beea27f92d44ed47b74b553ba947994ef1'
-
-    patches = [
-        # https://github.com/tinyalsa/tinyalsa/pull/216
-        f'{name}/0001-meson-add-attributes-h-and-plugin-h.patch',
-    ]
+    # Mirrored because the original source tarball is generated one, so the checksum keeps varying
+    # source: https://android.googlesource.com/platform/external/tinyalsa_new/+archive/android-15.0.0_r28.tar.gz
+    url = f'https://gstreamer.freedesktop.org/src/mirror/tinyalsa/tinyalsa-{version}.tar.xz'
+    tarball_checksum = 'd4c73a097c771db7c25d223266ab8056e61a94a997b9a263b6e8e58beacd7122'
 
     platform_deps = {
         Platform.LINUX: ['libpulse'],
