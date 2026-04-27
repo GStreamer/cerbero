@@ -291,7 +291,7 @@ class InnoSetup(PackagerBase):
             rules.write('Uninstallable=not is_portable_mode_enabled\n')
             # Template install and registration requires admin access
             rules.write('PrivilegesRequired=admin\n')
-            rules.write('PrivilegesRequiredOverridesAllowed=dialog\n')
+            rules.write('PrivilegesRequiredOverridesAllowed=dialog commandline\n')
 
             # Generate Runtime + Devel package
             rules.write('\n[Types]\n')
