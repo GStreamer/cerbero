@@ -13,6 +13,8 @@ class Recipe(recipe.Recipe):
 
     files_library = ['lib/GStreamer']
 
+    files_share = ['share/gstreamer/uninstaller.py']
+
     def prepare(self):
         # Just reexports symbols
         self.skip_steps = [BuildSteps.DSYMUTIL]
@@ -45,6 +47,14 @@ class Recipe(recipe.Recipe):
             raise FatalError('No gstreamer libraries were found in the prefix!')
         fwlib = DynamicFrameworkLibrary(self.config.min_osx_sdk_version, self.config.target_distro, libname, install_name, libs, self.config.target_arch, env=self.env)
         fwlib.create()
+
+        dest_dir = os.path.join(self.config.prefix, 'share', 'gstreamer')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'macos', 'uninstaller.py'),
+            dest_dir
+        )
 
     def have_symbol_files(self):
         return False
