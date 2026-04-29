@@ -114,6 +114,16 @@ class Recipe(recipe.Recipe):
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.a',
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.la',
             ]
+            # MSVC import library for the gst<name>.dll built in the
+            # shared half of library_type=BOTH (Linux/Windows default).
+            # cargo-c installs it as <name>.lib (MSVC naming); ship it
+            # so link.exe can resolve cargo:rustc-link-lib=<name> from
+            # Rust consumers using the bundle (e.g. system-deps' binary
+            # feature). Not the static archive — static linking goes
+            # through libgstrsworkspace.a (the dragonfire meld) below.
+            if (self.config.target_platform == Platform.WINDOWS
+                    and self.config.variants.visualstudio):
+                d.append(f'%(libdir)s/gstreamer-1.0/gst{name}.lib')
 
     def requires_melding(self):
         if Platform.is_apple(self.config.target_platform):
