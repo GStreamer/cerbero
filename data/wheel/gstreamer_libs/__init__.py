@@ -92,11 +92,11 @@ def gstreamer_env():
 
     if sys.platform == 'win32':
         try:
-            from gstreamer_msvc_runtime import environment as gp_msvc_env
+            from gstreamer_ext_runtime import environment as gp_ext_env
         except ImportError:
-            gp_msvc_env = {}
+            gp_ext_env = {}
     else:
-        gp_msvc_env = {}
+        gp_ext_env = {}
 
     env = os.environ.copy()
 
@@ -118,7 +118,7 @@ def gstreamer_env():
         gp_gpl_env.items(),
         gp_gplr_env.items(),
         gc_env.items(),
-        gp_msvc_env.items(),
+        gp_ext_env.items(),
     ]
 
     dll_directories = []

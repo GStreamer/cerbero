@@ -437,41 +437,42 @@ class WheelPackager(PackagerBase):
             f.write(json.dumps(package_files_list, indent=1))
 
         # Process the runtime wheel before anything else to prevent conflicts
+        package_name = 'gstreamer_ext_runtime'
+        license = License.LGPLv2_1Plus.acronym
+        files_list = []
+        dependencies = []
+        features = {}
+        output_dir = self.output_dir / package_name
+        output_dir.mkdir(parents=True, exist_ok=True)
         if self.config.variants.visualstudio:
-            m.action('Adding wheel for Visual C++ Runtime')
+            m.action('Filling redistributable wheel with Visual C++ Runtime')
             vc_tools_redist_dir = self.config.msvc_env_for_toolchain['VCToolsRedistDir']
             if self.config.target_arch == Architecture.X86:
                 redist_path = Path(vc_tools_redist_dir.get(), 'x86')
             else:
                 redist_path = Path(vc_tools_redist_dir.get(), 'x64')
 
-            package_name = 'gstreamer_msvc_runtime'
             files_list = [f.as_posix() for f in redist_path.glob('**/*.dll')]
             license = License.Proprietary.acronym
-            dependencies = []
-            features = {}
-
-            output_dir = self.output_dir / package_name
-            output_dir.mkdir(parents=True, exist_ok=True)
 
             for source in files_list:
                 dest = output_dir / package_name / 'bin'
                 dest.mkdir(parents=True, exist_ok=True)
                 shutil.copy(source, dest)
 
-            classifiers = self._get_classifiers(license)
+        classifiers = self._get_classifiers(license)
 
-            self._create_wheel(
-                package_name,
-                files_list,
-                license,
-                classifiers,
-                dependencies,
-                features,
-                'MSVC runtime redist for GStreamer',
-            )
+        self._create_wheel(
+            package_name,
+            files_list,
+            license,
+            classifiers,
+            dependencies,
+            features,
+            'Platform-specific runtime redist for GStreamer',
+        )
 
-            package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.wheel_version}')
+        package_dependencies['gstreamer_libs'].append(f'{package_name} ~= {self.wheel_version}')
 
         for package_name, files_list in package_files_list.items():
             license = ' AND '.join(lic.acronym for lic in package_licenses[package_name])
