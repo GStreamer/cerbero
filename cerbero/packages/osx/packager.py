@@ -224,13 +224,13 @@ class ProductPackage(PackagerBase):
     """
 
     PKG_EXT = '.pkg'
-    home_folder = False
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.packages = self.store.get_package_deps(package)
         self.packages_paths = {}
         self.empty_packages = {}
+        self.home_folder = True
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -528,7 +528,6 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     The product package will only contain the ios-framework package
     """
 
-    home_folder = True
     user_resources = []
 
     def __init__(self, config, package, store, xcframework=False):
@@ -536,6 +535,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self.readable_platform = self.config._get_toolchain_target_platform_arch(readable=True)[0]
         self.platform_arch = self.config._get_toolchain_target_platform_arch()[0]
         self.xcframework = xcframework
+        self.home_folder = True
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False, install_dir=None):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
