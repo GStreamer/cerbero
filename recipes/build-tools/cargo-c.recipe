@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'cargo-c'
-    version = '0.10.21'
+    version = '0.10.22'
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
-    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.10.21.tar.gz'
-    tarball_checksum = '819b62a61e5271924dffd122b7c713e446e5d65f3e630bbe9b90d4d46513d8fa'
+    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v%(version)s.tar.gz'
+    tarball_checksum = 'a7b00539437932f2a17a72b97d9c2142367a2d70ee20f9f1692a8b13c7255332'
     tarball_dirname = '%(name)s-%(version)s'
     # Get this from the release page on github
     cargo_lock = f'{name}/{version}-Cargo.lock'
