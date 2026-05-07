@@ -391,13 +391,13 @@ class InnoSetup(PackagerBase):
             # Set up environment variables and registry key
             root_env_var = self.package.get_root_env_var(platform_arch)
             rules.write('\n[Setup]\n')
-            rules.write('ChangesEnvironment=yes\n')
+            rules.write('ChangesEnvironment=not is_portable_mode_enabled\n')
             rules.write('\n[Tasks]\n')
             rules.write(
-                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce;\n'
+                f'Name: "environment_variables"; Description: "Set or update the {root_env_var} environment variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: not is_portable_mode_enabled;\n'
             )
             rules.write(
-                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce;\n'
+                f'Name: "registry_install_dir"; Description: "Set or update the {registry_subkey_name} Registry variable"; Components: gstreamer_1_0_core/runtime; Flags: checkedonce; Check: not is_portable_mode_enabled;\n'
             )
             rules.write('\n[Registry]\n')
             rules.write(
