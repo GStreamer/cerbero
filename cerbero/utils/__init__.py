@@ -34,6 +34,7 @@ import gettext
 import platform as pplatform
 import re
 import asyncio
+from glob import glob
 from pathlib import Path, PureWindowsPath, PurePath
 from collections.abc import Iterable
 
@@ -491,11 +492,10 @@ def get_wix_prefix(config):
         if not os.path.exists(wix_prefix):
             wix_prefix = wix_prefix % ' (x86)'
     if not os.path.exists(wix_prefix):
-        wix_prefix = 'C:/Program Files%s/Wix Toolset v3.11/bin'
-        if not os.path.exists(wix_prefix):
-            wix_prefix = wix_prefix % ' (x86)'
-    if not os.path.exists(wix_prefix):
-        raise FatalError("The required packaging tool 'WiX' was not found")
+        wix_prefix = glob('C:/Program Files*/Wix Toolset v3.1*/bin')
+        if not wix_prefix:
+            raise FatalError('The required packaging tool WiX 3.x was not found')
+        wix_prefix = wix_prefix[0]
     return escape_path(to_unixpath(wix_prefix))
 
 
