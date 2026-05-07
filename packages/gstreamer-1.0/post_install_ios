@@ -1,6 +1,7 @@
 #!/bin/sh
 
-if [ -d "~/Library/Developer/GStreamer/iPhone.sdk/Templates/" ] then
+if [ -d "~/Library/Developer/GStreamer/iPhone.sdk/Templates/" ]
+then
     mkdir -p ~/Library/Developer/Xcode/Templates/
     cp -r ~/Library/Developer/GStreamer/iPhone.sdk/Templates/* ~/Library/Developer/Xcode/Templates/
 fi
