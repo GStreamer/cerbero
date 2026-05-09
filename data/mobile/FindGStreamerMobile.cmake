@@ -461,7 +461,7 @@ if (GSTREAMER_IS_MOBILE)
                 COMMAND
                     "${CMAKE_COMMAND}" -E copy
                     "${GStreamer_NDK_BUILD_PATH}/${LOCAL_FILE}"
-                    "${GStreamer_JAVA_SRC_DIR}/org/freedesktop/gstreamer/"
+                    "${GStreamer_JAVA_SRC_DIR}/org/freedesktop/gstreamer/${LOCAL_FILE}"
                 BYPRODUCTS
                     "${GStreamer_JAVA_SRC_DIR}/org/freedesktop/gstreamer/${LOCAL_FILE}"
             )
