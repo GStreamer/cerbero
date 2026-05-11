@@ -3,7 +3,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-good-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '1ace2d8ec74f632d82eab5006753a27fe0c2402db4ca94d63271e494b62f50bf'
+    tarball_checksum = '47f78f500cbd900f758f9ba74288fda0e2ca5a7855096025641e121ffec40a5d'
     meson_options = {# enabled plugins
                      'amrnb': 'enabled',
                      'amrwbdec': 'enabled',
