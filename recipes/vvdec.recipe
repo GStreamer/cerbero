@@ -39,6 +39,9 @@ class Recipe(recipe.Recipe):
              self.config.target_arch == Architecture.X86):
             self.configure_options.append('-DVVDEC_ENABLE_LINK_TIME_OPT=OFF')
 
+        if Platform.is_apple(self.config.target_platform):
+            self.append_env('CXXFLAGS', '-Wno-error=nontrivial-memcall', '-Wno-error=unknown-warning-option')
+
         if self.config.target_platform == Platform.ANDROID:
             # VVdeC uses exceptions internally
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
