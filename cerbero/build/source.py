@@ -288,11 +288,15 @@ class Source(object):
         """
         raise NotImplementedError("'fetch' must be implemented by subclasses")
 
+    @property
+    def extract_lock_key(self):
+        return self.src_dir
+
     async def extract(self):
-        # Could have multiple recipes using the same git repo, or extract
-        # could've already been done in fetch by cargo recipes or meson
-        # recipes that need subprojects.
-        lock = self._extract_locks[self.src_dir]
+        # Could have multiple recipes using the same git repo, the same
+        # GitExtractedTarball tarball, or extract could've already been done in
+        # fetch by cargo recipes or meson recipes that need subprojects.
+        lock = self._extract_locks[self.extract_lock_key]
         async with lock:
             if self.src_dir in self._extract_done:
                 m.log('Extract already completed', logfile=get_logfile(self))
@@ -432,6 +436,17 @@ class Tarball(BaseTarball, Source):
         self.download_dir = self.repo_dir
         BaseTarball.__init__(self)
 
+    @property
+    def extract_lock_key(self):
+        # Multiple recipes may share the same tarball + tarball_dirname while
+        # having different src_dirs (e.g. x265, x265-10bit, x265-12bit). They
+        # all unpack into <sources>/<tarball_dirname> before renaming.
+        #
+        # tarball_is_bomb extracts straight into src_dir, so doesn't need that.
+        if self.tarball_is_bomb or self.tarball_dirname is None:
+            return self.src_dir
+        return os.path.join(self.config.sources, self.tarball_dirname)
+
     async def fetch(self, redownload=False):
         fname = self._get_download_path(self.tarball_name)
         os.makedirs(self.download_dir, exist_ok=True)
@@ -451,12 +466,16 @@ class Tarball(BaseTarball, Source):
             await super().fetch(redownload=redownload)
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project {self.name} to run cargo vendor', logfile=get_logfile(self))
-            await self.extract_impl(fetching=True)
-            self._extract_done.add(self.src_dir)
+            async with self._extract_locks[self.extract_lock_key]:
+                if self.src_dir not in self._extract_done:
+                    await self.extract_impl(fetching=True)
+                    self._extract_done.add(self.src_dir)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
             m.log(f'Extracting project {self.name} to fetch subprojects', logfile=get_logfile(self))
-            await self.extract_impl(fetching=True)
-            self._extract_done.add(self.src_dir)
+            async with self._extract_locks[self.extract_lock_key]:
+                if self.src_dir not in self._extract_done:
+                    await self.extract_impl(fetching=True)
+                    self._extract_done.add(self.src_dir)
 
     async def extract_impl(self, fetching=False):
         m.action(N_('Extracting tarball to %s') % self.src_dir, logfile=get_logfile(self))
