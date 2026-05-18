@@ -310,7 +310,7 @@ if (NOT TARGET GStreamer::mobile AND NOT DEFINED GStreamer_Mobile_MODULE_FILE)
         )
     else()
         configure_file(
-            "${CMAKE_CURRENT_LIST_DIR}/GStreamer/gstreamer_android-1.0.c.in"
+            "${CMAKE_CURRENT_LIST_DIR}/GStreamer/gst_init-1.0.c.in"
             "${GStreamer_Mobile_MODULE_NAME}.c"
         )
     endif()

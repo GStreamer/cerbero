@@ -51,13 +51,13 @@ gst_android_load_gio_modules (void)
 }
 
 #ifdef _WIN32
-#define GSTREAMER_ANDROID_API __declspec(dllexport)
+#define GST_INIT_API __declspec(dllexport)
 #else
-#define GSTREAMER_ANDROID_API __attribute__((visibility("default")))
+#define GST_INIT_API __attribute__((visibility("default")))
 #endif
 
 /* This is called by gst_init() */
-GSTREAMER_ANDROID_API void
+GST_INIT_API void
 gst_init_static_plugins (void)
 {
   @PLUGINS_REGISTRATION@

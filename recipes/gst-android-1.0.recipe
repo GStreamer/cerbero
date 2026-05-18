@@ -27,7 +27,7 @@ class Recipe(recipe.Recipe):
         'share/gst-android/ndk-build/tools',
         'share/gst-android/ndk-build/fontconfig',
         'share/gst-android/ndk-build/GStreamer.java',
-        'share/cmake/GStreamer/gstreamer_android-1.0.c.in',
+        'share/cmake/GStreamer/gst_init-1.0.c.in',
     ]
 
     def prepare(self):
@@ -69,6 +69,6 @@ class Recipe(recipe.Recipe):
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
         shutil.copy(
-            os.path.join(self.config.data_dir, 'mobile', 'gstreamer_android-1.0.c.in'),
+            os.path.join(self.config.data_dir, 'mobile', 'gst_init-1.0.c.in'),
             dest_dir
         )
