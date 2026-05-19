@@ -451,6 +451,8 @@ build cerbero manylinux_2_28 x86_64:
     - '.cerbero mr'
   variables:
     CONFIG: "linux.config"
+  rules:
+    - when: 'never'
 
 #
 # Cerbero Android Universal build
