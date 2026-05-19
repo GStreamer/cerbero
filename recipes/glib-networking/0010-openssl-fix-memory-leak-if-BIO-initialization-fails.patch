@@ -1,0 +1,25 @@
+From 9c477dcc9e0cecbd0d21fc4f8d71384d999b7aa6 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 14:28:36 -0500
+Subject: [PATCH 10/14] openssl: fix memory leak if BIO initialization fails
+
+---
+ tls/openssl/gtlsbio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tls/openssl/gtlsbio.c b/tls/openssl/gtlsbio.c
+index 9f13dfb..7460ab9 100644
+--- a/tls/openssl/gtlsbio.c
++++ b/tls/openssl/gtlsbio.c
+@@ -331,7 +331,7 @@ BIO_s_gtls (void)
+           !BIO_meth_set_ctrl (methods_gtls, gtls_bio_ctrl) ||
+           !BIO_meth_set_create (methods_gtls, gtls_bio_create) ||
+           !BIO_meth_set_destroy (methods_gtls, gtls_bio_destroy))
+-        return NULL;
++        g_clear_pointer (&methods_gtls, BIO_meth_free);
+     }
+   return methods_gtls;
+ }
+-- 
+2.54.0
+

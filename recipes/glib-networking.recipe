@@ -17,6 +17,23 @@ class Recipe(recipe.Recipe):
                      'gnutls': 'disabled', 'openssl': 'enabled'}
     deps = ['glib', 'libproxy', 'openssl']
 
+    patches = [
+        'glib-networking/0001-openssl-properly-check-return-value-when-writing-to-.patch',
+        'glib-networking/0002-openssl-check-return-value-of-g_tls_bio_alloc.patch',
+        'glib-networking/0003-openssl-check-return-values-of-BIO_new.patch',
+        'glib-networking/0004-openssl-delete-support-for-OCSP-stapling.patch',
+        'glib-networking/0005-Remove-support-for-rehandshaking.patch',
+        'glib-networking/0006-openssl-fix-out-of-bounds-read-in-accepted-cas-prope.patch',
+        'glib-networking/0007-openssl-fix-error-checking-in-certificate-getter.patch',
+        'glib-networking/0008-openssl-Fix-race-when-initializing-extra-data-index.patch',
+        'glib-networking/0009-openssl-reduce-the-scope-of-methods_gtls.patch',
+        'glib-networking/0010-openssl-fix-memory-leak-if-BIO-initialization-fails.patch',
+        'glib-networking/0011-openssl-fix-race-when-initializing-methods_gtls.patch',
+        'glib-networking/0012-openssl-fix-whitespace.patch',
+        'glib-networking/0013-Rename-get_server_identity-functions.patch',
+        'glib-networking/0014-Require-OpenSSL-1.1.1-or-newer.patch',
+    ]
+
     files_plugins = [
         '%(libdir)s/gio/modules/libgiolibproxy%(mext)s',
         '%(libdir)s/gio/modules/libgioopenssl%(mext)s',

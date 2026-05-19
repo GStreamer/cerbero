@@ -1,0 +1,92 @@
+From ec96bd6ff50c668bd88c7f6f754ae573635aa03b Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 14:08:06 -0500
+Subject: [PATCH 08/14] openssl: Fix race when initializing extra data index
+
+If no GTlsConnectionOpenSSL has been created before, and two different
+threads create one at the same time, then the initialization races.
+Fixing this is straightforward: do it in class init, so it only happens
+once, rather than in instance init.
+
+We don't need it at all in GTlsClientConnectionOpenSSL, so delete it.
+
+This bug was spotted in #YWH-PGM9867-250, which I closed as spam because
+it was submitted with a bogus proof of concept program. Shame, because
+it's actually useful to get reports like these.
+---
+ tls/openssl/gtlsclientconnection-openssl.c | 9 +--------
+ tls/openssl/gtlsconnection-openssl.c       | 9 ++++-----
+ 2 files changed, 5 insertions(+), 13 deletions(-)
+
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index f6e30ac..e441b0f 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -275,8 +275,6 @@ g_tls_client_connection_openssl_client_connection_interface_init (GTlsClientConn
+   iface->copy_session_state = g_tls_client_connection_openssl_copy_session_state;
+ }
+ 
+-static int data_index = -1;
+-
+ static int
+ handshake_thread_retrieve_certificate (SSL       *ssl,
+                                        X509     **x509,
+@@ -286,7 +284,7 @@ handshake_thread_retrieve_certificate (SSL       *ssl,
+   GTlsConnectionBase *tls;
+   GTlsCertificate *cert;
+ 
+-  client = SSL_get_ex_data (ssl, data_index);
++  client = G_TLS_CLIENT_CONNECTION_OPENSSL (g_tls_connection_openssl_get_connection_from_ssl (ssl));
+   tls = G_TLS_CONNECTION_BASE (client);
+ 
+   client->ca_list = SSL_get_client_CA_list (client->ssl);
+@@ -518,11 +516,6 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   SSL_set_session (client->ssl, client->session);
+ 
+-  if (data_index == -1) {
+-      data_index = SSL_get_ex_new_index (0, (void *)"gtlsclientconnection", NULL, NULL, NULL);
+-  }
+-  SSL_set_ex_data (client->ssl, data_index, client);
+-
+ #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+   if (hostname && !g_hostname_is_ip_address (hostname))
+     SSL_set_tlsext_host_name (client->ssl, hostname);
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index fffd3a0..8d41270 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -1019,6 +1019,8 @@ g_tls_connection_openssl_close (GTlsConnectionBase  *tls,
+                              N_("Error performing TLS close"));
+ }
+ 
++static int data_index = -1;
++
+ static void
+ g_tls_connection_openssl_class_init (GTlsConnectionOpensslClass *klass)
+ {
+@@ -1040,9 +1042,9 @@ g_tls_connection_openssl_class_init (GTlsConnectionOpensslClass *klass)
+   base_class->write_fn                                   = g_tls_connection_openssl_write;
+   base_class->write_message_fn                           = g_tls_connection_openssl_write_message;
+   base_class->close_fn                                   = g_tls_connection_openssl_close;
+-}
+ 
+-static int data_index = -1;
++  data_index = SSL_get_ex_new_index (0, (void *)"gtlsconnection", NULL, NULL, NULL);
++}
+ 
+ static gboolean
+ g_tls_connection_openssl_initable_init (GInitable     *initable,
+@@ -1069,9 +1071,6 @@ g_tls_connection_openssl_initable_init (GInitable     *initable,
+   ssl = g_tls_connection_openssl_get_ssl (openssl);
+   g_assert (ssl);
+ 
+-  if (data_index == -1) {
+-      data_index = SSL_get_ex_new_index (0, (void *)"gtlsconnection", NULL, NULL, NULL);
+-  }
+   SSL_set_ex_data (ssl, data_index, openssl);
+ 
+   if (base_io_stream)
+-- 
+2.54.0
+

@@ -1,0 +1,35 @@
+From 9d2a4a3579feadb3974dbf07f4988b714a2b30ab Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 13:28:27 -0500
+Subject: [PATCH 07/14] openssl: fix error checking in certificate getter
+
+This was spotted by seaslug in #YWH-PGM9867-122.
+---
+ tls/openssl/gtlscertificate-openssl.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tls/openssl/gtlscertificate-openssl.c b/tls/openssl/gtlscertificate-openssl.c
+index 4fa5286..d8e9d18 100644
+--- a/tls/openssl/gtlscertificate-openssl.c
++++ b/tls/openssl/gtlscertificate-openssl.c
+@@ -351,7 +351,7 @@ g_tls_certificate_openssl_get_property (GObject    *object,
+     case PROP_CERTIFICATE:
+       /* NOTE: we do the two calls to avoid openssl allocating the buffer for us */
+       size = i2d_X509 (openssl->cert, NULL);
+-      if (size < 0)
++      if (size <= 0)
+         certificate = NULL;
+       else
+         {
+@@ -359,7 +359,7 @@ g_tls_certificate_openssl_get_property (GObject    *object,
+           certificate->len = size;
+           data = certificate->data;
+           size = i2d_X509 (openssl->cert, &data);
+-          if (size < 0)
++          if (size <= 0)
+             {
+               g_byte_array_free (certificate, TRUE);
+               certificate = NULL;
+-- 
+2.54.0
+
