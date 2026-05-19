@@ -123,9 +123,13 @@ class BaseCache(Command):
 
     def get_distro_and_arch(self, config):
         distro = config.target_distro
+        distro_version = config.target_distro_version
         target_arch = config.target_arch
         if distro == Distro.REDHAT:
-            distro = 'fedora'
+            if distro_version.startswith('fedora'):
+                distro = 'fedora'
+            elif distro_version.startswith('redhat'):
+                distro = 'centos'
         elif distro == Distro.WINDOWS:
             # When targeting Windows, we need to differentiate between mingw,
             # and msvc jobs. When cross-compiling this will be
