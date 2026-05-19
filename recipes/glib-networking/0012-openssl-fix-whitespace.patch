@@ -1,0 +1,25 @@
+From 424c68cddc60296b47f6e9b7b43ca439d637519a Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 14:25:40 -0500
+Subject: [PATCH 12/14] openssl: fix whitespace
+
+---
+ tls/openssl/gtlsbio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tls/openssl/gtlsbio.c b/tls/openssl/gtlsbio.c
+index 11335ce..8270cf2 100644
+--- a/tls/openssl/gtlsbio.c
++++ b/tls/openssl/gtlsbio.c
+@@ -346,7 +346,7 @@ g_tls_bio_alloc (GTlsBio **out_gbio)
+   BIO *ret;
+   GTlsBio *gbio;
+ 
+-  ret = BIO_new(BIO_s_gtls ());
++  ret = BIO_new (BIO_s_gtls ());
+   if (!ret)
+     return NULL;
+ 
+-- 
+2.54.0
+

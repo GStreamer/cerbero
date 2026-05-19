@@ -1,0 +1,146 @@
+From 7729908d75868492e0a4694af434d0915d101605 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@redhat.com>
+Date: Fri, 16 Jan 2026 11:59:53 -0600
+Subject: [PATCH 05/14] Remove support for rehandshaking
+
+For 6 years now, since glib!1305, our documentation has indicated that
+initiating a rehandshake is no longer supported and does nothing. (The
+only other way to rehandshake would be if the peer requests it, but
+glib-networking has always ignored such requests.)
+
+Although I updated the documentation to indicate that rehandshaking no
+longer does anything, I apparently only removed the code only on a side
+branch that never landed, then forgot about the problem. So actually,
+rehandshaking is still supported, provided TLS 1.2 is in use. This is
+not very useful because there is no way to check whether TLS 1.2 is in
+use.
+
+The rehandshake tests are now failing for OpenSSL when newer OpenSSL
+verisons are used, and when testing TLS 1.3, because glib-networking
+fails the rehandshake if the peer does not support safe renegotiation,
+and OpenSSL has stopped advertising safe renegotiation in TLS 1.3, which
+is fine because renegotiation does not exist anymore in TLS 1.3.
+
+This seems like a good opportunity to simplify our code and tests. I
+would be very surprised if any application using GTlsConnection actually
+intentionally performs rehandshakes, so it should be safe to remove.
+
+I thought about keeping the tests in order to test that nothing happens
+if a rehandshake is attempted, but that's simply not worth the added
+complexity.
+
+Fixes #222
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/267>
+---
+ tls/openssl/gtlsconnection-openssl.c | 66 +---------------------------
+ 1 file changed, 1 insertion(+), 65 deletions(-)
+
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index 5191d6a..fffd3a0 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -87,18 +87,6 @@ g_tls_connection_openssl_finalize (GObject *object)
+   G_OBJECT_CLASS (g_tls_connection_openssl_parent_class)->finalize (object);
+ }
+ 
+-static GTlsSafeRenegotiationStatus
+-g_tls_connection_openssl_handshake_thread_safe_renegotiation_status (GTlsConnectionBase *tls)
+-{
+-  GTlsConnectionOpenssl *openssl = G_TLS_CONNECTION_OPENSSL (tls);
+-  SSL *ssl;
+-
+-  ssl = g_tls_connection_openssl_get_ssl (openssl);
+-
+-  return SSL_get_secure_renegotiation_support (ssl) ? G_TLS_SAFE_RENEGOTIATION_SUPPORTED_BY_PEER
+-                                                    : G_TLS_SAFE_RENEGOTIATION_UNSUPPORTED;
+-}
+-
+ static GTlsConnectionBaseStatus
+ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+                 GIOCondition            direction,
+@@ -156,7 +144,7 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+   err_lib = ERR_GET_LIB (err);
+   reason = ERR_GET_REASON (err);
+ 
+-  if (g_tls_connection_base_is_handshaking (tls) && !g_tls_connection_base_ever_handshaked (tls))
++  if (g_tls_connection_base_is_handshaking (tls))
+     {
+       if (reason == SSL_R_SSLV3_ALERT_HANDSHAKE_FAILURE && my_error)
+         {
+@@ -226,16 +214,6 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+       return G_TLS_CONNECTION_BASE_ERROR;
+     }
+ 
+-#ifdef SSL_R_NO_RENEGOTIATION
+-  if (reason == SSL_R_NO_RENEGOTIATION)
+-    {
+-      g_clear_error (&my_error);
+-      g_set_error_literal (error, G_TLS_ERROR, G_TLS_ERROR_MISC,
+-                           _("Secure renegotiation is disabled"));
+-      return G_TLS_CONNECTION_BASE_REHANDSHAKE;
+-    }
+-#endif
+-
+ #ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
+   if (reason == SSL_R_UNEXPECTED_EOF_WHILE_READING)
+     {
+@@ -590,46 +568,6 @@ g_tls_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+   *ciphersuite_name = g_strdup (SSL_get_cipher_name (ssl));
+ }
+ 
+-static int
+-perform_rehandshake (SSL      *ssl,
+-                     gpointer  user_data)
+-{
+-  GTlsConnectionBase *tls = user_data;
+-  int ret = 1; /* always look on the bright side of life */
+-
+-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+-  if (SSL_version(ssl) >= TLS1_3_VERSION)
+-    ret = SSL_key_update (ssl, SSL_KEY_UPDATE_REQUESTED);
+-  else if (SSL_get_secure_renegotiation_support (ssl) && !(SSL_get_options(ssl) & SSL_OP_NO_RENEGOTIATION))
+-    /* remote and local peers both can rehandshake */
+-    ret = SSL_renegotiate (ssl);
+-  else
+-    g_tls_log_debug (tls, "Secure renegotiation is not supported");
+-#else
+-  ret = SSL_renegotiate (ssl);
+-#endif
+-
+-  return ret;
+-}
+-
+-static GTlsConnectionBaseStatus
+-g_tls_connection_openssl_handshake_thread_request_rehandshake (GTlsConnectionBase  *tls,
+-                                                               gint64               timeout,
+-                                                               GCancellable        *cancellable,
+-                                                               GError             **error)
+-{
+-  /* On a client-side connection, SSL_renegotiate() itself will start
+-   * a rehandshake, so we only need to do something special here for
+-   * server-side connections.
+-   */
+-  if (!G_IS_TLS_SERVER_CONNECTION (tls))
+-    return G_TLS_CONNECTION_BASE_OK;
+-
+-  return perform_openssl_io (G_TLS_CONNECTION_OPENSSL (tls), G_IO_IN | G_IO_OUT,
+-                             perform_rehandshake, tls, timeout, cancellable,
+-                             NULL, error, N_("Error performing TLS handshake"));
+-}
+-
+ static GTlsCertificate *
+ g_tls_connection_openssl_retrieve_peer_certificate (GTlsConnectionBase *tls)
+ {
+@@ -1092,8 +1030,6 @@ g_tls_connection_openssl_class_init (GTlsConnectionOpensslClass *klass)
+   base_class->prepare_handshake                          = g_tls_connection_openssl_prepare_handshake;
+   base_class->verify_chain                               = g_tls_connection_openssl_verify_chain;
+   base_class->complete_handshake                         = g_tls_connection_openssl_complete_handshake;
+-  base_class->handshake_thread_safe_renegotiation_status = g_tls_connection_openssl_handshake_thread_safe_renegotiation_status;
+-  base_class->handshake_thread_request_rehandshake       = g_tls_connection_openssl_handshake_thread_request_rehandshake;
+   base_class->handshake_thread_handshake                 = g_tls_connection_openssl_handshake_thread_handshake;
+   base_class->retrieve_peer_certificate                  = g_tls_connection_openssl_retrieve_peer_certificate;
+   base_class->get_channel_binding_data                   = g_tls_connection_openssl_get_channel_binding_data;
+-- 
+2.54.0
+

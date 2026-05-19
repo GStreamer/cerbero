@@ -1,0 +1,38 @@
+From 176c9f4ca449e737d920ea1f8f22931df8bedb5c Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 14:30:17 -0500
+Subject: [PATCH 11/14] openssl: fix race when initializing methods_gtls
+
+This is global data, but we have no synchronization when initializing
+it. Spotted in #YWH-PGM9867-250.
+---
+ tls/openssl/gtlsbio.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/tls/openssl/gtlsbio.c b/tls/openssl/gtlsbio.c
+index 7460ab9..11335ce 100644
+--- a/tls/openssl/gtlsbio.c
++++ b/tls/openssl/gtlsbio.c
+@@ -319,8 +319,9 @@ static const BIO_METHOD *
+ BIO_s_gtls (void)
+ {
+   static BIO_METHOD *methods_gtls = NULL;
++  static gsize once = 0;
+ 
+-  if (!methods_gtls)
++  if (g_once_init_enter (&once))
+     {
+       methods_gtls = BIO_meth_new (BIO_TYPE_SOURCE_SINK | BIO_get_new_index (), "gtls");
+       if (!methods_gtls ||
+@@ -332,6 +333,8 @@ BIO_s_gtls (void)
+           !BIO_meth_set_create (methods_gtls, gtls_bio_create) ||
+           !BIO_meth_set_destroy (methods_gtls, gtls_bio_destroy))
+         g_clear_pointer (&methods_gtls, BIO_meth_free);
++
++      g_once_init_leave (&once, 1);
+     }
+   return methods_gtls;
+ }
+-- 
+2.54.0
+

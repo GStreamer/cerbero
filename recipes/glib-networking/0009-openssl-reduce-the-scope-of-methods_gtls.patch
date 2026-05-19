@@ -1,0 +1,63 @@
+From c9fe47e6d24dc2ecd3ef3ead7e1c2687224db951 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 14:15:42 -0500
+Subject: [PATCH 09/14] openssl: reduce the scope of methods_gtls
+
+---
+ tls/openssl/gtlsbio.c | 30 ++++++++++++++----------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/tls/openssl/gtlsbio.c b/tls/openssl/gtlsbio.c
+index 1e54943..9f13dfb 100644
+--- a/tls/openssl/gtlsbio.c
++++ b/tls/openssl/gtlsbio.c
+@@ -296,32 +296,30 @@ gtls_bio_gets(BIO  *bio,
+   return -1;
+ }
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-static BIO_METHOD methods_gtls = {
+-  BIO_TYPE_SOURCE_SINK,
+-  "gtls",
+-  gtls_bio_write,
+-  gtls_bio_read,
+-  gtls_bio_puts,
+-  gtls_bio_gets,
+-  gtls_bio_ctrl,
+-  gtls_bio_create,
+-  gtls_bio_destroy
+-};
+-#else
+-static BIO_METHOD *methods_gtls = NULL;
+-#endif
+-
+ #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+ static BIO_METHOD *
+ BIO_s_gtls (void)
+ {
++  static BIO_METHOD methods_gtls = {
++    BIO_TYPE_SOURCE_SINK,
++    "gtls",
++    gtls_bio_write,
++    gtls_bio_read,
++    gtls_bio_puts,
++    gtls_bio_gets,
++    gtls_bio_ctrl,
++    gtls_bio_create,
++    gtls_bio_destroy
++  };
++
+   return &methods_gtls;
+ }
+ #else
+ static const BIO_METHOD *
+ BIO_s_gtls (void)
+ {
++  static BIO_METHOD *methods_gtls = NULL;
++
+   if (!methods_gtls)
+     {
+       methods_gtls = BIO_meth_new (BIO_TYPE_SOURCE_SINK | BIO_get_new_index (), "gtls");
+-- 
+2.54.0
+

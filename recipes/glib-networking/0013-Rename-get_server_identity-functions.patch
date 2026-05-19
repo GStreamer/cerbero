@@ -1,0 +1,39 @@
+From 4667c06efda73810fa93e9015d9b840d2fd45905 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Wed, 1 Apr 2026 16:16:39 -0500
+Subject: [PATCH 13/14] Rename get_server_identity() functions
+
+Unfortunately we have three copies of this function in three different
+places. I am about to reduce the code duplication somewhat by modifying
+only one of them. This will make things even more confusing, so rename
+these two instances to make it more clear that they are no longer
+intended to be identical.
+---
+ tls/openssl/gtlsclientconnection-openssl.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index e441b0f..c1fa5eb 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -94,7 +94,7 @@ g_tls_client_connection_openssl_finalize (GObject *object)
+ }
+ 
+ static const gchar *
+-get_server_identity (GTlsClientConnectionOpenssl *openssl)
++get_server_hostname (GTlsClientConnectionOpenssl *openssl)
+ {
+   if (G_IS_NETWORK_ADDRESS (openssl->server_identity))
+     return g_network_address_get_hostname (G_NETWORK_ADDRESS (openssl->server_identity));
+@@ -477,7 +477,7 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   SSL_CTX_clear_options (client->ssl_ctx, SSL_OP_LEGACY_SERVER_CONNECT);
+ 
+-  hostname = get_server_identity (client);
++  hostname = get_server_hostname (client);
+ 
+   if (hostname)
+     {
+-- 
+2.54.0
+

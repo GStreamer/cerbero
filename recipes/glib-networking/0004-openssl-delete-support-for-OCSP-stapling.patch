@@ -1,0 +1,258 @@
+From 60240c2394d6cc32e3cfba8985fb20518305399b Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@redhat.com>
+Date: Tue, 30 Sep 2025 12:09:35 -0500
+Subject: [PATCH 04/14] openssl: delete support for OCSP stapling
+
+OCSP has been obsolete for a while now. I thought OCSP Must-Staple was a
+pretty good idea, but it has failed and there is no point to supporting
+it anymore. Time to give up and move on.
+
+GnuTLS users will still actually receive OCSP verification so long as
+GnuTLS continues to do so by default, but this is probably a bad thing
+if anything, because no web browsers do so, and occasionally users
+encounter prominent websites that present invalid OCSP responses. I
+don't think maintaining the same behavior for the OpenSSL backend is
+useful.
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/265>
+---
+ tls/openssl/gtlsclientconnection-openssl.c |  53 --------
+ tls/openssl/gtlsdatabase-openssl.c         | 133 ---------------------
+ tls/openssl/gtlsdatabase-openssl.h         |   4 -
+ 3 files changed, 190 deletions(-)
+
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index e98fb0b..dc57b77 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -227,53 +227,6 @@ g_tls_client_connection_openssl_complete_handshake (GTlsConnectionBase   *tls,
+   g_object_notify (G_OBJECT (client), "accepted-cas");
+ }
+ 
+-static GTlsCertificateFlags
+-verify_ocsp_response (GTlsClientConnectionOpenssl *openssl,
+-                      GTlsCertificate             *peer_certificate)
+-{
+-  SSL *ssl = NULL;
+-  OCSP_RESPONSE *resp = NULL;
+-  GTlsDatabase *database;
+-  long len = 0;
+-  unsigned char *p = NULL;
+-
+-  ssl = g_tls_connection_openssl_get_ssl (G_TLS_CONNECTION_OPENSSL (openssl));
+-  len = SSL_get_tlsext_status_ocsp_resp (ssl, &p);
+-  if (p)
+-    {
+-      resp = d2i_OCSP_RESPONSE (NULL, (const unsigned char **)&p, len);
+-      if (!resp)
+-        return G_TLS_CERTIFICATE_GENERIC_ERROR;
+-    }
+-
+-  database = g_tls_connection_get_database (G_TLS_CONNECTION (openssl));
+-
+-  /* If there's no database, then G_TLS_CERTIFICATE_UNKNOWN_CA must be flagged,
+-   * and this function is only called if there are no flags.
+-   */
+-  g_assert (database);
+-
+-  /* Note we have to call this even if resp is NULL, because it will check
+-   * whether Must-Staple is set.
+-   */
+-  return g_tls_database_openssl_verify_ocsp_response (G_TLS_DATABASE_OPENSSL (database),
+-                                                      peer_certificate,
+-                                                      resp);
+-}
+-
+-static GTlsCertificateFlags
+-g_tls_client_connection_openssl_verify_peer_certificate (GTlsConnectionBase   *tls,
+-                                                         GTlsCertificate      *certificate,
+-                                                         GTlsCertificateFlags  flags)
+-{
+-  GTlsClientConnectionOpenssl *openssl = G_TLS_CLIENT_CONNECTION_OPENSSL (tls);
+-
+-  if (flags == 0)
+-    flags = verify_ocsp_response (openssl, certificate);
+-
+-  return flags;
+-}
+-
+ static SSL *
+ g_tls_client_connection_openssl_get_ssl (GTlsConnectionOpenssl *connection)
+ {
+@@ -292,7 +245,6 @@ g_tls_client_connection_openssl_class_init (GTlsClientConnectionOpensslClass *kl
+   gobject_class->set_property         = g_tls_client_connection_openssl_set_property;
+ 
+   base_class->complete_handshake      = g_tls_client_connection_openssl_complete_handshake;
+-  base_class->verify_peer_certificate = g_tls_client_connection_openssl_verify_peer_certificate;
+ 
+   openssl_class->get_ssl              = g_tls_client_connection_openssl_get_ssl;
+ 
+@@ -576,11 +528,6 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   SSL_set_connect_state (client->ssl);
+ 
+-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
+-    !defined(OPENSSL_NO_OCSP)
+-  SSL_set_tlsext_status_type (client->ssl, TLSEXT_STATUSTYPE_ocsp);
+-#endif
+-
+   if (!g_tls_client_connection_openssl_parent_initable_iface->
+       init (initable, cancellable, error))
+     return FALSE;
+diff --git a/tls/openssl/gtlsdatabase-openssl.c b/tls/openssl/gtlsdatabase-openssl.c
+index ec008de..11288cd 100644
+--- a/tls/openssl/gtlsdatabase-openssl.c
++++ b/tls/openssl/gtlsdatabase-openssl.c
+@@ -473,136 +473,3 @@ g_tls_database_openssl_new (GError **error)
+ 
+   return g_initable_new (G_TYPE_TLS_DATABASE_OPENSSL, NULL, error, NULL);
+ }
+-
+-static gboolean
+-check_for_ocsp_must_staple (X509 *cert)
+-{
+-  int idx = -1; /* We ignore the return of this as we only expect one extension. */
+-  STACK_OF(ASN1_INTEGER) *features = X509_get_ext_d2i (cert, NID_tlsfeature, NULL, &idx);
+-
+-  if (!features)
+-    return FALSE;
+-
+-  for (guint i = 0; i < sk_ASN1_INTEGER_num (features); i++)
+-    {
+-      const long feature_id = ASN1_INTEGER_get (sk_ASN1_INTEGER_value (features, i));
+-      if (feature_id == 5 || feature_id == 17) /* status_request, status_request_v2 */
+-        {
+-          sk_ASN1_INTEGER_pop_free (features, ASN1_INTEGER_free);
+-          return TRUE;
+-        }
+-    }
+-
+-  sk_ASN1_INTEGER_pop_free (features, ASN1_INTEGER_free);
+-  return FALSE;
+-}
+-
+-GTlsCertificateFlags
+-g_tls_database_openssl_verify_ocsp_response (GTlsDatabaseOpenssl *self,
+-                                             GTlsCertificate     *chain,
+-                                             OCSP_RESPONSE       *resp)
+-{
+-  GTlsCertificateFlags errors = 0;
+-  GTlsDatabaseOpensslPrivate *priv;
+-  STACK_OF(X509) *chain_openssl = NULL;
+-  OCSP_BASICRESP *basic_resp = NULL;
+-  int ocsp_status = 0;
+-  int i;
+-
+-  chain_openssl = convert_certificate_chain_to_openssl (G_TLS_CERTIFICATE_OPENSSL (chain));
+-  priv = g_tls_database_openssl_get_instance_private (self);
+-  if ((chain_openssl == NULL) ||
+-      (priv->store == NULL))
+-    {
+-      errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-      goto end;
+-    }
+-
+-  /* OpenSSL doesn't provide an API to determine if the chain requires
+-   * an OCSP response (known as Must-Staple) using the status_request
+-   * X509v3 extension. We also seem to have no way of correctly knowing the
+-   * final certificate path that OpenSSL will internally use, so can't do it
+-   * ourselves. So for now we will check only the server certificate to see if
+-   * it sets Must-Staple. This is inconsistent with GnuTLS's behavior, but it
+-   * seems to be the best we can do. Checking *every* certificate for Must-
+-   * Staple would be wrong because we don't want to check certificates that
+-   * OpenSSL does not actually use as part of its final certification path.
+-   */
+-  if (resp == NULL)
+-    {
+-      if (check_for_ocsp_must_staple (sk_X509_value (chain_openssl, 0)))
+-        errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-      goto end;
+-    }
+-
+-  ocsp_status = OCSP_response_status (resp);
+-  if (ocsp_status != OCSP_RESPONSE_STATUS_SUCCESSFUL)
+-    {
+-      errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-      goto end;
+-    }
+-
+-  basic_resp = OCSP_response_get1_basic (resp);
+-  if (basic_resp == NULL)
+-    {
+-      errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-      goto end;
+-    }
+-
+-  if (OCSP_basic_verify (basic_resp, chain_openssl, priv->store, 0) <= 0)
+-    {
+-      errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-      goto end;
+-    }
+-
+-  for (i = 0; i < OCSP_resp_count (basic_resp); i++)
+-    {
+-      OCSP_SINGLERESP *single_resp = OCSP_resp_get0 (basic_resp, i);
+-      ASN1_GENERALIZEDTIME *revocation_time = NULL;
+-      ASN1_GENERALIZEDTIME *this_update_time = NULL;
+-      ASN1_GENERALIZEDTIME *next_update_time = NULL;
+-      int crl_reason = 0;
+-      int cert_status = 0;
+-
+-      if (single_resp == NULL)
+-        continue;
+-
+-      cert_status = OCSP_single_get0_status (single_resp,
+-                                             &crl_reason,
+-                                             &revocation_time,
+-                                             &this_update_time,
+-                                             &next_update_time);
+-      if (!OCSP_check_validity (this_update_time,
+-                                next_update_time,
+-                                300L,
+-                                -1L))
+-        {
+-          errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-          goto end;
+-        }
+-
+-      switch (cert_status)
+-        {
+-        case V_OCSP_CERTSTATUS_GOOD:
+-          break;
+-        case V_OCSP_CERTSTATUS_REVOKED:
+-          errors = G_TLS_CERTIFICATE_REVOKED;
+-          goto end;
+-        case V_OCSP_CERTSTATUS_UNKNOWN:
+-          errors = G_TLS_CERTIFICATE_GENERIC_ERROR;
+-          goto end;
+-        }
+-    }
+-
+-end:
+-  if (chain_openssl)
+-    sk_X509_free (chain_openssl);
+-
+-  if (basic_resp)
+-    OCSP_BASICRESP_free (basic_resp);
+-
+-  if (resp)
+-    OCSP_RESPONSE_free (resp);
+-
+-  return errors;
+-}
+diff --git a/tls/openssl/gtlsdatabase-openssl.h b/tls/openssl/gtlsdatabase-openssl.h
+index f3203c0..092fdee 100644
+--- a/tls/openssl/gtlsdatabase-openssl.h
++++ b/tls/openssl/gtlsdatabase-openssl.h
+@@ -46,8 +46,4 @@ struct _GTlsDatabaseOpensslClass
+ 
+ GTlsDatabaseOpenssl      *g_tls_database_openssl_new                      (GError **error);
+ 
+-GTlsCertificateFlags      g_tls_database_openssl_verify_ocsp_response     (GTlsDatabaseOpenssl *self,
+-                                                                           GTlsCertificate     *chain,
+-                                                                           OCSP_RESPONSE       *resp);
+-
+ G_END_DECLS
+-- 
+2.54.0
+

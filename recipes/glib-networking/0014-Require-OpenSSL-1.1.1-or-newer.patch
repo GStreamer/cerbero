@@ -1,0 +1,558 @@
+From 07fe5120e68db576a12ae0caafab26edcdfac29c Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Fri, 10 Apr 2026 09:49:33 -0500
+Subject: [PATCH 14/14] Require OpenSSL 1.1.1 or newer
+
+This is the version available in RHEL 8.
+
+Also, check OPENSSL_VERSION rather than for macro existence when testing
+for SSL_R_UNEXPECTED_EOF_WHILE_READING. Although this is less specific,
+it makes it easier to know when we can safely remove the preprocessor
+guard in the future.
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/277>
+---
+ tls/openssl/gtlsbio.c                      | 107 +--------------------
+ tls/openssl/gtlsclientconnection-openssl.c |  28 +-----
+ tls/openssl/gtlsconnection-openssl.c       |  12 +--
+ tls/openssl/gtlsserverconnection-openssl.c |  62 +-----------
+ 4 files changed, 10 insertions(+), 199 deletions(-)
+
+diff --git a/tls/openssl/gtlsbio.c b/tls/openssl/gtlsbio.c
+index 8270cf2..6656d76 100644
+--- a/tls/openssl/gtlsbio.c
++++ b/tls/openssl/gtlsbio.c
+@@ -57,16 +57,9 @@ free_gbio (gpointer user_data)
+ static int
+ gtls_bio_create (BIO *bio)
+ {
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  bio->init = 0;
+-  bio->num = 0;
+-  bio->ptr = NULL;
+-  bio->flags = 0;
+-#else
+   BIO_set_init (bio, 0);
+   BIO_set_data (bio, NULL);
+   BIO_clear_flags (bio, ~0);
+-#endif
+   return 1;
+ }
+ 
+@@ -76,18 +69,6 @@ gtls_bio_destroy (BIO *bio)
+   if (!bio)
+     return 0;
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  if (bio->shutdown)
+-    {
+-      if (bio->ptr)
+-        {
+-          free_gbio (bio->ptr);
+-          bio->ptr = NULL;
+-        }
+-      bio->init = 0;
+-      bio->flags = 0;
+-    }
+-#else
+   if (BIO_get_shutdown (bio))
+     {
+       if (BIO_get_data (bio))
+@@ -98,7 +79,6 @@ gtls_bio_destroy (BIO *bio)
+       BIO_clear_flags (bio, ~0);
+       BIO_set_init (bio, 0);
+     }
+-#endif
+ 
+     return 1;
+ }
+@@ -109,30 +89,16 @@ gtls_bio_ctrl (BIO  *b,
+                long  num,
+                void *ptr)
+ {
+-  GTlsBio *gbio;
++  GTlsBio *gbio = BIO_get_data (b);
+   long ret = 1;
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)b->ptr;
+-#else
+-  gbio = BIO_get_data (b);
+-#endif
+-
+   switch (cmd)
+     {
+     case BIO_CTRL_GET_CLOSE:
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-      ret = b->shutdown;
+-#else
+       ret = BIO_get_shutdown (b);
+-#endif
+       break;
+     case BIO_CTRL_SET_CLOSE:
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-      b->shutdown = (int)num;
+-#else
+       BIO_set_shutdown (b, (int)num);
+-#endif
+       break;
+     case BIO_CTRL_DUP:
+     case BIO_CTRL_FLUSH:
+@@ -145,11 +111,9 @@ gtls_bio_ctrl (BIO  *b,
+     case BIO_CTRL_DGRAM_QUERY_MTU:
+       ret = 1400; /* Same as the GnuTLS backend */
+       break;
+-#ifdef BIO_CTRL_EOF
+     case BIO_CTRL_EOF:
+       ret = gbio->reached_eof ? 1 : 0;
+       break;
+-#endif
+     default:
+       g_debug ("Got unsupported command: %d", cmd);
+       ret = 0;
+@@ -168,20 +132,10 @@ gtls_bio_write (BIO        *bio,
+   gssize written;
+   GError *error = NULL;
+ 
+-  if (
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-      !bio->init ||
+-#else
+-      !BIO_get_init (bio) ||
+-#endif
+-      !in || inl == 0)
++  if (!BIO_get_init (bio) || !in || inl == 0)
+     return 0;
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+ 
+   BIO_clear_retry_flags (bio);
+   if (gbio->io_stream)
+@@ -228,20 +182,10 @@ gtls_bio_read (BIO  *bio,
+   gssize read;
+   GError *error = NULL;
+ 
+-  if (
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-      !bio->init ||
+-#else
+-      !BIO_get_init (bio) ||
+-#endif
+-      !out || outl == 0)
++  if (!BIO_get_init (bio) || !out || outl == 0)
+     return 0;
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+ 
+   BIO_clear_retry_flags (bio);
+   if (gbio->io_stream)
+@@ -296,25 +240,6 @@ gtls_bio_gets(BIO  *bio,
+   return -1;
+ }
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-static BIO_METHOD *
+-BIO_s_gtls (void)
+-{
+-  static BIO_METHOD methods_gtls = {
+-    BIO_TYPE_SOURCE_SINK,
+-    "gtls",
+-    gtls_bio_write,
+-    gtls_bio_read,
+-    gtls_bio_puts,
+-    gtls_bio_gets,
+-    gtls_bio_ctrl,
+-    gtls_bio_create,
+-    gtls_bio_destroy
+-  };
+-
+-  return &methods_gtls;
+-}
+-#else
+ static const BIO_METHOD *
+ BIO_s_gtls (void)
+ {
+@@ -338,7 +263,6 @@ BIO_s_gtls (void)
+     }
+   return methods_gtls;
+ }
+-#endif
+ 
+ static BIO *
+ g_tls_bio_alloc (GTlsBio **out_gbio)
+@@ -352,13 +276,8 @@ g_tls_bio_alloc (GTlsBio **out_gbio)
+ 
+   gbio = g_new0 (GTlsBio, 1);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  ret->ptr = gbio;
+-  ret->init = 1;
+-#else
+   BIO_set_data (ret, gbio);
+   BIO_set_init (ret, 1);
+-#endif
+ 
+   *out_gbio = gbio;
+   return ret;
+@@ -398,11 +317,7 @@ g_tls_bio_set_read_cancellable (BIO          *bio,
+ 
+   g_return_if_fail (bio);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+   gbio->read_cancellable = cancellable;
+ }
+ 
+@@ -414,11 +329,7 @@ g_tls_bio_set_read_error (BIO     *bio,
+ 
+   g_return_if_fail (bio);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+   gbio->read_error = error;
+ }
+ 
+@@ -430,11 +341,7 @@ g_tls_bio_set_write_cancellable (BIO          *bio,
+ 
+   g_return_if_fail (bio);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+   gbio->write_cancellable = cancellable;
+ }
+ 
+@@ -446,11 +353,7 @@ g_tls_bio_set_write_error (BIO     *bio,
+ 
+   g_return_if_fail (bio);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+   gbio->write_error = error;
+ }
+ 
+@@ -501,11 +404,7 @@ g_tls_bio_wait_available (BIO          *bio,
+ 
+   g_return_val_if_fail (bio, FALSE);
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-  gbio = (GTlsBio *)bio->ptr;
+-#else
+   gbio = BIO_get_data (bio);
+-#endif
+ 
+   wait_data.done = FALSE;
+   wait_data.timed_out = FALSE;
+diff --git a/tls/openssl/gtlsclientconnection-openssl.c b/tls/openssl/gtlsclientconnection-openssl.c
+index c1fa5eb..cc04174 100644
+--- a/tls/openssl/gtlsclientconnection-openssl.c
++++ b/tls/openssl/gtlsclientconnection-openssl.c
+@@ -305,11 +305,7 @@ handshake_thread_retrieve_certificate (SSL       *ssl,
+       if (key != NULL)
+         {
+           /* increase ref count */
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-          CRYPTO_add (&key->references, 1, CRYPTO_LOCK_EVP_PKEY);
+-#else
+           EVP_PKEY_up_ref (key);
+-#endif
+           *pkey = key;
+ 
+           *x509 = X509_dup (g_tls_certificate_openssl_get_cert (G_TLS_CERTIFICATE_OPENSSL (cert)));
+@@ -350,7 +346,6 @@ static gboolean
+ set_max_protocol (GTlsClientConnectionOpenssl  *client,
+                   GError                      **error)
+ {
+-#ifdef SSL_CTX_set_max_proto_version
+   const gchar *proto;
+ 
+   proto = g_getenv ("G_TLS_OPENSSL_MAX_PROTO");
+@@ -371,12 +366,10 @@ set_max_protocol (GTlsClientConnectionOpenssl  *client,
+             }
+         }
+     }
+-#endif
+ 
+   return TRUE;
+ }
+ 
+-#ifdef SSL_CTX_set1_sigalgs_list
+ static void
+ set_signature_algorithm_list (GTlsClientConnectionOpenssl *client)
+ {
+@@ -388,9 +381,7 @@ set_signature_algorithm_list (GTlsClientConnectionOpenssl *client)
+ 
+   SSL_CTX_set1_sigalgs_list (client->ssl_ctx, signature_algorithm_list);
+ }
+-#endif
+ 
+-#ifdef SSL_CTX_set1_curves_list
+ static void
+ set_curve_list (GTlsClientConnectionOpenssl *client)
+ {
+@@ -402,7 +393,6 @@ set_curve_list (GTlsClientConnectionOpenssl *client)
+ 
+   SSL_CTX_set1_curves_list (client->ssl_ctx, curve_list);
+ }
+-#endif
+ 
+ static int g_tls_client_connection_openssl_new_session (SSL *s, SSL_SESSION *sess)
+ {
+@@ -443,13 +433,8 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+     }
+ 
+   client->ssl_ctx = SSL_CTX_new (g_tls_connection_base_is_dtls (G_TLS_CONNECTION_BASE (client))
+-#if OPENSSL_VERSION_NUMBER >= 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+                                  ? DTLS_client_method ()
+                                  : TLS_client_method ());
+-#else
+-                                 ? DTLSv1_client_method ()
+-                                 : SSLv23_client_method ());
+-#endif
+   if (!client->ssl_ctx)
+     {
+       ERR_error_string_n (ERR_get_error (), error_buffer, sizeof (error_buffer));
+@@ -467,12 +452,10 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   /* Only TLS 1.2 or higher */
+   options = SSL_OP_NO_COMPRESSION |
+-#ifdef SSL_OP_NO_TLSv1_1
+-            SSL_OP_NO_TLSv1_1 |
+-#endif
+             SSL_OP_NO_SSLv2 |
+             SSL_OP_NO_SSLv3 |
+-            SSL_OP_NO_TLSv1;
++            SSL_OP_NO_TLSv1 |
++            SSL_OP_NO_TLSv1_1;
+   SSL_CTX_set_options (client->ssl_ctx, options);
+ 
+   SSL_CTX_clear_options (client->ssl_ctx, SSL_OP_LEGACY_SERVER_CONNECT);
+@@ -496,13 +479,8 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   SSL_CTX_sess_set_new_cb (client->ssl_ctx, g_tls_client_connection_openssl_new_session);
+ 
+-#ifdef SSL_CTX_set1_sigalgs_list
+   set_signature_algorithm_list (client);
+-#endif
+-
+-#ifdef SSL_CTX_set1_curves_list
+   set_curve_list (client);
+-#endif
+ 
+   client->ssl = SSL_new (client->ssl_ctx);
+   if (!client->ssl)
+@@ -516,10 +494,8 @@ g_tls_client_connection_openssl_initable_init (GInitable       *initable,
+ 
+   SSL_set_session (client->ssl, client->session);
+ 
+-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+   if (hostname && !g_hostname_is_ip_address (hostname))
+     SSL_set_tlsext_host_name (client->ssl, hostname);
+-#endif
+ 
+   SSL_set_connect_state (client->ssl);
+ 
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index 8d41270..12662ac 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -166,7 +166,6 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+         }
+     }
+ 
+-#ifdef SSL_R_SHUTDOWN_WHILE_IN_INIT
+   /* XXX: this error happens on ubuntu when shutting down the connection, it
+    * seems to be a bug in a specific version of openssl, so let's handle it
+    * gracefully
+@@ -176,13 +175,8 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+       g_clear_error (&my_error);
+       return G_TLS_CONNECTION_BASE_OK;
+     }
+-#endif
+ 
+-  if (reason == SSL_R_PEER_DID_NOT_RETURN_A_CERTIFICATE
+-#ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
+-      || reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
+-#endif
+-     )
++  if (reason == SSL_R_PEER_DID_NOT_RETURN_A_CERTIFICATE || reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)
+     {
+       g_clear_error (&my_error);
+       g_set_error_literal (error, G_TLS_ERROR, G_TLS_ERROR_CERTIFICATE_REQUIRED,
+@@ -214,7 +208,7 @@ end_openssl_io (GTlsConnectionOpenssl  *openssl,
+       return G_TLS_CONNECTION_BASE_ERROR;
+     }
+ 
+-#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
++#if OPENSSL_VERSION_MAJOR >= 3
+   if (reason == SSL_R_UNEXPECTED_EOF_WHILE_READING)
+     {
+       if (g_tls_connection_get_require_close_notify (G_TLS_CONNECTION (openssl)))
+@@ -607,14 +601,12 @@ openssl_get_binding_tls_unique (GTlsConnectionOpenssl  *tls,
+   gboolean resumed = SSL_session_reused (ssl);
+   size_t len = 64;
+ 
+-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+   if (SSL_version (ssl) >= TLS1_3_VERSION)
+     {
+       g_set_error_literal (error, G_TLS_CHANNEL_BINDING_ERROR, G_TLS_CHANNEL_BINDING_ERROR_GENERAL_ERROR,
+                            _("The request is invalid."));
+       return FALSE;
+     }
+-#endif
+ 
+   /* This is a drill */
+   if (!data)
+diff --git a/tls/openssl/gtlsserverconnection-openssl.c b/tls/openssl/gtlsserverconnection-openssl.c
+index 2940897..bce326f 100644
+--- a/tls/openssl/gtlsserverconnection-openssl.c
++++ b/tls/openssl/gtlsserverconnection-openssl.c
+@@ -268,20 +268,6 @@ g_tls_server_connection_openssl_server_connection_interface_init (GTlsServerConn
+ {
+ }
+ 
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-static void
+-ssl_info_callback (const SSL *ssl,
+-                   int        type,
+-                   int        val)
+-{
+-  if ((type & SSL_CB_HANDSHAKE_DONE) != 0)
+-    {
+-      /* Disable renegotiation (CVE-2009-3555) */
+-      ssl->s3->flags |= SSL3_FLAGS_NO_RENEGOTIATE_CIPHERS;
+-    }
+-}
+-#endif
+-
+ static gboolean
+ set_cipher_list (GTlsServerConnectionOpenssl  *server,
+                  GError                      **error)
+@@ -309,7 +295,6 @@ static gboolean
+ set_max_protocol (GTlsServerConnectionOpenssl  *server,
+                   GError                      **error)
+ {
+-#ifdef SSL_CTX_set_max_proto_version
+   const gchar *proto;
+ 
+   proto = g_getenv ("G_TLS_OPENSSL_MAX_PROTO");
+@@ -330,12 +315,10 @@ set_max_protocol (GTlsServerConnectionOpenssl  *server,
+             }
+         }
+     }
+-#endif
+ 
+   return TRUE;
+ }
+ 
+-#ifdef SSL_CTX_set1_sigalgs_list
+ static void
+ set_signature_algorithm_list (GTlsServerConnectionOpenssl *server)
+ {
+@@ -347,9 +330,7 @@ set_signature_algorithm_list (GTlsServerConnectionOpenssl *server)
+ 
+   SSL_CTX_set1_sigalgs_list (server->ssl_ctx, signature_algorithm_list);
+ }
+-#endif
+ 
+-#ifdef SSL_CTX_set1_curves_list
+ static void
+ set_curve_list (GTlsServerConnectionOpenssl *server)
+ {
+@@ -361,7 +342,6 @@ set_curve_list (GTlsServerConnectionOpenssl *server)
+ 
+   SSL_CTX_set1_curves_list (server->ssl_ctx, curve_list);
+ }
+-#endif
+ 
+ static gboolean
+ g_tls_server_connection_openssl_initable_init (GInitable       *initable,
+@@ -376,13 +356,8 @@ g_tls_server_connection_openssl_initable_init (GInitable       *initable,
+   server->session = SSL_SESSION_new ();
+ 
+   server->ssl_ctx = SSL_CTX_new (g_tls_connection_base_is_dtls (G_TLS_CONNECTION_BASE (server))
+-#if OPENSSL_VERSION_NUMBER >= 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+                                  ? DTLS_server_method ()
+                                  : TLS_server_method ());
+-#else
+-                                 ? DTLSv1_server_method ()
+-                                 : SSLv23_server_method ());
+-#endif
+   if (!server->ssl_ctx)
+     {
+       ERR_error_string_n (ERR_get_error (), error_buffer, sizeof (error_buffer));
+@@ -401,49 +376,18 @@ g_tls_server_connection_openssl_initable_init (GInitable       *initable,
+   /* Only TLS 1.2 or higher */
+   options = SSL_OP_NO_COMPRESSION |
+             SSL_OP_CIPHER_SERVER_PREFERENCE |
+-            SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION |
++            SSL_OP_NO_RENEGOTIATION |
+             SSL_OP_SINGLE_ECDH_USE |
+-#ifdef SSL_OP_NO_TLSv1_1
+-            SSL_OP_NO_TLSv1_1 |
+-#endif
+             SSL_OP_NO_SSLv2 |
+             SSL_OP_NO_SSLv3 |
+-            SSL_OP_NO_TLSv1;
+-
+-#ifdef SSL_OP_NO_RENEGOTIATION
+-  options |= SSL_OP_NO_RENEGOTIATION;
+-#endif
+-
++            SSL_OP_NO_TLSv1 |
++            SSL_OP_NO_TLSv1_1;
+   SSL_CTX_set_options (server->ssl_ctx, options);
+ 
+   SSL_CTX_add_session (server->ssl_ctx, server->session);
+ 
+-#ifdef SSL_CTX_set1_sigalgs_list
+   set_signature_algorithm_list (server);
+-#endif
+-
+-#ifdef SSL_CTX_set1_curves_list
+   set_curve_list (server);
+-#endif
+-
+-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+-# ifdef SSL_CTX_set_ecdh_auto
+-  SSL_CTX_set_ecdh_auto (server->ssl_ctx, 1);
+-# else
+-  {
+-    EC_KEY *ecdh;
+-
+-    ecdh = EC_KEY_new_by_curve_name (NID_X9_62_prime256v1);
+-    if (ecdh)
+-      {
+-        SSL_CTX_set_tmp_ecdh (server->ssl_ctx, ecdh);
+-        EC_KEY_free (ecdh);
+-      }
+-  }
+-# endif
+-
+-  SSL_CTX_set_info_callback (server->ssl_ctx, ssl_info_callback);
+-#endif
+ 
+   cert = g_tls_connection_get_certificate (G_TLS_CONNECTION (initable));
+ 
+-- 
+2.54.0
+
