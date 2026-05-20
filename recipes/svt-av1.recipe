@@ -4,10 +4,8 @@ import shutil
 
 from cerbero.tools.libtool import LibtoolLibrary
 
-class Recipe(recipe.Recipe):
-    name = 'svt-av1'
+class SvtAv1Base:
     version = '2.1.2'
-    licenses = [{License.BSD_3_Clause: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     can_msvc = True
@@ -18,16 +16,7 @@ class Recipe(recipe.Recipe):
         '-DBUILD_APPS=OFF',
         '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     ]
-    # svt-av1 handles BUILD_SHARED_LIBS itself and is ON by default
-    library_type = LibraryType.SHARED
-
-    # Decoder removed in 2.1.1 -- https://gitlab.com/AOMediaCodec/SVT-AV1/-/issues/2182
-    files_bins = []
-    files_libs = ['libSvtAv1Enc']
-    files_devel = [
-        'include/svt-av1/',
-        '%(libdir)s/pkgconfig/SvtAv1Enc.pc',
-    ]
+    library_type = LibraryType.STATIC
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
@@ -38,18 +27,56 @@ class Recipe(recipe.Recipe):
             # https://gitlab.kitware.com/cmake/cmake/-/issues/18277
             self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
 
-        # We only want static libs on iOS and Android
-        if Platform.is_app_platform(self.config.target_platform):
-            self.library_type = LibraryType.STATIC
-
         if self.using_msvc() and self.config.target_arch == Architecture.ARM64:
             self.configure_options += ['-DCOMPILE_C_ONLY=ON']
+
+        # Fix output directory for symbolication (shared) and copy (static)
+        self.configure_options.append(f'-DCMAKE_OUTPUT_DIRECTORY={self.build_dir}/Bin')
+
+
+class SvtAv1StaticRecipe(SvtAv1Base, recipe.Recipe):
+    name = 'svt-av1-static'
+
+    def prepare(self):
+        super().prepare()
+
+    async def install(self):
+        name = 'SvtAv1Enc.lib' if self.using_msvc() else 'libSvtAv1Enc.a'
+        src = Path(self.build_dir) / 'Bin' / name
+        dest = Path(self.config.libdir) / 'libSvtAv1Enc.a'
+        shutil.copy(src, dest)
+
+class SvtAv1Recipe(SvtAv1Base, recipe.Recipe):
+    name = 'svt-av1'
+    deps = []
+    licenses = [{License.BSD_3_Clause: ['LICENSE.md']}]
+    # CMake will ignore the BUILD_STATIC_LIBS bit, which has been completed
+    # by the recipe above
+    library_type = LibraryType.BOTH
+
+    # Decoder removed in 2.1.1 -- https://gitlab.com/AOMediaCodec/SVT-AV1/-/issues/2182
+    files_bins = []
+    files_libs = ['libSvtAv1Enc']
+    files_devel = [
+        'include/svt-av1/',
+        '%(libdir)s/pkgconfig/SvtAv1Enc.pc',
+    ]
+
+    def prepare(self):
+        super().prepare()
+        # We only want static libs on iOS and Android. The
+        # static recipe won't work for this because it doesn't
+        # generate the pkg-config payloads etc.
+        if Platform.is_app_platform(self.config.target_platform):
+            self.library_type = LibraryType.STATIC
+        else:
+            self.deps = ['svt-av1-static']
 
     def post_install(self):
         if self.using_msvc():
             # svt-av1 has a separate (internal) build folder for binaries
             bindir = Path(self.config.prefix, self.extensions['sdir']).as_posix()
-            for f in Path(self.src_dir, 'Bin').glob("**/*.pdb"):
+            for f in Path(self.config_src_dir, 'Bin').glob("**/*.pdb"):
                 shutil.copy(f.as_posix(), bindir)
         dependency_libs=[]
         if self.config.target_platform == Platform.ANDROID:
