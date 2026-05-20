@@ -2,6 +2,9 @@
 
 from cerbero.tools.libtool import LibtoolLibrary
 
+import shutil
+
+
 class Recipe(recipe.Recipe):
     name = 'srt'
     version = '1.5.5'
@@ -21,6 +24,7 @@ class Recipe(recipe.Recipe):
 
     patches = [
         'srt/0001-cmake-Fix-exception-handling-mode-on-MSVC.patch',
+        'srt/0002-Add-static-Win32-build.patch',
     ]
 
     files_libs = ['libsrt']
@@ -29,6 +33,14 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
+
+    async def install(self):
+        await super(recipe.Recipe, self).install()
+        # This step must be idempotent, hence why it's done here
+        if self.using_msvc():
+            shutil.move(
+                    os.path.join(self.config.libdir, 'srt_static.lib'),
+                    os.path.join(self.config.libdir, 'libsrt.a'))
 
     def post_install(self):
         libtool_la = LibtoolLibrary('srt', None, None, None, self.config.libdir,

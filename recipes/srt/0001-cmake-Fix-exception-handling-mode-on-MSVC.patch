@@ -16,7 +16,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 7ed11ef..f3feb56 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1025,6 +1025,9 @@ list(INSERT HEADERS_srt 0 "${CMAKE_CURRENT_BINARY_DIR}/version.h")
+@@ -1093,6 +1093,9 @@ list(INSERT HEADERS_srt 0 "${CMAKE_CURRENT_BINARY_DIR}/version.h")
  include_directories("${CMAKE_CURRENT_BINARY_DIR}")
  
  add_library(srt_virtual OBJECT ${SOURCES_srt} ${SOURCES_srt_extra} ${HEADERS_srt} ${SOURCES_haicrypt} ${SOURCES_common})

@@ -1,0 +1,110 @@
+From 9d116313bbd57e08a3ee80f56e4d00390a7ca614 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 20 May 2026 13:18:05 -0300
+Subject: [PATCH 2/2] Add static Win32 build
+
+---
+ CMakeLists.txt | 54 ++++++++++++++++++++++++++++++--------------------
+ 1 file changed, 33 insertions(+), 21 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7adc20c..118a213 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1092,15 +1092,7 @@ configure_file("srtcore/version.h.in" "version.h" @ONLY)
+ list(INSERT HEADERS_srt 0 "${CMAKE_CURRENT_BINARY_DIR}/version.h")
+ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+ 
+-add_library(srt_virtual OBJECT ${SOURCES_srt} ${SOURCES_srt_extra} ${HEADERS_srt} ${SOURCES_haicrypt} ${SOURCES_common})
+-if (MSVC)
+-        target_compile_options(srt_virtual PRIVATE "/EHsc")
+-endif()
+-
+-if (ENABLE_SHARED)
+-	# Set this to sources as well, as it won't be automatically handled
+-	set_target_properties(srt_virtual PROPERTIES POSITION_INDEPENDENT_CODE 1)
+-endif()
++set(VIRTUAL_srt ${SOURCES_srt} ${SOURCES_srt_extra} ${HEADERS_srt} ${SOURCES_haicrypt} ${SOURCES_common})
+ 
+ macro(srt_set_stdcxx targetname spec)
+ 	set (stdcxxspec ${spec})
+@@ -1132,11 +1124,6 @@ macro(srt_set_stdc targetname spec)
+ 	endif()
+ endmacro()
+ 
+-srt_set_stdcxx(srt_virtual "${USE_CXX_STD_LIB}")
+-srt_set_stdc(srt_virtual "99")
+-
+-set (VIRTUAL_srt $<TARGET_OBJECTS:srt_virtual>)
+-
+ if (srt_libspec_shared)
+ 	add_library(${TARGET_srt}_shared SHARED ${OBJECT_LIB_SUPPORT} ${VIRTUAL_srt})
+ 	# shared libraries need PIC
+@@ -1164,6 +1151,13 @@ if (srt_libspec_shared)
+ 	if (USE_GNUSTL)
+ 		target_link_libraries(${TARGET_srt}_shared PRIVATE ${GNUSTL_LIBRARIES} ${GNUSTL_LDFLAGS})
+ 	endif()
++
++	srt_set_stdcxx(${TARGET_srt}_shared "${USE_CXX_STD_LIB}")
++	srt_set_stdc(${TARGET_srt}_shared "99")
++	target_include_directories(${TARGET_srt}_shared PRIVATE  ${SSL_INCLUDE_DIRS})
++	if (MSVC)
++		target_compile_options(${TARGET_srt}_shared PRIVATE "/EHsc")
++	endif()
+ endif()
+ 
+ if (srt_libspec_static)
+@@ -1198,9 +1192,17 @@ if (srt_libspec_static)
+ 	if (USE_GNUSTL)
+ 		target_link_libraries(${TARGET_srt}_static PRIVATE ${GNUSTL_LIBRARIES} ${GNUSTL_LDFLAGS})
+ 	endif()
+-endif()
+ 
+-target_include_directories(srt_virtual PRIVATE  ${SSL_INCLUDE_DIRS})
++	srt_set_stdcxx(${TARGET_srt}_static "${USE_CXX_STD_LIB}")
++	srt_set_stdc(${TARGET_srt}_static "99")
++	target_include_directories(${TARGET_srt}_static PRIVATE  ${SSL_INCLUDE_DIRS})
++	if (srt_libspec_shared) # for compatibility -Amy
++		set_target_properties(${TARGET_srt}_static PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
++	endif()
++	if (MSVC)
++		target_compile_options(${TARGET_srt}_static PRIVATE "/EHsc")
++	endif()
++endif()
+ 
+ if (MICROSOFT)
+ 	if (SRT_USE_OPENSSL_STATIC_LIBS)
+@@ -1231,15 +1233,25 @@ endforeach()
+ 
+ set (SRT_LIBS_PRIVATE ${SRT_LIBS_PRIVATE} ${PTHREAD_LIBRARY})
+ 
+-target_compile_definitions(srt_virtual PRIVATE -DSRT_EXPORTS )
+-if (ENABLE_SHARED)
+-	target_compile_definitions(srt_virtual PUBLIC -DSRT_DYNAMIC)
++if (srt_libspec_shared)
++	target_compile_definitions(${TARGET_srt}_shared PRIVATE -DSRT_EXPORTS)
++	target_compile_definitions(${TARGET_srt}_shared PUBLIC -DSRT_DYNAMIC)
+ endif()
+ 
+-target_compile_definitions(srt_virtual PRIVATE -DSRT_LOG_SLOWDOWN_FREQ_MS=${SRT_LOG_SLOWDOWN_FREQ_MS})
++if (srt_libspec_shared)
++	target_compile_definitions(${TARGET_srt}_shared PRIVATE -DSRT_LOG_SLOWDOWN_FREQ_MS=${SRT_LOG_SLOWDOWN_FREQ_MS})
++endif()
++if (srt_libspec_static)
++	target_compile_definitions(${TARGET_srt}_static PRIVATE -DSRT_LOG_SLOWDOWN_FREQ_MS=${SRT_LOG_SLOWDOWN_FREQ_MS})
++endif()
+ 
+ if (ENABLE_ENCRYPTION AND "${USE_ENCLIB}" STREQUAL "botan")
+-	add_dependencies(srt_virtual botan)
++	if (srt_libspec_shared)
++		add_dependencies(${TARGET_srt}_shared botan)
++	endif()
++	if (srt_libspec_static)
++		add_dependencies(${TARGET_srt}_static botan)
++	endif()
+ endif()
+ 
+ if (srt_libspec_shared)
+-- 
+2.53.0.windows.3
+
