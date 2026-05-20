@@ -1,15 +1,17 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
+import shutil
+
 from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
 
-class Recipe(recipe.Recipe):
-    name = 'wavpack'
+class WavpackBase:
     version = '5.8.1'
     stype = SourceType.TARBALL
     url = 'https://www.wavpack.com/wavpack-%(version)s.tar.xz'
     tarball_checksum = '7322775498602c8850afcfc1ae38f99df4cbcd51386e873d6b0f8047e55c0c26'
-    licenses = [{License.BSD_3_Clause: ['COPYING']}]
+    tarball_dirname = 'wavpack-%(version)s'
     library_type = LibraryType.STATIC
     btype = BuildType.CMAKE
     configure_options = [
@@ -24,26 +26,47 @@ class Recipe(recipe.Recipe):
     can_msvc = True
 
     patches = [
-        f'{name}/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
-        f'{name}/0002-cmake-Set-SOVERSION-to-match-Autotools.patch',
-        f'{name}/0003-cmake-Skip-setting-ASM-up-with-MSVC.patch',
+        'wavpack/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
+        'wavpack/0002-cmake-Set-SOVERSION-to-match-Autotools.patch',
+        'wavpack/0003-cmake-Skip-setting-ASM-up-with-MSVC.patch',
     ]
-
-    files_libs = ['libwavpack']
-    files_devel = ['include/wavpack', '%(libdir)s/pkgconfig/wavpack.pc']
 
     def prepare(self):
         if self.config.target_arch == Architecture.ARM64 or Platform.is_apple_app_platform(self.config.target_platform):
             self.configure_options.append('-DWAVPACK_ENABLE_ASM=OFF')
-        # We only want static libs on iOS and Android
-        if not Platform.is_app_platform(self.config.target_platform):
-            self.library_type = LibraryType.SHARED
         if self.config.cross_compiling() and self.config.target_platform not in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options.append('-DCOMPILER_SUPPORTS_SYMBOL_MAPS_EXITCODE=0')
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options.append('-DCOMPILER_SUPPORTS_SYMBOL_MAPS=TRUE')
         if self.config.target_arch == Architecture.X86 and self.config.variants.mingw:
             self.append_env('ASMFLAGS', '-m32')
+
+class WavpackStaticRecipe(WavpackBase, recipe.Recipe):
+    name = 'wavpack-static'
+
+    def prepare(self):
+        super().prepare()
+
+    async def install(self):
+        name = 'libwavpack.lib' if self.using_msvc() else 'libwavpack.a'
+        src = Path(self.build_dir) / name
+        dest = Path(self.config.libdir) / 'libwavpack.a'
+        shutil.copy(src, dest)
+
+
+class WavpackRecipe(WavpackBase, recipe.Recipe):
+    name = 'wavpack'
+    # CMake will ignore the BUILD_STATIC_LIBS bit, which has been completed
+    # by the recipe above
+    library_type = LibraryType.BOTH
+    licenses = [{License.BSD_3_Clause: ['COPYING']}]
+    deps = ['wavpack-static']
+
+    files_libs = ['libwavpack']
+    files_devel = ['include/wavpack', '%(libdir)s/pkgconfig/wavpack.pc']
+
+    def prepare(self):
+        super().prepare()
         if self.config.variants.visualstudio:
             self.symbolication_patterns = {
                 Symbolication.SKIP: [],
