@@ -1,19 +1,20 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.tools.libtool import LibtoolLibrary
 
+from pathlib import Path
+import shutil
 
-class Recipe(recipe.Recipe):
-    name = 'lcevcdec'
+
+class LcevcdecBase:
     version = '4.0.4'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://github.com/v-novaltd/LCEVCdec/archive/refs/tags/%(version)s.tar.gz'
     tarball_checksum = '513f71531c66f226ec258289fd6c889844570029faf00ba2d7ebe501008c7db1'
     tarball_dirname = 'LCEVCdec-%(version)s'
-    library_type = LibraryType.SHARED
+    library_type = LibraryType.STATIC
     can_msvc = True
 
-    licenses = [{License.BSD_3_Clause_Clear: ['COPYING']}]
     deps = ['fmt']
 
     configure_options = [
@@ -24,6 +25,41 @@ class Recipe(recipe.Recipe):
         '-DVN_MSVC_RUNTIME_STATIC=OFF',
     ]
 
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.remove_env('CXXFLAGS', '-fno-exceptions')
+
+
+class LcevcdecStaticRecipe(LcevcdecBase, recipe.Recipe):
+    name = 'lcevcdec-static'
+    files_libs = [
+        'liblcevc_dec_api', 'liblcevc_dec_pipeline_cpu',
+        'liblcevc_dec_pipeline_legacy', 'liblcevc_dec_legacy',
+        'liblcevc_dec_api_utility',
+        'liblcevc_dec_extract', 'liblcevc_dec_enhancement',
+        'liblcevc_dec_pixel_processing', 'liblcevc_dec_common',
+        'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline',
+    ]
+
+    def prepare(self):
+        super().prepare()
+
+    async def install(self):
+        for lib in self.files_libs:
+            name = f"{lib.removeprefix('lib')}.lib" if self.using_msvc() else f'{lib}.a'
+            src = Path(self.build_dir) / 'lib' / name
+            dest = Path(self.config.libdir) / f'{lib}.a'
+            shutil.copy(src, dest)
+
+class LcevcdecRecipe(LcevcdecBase, recipe.Recipe):
+    name = 'lcevcdec'
+    # CMake will ignore the BUILD_STATIC_LIBS bit, which has been completed
+    # by the recipe above
+    library_type = LibraryType.BOTH
+    # Complete the licenses with the BOTH recipe
+    licenses = [{License.BSD_3_Clause_Clear: ['COPYING']}]
+    deps = []
+
     files_libs = [
         'liblcevc_dec_api', 'liblcevc_dec_pipeline_cpu',
         'liblcevc_dec_pipeline_legacy', 'liblcevc_dec_legacy',
@@ -31,10 +67,11 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/LCEVC', '%(libdir)s/pkgconfig/lcevc_dec.pc']
 
     def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.remove_env('CXXFLAGS', '-fno-exceptions')
+        super().prepare()
 
-        # We only want static libs on iOS and Android
+        # We only want static libs on iOS and Android. The
+        # static recipe won't work for this because it doesn't
+        # generate the pkg-config payloads etc.
         if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
             self.files_libs += ['liblcevc_dec_api_utility',
@@ -42,7 +79,8 @@ class Recipe(recipe.Recipe):
                 'liblcevc_dec_pixel_processing', 'liblcevc_dec_common',
                 'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline',
             ]
-
+        else:
+            self.deps = ['lcevcdec-static']
 
     def post_install(self):
         # CMake does not generate la files
