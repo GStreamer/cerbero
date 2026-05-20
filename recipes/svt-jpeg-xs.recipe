@@ -1,13 +1,12 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from pathlib import Path
+import shutil
 
 from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
-class Recipe(recipe.Recipe):
-    name = 'svt-jpeg-xs'
+class SvtJpegXsBase:
     version = '0.9.0'
-    licenses = [{License.BSD_2_Clause_Patent: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     can_msvc = True
@@ -21,32 +20,49 @@ class Recipe(recipe.Recipe):
         '-DBUILD_TESTING=OFF',
         '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     ]
+    library_type = LibraryType.STATIC
+
+    def prepare(self):
+        if self.config.target_arch in (Architecture.X86, Architecture.X86_64):
+            self.configure_options.append('-DENABLE_NASM=ON')
+        # Fix output directory for symbolication (shared) and copy (static)
+        self.configure_options.append(f'-DCMAKE_OUTPUT_DIRECTORY={self.build_dir}/Bin/')
+
+
+class SvtJpegXsStaticRecipe(SvtJpegXsBase, recipe.Recipe):
+    name = 'svt-jpeg-xs-static'
+
+    async def install(self):
+        name = 'SvtJpegxs.lib' if self.using_msvc() else 'libSvtJpegxs.a'
+        src = Path(self.build_dir) / 'Bin' / name
+        dest = Path(self.config.libdir) / 'libSvtJpegxs.a'
+        shutil.copy(src, dest)
+
+
+class SvtJpegXsRecipe(SvtJpegXsBase, recipe.Recipe):
+    name = 'svt-jpeg-xs'
+    library_type = LibraryType.BOTH
+    licenses = [{License.BSD_2_Clause_Patent: ['LICENSE.md']}]
+    deps = ['svt-jpeg-xs-static']
 
     files_libs = ['libSvtJpegxs']
     files_devel = [
         'include/svt-jpegxs/',
         '%(libdir)s/pkgconfig/SvtJpegxs.pc'
     ]
-    library_type = LibraryType.SHARED
 
     def prepare(self):
-        if Platform.is_app_platform(self.config.target_platform):
-            self.library_type = LibraryType.STATIC
-
-        if self.config.target_arch in (Architecture.X86, Architecture.X86_64):
-            self.configure_options.append('-DENABLE_NASM=ON')
+        super().prepare()
 
         if self.config.variants.visualstudio:
             self.symbolication_patterns = {
                 Symbolication.SKIP: [],
                 Symbolication.MANUAL: ['SvtJpegxs']
             }
-            # Fix output directory for symbolication
-            self.configure_options.append(f'-DCMAKE_OUTPUT_DIRECTORY={self.build_dir}/Bin/')
 
     # https://github.com/OpenVisualCloud/SVT-JPEG-XS/blob/e1030c6c8ee2fb05b76c3fa14cccf8346db7a1fa/Source/Lib/CMakeLists.txt#L91
     async def install(self):
-        await super(Recipe, self).install()
+        await super(recipe.Recipe, self).install()
         if self.config.target_platform == Platform.WINDOWS:
             lib = f"{'' if self.using_msvc() else 'lib'}SvtJpegxs.dll"
             src = Path(self.config.libdir) / lib
