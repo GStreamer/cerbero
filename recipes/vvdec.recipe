@@ -2,14 +2,16 @@
 
 from cerbero.tools.libtool import LibtoolLibrary
 
+from pathlib import Path
+import shutil
 
-class Recipe(recipe.Recipe):
-    name = 'vvdec'
+
+class VvdecBase:
     version = '3.1.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/fraunhoferhhi/vvdec/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = 'e3e5093acfdcbfd2159f3d0166d451d7ccabd293ed30f3762b481c9c6c0a7512'
-    licenses = [{License.BSD_3_Clause_Clear: ['LICENSE.txt']}]
+    tarball_dirname = 'vvdec-%(version)s'
 
     patches = [
         'vvdec/0001-Do-not-set-_WIN32_WINNT-in-CMake.patch',
@@ -18,18 +20,10 @@ class Recipe(recipe.Recipe):
     can_msvc = True
 
     btype = BuildType.CMAKE
+    library_type = LibraryType.STATIC
     configure_options = ['-DVVDEC_TOPLEVEL_OUTPUT_DIRS=OFF']
 
-    files_libs = ['libvvdec']
-    files_devel = ['include/vvdec', '%(libdir)s/pkgconfig/libvvdec.pc']
-
     def prepare(self):
-        # We only want static libs on iOS and Android
-        if Platform.is_app_platform(self.config.target_platform):
-            self.library_type = LibraryType.STATIC
-        else:
-            self.library_type = LibraryType.SHARED
-
         # Bitcode breaks xcodebuild archiving
         #
         # -flto is broken on x86 windows:
@@ -49,6 +43,27 @@ class Recipe(recipe.Recipe):
             # No NEON on ARMv7
             if self.config.target_arch == Architecture.ARMv7:
                 self.configure_options.append('-DVVDEC_ENABLE_ARM_SIMD=OFF')
+
+class VvdecStaticRecipe(VvdecBase, recipe.Recipe):
+    name = 'vvdec-static'
+
+    def prepare(self):
+        super().prepare()
+
+    async def install(self):
+        name = 'vvdec.lib' if self.using_msvc() else 'libvvdec.a'
+        src = Path(self.build_dir) / 'lib' / name
+        dest = Path(self.config.libdir) / 'libvvdec.a'
+        shutil.copy(src, dest)
+
+class VvdecRecipe(VvdecBase, recipe.Recipe):
+    name = 'vvdec'
+    deps = ['vvdec-static']
+    licenses = [{License.BSD_3_Clause_Clear: ['LICENSE.txt']}]
+    library_type = LibraryType.BOTH
+
+    files_libs = ['libvvdec']
+    files_devel = ['include/vvdec', '%(libdir)s/pkgconfig/libvvdec.pc']
 
     def post_install(self):
         libtool_la = LibtoolLibrary('vvdec', None, None, None, self.config.libdir,
