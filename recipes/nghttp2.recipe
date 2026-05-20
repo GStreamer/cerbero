@@ -13,7 +13,6 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CMAKE
     url = 'https://github.com/nghttp2/nghttp2/releases/download/v1.61.0/%(name)s-%(version)s.tar.gz'
     tarball_checksum = 'aa7594c846e56a22fbf3d6e260e472268808d3b49d5e0ed339f589e9cc9d484c'
-    cmake_generator = 'ninja'
     can_msvc = True
     configure_options = [
         '-DENABLE_LIB_ONLY=ON',
@@ -22,7 +21,6 @@ class Recipe(recipe.Recipe):
         '-DWITH_JEMALLOC=OFF',
         '-DBUILD_STATIC_LIBS=ON'
     ]
-    library_type = LibraryType.BOTH
 
     files_libs = ['libnghttp2']
     files_devel = ['include/nghttp2/nghttp2.h', '%(libdir)s/pkgconfig/libnghttp2.pc']

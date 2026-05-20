@@ -22,7 +22,6 @@ class Recipe(recipe.Recipe):
         '-DWAVPACK_BUILD_WINAMP_PLUGIN=OFF',
     ]
     can_msvc = True
-    cmake_generator = 'ninja'
 
     patches = [
         f'{name}/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',

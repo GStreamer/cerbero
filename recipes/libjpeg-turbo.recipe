@@ -10,8 +10,6 @@ class Recipe(recipe.Recipe):
     licenses = [{License.Libjpeg: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    library_type = LibraryType.BOTH
-    cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
     tarball_checksum = '9564c72b1dfd1d6fe6274c5f95a8d989b59854575d4bbee44ade7bc17aa9bc93'

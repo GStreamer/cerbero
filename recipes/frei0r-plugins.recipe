@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/dyne/frei0r/archive/refs/tags/v%(version)s.tar.gz'
     tarball_dirname = 'frei0r-%(version)s'

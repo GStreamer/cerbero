@@ -21,7 +21,6 @@ class Recipe(recipe.Recipe):
     deps = ['zlib']
 
     can_msvc = True
-    cmake_generator = 'ninja'
 
     patches = [
         'taglib/0002-Build-a-static-and-non-static-version.patch',

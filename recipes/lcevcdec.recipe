@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '513f71531c66f226ec258289fd6c889844570029faf00ba2d7ebe501008c7db1'
     tarball_dirname = 'LCEVCdec-%(version)s'
     library_type = LibraryType.SHARED
-    cmake_generator = 'ninja'
     can_msvc = True
 
     licenses = [{License.BSD_3_Clause_Clear: ['COPYING']}]

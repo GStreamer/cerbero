@@ -10,7 +10,6 @@ class Recipe(recipe.Recipe):
     licenses = [{License.BSD_2_Clause_Patent: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/OpenVisualCloud/SVT-JPEG-XS/archive/refs/tags/v%(version)s.tar.gz'
     tarball_dirname = 'SVT-JPEG-XS-%(version)s'

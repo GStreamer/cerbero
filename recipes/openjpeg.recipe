@@ -9,7 +9,6 @@ class Recipe(recipe.Recipe):
     licenses = [{License.BSD_2_Clause: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/uclouvain/openjpeg/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = '368fe0468228e767433c9ebdea82ad9d801a3ad1e4234421f352c8b06e7aa707'
@@ -20,7 +19,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libopenjp2']
     files_devel = ['include/openjpeg-2.5/',
                    '%(libdir)s/pkgconfig/libopenjp2.pc']
-    library_type = LibraryType.BOTH
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS]:
