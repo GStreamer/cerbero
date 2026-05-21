@@ -288,12 +288,16 @@ class Recipe(recipe.Recipe):
                 # MSVC is already set up
                 self.set_env('CMAKE_GENERATOR', 'Ninja')
             else:
-                bindgen_args = [f'--sysroot={self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}']
-                if 'gst-plugin-vvdec' in self.cargo_packages:
-                    # Use a header provided by gcc's stdlib to determine
-                    # stdbool.h's location
-                    include_folders = [f'-I{f.parent.as_posix()}' for f in Path(self.config.toolchain_prefix).glob('**/sha512intrin.h')]
-                    bindgen_args.extend(include_folders)
+                bindgen_args = [
+                    # Extracted in this order from mingw gcc
+                    f'--sysroot={self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}',
+                    # stdbool.h and sha512intrin.h
+                    f'-I{self.config.toolchain_prefix}/lib/x86_64-linux-gnu/gcc/{self.config.target}/14.2.0/include'
+                    # # c++
+                    # f'-I{self.config.toolchain_prefix}/x86_64-w64-mingw32/include',
+                    # # stdarg.h valist etc.
+                    f'-I/{self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}/include'
+                ]
                 self.set_env('BINDGEN_EXTRA_CLANG_ARGS', ' '.join(bindgen_args))
         elif self.config.target_platform == Platform.ANDROID:
             # For aws-lc-rs
