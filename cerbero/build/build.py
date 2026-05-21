@@ -513,6 +513,9 @@ class MakefilesBase(Build, ModifyEnvBase):
 
         if not self.configure_options:
             self.configure_options = []
+        elif isinstance(self.configure_options, list):
+            # Prepare individual instance, lists are inplace mutable
+            self.configure_options = list(self.configure_options)
 
         if isinstance(self.configure_options, str):
             m.deprecation(f'{self.name}: `configure_options` should be a list instead of a string')
