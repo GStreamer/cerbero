@@ -145,7 +145,12 @@ class BuildTools(BootstrapperBase, Fetch):
             if os.path.isdir(scriptsdir):
                 os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
-        shell.new_call([python, '-m', 'pip', 'install', '-U', 'setuptools==80.10.2', 'packaging'], env=python_env)
+        # pip == 26.0.1 as 26.1 removes support for Xcode's 3.9
+        # Required to avoid copying files to /tmp as that breaks CentOS.
+        # https://github.com/pypa/pip/issues/6265#issuecomment-524667548
+        shell.new_call(
+            [python, '-m', 'pip', 'install', '-U', 'setuptools==80.10.2', 'packaging', 'pip==26.0.1'], env=python_env
+        )
         if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
             # Create an x86_64 python for introspection in universal builds
             python_wrapper = os.path.join(self.config.build_tools_prefix, 'bin', 'python3-x86_64')
