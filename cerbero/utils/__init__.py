@@ -495,7 +495,7 @@ def parse_file(filename, dict):
     if '__file__' not in dict:
         dict['__file__'] = filename
     try:
-        exec(compile(open(filename).read(), filename, 'exec'), dict)
+        exec(compile(open(filename, encoding='utf-8').read(), filename, 'exec'), dict)
     except Exception as ex:
         import traceback
 
