@@ -161,6 +161,16 @@ class WheelPackager(PackagerBase):
                 '[gstreamer_meta](/project/gstreamer-meta/) packages.'
             )
 
+        # Generate a static pre-registry for the gstreamer plugins
+        plugins_dir = os.path.join(output_dir, package_name, 'lib/gstreamer-1.0')
+        if os.path.isdir(plugins_dir):
+            env = self.config.env.copy()
+            m.action(f'Creating plugin cache for {plugins_dir}')
+            shell.new_call(['gst-preregistry-generate', plugins_dir], env=env)
+            if self.config.target_platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
+                m.action(f'Creating x86_64 plugin cache for {plugins_dir}')
+                shell.new_call(['arch', '-x86_64', 'gst-preregistry-generate', plugins_dir], env=env)
+
         # Copy files manually (the last one needs to match the package name)
         shutil.copy(base_tree / 'setup.py', output_dir)
         shutil.copy(base_tree / 'pyproject.toml', output_dir)

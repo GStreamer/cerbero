@@ -16,6 +16,10 @@ class Recipe(recipe.Recipe):
                      'crypto-library' : 'openssl'}
     deps = ['glib', 'gstreamer-1.0', 'openssl']
 
+    patches = [
+        'libnice/0001-gst-Enable-the-static-features-flag-when-available.patch',
+    ]
+
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
     files_devel = [

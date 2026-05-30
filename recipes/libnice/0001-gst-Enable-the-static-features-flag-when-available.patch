@@ -1,0 +1,30 @@
+From eec2e7b69aaf1992901ab8811f7eca917c7cf825 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 30 May 2026 05:22:04 +0530
+Subject: [PATCH] gst: Enable the static features flag when available
+
+Tell gstreamer that our plugin exposes static features, which allows
+the creation of a preregistry cache, to speed up first-time init on
+Windows and macOS.
+---
+ gst/gstnice.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/gst/gstnice.c b/gst/gstnice.c
+index 6bc86d77..56e1fde3 100644
+--- a/gst/gstnice.c
++++ b/gst/gstnice.c
+@@ -44,6 +44,10 @@
+ static gboolean
+ plugin_init (GstPlugin *plugin)
+ {
++#if GST_CHECK_VERSION(1, 29, 1)
++  gst_plugin_set_static_features_flag (plugin);
++#endif
++
+   if (!gst_element_register_nicesrc (plugin))
+     return FALSE;
+ 
+-- 
+2.53.0
+

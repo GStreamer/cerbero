@@ -68,6 +68,7 @@ file_types = [
     ('OpenType', 'copy'),
     ('TrueType', 'copy'),
     ('directory', 'recurse'),
+    ('GStreamer binary registry', 'copy'),
 ]
 
 

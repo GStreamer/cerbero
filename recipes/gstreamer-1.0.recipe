@@ -9,9 +9,11 @@ class Recipe(custom.GStreamer):
     deps = ['glib']
     bash_completions = ['gst-inspect-1.0', 'gst-launch-1.0']
 
-    files_bins = ['gst-inspect-1.0',
-                  'gst-typefind-1.0',
-                  'gst-launch-1.0']
+    files_bins = [
+        'gst-inspect-1.0',
+        'gst-typefind-1.0',
+        'gst-launch-1.0',
+    ]
 
     files_libs = ['libgstbase-1.0', 'libgstcontroller-1.0',
                   'libgstnet-1.0', 'libgstreamer-1.0', 'libgstcheck-1.0']
@@ -83,3 +85,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['ptp-helper'] = 'enabled'
             self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
             self.append_env('RUSTFLAGS', '-g')
+
+        # Generate the plugin cache only if the executable is runnable
+        if self.config.prefix_is_executable():
+            self.files_bins += ['gst-preregistry-generate']

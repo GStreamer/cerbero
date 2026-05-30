@@ -42,3 +42,7 @@ class Package(custom.GStreamer, package.Package):
             self.files.append('gst-plugins-rs:plugins_core')
             self.files_devel.append('gst-plugins-rs:files_devel')
             self.files_devel.append('gst-plugins-rs:plugins_core_devel')
+
+        # Generate the plugin cache only if the executable is runnable
+        if self.config.prefix_is_executable():
+            self.files.append('gst-plugin-cache:plugins_core')
