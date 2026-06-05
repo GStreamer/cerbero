@@ -1,0 +1,20 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+from pathlib import Path
+import shutil
+
+
+class Recipe(recipe.Recipe):
+    name = 'jom'
+    version = '1.1.7'
+    stype = SourceType.TARBALL
+    url = 'https://download.qt.io/official_releases/%(name)s/%(name)s_1_1_7.zip'
+    tarball_checksum = '4c8af345586a9a08fbfd2f613fcac748226d91a75627aa3581b297dd513046fe'
+    tarball_is_bomb = True
+    btype = BuildType.CUSTOM
+
+    async def install(self):
+        bindir = os.path.join(self.config.build_tools_prefix, 'bin')
+        os.makedirs(bindir, exist_ok=True)
+        src = Path(self.config_src_dir) / 'jom.exe'
+        shutil.copy(src, bindir)

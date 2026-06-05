@@ -81,6 +81,9 @@ class BuildTools(BootstrapperBase, Fetch):
         if self.config.variants.rust:
             self.BUILD_TOOLS.append('dragonfire')
 
+        if self.config.target_platform == Platform.WINDOWS:
+            self.BUILD_TOOLS.append('jom')
+
         self.BUILD_TOOLS += self.config.extra_build_tools
 
     def check_build_tools(self):

@@ -117,9 +117,11 @@ class Recipe(recipe.Recipe):
             self.set_env('CPPFLAGS')
             self.set_env('CXXFLAGS')
             self.set_env('LDFLAGS')
-            # Building with MSVC uses nmake, not make
-            self.make = ['nmake', 'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
-            self.make_install = ['nmake', 'install_sw']
+            # Building with MSVC uses jom, neither nmake nor make
+            # Use explicit targets to reduce chances of spurious errors
+            # See https://github.com/conan-io/conan-center-index/issues/26349
+            self.make = ['jom', 'CFLAG=' + cflags, 'LDFLAG=' + ldflags, 'build_libs', 'build_modules', 'build_programs']
+            self.make_install = ['jom', 'install_sw']
         else:
             cflags += '-fPIC -DOPENSSL_PIC'
             if Subsystem.no_process_spawning(self.config.target_subsystem):
@@ -219,6 +221,28 @@ class Recipe(recipe.Recipe):
 
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)
+
+        # now fix the CC and CXX invocations
+        # - CC/CXX is assumed to be a single argument (see
+        #   windows-makefile.tmpl line 261) (affects ccache)
+        # - lib_cflags, dso_cflags and bin_cflags use /Zi which needs to be
+        #   replaced with /Z7 (for allowing ccache hits)
+        # - the flags above specify a single PDB file, which requires writing
+        #   to be serialized with (needed as JOM enabled parallel building)
+        if self.using_msvc():
+            if self.config.use_ccache:
+                shell.replace(
+                    f'{self.build_dir}/makefile', {
+                        '"ccache cl"': '"ccache" "cl"',
+                        '/Zi ': '/Z7 /FS '
+                    }
+                )
+            else:
+                shell.replace(
+                    f'{self.build_dir}/makefile', {
+                        '/Zi ': '/Z7 /FS '
+                    }
+                )
 
     def post_install(self):
         if self.using_msvc():
