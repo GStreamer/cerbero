@@ -635,6 +635,11 @@ class Recipe(custom.GStreamer):
         if Platform.is_apple(self.config.target_platform):
             self.meson_options['applemedia'] = 'enabled'
             self.deps += ['moltenvk']
+            self.files_libs += ['libgstiosurface-1.0']
+            self.files_plugins_devel += [
+                'include/gstreamer-1.0/gst/iosurface',
+                '%(libdir)s/pkgconfig/gstreamer-iosurface-1.0.pc',
+            ]
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['vulkan-android']
             self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
