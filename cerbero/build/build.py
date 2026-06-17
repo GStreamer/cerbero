@@ -1511,12 +1511,12 @@ class CargoC(Cargo):
 
     @modify_environment
     async def compile(self):
-        cmd = [self.cargo, 'cbuild'] + self.get_cargoc_args()
+        cmd = [self.cargo, 'capi', 'build'] + self.get_cargoc_args()
         await self.retry_run(shell.async_call, cmd, self.build_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     async def install(self):
-        cmd = [self.cargo, 'cinstall'] + self.get_cargoc_args()
+        cmd = [self.cargo, 'capi', 'install'] + self.get_cargoc_args()
         await self.retry_run(shell.async_call, cmd, self.build_dir, logfile=self.logfile, env=self.env)
 
 
