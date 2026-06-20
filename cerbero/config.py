@@ -332,6 +332,7 @@ class Config(object):
         'tomllib_path',
         'qt6_qmake_path',
         'system_build_tools',
+        'cmake_system_version',
     ]
 
     _deprecated_properties = [

@@ -1,0 +1,40 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libajantv2'
+    version = '18.0.0'
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    # AJA only support staticlibs
+    library_type = LibraryType.STATIC
+    url = 'https://github.com/aja-video/libajantv2/archive/refs/tags/ntv2_18_0_0.tar.gz'
+    tarball_checksum = '46ea35f131ac795107d953d86de63fe3a490594b8abb109ad2d1efcb2eeaf1fa'
+    tarball_dirname = 'libajantv2-ntv2_18_0_0'
+    licenses = [{License.MIT: ['LICENSE']}]
+    can_msvc = True
+
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch'
+    ]
+
+    files_libs = ['libajantv2']
+    files_devel = [
+        '%(libdir)s/pkgconfig/libajantv2.pc',
+        'include/libajantv2',
+    ]
+
+    platform_deps = {
+        Platform.LINUX: ['libudev']
+    }
+
+    def prepare(self):
+        # The ajabase headers overlay the MSVC STL
+        if self.config.variants.mingw:
+            raise InvalidRecipeError(self, "Unsupported platform")
+
+        if self.using_msvc():
+            # dpx_hdr.cpp(38): error C2556: 'float htonf(float)'
+            # winsock2.h inline defines hton* starting with
+            # _WIN32_WINNT=_WIN32_WINNT_WIN8
+            self.append_env('CFLAGS', '-U_WIN32_WINNT', '-UWINVER')
+            self.append_env('CXXFLAGS', '-U_WIN32_WINNT', '-UWINVER')

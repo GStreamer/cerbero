@@ -668,6 +668,11 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform != Platform.WINDOWS:
             self.enable_plugin('unixfd', 'effects')
 
+        if self.config.target_platform == Platform.LINUX \
+            or self.config.target_subsystem == Subsystem.MACOS \
+            or (self.config.target_platform == Platform.WINDOWS and not self.config.variants.mingw):
+            self.enable_plugin('aja', 'sys', dep='libajantv2')
+
     def post_install(self):
         LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gstreamer-1.0', 'gstbase-1.0']).save()

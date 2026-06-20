@@ -771,6 +771,7 @@ class CMake(MakefilesBase):
             self.configure_options += [
                 f'-DCMAKE_SYSTEM_NAME={system_name}',
                 f'-DCMAKE_SYSTEM_PROCESSOR={self.config.target_arch}',
+                f'-DCMAKE_SYSTEM_VERSION={self.config.cmake_system_version}',
             ]
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic

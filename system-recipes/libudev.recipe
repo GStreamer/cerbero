@@ -1,0 +1,3 @@
+class Recipe(recipe.SystemRecipe):
+    name = 'libudev'
+    pkgconfig_files = ['libudev']
