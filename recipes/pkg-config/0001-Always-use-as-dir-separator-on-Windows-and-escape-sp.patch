@@ -1,0 +1,117 @@
+From 8bcd30ac65a38f9e5439f33e655377e2b0de8def Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 20 Jun 2026 16:57:49 +0530
+Subject: [PATCH] Always use / as dir separator on Windows, and escape space
+
+Shell-esque lexing is used for delimiting, which means arguments are
+split on unescaped space. So we must convert paths with \ to / and
+escape ' ' as '\ '. In that order.
+
+We cannot store the escaped string in search_dirs because it is used
+for searching for pc files. We must only use it when parsing the pc
+files.
+
+There already exists code to do the backslash conversion, but it must
+happen before space-escaping.
+---
+ parse.c | 20 ++++++++++++++++++--
+ pkg.c   | 26 ++++++++------------------
+ 2 files changed, 26 insertions(+), 20 deletions(-)
+
+diff --git a/parse.c b/parse.c
+index b658c7c..fcaa4a7 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1083,6 +1083,20 @@ parse_line (Package *pkg, const char *untrimmed, const char *path,
+   g_free (tag);
+ }
+ 
++char *
++escape_whitespace (const char *path)
++{
++  GString *escaped = g_string_new (NULL);
++  for (const char *p = path; *p; p++)
++    {
++      if (*p == ' ') g_string_append_c (escaped, '\\');
++      g_string_append_c (escaped, *p);
++    }
++  char *ret = escaped->str;
++  g_string_free (escaped, FALSE);
++  return ret;
++}
++
+ Package*
+ parse_package_file (const char *key, const char *path,
+                     gboolean ignore_requires,
+@@ -1134,8 +1148,10 @@ parse_package_file (const char *key, const char *path,
+   if (pkg->vars == NULL)
+     pkg->vars = g_hash_table_new (g_str_hash, g_str_equal);
+ 
+-  /* Variable storing directory of pc file */
+-  g_hash_table_insert (pkg->vars, "pcfiledir", pkg->pcfiledir);
++  /* Variable storing directory of pc file. Escape spaces so that
++   * ${pcfiledir} substitutions survive g_shell_parse_argv() in
++   * parse_libs() / parse_cflags(). */
++  g_hash_table_insert (pkg->vars, "pcfiledir", escape_whitespace (pkg->pcfiledir));
+ 
+   str = g_string_new ("");
+ 
+diff --git a/pkg.c b/pkg.c
+index 87ea549..94b12f2 100644
+--- a/pkg.c
++++ b/pkg.c
+@@ -54,7 +54,13 @@ gboolean ignore_private_libs = TRUE;
+ void
+ add_search_dir (const char *path)
+ {
++#ifdef G_OS_WIN32
++  /* Convert windows path to posix path*/
++  search_dirs = g_list_append (search_dirs,
++      g_strdelimit (g_strdup (path), "\\", '/'));
++#else
+   search_dirs = g_list_append (search_dirs, g_strdup (path));
++#endif
+ }
+ 
+ void
+@@ -136,27 +142,11 @@ scan_dir (char *dirname)
+    */
+   char *dirname_copy = g_strdup (dirname);
+ 
+-  if (dirnamelen > 1 && dirname[dirnamelen-1] == G_DIR_SEPARATOR)
++  if (dirnamelen > 1 && dirname[dirnamelen-1] == '/')
+     {
+       dirnamelen--;
+       dirname_copy[dirnamelen] = '\0';
+     }
+-#ifdef G_OS_WIN32
+-    {
+-      gchar *p;
+-      /* Turn backslashes into slashes or
+-       * g_shell_parse_argv() will eat them when ${prefix}
+-       * has been expanded in parse_libs().
+-       */
+-      p = dirname;
+-      while (*p)
+-        {
+-          if (*p == '\\')
+-            *p = '/';
+-          p++;
+-        }
+-    }
+-#endif
+   dir = g_dir_open (dirname_copy, 0 , NULL);
+   g_free (dirname_copy);
+ 
+@@ -269,7 +259,7 @@ internal_get_package (const char *name, gboolean warn)
+         {
+           path_position++;
+           location = g_strdup_printf ("%s%c%s.pc", (char*)dir_iter->data,
+-                                      G_DIR_SEPARATOR, name);
++                                      '/', name);
+           if (g_file_test (location, G_FILE_TEST_IS_REGULAR))
+             break;
+           g_free (location);
+-- 
+2.45.2.windows.1
+

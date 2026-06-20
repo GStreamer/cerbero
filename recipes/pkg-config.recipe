@@ -32,6 +32,8 @@ class Recipe(recipe.Recipe):
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
         # backported into 2.74.6
         'pkg-config/0001-Fix-glib-build-on-Windows.patch',
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/work_items/585
+        'pkg-config/0001-Always-use-as-dir-separator-on-Windows-and-escape-sp.patch',
     ]
 
     files_bins = ['pkg-config']
