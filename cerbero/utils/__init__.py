@@ -1047,8 +1047,22 @@ def merge_env_value_env(old_env, new_env):
         assert isinstance(old_v, EnvValue)
         if isinstance(old_v, (EnvValueSingle, EnvValueCmd)) or (new_v == old_v):
             ret_env[k] = new_v
-        elif isinstance(old_v, (EnvValuePath, EnvValueArg)):
+        elif isinstance(old_v, EnvValuePath):
             ret_env[k] = new_v + old_v
+        elif isinstance(old_v, EnvValueArg):
+            # -L / -I / -isystem must be prepended
+            # -D / -U must be appended
+            prep = EnvValueArg()
+            app = EnvValueArg()
+            items = iter(new_v)
+            for v in items:
+                if v in ('-L', '-I', '-isystem'):
+                    prep += [v, next(items)]
+                elif v.startswith('-L') or v.startswith('-I') or v.startswith('-isystem'):
+                    prep.append(v)
+                else:
+                    app.append(v)
+            ret_env[k] = prep + old_v + app
         else:
             raise FatalError(
                 "Don't know how to combine the environment "
