@@ -3,16 +3,14 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'ffmpeg'
-    version = '7.1'
+    version = '8.1.2'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '40973d44970dbc83ef302b0609f2e74982be2d85916dd2ee7472d30678a7abe6'
+    tarball_checksum = '464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c'
     patches = [
-        # https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/tree/a66a916f069fe490a3fe418ec54f9cd05dd608be
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/tree/ff59522f2ef9058d67925373982c7b674a0f1fe9
         name + '/0001-Add-Meson-build.patch',
-        # https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg/-/merge_requests/151
-        name + '/fix-textrels.patch',
     ]
 
     btype = BuildType.MESON
