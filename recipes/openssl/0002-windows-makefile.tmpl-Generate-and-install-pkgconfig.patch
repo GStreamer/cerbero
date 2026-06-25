@@ -13,7 +13,7 @@ diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makef
 index 894834cfb7..51ad2e9b5b 100644
 --- a/Configurations/windows-makefile.tmpl
 +++ b/Configurations/windows-makefile.tmpl
-@@ -424,7 +424,7 @@ build_html_docs: $(HTMLDOCS1) $(HTMLDOCS3) $(HTMLDOCS5) $(HTMLDOCS7)
+@@ -425,7 +425,7 @@ build_html_docs: $(HTMLDOCS1) $(HTMLDOCS3) $(HTMLDOCS5) $(HTMLDOCS7)
  	@
  build_generated: $(GENERATED_MANDATORY)
  	@
@@ -22,15 +22,15 @@ index 894834cfb7..51ad2e9b5b 100644
  	@
  build_modules_nodep: $(MODULES)
  	@
-@@ -484,6 +484,7 @@ clean: libclean
+@@ -485,6 +485,7 @@ clean: libclean
  	-del /Q /S /F engines\*.lib engines\*.exp
  	-del /Q /S /F apps\*.lib apps\*.rc apps\*.res apps\*.exp
  	-del /Q /S /F test\*.exp
 +	-del /Q /S /F openssl.pc libcrypto.pc libssl.pc
- 	-rd /Q /S test\test-runs
+ 	-@if exist "$(RESULT_D)" rd /Q /S "$(RESULT_D)"
  
  distclean: clean
-@@ -566,6 +567,14 @@ install_dev: install_runtime_libs
+@@ -567,6 +568,14 @@ install_dev: install_runtime_libs
  	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_LIBS) "$(libdir)"
  	@if "$(SHLIBS)"=="" \
  	 "$(PERL)" "$(SRCDIR)\util\copy.pl" ossl_static.pdb "$(libdir)"
@@ -45,7 +45,7 @@ index 894834cfb7..51ad2e9b5b 100644
  	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(CMAKECONFIGDIR)"
  	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_EXPORTERS_CMAKE) "$(CMAKECONFIGDIR)"
  
-@@ -660,6 +669,45 @@ $(BLDDIR)\apps\openssl.cnf: makefile
+@@ -661,6 +670,45 @@ $(BLDDIR)\apps\openssl.cnf: makefile
  	@if NOT "$(SRCDIR)"=="$(BLDDIR)" copy "$(SRCDIR)\apps\$(@F)" "$(BLDDIR)\apps"
  
  # Building targets ###################################################
@@ -92,5 +92,5 @@ index 894834cfb7..51ad2e9b5b 100644
  makefile: configdata.pm {- join(" ", map { '"'.$_.'"' } @{$config{build_file_templates}}) -}
  	@$(ECHO) "Detected changed: $?"
 -- 
-2.46.0
+2.53.0.windows.3
 

@@ -11,11 +11,11 @@ class Recipe(recipe.Recipe):
     # Note: openssl helpfully moves tarballs somewhere else (old/x.y.z/)
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
-    version = '3.5.0'
+    version = '3.5.7'
     licenses = [License.Apachev2]
     stype = SourceType.TARBALL
     url = 'https://github.com/openssl/openssl/releases/download/openssl-%(version)s/openssl-%(version)s.tar.gz'
-    tarball_checksum = '344d0a79f1a9b08029b0744e2cc401a43f9c90acd1044d09a530b4885a8e9fc0'
+    tarball_checksum = 'a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8'
     deps = ['ca-certificates', 'zlib']
     # Configure script is perl, not shell
     config_sh_needs_shell = False
