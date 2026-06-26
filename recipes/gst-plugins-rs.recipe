@@ -264,7 +264,7 @@ class Recipe(recipe.Recipe):
             self.set_env('LIBRARY_PATH')
 
         if self.requires_melding():
-            self.workspace_lib = Path(self.config.libdir) / 'gstreamer-1.0' / 'libgstrsworkspace.a'
+            self.workspace_lib = Path(self.config.libdir) / 'libgstrsworkspace.a'
             # gstrsworkspace describes the dragonfire-melded workspace
             # meta-library, not a GStreamer plugin (no gst_plugin_*_register
             # entrypoint). Install its .pc under lib/pkgconfig/ rather than
@@ -277,9 +277,9 @@ class Recipe(recipe.Recipe):
             # lib/pkgconfig/ and lib/gstreamer-1.0/pkgconfig/ by default.
             self.workspace_pc = Path(self.config.libdir) / 'pkgconfig' / 'gstrsworkspace.pc'
             # Append the melded library
-            self.files_plugins_core_devel.append('%(libdir)s/gstreamer-1.0/libgstrsworkspace.a')
-            self.files_plugins_core_devel.append('%(libdir)s/pkgconfig/gstrsworkspace.pc')
-            self.skip_pdb_files = ['%(libdir)s/gstreamer-1.0/libgstrsworkspace.a']
+            self.files_devel.append('%(libdir)s/libgstrsworkspace.a')
+            self.files_devel.append('%(libdir)s/pkgconfig/gstrsworkspace.pc')
+            self.skip_pdb_files = ['%(libdir)s/libgstrsworkspace.a']
 
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.platform == Platform.WINDOWS:
