@@ -65,7 +65,8 @@ class Recipe(recipe.Recipe):
             libdir = Path(self.config.prefix) / self.config.rel_libdir
             os.replace(libdir / 'rice-proto.lib', libdir / 'librice-proto.a')
             os.replace(libdir / 'rice-proto.dll.lib', libdir / 'rice-proto.lib')
-        elif self.config.target_subsystem == Subsystem.MACOS:
+        elif self.config.target_platform == Platform.DARWIN and \
+            self.config.target_subsystem == Subsystem.MACOS:
             libraries = [f for f in self.devel_files_list(only_existing=False)
                          if f.endswith('.a')]
             prelinker = Prelink(self.config, self.env, self.logfile)

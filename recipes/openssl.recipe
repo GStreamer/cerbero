@@ -108,7 +108,7 @@ class Recipe(recipe.Recipe):
         cflags = srcdir_include + self.get_env('CFLAGS')
         ldflags = self.get_env('LDFLAGS')
 
-        if self.using_msvc():
+        if self.config.target_platform == Platform.WINDOWS and self.config.variants.visualstudio:
             # Gets converted to C:/MinGW/msys/1.0/utf-8 by MSYS somehow, so
             # just remove it. We only need this for gstreamer sources anyway.
             cflags = cflags.replace('/utf-8', '')

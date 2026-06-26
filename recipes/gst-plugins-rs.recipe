@@ -456,7 +456,8 @@ class Recipe(recipe.Recipe):
                 src = Path(self.config.prefix, f)
                 bak = src.with_suffix('.bak')
                 bak.unlink(missing_ok=True)
-        elif self.config.target_subsystem == Subsystem.MACOS:
+        elif self.config.target_platform == Platform.DARWIN and \
+            self.config.target_subsystem == Subsystem.MACOS:
             libraries = [f for f in self.devel_files_list(only_existing=False)
                          if f.endswith('.a')]
             prelinker = Prelink(self.config, self.env, self.logfile)

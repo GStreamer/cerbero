@@ -117,7 +117,8 @@ class Recipe(recipe.Recipe):
         # removing the bitcode from the static library
         libraries = [f for f in self.devel_files_list(only_existing=False)
                                 if f.endswith('.a')]
-        if self.config.target_subsystem == Subsystem.MACOS:
+        if self.config.target_platform == Platform.DARWIN and \
+            self.config.target_subsystem == Subsystem.MACOS:
             prelinker = Prelink(self.config, self.env, self.logfile)
             for f in libraries:
                 prelinker.prelink(f, '_rsvg*')
