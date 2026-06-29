@@ -44,17 +44,18 @@ cerbero_package_and_check() {
         dlopen_plugins+=(nvcodec va)
     fi
 
+    # Make up some space for the packaging step;
+    # blocks running bundle-source later!
+    if [[ $CONFIG = *macos* ]] || [[ $CONFIG = *-ios-* ]] || [[ $CONFIG = *-tvos-* ]]; then
+        time rm -rf "$(pwd)/${CERBERO_HOME}/sources"
+    fi
+
     ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     if [[ $ARCH = msvc* && $CONFIG = win* ]] || [[ $CONFIG = *macos* ]] || [[ $ARCH = *manylinux* ]]; then
         if [[ -n ${CI_GSTREAMER_PATH} ]] && [[ -n ${CI_GST_PLUGINS_RS_PATH} ]]; then
             echo "Trigger CI, skipping wheel packaging"
         else
-            if [[ $CONFIG = *macos* ]] || [[ $CONFIG = *-ios-* ]] || [[ $CONFIG = *-tvos-* ]]; then
-                # Make up some space for the packaging step;
-                # blocks running bundle-source
-                time rm -rf "$(pwd)/${CERBERO_HOME}/sources"
-            fi
             ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
         fi
     # Test that generating the source bundle works
