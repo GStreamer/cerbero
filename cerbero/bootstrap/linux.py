@@ -186,6 +186,9 @@ class RedHatBootstrapper(UnixBootstrapper):
         'nasm',
         'ninja-build',
         'openssl-devel',
+        # OpenSSL 3.5+ requires the complete perl-core package
+        # See https://github.com/openssl/openssl/issues/28579
+        'perl-core',
         'perl-ExtUtils-MakeMaker',
         'perl-IPC-Cmd',
         'perl-XML-Simple',
@@ -238,14 +241,6 @@ class RedHatBootstrapper(UnixBootstrapper):
             else:
                 m.warning('Compilation will not use ccache since it is not available')
                 self.config.use_ccache = False
-
-        # Before RHEL 9 perl-FindBin wasn't a standalone package
-        if dn != 'redhat' or dv >= (9,):
-            add_pkg(['perl-FindBin'])
-        elif dv >= (8,):
-            add_pkg(['perl-interpreter'])
-        else:
-            add_pkg(['perl'])
 
         # Try to get a better matching python3 library version
         ver = sys.version_info[1]
