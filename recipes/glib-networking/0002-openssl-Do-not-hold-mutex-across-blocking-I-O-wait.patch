@@ -1,0 +1,45 @@
+From 0ec23ef7ef03b3be4282769b36d8bbae411dbf04 Mon Sep 17 00:00:00 2001
+From: Sanchayan Maity <sanchayan@centricular.com>
+Date: Wed, 20 May 2026 20:06:18 +0530
+Subject: [PATCH 2/4] openssl: Do not hold mutex across blocking I/O wait
+
+This also fixes the test_simultaneous_sync timing out when running the
+connection-openssl tests.
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/278>
+
+---
+ tls/openssl/gtlsconnection-openssl.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tls/openssl/gtlsconnection-openssl.c b/tls/openssl/gtlsconnection-openssl.c
+index 1d263b0d7..adc4bab05 100644
+--- a/tls/openssl/gtlsconnection-openssl.c
++++ b/tls/openssl/gtlsconnection-openssl.c
+@@ -330,21 +330,23 @@ perform_openssl_io (GTlsConnectionOpenssl  *openssl,
+ 
+           if (io_timeout != -1)
+             io_timeout = MIN (io_timeout, remaining);
+           else
+             io_timeout = remaining;
+         }
+ 
+       if (io_timeout == 0)
+         break;
+ 
++      g_tls_connection_openssl_unlock (openssl);
+       g_tls_bio_wait_available (priv->bio, io_needed, io_timeout, cancellable);
++      ssl = g_tls_connection_openssl_lock_ssl (openssl);
+     }
+ 
+   if (status == G_TLS_CONNECTION_BASE_TRY_AGAIN)
+     {
+       if (timeout == 0)
+         {
+           status = G_TLS_CONNECTION_BASE_WOULD_BLOCK;
+           g_clear_error (error);
+           g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK,
+                                "Operation would block");
+-- 
+2.55.0
+

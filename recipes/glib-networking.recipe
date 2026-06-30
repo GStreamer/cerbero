@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.80.1'
+    version = '2.90.0'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'b80e2874157cd55071f1b6710fa0b911d5ac5de106a9ee2a4c9c7bee61782f8e'
+    tarball_checksum = '83a75e3d9c36b66ee86d3281c2fc997816101968a5126ba322b2acb9a74dd8c0'
 
     # static_modules is now governed by default_library
     # https://gitlab.gnome.org/GNOME/glib-networking/-/commit/270d54a5ef9a3c9cb96997dbe0fbcb329dbf80e8
@@ -18,20 +18,10 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'libproxy', 'openssl']
 
     patches = [
-        'glib-networking/0001-openssl-properly-check-return-value-when-writing-to-.patch',
-        'glib-networking/0002-openssl-check-return-value-of-g_tls_bio_alloc.patch',
-        'glib-networking/0003-openssl-check-return-values-of-BIO_new.patch',
-        'glib-networking/0004-openssl-delete-support-for-OCSP-stapling.patch',
-        'glib-networking/0005-Remove-support-for-rehandshaking.patch',
-        'glib-networking/0006-openssl-fix-out-of-bounds-read-in-accepted-cas-prope.patch',
-        'glib-networking/0007-openssl-fix-error-checking-in-certificate-getter.patch',
-        'glib-networking/0008-openssl-Fix-race-when-initializing-extra-data-index.patch',
-        'glib-networking/0009-openssl-reduce-the-scope-of-methods_gtls.patch',
-        'glib-networking/0010-openssl-fix-memory-leak-if-BIO-initialization-fails.patch',
-        'glib-networking/0011-openssl-fix-race-when-initializing-methods_gtls.patch',
-        'glib-networking/0012-openssl-fix-whitespace.patch',
-        'glib-networking/0013-Rename-get_server_identity-functions.patch',
-        'glib-networking/0014-Require-OpenSSL-1.1.1-or-newer.patch',
+        'glib-networking/0001-openssl-Fix-threading-race-conditions.patch',
+        'glib-networking/0002-openssl-Do-not-hold-mutex-across-blocking-I-O-wait.patch',
+        'glib-networking/0003-openssl-Drop-lock_ssl-function.patch',
+        'glib-networking/0004-openssl-Guard-some-more-member-accesses-with-mutex.patch',
     ]
 
     files_plugins = [
