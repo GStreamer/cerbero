@@ -287,7 +287,7 @@ class WheelPackager(PackagerBase):
             elif p.name.endswith('-editing'):
                 for f in p.files_list():
                     if 'gstreamer-1.0' in f:
-                        plugins_libs_list.append(f)
+                        plugins_list.append(f)
                     elif f.startswith('bin/'):
                         cli_list.append(f)
                     else:
