@@ -14,16 +14,16 @@ ERRORS=(
     "ShellExecuteEx failed"
     # crates.io flakiness
     "warning: spurious network error"
-    # Weird xcode toolchain bug 
-    "otool: unknown char"
     # Wine is flaky
     "The explorer process failed to start."
     # Mac Virtualization bugs where lipo/git etc are spawned instead of clang
     "lipo: unknown flag: -I"
     "unknown option: -I"
+    "otool: unknown char"
     "ranlib: unknown option character"
     "install_name_tool: more than one input file specified"
     "ar: one of options -dmpqrtsx is required"
+    "nm: error: : unknown argument"
     # Random permission errors with g-ir-scanner and other tools that write
     # temporary files on Windows
     "PermissionError: [Errno 13] Permission denied:"
