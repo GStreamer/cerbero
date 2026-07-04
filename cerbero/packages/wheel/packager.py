@@ -250,6 +250,8 @@ class WheelPackager(PackagerBase):
         libs_list = []
         plugins_libs_list = []
         plugins_list = []
+        plugins_net_libs_list = []
+        plugins_net_list = []
         python_list = []
         restricted_files_list = []
 
@@ -259,6 +261,8 @@ class WheelPackager(PackagerBase):
         libs_licenses = set()
         plugins_libs_licenses = set()
         plugins_licenses = set()
+        plugins_net_libs_licenses = set()
+        plugins_net_licenses = set()
         python_licenses = set()
         restricted_licenses = set()
 
@@ -293,6 +297,17 @@ class WheelPackager(PackagerBase):
                     else:
                         libs_list.append(f)
                 libs_licenses.update(_parse_licenses(p))
+            elif p.name.endswith('-net'):
+                for f in p.files_list():
+                    if 'gstreamer-1.0' in f:
+                        plugins_net_list.append(f)
+                    elif f.startswith('bin/'):
+                        cli_list.append(f)
+                    else:
+                        plugins_net_libs_list.append(f)
+                parsed = _parse_licenses(p)
+                plugins_net_libs_licenses.update(parsed)
+                plugins_net_licenses.update(parsed)
             elif p.name.endswith('-python'):
                 python_list += p.files_list()
                 python_licenses.update(_parse_licenses(p))
@@ -333,6 +348,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl': gpl_files_list,
             'gstreamer_plugins_gpl_restricted': gpl_restricted_files_list,
             'gstreamer_plugins_libs': plugins_libs_list,
+            'gstreamer_plugins_net': plugins_net_list,
+            'gstreamer_plugins_net_libs': plugins_net_libs_list,
             'gstreamer_plugins_restricted': restricted_files_list,
             'gstreamer_python': python_list,
         }
@@ -350,6 +367,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl': 'GStreamer GPL/AGPL plugins',
             'gstreamer_plugins_gpl_restricted': 'GStreamer GPL/AGPL plugins that are known to be patent encumbered',
             'gstreamer_plugins_libs': 'Third-party libraries used by GStreamer plugins',
+            'gstreamer_plugins_net': 'GStreamer plugins for network protocols',
+            'gstreamer_plugins_net_libs': 'Third-party network libraries used by GStreamer plugins',
             'gstreamer_plugins_restricted': 'GStreamer plugins that are known to be patent encumbered',
             'gstreamer_python': 'Python bindings and plugins for GStreamer',
         }
@@ -375,6 +394,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl': gpl_licenses,
             'gstreamer_plugins_gpl_restricted': gpl_restricted_licenses,
             'gstreamer_plugins_libs': plugins_libs_licenses,
+            'gstreamer_plugins_net': plugins_net_licenses,
+            'gstreamer_plugins_net_libs': plugins_net_libs_licenses,
             'gstreamer_plugins_restricted': restricted_licenses,
             'gstreamer_python': python_licenses,
         }
@@ -395,6 +416,8 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_frei0r': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
             'gstreamer_plugins_gpl': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
             'gstreamer_plugins_gpl_restricted': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_net_libs': [f'gstreamer_libs ~= {self.wheel_version}'],
+            'gstreamer_plugins_net': [f'gstreamer_plugins_net_libs ~= {self.wheel_version}'],
             'gstreamer_plugins_restricted': [f'gstreamer_plugins_libs ~= {self.wheel_version}'],
             'gstreamer_python': [],
             'gstreamer_meta': [
@@ -409,6 +432,7 @@ class WheelPackager(PackagerBase):
                 f'gstreamer_plugins ~= {self.wheel_version}',
                 f'gstreamer_plugins_gpl ~= {self.wheel_version}',
                 f'gstreamer_plugins_gpl_restricted ~= {self.wheel_version}',
+                f'gstreamer_plugins_net ~= {self.wheel_version}',
                 f'gstreamer_plugins_restricted ~= {self.wheel_version}',
                 f'gstreamer_python ~= {self.wheel_version}',
             ],
