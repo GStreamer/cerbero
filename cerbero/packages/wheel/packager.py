@@ -304,14 +304,14 @@ class WheelPackager(PackagerBase):
                     source = Path(self.config.prefix, f)
                     if _is_gstreamer_executable(source) and 'libexec' not in source.parts:
                         cli_list.append(f)
-                    elif p.name.endswith('-core') or p.name.endswith('-devtools'):
-                        libs_licenses.update(_parse_licenses(p))
-                        libs_list.append(f)
                     elif 'frei0r' in f:
                         frei0r_list.append(f)
                     elif 'gstreamer-1.0' in f:
                         plugins_list.append(f)
                         plugins_licenses.update(_parse_licenses(p))
+                    elif p.name.endswith('-core') or p.name.endswith('-devtools'):
+                        libs_licenses.update(_parse_licenses(p))
+                        libs_list.append(f)
                     else:
                         plugins_libs_list.append(f)
                         plugins_libs_licenses.update(_parse_licenses(p))
