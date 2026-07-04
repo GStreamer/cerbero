@@ -369,6 +369,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdtls%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstnetsim%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrist%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrtmp2%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstrtponvif%(mext)s',
@@ -383,6 +384,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdtls.a', '%(libdir)s/gstreamer-1.0/libgstdtls.la',
              '%(libdir)s/gstreamer-1.0/libgstnetsim.a', '%(libdir)s/gstreamer-1.0/libgstnetsim.la',
              '%(libdir)s/gstreamer-1.0/libgstrist.a', '%(libdir)s/gstreamer-1.0/libgstrist.la',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp.a', '%(libdir)s/gstreamer-1.0/libgstrtmp.la',
              '%(libdir)s/gstreamer-1.0/libgstrtmp2.a', '%(libdir)s/gstreamer-1.0/libgstrtmp2.la',
              '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad.a', '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad.la',
              '%(libdir)s/gstreamer-1.0/libgstrtponvif.a', '%(libdir)s/gstreamer-1.0/libgstrtponvif.la',
@@ -391,14 +393,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstsrtp.a', '%(libdir)s/gstreamer-1.0/libgstsrtp.la',
              '%(libdir)s/gstreamer-1.0/libgstsrt.a', '%(libdir)s/gstreamer-1.0/libgstsrt.la',
              '%(libdir)s/gstreamer-1.0/libgstwebrtc.a', '%(libdir)s/gstreamer-1.0/libgstwebrtc.la',
-    ]
-
-    files_plugins_net_restricted = [
-             '%(libdir)s/gstreamer-1.0/libgstrtmp%(mext)s',
-    ]
-
-    files_plugins_net_restricted_devel = [
-             '%(libdir)s/gstreamer-1.0/libgstrtmp.a', '%(libdir)s/gstreamer-1.0/libgstrtmp.la',
     ]
 
     files_plugins_capture = [
