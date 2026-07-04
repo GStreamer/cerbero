@@ -340,7 +340,7 @@ class WheelPackager(PackagerBase):
 
         package_desc = {
             'gstreamer_libs': 'GStreamer API Libraries',
-            'gstreamer_plugins_libs': 'Third-party libraries used by GStreamer Plugins',
+            'gstreamer_plugins_libs': 'Third-party libraries used by GStreamer plugins',
             'gstreamer_debuginfo': 'Debug symbols for all GStreamer wheels',
             'gstreamer_plugins': 'GStreamer plugins',
             'gstreamer_plugins_frei0r': 'GStreamer frei0r plugin, including frei0r-plugins',
@@ -368,7 +368,6 @@ class WheelPackager(PackagerBase):
             'gstreamer_plugins_gpl_restricted': gpl_restricted_licenses,
             'gstreamer_plugins_restricted': restricted_licenses,
             'gstreamer_plugins_gpl': gpl_licenses,
-            # (fixed)
             'gstreamer_plugins_frei0r': [License.GPLv2Plus],
             'gstreamer_plugins_libs': plugins_libs_licenses,
             'gstreamer_libs': libs_licenses,
@@ -424,7 +423,7 @@ class WheelPackager(PackagerBase):
                 'gpl': [f'gstreamer_plugins_gpl ~= {self.wheel_version}'],
                 'gpl-restricted': [f'gstreamer_plugins_gpl_restricted ~= {self.wheel_version}'],
                 'gtk': [f'gstreamer_gtk ~= {self.wheel_version}'],
-                'restricted': [f'gstreamer_plugins_gpl ~= {self.wheel_version}'],
+                'restricted': [f'gstreamer_plugins_restricted ~= {self.wheel_version}'],
             },
             'gstreamer': {
                 'frei0r': [f'gstreamer_plugins_frei0r ~= {self.wheel_version}'],
