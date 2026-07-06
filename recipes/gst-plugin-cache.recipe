@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import re
 from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
@@ -19,6 +20,20 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/gstreamer-1.0/registry.*.bin'
     ]
 
+    dynamic_feature_plugins = {
+        'all': [
+            'ladspa', 'jack', 'gio', 'frei0r', 'python',
+            'validategapplication', 'validatetracer', 'vulkan',
+            'validatefaultinjection',
+        ],
+        Platform.DARWIN: ['applemedia'],
+        Platform.LINUX: ['hip', 'va', 'video4linux2', 'nvcodec'],
+        Platform.WINDOWS: [
+            'amfcodec', 'directshow', 'd3d11', 'd3d12', 'hip',
+            'mediafoundation', 'nvcodec', 'qsv', 'wic',
+        ],
+    }
+
     def prepare(self):
         if self.config.variants.rust:
             self.deps.append('gst-plugins-rs')
@@ -26,5 +41,29 @@ class Recipe(recipe.Recipe):
             self.deps.append('gst-python-1.0')
 
     async def install(self):
+        env = self.env.copy()
+        # Parse the debug logging to get the list of plugins that don't
+        # advertise static features to check against our predefined list.
+        env['GST_DEBUG'] = '1,GST_REGISTRY:6'
+        env['GST_DEBUG_NO_COLOR'] = '1'
         await shell.async_call(['gst-preregistry-generate', f'{self.config.libdir}/gstreamer-1.0'],
-                               logfile=self.logfile, env=self.env)
+                               logfile=self.logfile, env=env)
+        if self.logfile and self.logfile.name:
+            original_pos = self.logfile.tell()
+            self.logfile.seek(0)
+            rejects = set()
+            pattern = re.compile(".*GST_REGISTRY.*gst_registry_remove_plugin_by_check.*removing plugin '([^']*)'")
+            for line in self.logfile:
+                if 'gst_registry_remove_plugin_by_check' not in line or \
+                   'removing plugin' not in line:
+                    continue
+                match = pattern.match(line)
+                if match:
+                    rejects.update((g for g in match.groups() if not g.endswith(('.dll', '.dylib', '.so'))))
+            if not rejects:
+                raise FatalError('No plugins with dynamic features found. Improbable.')
+            expected = set(self.dynamic_feature_plugins['all'] + self.dynamic_feature_plugins[self.config.target_platform])
+            extra = rejects - expected
+            if extra:
+                raise FatalError('Unexpected dynamic plugins: ' + ', '.join(extra))
+            self.logfile.seek(original_pos)

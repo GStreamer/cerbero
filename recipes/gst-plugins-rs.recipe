@@ -246,6 +246,67 @@ class Recipe(recipe.Recipe):
             self.cargo_features.append('gst-plugin-webrtc/aws')
             self.cargo_features.append('gst-plugin-webrtc/livekit')
 
+        # These plugins also need v1_30 for the plugin cache
+        need_v1_30 = (
+            'regex',
+            'originalbuffer',
+            'raptorq',
+            'aws',
+            'textwrap',
+            'ndi',
+            'hlsmultivariantsink',
+            'gtk4',
+            'textahead',
+            'gopbuffer',
+            'elevenlabs',
+            'webrtcbin2',
+            'analytics',
+            'hlssink3',
+            'debugseimetainserter',
+            'videofx',
+            'demucs',
+            'audiomultimixer',
+            'cdg',
+            'webrtchttp',
+            'reqwest',
+            'ffv1',
+            'mpegtslive',
+            'claxon',
+            'togglerecord',
+            'rtsp',
+            'rav1e',
+            'livesync',
+            'speechmatics',
+            'gif',
+            'streamgrouper',
+            'quinn',
+            'lewton',
+            'webrtc',
+            'inter',
+            'burn',
+            'threadshare',
+            'icecast',
+            'json',
+            'rtp',
+            'audioparsers',
+            'isobmff',
+            'uriplaylistbin',
+            'dav1d',
+            'colorlut',
+            'png',
+            'hsv',
+            'onvif',
+            'fallbackswitch',
+            'audiofx',
+            'closedcaption',
+            'imagers',
+        )
+        for each in need_v1_30:
+            self.cargo_features.append(f'gst-plugin-{each}/v1_30')
+
+        # Deduplicate (just in case)
+        self.cargo_features = list(set(self.cargo_features))
+
         if self.requires_melding():
             self.workspace_lib = Path(self.config.libdir) / 'libgstrsworkspace.a'
             # gstrsworkspace describes the dragonfire-melded workspace
