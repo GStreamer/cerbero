@@ -73,7 +73,7 @@ class PackagesStore(object):
             raise PackageNotFoundError(name)
         return self._packages[name]
 
-    def get_package_deps(self, pkg, recursive=False):
+    def get_package_deps(self, pkg, recursive=True):
         """
         Gets the dependencies of a package
 

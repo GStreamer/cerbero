@@ -294,10 +294,12 @@ class Package(PackageBase):
         self._parse_files()
 
     def recipes_dependencies(self, use_devel=True):
-        deps = [x.split(':')[0] for x in self._files]
+        deps = []
+        recipes = [x.split(':')[0] for x in self._files]
         if use_devel:
-            deps.extend([x.split(':')[0] for x in self._files_devel])
-
+            recipes.extend([x.split(':')[0] for x in self._files_devel])
+        for recipe in recipes:
+            deps.extend([r.name for r in self.cookbook.list_recipe_deps(recipe)])
         for name in self.deps:
             p = self.store.get_package(name)
             deps += p.recipes_dependencies(use_devel)

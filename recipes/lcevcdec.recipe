@@ -80,7 +80,7 @@ class LcevcdecRecipe(LcevcdecBase, recipe.Recipe):
                 'liblcevc_dec_sequencer', 'liblcevc_dec_pipeline',
             ]
         else:
-            self.deps = ['lcevcdec-static']
+            self.deps += ['lcevcdec-static']
 
     def post_install(self):
         # CMake does not generate la files

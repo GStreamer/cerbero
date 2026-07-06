@@ -70,7 +70,7 @@ class SvtAv1Recipe(SvtAv1Base, recipe.Recipe):
         if Platform.is_app_platform(self.config.target_platform):
             self.library_type = LibraryType.STATIC
         else:
-            self.deps = ['svt-av1-static']
+            self.deps += ['svt-av1-static']
 
     def post_install(self):
         if self.using_msvc():
