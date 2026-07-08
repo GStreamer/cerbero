@@ -877,6 +877,8 @@ build cerbero xcframework:
 .cerbero windows native:
   image: $WINDOWS_IMAGE
   needs: [ "manual trigger" ]
+  # Because MSVC takes ~1h35m without caching
+  timeout: '1 hour 45 minutes'
   tags:
     - 'docker'
     - 'windows'
