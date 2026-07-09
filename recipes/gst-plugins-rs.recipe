@@ -248,17 +248,6 @@ class Recipe(recipe.Recipe):
             self.cargo_features.append('gst-plugin-webrtc/aws')
             self.cargo_features.append('gst-plugin-webrtc/livekit')
 
-        # The LIBRARY_PATH setting affects all invocations of GCC underneath
-        # Cargo, in particular those that link build scripts (that are meant to
-        # run on the host machine, not through wine).
-        # When creating these, a value for LIBRARY_PATH present will cause
-        # cross-mingw GCC to prefer libpthread.a for MinGW-w64 over the system
-        # libpthread, and hell breaks loose.
-        if self.config.target_platform == Platform.WINDOWS and \
-            self.config.platform != self.config.target_platform:
-            self.set_env('LDFLAGS')
-            self.set_env('LIBRARY_PATH')
-
         if self.requires_melding():
             self.workspace_lib = Path(self.config.libdir) / 'libgstrsworkspace.a'
             # gstrsworkspace describes the dragonfire-melded workspace
