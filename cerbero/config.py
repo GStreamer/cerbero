@@ -260,6 +260,7 @@ class Config(object):
         'target_distro_version',
         'system_recipes_dir',
         'allow_system_recipes',
+        'allow_pc_missing_for_system_recipes',
         'system_recipes_priority',
         'packages_dir',
         'py_prefix',
@@ -722,6 +723,9 @@ class Config(object):
         self.set_property('recipes_dir', self._relative_path('recipes'))
         self.set_property('system_recipes_dir', self._relative_path('system-recipes'))
         self.set_property('allow_system_recipes', platform == Platform.LINUX)
+        # Resolve system deps (and reject recipes if missing the .pc file)
+        # Needed for disabling .pc validation on fetch commands
+        self.set_property('allow_pc_missing_for_system_recipes', False)
         self.set_property('system_recipes_priority', 1)
         self.set_property('packages_dir', self._relative_path('packages'))
         self.set_property('use_configure_cache', False)

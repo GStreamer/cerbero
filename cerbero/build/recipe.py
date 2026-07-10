@@ -1358,7 +1358,8 @@ class SystemRecipe(Recipe):
         FilesProvider.__init__(self, config)
         if config.cross_compiling():
             raise InvalidRecipeError(self, 'System recipes cannot be used when cross-compiling')
-        self._validate_and_ensure_version()
+        if not config.allow_pc_missing_for_system_recipes:
+            self._validate_and_ensure_version()
 
     def get_checksum(self):
         return self.name

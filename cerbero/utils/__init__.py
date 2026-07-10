@@ -594,7 +594,7 @@ def get_system_pc_path(config, lib):
         if os.path.exists(pc_path):
             return pc_path
 
-    raise FatalError(f'{lib}.pc not found in the system and required by the recipe, please run bootstrap again')
+    raise FatalError(f'{lib}.pc not found in the system and required by the recipe, please run bootstrap')
 
 
 def split_version(s):

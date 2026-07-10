@@ -21,7 +21,7 @@ import asyncio
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.build.oven import Oven
-from cerbero.enums import LibraryType
+from cerbero.enums import LibraryType, Platform
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import (
     _,
@@ -154,6 +154,10 @@ class FetchRecipes(Fetch):
         Fetch.__init__(self, args)
 
     def run(self, config, args):
+        # Do not attempt to resolve system dependencies
+        # (fetch does not depend on bootstrap)
+        if config.target_platform == Platform.LINUX:
+            config.allow_pc_missing_for_system_recipes = True
         cookbook = CookBook(config)
         recipes = []
         for recipe in args.recipes:
@@ -180,6 +184,10 @@ class FetchPackage(Fetch):
         Fetch.__init__(self, args)
 
     def run(self, config, args):
+        # Do not attempt to resolve system dependencies
+        # (fetch-package does not depend on bootstrap)
+        if config.target_platform == Platform.LINUX:
+            config.allow_pc_missing_for_system_recipes = True
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
         task = self.fetch(
