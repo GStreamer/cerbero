@@ -189,6 +189,7 @@ fedora image:
   extends:
     - .fedora image
     - .fdo.container-build@fedora
+  timeout: '45 minutes'
   variables:
     GIT_STRATEGY: none
   tags: [ 'kvm' ]

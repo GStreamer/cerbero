@@ -73,6 +73,7 @@ class DebianBootstrapper(UnixBootstrapper):
     command = ['install']
     yes_arg = ['-y']
     packages = [
+        'libasound2-dev',
         'autoconf',
         'automake',
         'autopoint',
@@ -98,6 +99,7 @@ class DebianBootstrapper(UnixBootstrapper):
         'libpulse-dev',
         'libssl-dev',
         'libtool',
+        'libudev-dev',
         'libva-dev',
         'libx11-dev',
         'libx11-xcb-dev',
@@ -179,6 +181,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'libcurl-devel',
         'libdrm-devel',
         'libtool',
+        'libudev-devel',
         'libva-devel',
         'make',
         'mesa-libEGL-devel',
