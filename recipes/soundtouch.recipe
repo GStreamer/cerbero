@@ -3,11 +3,16 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
+    # https://www.surina.net/soundtouch/
+    # sources are at Codeberg:
+    # https://codeberg.org/soundtouch/soundtouch
     name = 'soundtouch'
     version = '2.3.2'
     btype = BuildType.MESON
     stype = SourceType.TARBALL
-    url = 'https://codeberg.org/soundtouch/soundtouch/archive/%(version)s.tar.gz'
+    # Codeberg only has a weak guarantee regarding tarball checksums, and
+    # surina.net is a personal website. Use our mirror.
+    url = f'https://gstreamer.freedesktop.org/src/mirror/{name}/{version}.tar.gz'
     tarball_dirname = 'soundtouch'
     tarball_checksum = 'ed714f84a3e748de87b24f385ec69d3bdc51ca47b7f4710d2048b84b2761e7ff'
 
