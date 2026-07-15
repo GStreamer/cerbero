@@ -40,11 +40,13 @@ class Recipe(recipe.Recipe):
         'xlib-2.0']
     files_gi = [
         '%(libdir)s/gobject-introspection/giscanner/__init__.py',
+        '%(libdir)s/gobject-introspection/giscanner/_version.py',
         '%(libdir)s/gobject-introspection/giscanner/_giscanner*%(pext)s',
         '%(libdir)s/gobject-introspection/giscanner/annotationmain.py',
         '%(libdir)s/gobject-introspection/giscanner/annotationparser.py',
         '%(libdir)s/gobject-introspection/giscanner/ast.py',
         '%(libdir)s/gobject-introspection/giscanner/cachestore.py',
+        '%(libdir)s/gobject-introspection/giscanner/ccompiler.py',
         '%(libdir)s/gobject-introspection/giscanner/codegen.py',
         '%(libdir)s/gobject-introspection/giscanner/docmain.py',
         '%(libdir)s/gobject-introspection/giscanner/docwriter.py',
@@ -54,7 +56,10 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/gobject-introspection/giscanner/girwriter.py',
         '%(libdir)s/gobject-introspection/giscanner/introspectablepass.py',
         '%(libdir)s/gobject-introspection/giscanner/maintransformer.py',
+        '%(libdir)s/gobject-introspection/giscanner/mdextensions.py',
         '%(libdir)s/gobject-introspection/giscanner/message.py',
+        '%(libdir)s/gobject-introspection/giscanner/msvccompiler.py',
+        '%(libdir)s/gobject-introspection/giscanner/pkgconfig.py',
         '%(libdir)s/gobject-introspection/giscanner/scannermain.py',
         '%(libdir)s/gobject-introspection/giscanner/sectionparser.py',
         '%(libdir)s/gobject-introspection/giscanner/shlibs.py',
@@ -62,14 +67,14 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/gobject-introspection/giscanner/testcodegen.py',
         '%(libdir)s/gobject-introspection/giscanner/transformer.py',
         '%(libdir)s/gobject-introspection/giscanner/utils.py',
-        '%(libdir)s/gobject-introspection/giscanner/xmlwriter.py'
+        '%(libdir)s/gobject-introspection/giscanner/xmlwriter.py',
+        'bin/g-ir-annotation-tool',
+        'bin/g-ir-scanner',
     ]
     files_devel = [
-        'bin/g-ir-annotation-tool',
         'bin/g-ir-compiler%(bext)s',
         'bin/g-ir-generate%(bext)s',
         'bin/g-ir-inspect%(bext)s',
-        'bin/g-ir-scanner',
         'include/gobject-introspection-1.0',
         '%(libdir)s/pkgconfig/gobject-introspection-1.0.pc',
         '%(libdir)s/pkgconfig/gobject-introspection-no-export-1.0.pc',
