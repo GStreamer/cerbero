@@ -10,7 +10,6 @@ from cerbero.utils.rust import Prelink
 import os
 from pathlib import Path
 import re
-import shutil
 
 
 class Recipe(recipe.Recipe):
@@ -116,16 +115,6 @@ class Recipe(recipe.Recipe):
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.a',
                 f'%(libdir)s/gstreamer-1.0/libgst{name}.la',
             ]
-            # MSVC import library for the gst<name>.dll built in the
-            # shared half of library_type=BOTH (Linux/Windows default).
-            # cargo-c installs it as <name>.lib (MSVC naming); ship it
-            # so link.exe can resolve cargo:rustc-link-lib=<name> from
-            # Rust consumers using the bundle (e.g. system-deps' binary
-            # feature). Not the static archive — static linking goes
-            # through libgstrsworkspace.a (the dragonfire meld) below.
-            if (self.config.target_platform == Platform.WINDOWS
-                    and self.config.variants.visualstudio):
-                d.append(f'%(libdir)s/gstreamer-1.0/gst{name}.lib')
 
     def requires_melding(self):
         if Platform.is_apple(self.config.target_platform):
@@ -371,6 +360,8 @@ class Recipe(recipe.Recipe):
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         # It also follows MSVC convention for static/import libraries
+        # We must rename the files (not copy them) lest both copies end up in
+        # the package (.lib will be read as an import library)
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.variants.visualstudio:
                 for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False):
@@ -379,7 +370,7 @@ class Recipe(recipe.Recipe):
                     dst = Path(self.config.prefix) / f
                     src = dst.with_name(f'{dst.stem[3:]}.lib')
                     if src.exists():
-                        shutil.copy(src, dst)
+                        os.replace(src, dst)
             else:
                 for f in self.dist_files_list(only_existing=False):
                     if not f.endswith('.dll'):
@@ -389,23 +380,10 @@ class Recipe(recipe.Recipe):
                     src = os.path.join(self.config.prefix, d, f'{name[3:]}')
                     dst = os.path.join(self.config.prefix, f)
                     if os.path.exists(src):
-                        shutil.copy(src, dst)
+                        os.replace(src, dst)
                     # if there's a .dll.a it also needs renaming
                     if os.path.exists(src + '.a'):
-                        shutil.copy(src + '.a', dst + '.a')
-        else:
-            for f in self.dist_files_list(only_existing=False):
-                if not f.endswith('.dll'):
-                    continue
-                name = os.path.basename(f)
-                d = os.path.dirname(f)
-                src = os.path.join(self.config.prefix, d, f'{name[3:]}')
-                dst = os.path.join(self.config.prefix, f)
-                if os.path.exists(src):
-                    shutil.copy(src, dst)
-                # if there's a .dll.a it also needs renaming
-                if os.path.exists(src + '.a'):
-                    shutil.copy(src + '.a', dst + '.a')
+                        os.replace(src + '.a', dst + '.a')
 
         if self.requires_melding():
             libs = '-L${libdir}/gstreamer-1.0 -lgstrsworkspace'
