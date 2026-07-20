@@ -7,9 +7,9 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.5.5'
+    version = '1.5.6'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    tarball_checksum = 'c3518bc43a71b5289032395b2db4c3e09e73d78b54247d56c14553a503b491cf'
+    tarball_checksum = '788a36c6739d9d2076ea53a4021ad36ab421a671eca4a79c8d7ca68257cc03a3'
     licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
