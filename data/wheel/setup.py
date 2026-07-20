@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import sys
 import sysconfig
 import setuptools
 from setuptools.dist import Distribution
@@ -35,12 +36,19 @@ class BinaryDistribution(Distribution):
 class InjectGStreamerWheels(build_py):
     IMPORT_SHIM = """import sys; import gstreamer_libs; gstreamer_libs.setup_python_environment();
 """
+    IMPORT_SHIM_PY3_15 = """gstreamer_libs:setup_python_environment
+"""
 
     def run(self):
         super().run()
-        sitecustomize_path = os.path.join(self.build_lib, f'{package_name}.pth')
-        with open(sitecustomize_path, 'w', encoding='utf-8', newline='\n') as f:
-            f.write(self.IMPORT_SHIM)
+        if sys.version_info >= (3, 15, 0):
+            startfile_path = os.path.join(self.build_lib, f'{package_name}.start')
+            with open(startfile_path, 'w', encoding='utf-8-sig', newline='\n') as f:
+                f.write(self.IMPORT_SHIM_PY3_15)
+        else:
+            sitecustomize_path = os.path.join(self.build_lib, f'{package_name}.pth')
+            with open(sitecustomize_path, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(self.IMPORT_SHIM)
 
 
 class MakeStableAbiWheel(bdist_wheel):
