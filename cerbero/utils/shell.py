@@ -16,7 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
 import subprocess
 import asyncio
 import sys
@@ -32,10 +31,11 @@ import collections
 from pathlib import Path
 
 from cerbero.enums import CERBERO_VERSION, Platform, Distro
-from cerbero.utils import _, system_info, split_version, to_winpath, CerberoSemaphore
+from cerbero.utils import _, system_info, split_version, to_winpath, verify_checksum
+from cerbero.utils import CerberoSemaphore
 from cerbero.utils import messages as m
 from cerbero.utils.tar import Tar
-from cerbero.errors import CommandError, FatalError
+from cerbero.errors import CommandError, FatalError, ChecksumError
 
 
 PATCH = 'patch'
@@ -365,7 +365,7 @@ async def unpack(filepath, output_dir, logfile=None):
         raise FatalError('Unknown tarball format %s' % filepath)
 
 
-async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fallback_urls=None):
+async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fallback_urls=None, checksum=None):
     """
     Downloads a file
 
@@ -386,13 +386,19 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fa
         urls += fallback_urls
 
     if not overwrite and os.path.exists(dest):
-        if logfile is None:
-            logging.info('File %s already downloaded.' % dest)
-        return
-    else:
-        os.makedirs(os.path.dirname(dest), exist_ok=True)
-        m.log('Downloading {}'.format(url), logfile)
+        download = False
+        if checksum:
+            try:
+                verify_checksum(dest, checksum, logfile=logfile)
+            except ChecksumError:
+                download = True
+        if not download:
+            m.log(f'File {dest} already downloaded', logfile)
+            return
 
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+
+    MAX_TRIES = 1  # the command will retry
     if sys.platform.startswith('win'):
         cmd = [
             'powershell',
@@ -402,6 +408,7 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fa
             f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} '
             '-Method Get -Uri %s',
         ]
+        MAX_TRIES = 3  # Need to manually retry twice
     elif shutil.which('curl'):
         cmd = [
             'curl',
@@ -436,17 +443,47 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, fa
     errors = []
     url_fmt = cmd[-1]
     cmd = cmd[:-1]
-    for murl in urls:
-        tries = 2
+    for idx, murl in enumerate(urls):
+        m.log(f'Downloading {murl}', logfile)
+        tries = MAX_TRIES
         while tries > 0:
             try:
-                return await async_call(cmd + [url_fmt % murl], cpu_bound=False, logfile=logfile)
+                await async_call(cmd + [url_fmt % murl], cpu_bound=False, logfile=logfile)
             except Exception as ex:
                 if os.path.exists(dest):
                     os.remove(dest)
                 tries -= 1
                 if tries == 0:
                     errors.append((murl, ex))
+                m.log(f'{murl} failed to download: {ex!r}', logfile)
+                continue
+
+            if checksum is not None:
+                try:
+                    verify_checksum(dest, checksum, url=murl, logfile=logfile)
+                except ChecksumError as exc:
+                    if checksum == '':
+                        # No expected checksum: we just want to get the
+                        # expected checksum. Return early.
+                        raise exc
+                    if idx == 0 and fallback_urls:
+                        m.action(f'{murl} failed checksum verification! Trying mirrors...')
+                    errors.append((murl, exc))
+                    # No point retrying on checksum failure. Try the next
+                    # URL (mirror). Sometimes the main URL is broken and
+                    # returns an error page or a broken tarball, or maybe
+                    # the URL is compromised.
+                    tries = 0
+                    continue
+            return
+
+    assert errors
+    # If all URLs failed to download, maybe it's a checksum error
+    for failed_url, error in errors:
+        if isinstance(error, ChecksumError):
+            error.other_errors = [(url, exc) for url, exc in errors if url != failed_url or exc is not error]
+            raise error
+
     if len(errors) == 1:
         errors = errors[0]
     raise FatalError('Failed to download {!r}: {!r}'.format(url, errors))

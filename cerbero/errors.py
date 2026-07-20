@@ -93,3 +93,17 @@ class InvalidRecipeError(CerberoException):
 
 class AbortedError(Exception):
     pass
+
+
+class ChecksumError(Exception):
+    found = None
+    expected = None
+    movedto = None
+    other_errors = []
+
+    def __init__(self, found, expected, movedto):
+        m = f'Incorrect checksum: {expected} != {found}. File moved to {movedto}'
+        Exception.__init__(self, m)
+        self.found = found
+        self.expected = expected
+        self.movedto = movedto
