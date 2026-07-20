@@ -25,11 +25,10 @@ import urllib.parse
 import urllib.error
 import collections
 import asyncio
-from hashlib import sha256
 
 from cerbero.config import Distro, DistroVersion, Platform, DEFAULT_MIRRORS
-from cerbero.utils import git, svn, shell, N_
-from cerbero.errors import FatalError, CommandError, InvalidRecipeError
+from cerbero.utils import git, svn, shell, N_, verify_checksum
+from cerbero.errors import FatalError, CommandError, InvalidRecipeError, ChecksumError
 from cerbero.build.build import BuildType
 import cerbero.utils.messages as m
 
@@ -86,6 +85,16 @@ class Source(object):
     @property
     def cargo_vendor_cache_dir(self):
         return f'{self.repo_dir}/cargo-vendor'
+
+    def _handle_download_checksum_error(self, fname, exc):
+        if hasattr(self, 'tarball_checksum') and self.tarball_checksum is None:
+            return FatalError(
+                f'tarball_checksum is missing in {self.name}.recipe for tarball '
+                f'{self.url}\nThe SHA256 of the current file is {exc.found}. '
+                'Please verify and add it to the recipe'
+            )
+        m.action(f'Checksum failed, tarball {fname} moved to {exc.movedto}', logfile=get_logfile(self))
+        return exc
 
     def _get_download_path(self, fname):
         """
@@ -179,10 +188,18 @@ class Source(object):
             if fallback_url:
                 # Our mirror implementation assumes that the basename is the same
                 fallback_urls.append(fallback_url)
-            await shell.download(
-                url, fpath, check_cert=self.check_cert, overwrite=False, logfile=logfile, fallback_urls=fallback_urls
-            )
-            self.verify(fpath, fhash)
+            try:
+                await shell.download(
+                    url,
+                    fpath,
+                    check_cert=self.check_cert,
+                    overwrite=False,
+                    logfile=logfile,
+                    fallback_urls=fallback_urls,
+                    checksum=fhash,
+                )
+            except ChecksumError as exc:
+                raise self._handle_download_checksum_error(fpath, exc)
 
     async def meson_subprojects_extract(self, offline):
         logfile = get_logfile(self)
@@ -359,50 +376,30 @@ class BaseTarball(object):
 
     async def fetch(self, redownload=False):
         fname = self._get_download_path(self.tarball_name)
+        logfile = get_logfile(self)
         if self.offline:
             if not os.path.isfile(fname):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.download_dir))
-            self.verify(fname, self.tarball_checksum)
-            m.action(N_('Found %s at %s') % (self.url, fname), logfile=get_logfile(self))
+            try:
+                verify_checksum(fname, self.tarball_checksum, logfile=logfile)
+            except ChecksumError as exc:
+                raise self._handle_download_checksum_error(fname, exc)
+            m.action(N_('Found %s at %s') % (self.url, fname), logfile=logfile)
             return
         os.makedirs(self.download_dir, exist_ok=True)
-        await shell.download(
-            self.url,
-            fname,
-            check_cert=self.check_cert,
-            overwrite=redownload,
-            logfile=get_logfile(self),
-            fallback_urls=self.get_fallback_urls(self.url),
-        )
-        self.verify(fname, self.tarball_checksum)
-
-    @staticmethod
-    def _checksum(fname):
-        h = sha256()
-        with open(fname, 'rb') as f:
-            # Read in chunks of 512k till f.read() returns b'' instead of reading
-            # the whole file at once which will fail on systems with low memory
-            for block in iter(lambda: f.read(512 * 1024), b''):
-                h.update(block)
-        return h.hexdigest()
-
-    def verify(self, fname, checksum, fatal=True):
-        found_checksum = self._checksum(fname)
-        if checksum is None:
-            raise FatalError(
-                'tarball_checksum is missing in {}.recipe for tarball {}\n'
-                'The SHA256 of the current file is {}\nPlease verify and '
-                'add it to the recipe'.format(self.name, self.url, found_checksum)
+        try:
+            await shell.download(
+                self.url,
+                fname,
+                check_cert=self.check_cert,
+                overwrite=redownload,
+                logfile=logfile,
+                fallback_urls=self.get_fallback_urls(self.url),
+                checksum=self.tarball_checksum,
             )
-        if found_checksum != checksum:
-            movedto = fname + '.failed-checksum'
-            os.replace(fname, movedto)
-            m.action(N_('Checksum failed, tarball %s moved to %s') % (fname, movedto), logfile=get_logfile(self))
-            if not fatal:
-                return False
-            raise FatalError('Checksum for {} is {!r} instead of {!r}'.format(fname, found_checksum, checksum))
-        return True
+        except ChecksumError as exc:
+            raise self._handle_download_checksum_error(fname, exc)
 
     async def extract_tarball(self, unpack_dir):
         fname = self._get_download_path(self.tarball_name)
@@ -449,17 +446,18 @@ class Tarball(BaseTarball, Source):
 
     async def fetch(self, redownload=False):
         fname = self._get_download_path(self.tarball_name)
+        logfile = get_logfile(self)
         os.makedirs(self.download_dir, exist_ok=True)
 
         cached_file = os.path.join(self.config.cached_sources, self.package_name, self.tarball_name)
         if (
             not redownload
             and os.path.isfile(cached_file)
-            and self.verify(cached_file, self.tarball_checksum, fatal=False)
+            and verify_checksum(cached_file, self.tarball_checksum, fatal=False, logfile=logfile)
         ):
             m.action(
                 N_('Copying cached tarball from %s to %s instead of %s') % (cached_file, fname, self.url),
-                logfile=get_logfile(self),
+                logfile=logfile,
             )
             shutil.copy(cached_file, fname)
         else:

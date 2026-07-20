@@ -38,7 +38,7 @@ from pathlib import Path, PureWindowsPath, PurePath
 from collections.abc import Iterable
 
 from cerbero.enums import Platform, Subsystem, Architecture, Distro, DistroVersion
-from cerbero.errors import FatalError, CommandError
+from cerbero.errors import FatalError, CommandError, ChecksumError
 from cerbero.utils import messages as m
 
 # We use shell from cerbero.utils but we can't import it directly because
@@ -1025,3 +1025,36 @@ def xmlwrite(tree: etree.ElementTree, filepath, encoding='utf-8'):
     xmlstr = xml.etree.ElementTree.tostring(tree.getroot())
     xmlstr = minidom.parseString(xmlstr).toprettyxml(indent='\t')
     open(filepath, 'w', encoding=encoding).write(xmlstr)
+
+
+def sha256sum(fname):
+    """
+    Calculate the SHA256 checksum of the specified file
+    """
+    from hashlib import sha256
+
+    h = sha256()
+    with open(fname, 'rb') as f:
+        # Read in chunks of 512k till f.read() returns b'' instead of reading
+        # the whole file at once which will fail on systems with low memory
+        for block in iter(lambda: f.read(512 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def verify_checksum(dest, expected, url=None, fatal=True, logfile=None):
+    """
+    Verify checksum of file, move it away if verification fails
+    """
+    # No expected checksum, we don't want to verify the checksum
+    if expected is False:
+        return True
+    found = sha256sum(dest)
+    if found != expected:
+        movedto = dest + '.failed-checksum'
+        os.replace(dest, movedto)
+        m.log(f'{url or dest} failed checksum: {expected!r} != {found!r}', logfile)
+        if fatal:
+            raise ChecksumError(found, expected, movedto)
+        return False
+    return True
