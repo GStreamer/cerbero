@@ -22,12 +22,12 @@ def get_inno_setup_path(config):
     if config.cross_compiling():
         return 'C:/Program Files (x86)/Inno Setup 6/iscc.exe'
     progfiles = ('C:/Program Files/', 'C:/Program Files (x86)/')
-    tool = 'Inno Setup 6/iscc.exe'
     for d in progfiles:
-        iscc = Path(d, tool)
-        if iscc.exists():
-            return iscc.as_posix()
-    raise FatalError('The required packaging tool Inno Setup 5.0 was not found')
+        for v in (7, 6):
+            iscc = Path(d, f'Inno Setup {v}/iscc.exe')
+            if iscc.exists():
+                return iscc.as_posix()
+    raise FatalError('The required packaging tool Inno Setup was not found')
 
 
 def format_inno_feature_id(string, package_type):
@@ -83,6 +83,7 @@ class InnoSetup(PackagerBase):
         self._with_wine = config.platform != Platform.WINDOWS
         self.architecture = config.target_arch
         self.inno_prefix = get_inno_setup_path(config)
+        self.inno_version = 7 if 'Inno Setup 7' in self.inno_prefix else 6
         self.abi_desc = ' '.join(config._get_toolchain_target_platform_arch(readable=True))
 
     def _package_name(self):
@@ -215,7 +216,7 @@ class InnoSetup(PackagerBase):
             f.write('*\n')
 
         # Set project up
-        m.action(f'Creating Inno Setup project for {self.package.name}')
+        m.action(f'Creating Inno Setup v{self.inno_version} project for {self.package.name}')
         iss_project = self.output_dir / 'installer.iss'
         with iss_project.open('w', encoding='utf-8') as rules:
             rules.write(f'// This is the build file for the installer "{self._package_name()}"\n')
@@ -263,13 +264,21 @@ class InnoSetup(PackagerBase):
 
             # Architectures
             if self.config.target_arch == Architecture.X86:
-                rules.write('ArchitecturesAllowed=x86compatible\n')
+                if self.inno_version >= 7:
+                    rules.write('SetupArchitecture=x86\n')
+                else:
+                    rules.write('ArchitecturesAllowed=x86compatible\n')
             else:
-                rules.write('ArchitecturesAllowed=x64compatible\n')
-                rules.write('ArchitecturesInstallIn64BitMode=x64compatible\n')
+                if self.inno_version >= 7:
+                    rules.write('SetupArchitecture=x64\n')
+                else:
+                    rules.write('ArchitecturesAllowed=x64compatible\n')
+                    rules.write('ArchitecturesInstallIn64BitMode=x64compatible\n')
 
             # Compression
-            rules.write('Compression=lzma2/max\nCompressionThreads=auto\nLZMAUseSeparateProcess=yes\n')
+            rules.write('Compression=lzma2/max\nCompressionThreads=auto\n')
+            if self.inno_version < 7:
+                rules.write('LZMAUseSeparateProcess=yes\n')
             # Solid compression allows parallelization but makes
             # unused files unable to be skipped during decompression
             # See https://jrsoftware.org/ishelp/index.php?topic=setup_solidcompression
