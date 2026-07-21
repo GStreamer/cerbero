@@ -281,6 +281,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         Platform.WINDOWS: (
             'fatal error C1083: Cannot open compiler generated file:',
             'STATUS_STACK_BUFFER_OVERRUN',
+            'The process cannot access the file because it is being used by another process',
         ),
     }
 
