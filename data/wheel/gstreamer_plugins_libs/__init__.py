@@ -13,5 +13,4 @@ environment = {
     'LD_LIBRARY_PATH': f'{_gstreamer_root}/lib',
     'GST_PLUGIN_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
     'GST_PLUGIN_SYSTEM_PATH_1_0': f'{_gstreamer_root}/lib/gstreamer-1.0',
-    'GIO_EXTRA_MODULES': f'{_gstreamer_root}/lib/gio/modules',
 }

@@ -121,8 +121,10 @@ class WheelPackager(PackagerBase):
     def _package_name(self):
         if self.config.variants.visualstudio:
             platform = 'msvc'
-        else:
+        elif self.config.target_platform == Platform.WINDOWS:
             platform = 'mingw'
+        else:
+            platform = str(self.config.target_platform)
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
         return '-'.join((self.package.name, platform, self.config.target_arch, self.wheel_version))
@@ -240,7 +242,7 @@ class WheelPackager(PackagerBase):
         # completely breaks Python and it can't find pip.
         python_env = self.config.env if self.config.platform != Platform.WINDOWS else None
         shell.new_call(
-            [python_exe, '-m', 'pip', 'wheel', f'--find-links={self.output_dir.as_posix()}', output_dir],
+            [python_exe, '-m', 'pip', 'wheel', '--no-deps', f'--find-links={self.output_dir.as_posix()}', output_dir],
             cmd_dir=self.output_dir,
             env=python_env,
         )
@@ -331,7 +333,7 @@ class WheelPackager(PackagerBase):
                         cli_list.append(f)
                     elif 'frei0r' in f:
                         frei0r_list.append(f)
-                    elif 'gstreamer-1.0' in f:
+                    elif 'gstreamer-1.0' in Path(f).parts and 'libexec' not in Path(f).parts:
                         plugins_list.append(f)
                         plugins_licenses.update(_parse_licenses(p))
                     elif p.name.endswith('-core') or p.name.endswith('-devtools'):

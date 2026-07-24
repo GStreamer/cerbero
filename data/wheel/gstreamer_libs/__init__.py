@@ -72,6 +72,14 @@ def gstreamer_env():
     except ImportError:
         gp_gplr_env = {}
     try:
+        from gstreamer_plugins_net import environment as gp_net_env
+    except ImportError:
+        gp_net_env = {}
+    try:
+        from gstreamer_plugins_net_libs import environment as gp_net_libs_env
+    except ImportError:
+        gp_net_libs_env = {}
+    try:
         from gstreamer_plugins_libs import environment as gp_r_env
     except ImportError:
         gp_r_env = {}
@@ -117,6 +125,8 @@ def gstreamer_env():
         gp_r_env.items(),
         gp_gpl_env.items(),
         gp_gplr_env.items(),
+        gp_net_env.items(),
+        gp_net_libs_env.items(),
         gc_env.items(),
         gp_ext_env.items(),
     ]
