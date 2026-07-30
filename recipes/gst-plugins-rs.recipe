@@ -52,6 +52,7 @@ class Recipe(recipe.Recipe):
         'hlssink3',
         'hsv',
         'icecast',
+        'imagers',
         'inter',
         'isobmff',
         'json',
@@ -185,6 +186,7 @@ class Recipe(recipe.Recipe):
                 'regex',
                 'textwrap',
                 'textahead',
+                'imagers',
                 # 'rswebp',
             ],
             'codecs_restricted': [
