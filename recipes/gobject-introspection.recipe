@@ -90,6 +90,10 @@ class Recipe(recipe.Recipe):
         f'{name}/0006-tests-Fix-path-parsing-for-Windows.patch',
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/532
         f'{name}/0007-g-ir-tools-Support-reading-rspfiles-for-arguments.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/555
+        f'{name}/0008-giscanner-Disable-macros-double-quote-escaping-for-V.patch',
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/559
+        f'{name}/0009-giscanner-Don-t-enable-macro-escaping-on-non-MSVC-co.patch',
     ]
 
     def prepare(self):

@@ -1,0 +1,45 @@
+From 1fd1a20530de73461b01c51fedd5f4bcec69c58b Mon Sep 17 00:00:00 2001
+From: Sebastian Keller <skeller@gnome.org>
+Date: Sat, 1 Aug 2026 11:11:56 +0200
+Subject: [PATCH 9/9] giscanner: Don't enable macro escaping on non-MSVC
+ compilers
+
+When bc1bf9ef tried to enable the MSVC speicific escaping only on older
+MSVC compilers, it accidentally also enabled it on all non-MSVC
+compilers as well, because `_needs_escaping_macros` was initialized to
+`True` and only ever set to `False` on newer MSVC versions. This was
+then breaking builds with those compilers.
+
+Fixes: bc1bf9ef ("giscanner: Disable macros double quote escaping for VS 2026 onwards")
+(cherry picked from commit c6c7e781549b359de979fe584e67760dceb7a344)
+---
+ giscanner/ccompiler.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/giscanner/ccompiler.py b/giscanner/ccompiler.py
+index dd62dcc3..855ca37c 100644
+--- a/giscanner/ccompiler.py
++++ b/giscanner/ccompiler.py
+@@ -150,7 +150,7 @@ class CCompiler(object):
+     compiler_cmd = ''
+     compiler = None
+     _cflags_no_deprecation_warnings = ''
+-    _needs_escaping_macros = True
++    _needs_escaping_macros = False
+ 
+     def __init__(self,
+                  environ=os.environ,
+@@ -220,8 +220,8 @@ class CCompiler(object):
+                 # https://developercommunity.visualstudio.com/t/Spurious-C7772-C1903-in-2026-Insiders-wh/11082089
+                 output = subprocess.check_output([self.compiler_cmd], universal_newlines=True, stderr=subprocess.STDOUT)
+                 version = re.search(r'\w([0-9]+\.[0-9]+\.[0-9]+)\w', output)
+-                if version and version.group(0) >= '19.50':
+-                    self._needs_escaping_macros = False
++                if not version or version.group(0) < '19.50':
++                    self._needs_escaping_macros = True
+         else:
+             if (isinstance(self.compiler, Mingw32CCompiler)):
+                 self.compiler_cmd = self.compiler.compiler[0]
+-- 
+2.54.0
+
