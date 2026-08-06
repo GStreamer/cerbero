@@ -3,7 +3,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
-    version = '0.164.3108+git31e19f9'
+    version = '0.165.3223+git20250910.0480cb0'
     name = 'x264'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
@@ -12,19 +12,15 @@ class Recipe(recipe.Recipe):
     # See https://download.videolan.org/pub/x264/snapshots/x264-snapshot-20191218-README.txt
     # Patch and tarball must match the below port (keeping it for reference)
     # remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/meson-ports/%(name)s.git'}
-    # commit = 'origin/164.3108-meson'
-    # Source url = 'https://deb.debian.org/debian/pool/main/x/x264/x264_%(version)s.orig.tar.gz'
-    url = 'https://gstreamer.freedesktop.org/src/mirror/%(name)s_%(version)s.orig.tar.gz'
-    tarball_checksum = '41606cb8e788a7f8c4514290646d4ba5c7bc68d9e1ccd1a73f446a90546913eb'
+    # commit = 'origin/165.3223-meson'
+    # Source url = 'https://deb.debian.org/debian/pool/main/x/x264/x264_%(version)s.orig.tar.xz'
+    url = 'https://deb.debian.org/debian/pool/main/x/x264/x264_%(version)s.orig.tar.xz'
+    tarball_checksum = 'de68ca43d0c6e09baeb86a38ed5cde86b0a84a21d6babcc569804201dc9df133'
 
     licenses = [License.GPLv2Plus]
 
     patches = [
         'x264/0001-Add-Meson-build.patch',
-        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/31
-        'x264/fix-textrels.patch',
-        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/32
-        'x264/msvc-arm64-support.patch',
     ]
 
     meson_options = {}
@@ -40,6 +36,6 @@ class Recipe(recipe.Recipe):
             self.files_bins.remove('x264')
 
     def post_install(self):
-        LibtoolLibrary('x264', 164, None, None, self.config.libdir,
+        LibtoolLibrary('x264', 165, None, None, self.config.libdir,
                 self.config.target_platform).save()
         super().post_install()

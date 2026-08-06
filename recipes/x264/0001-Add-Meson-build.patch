@@ -1,7 +1,7 @@
-From 1280d5645fc96750a6577bf8c52c4621f519d530 Mon Sep 17 00:00:00 2001
+From 23458117f3520720848bb557a3fd83e5fc1a7966 Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 27 Mar 2024 00:13:16 +0000
-Subject: [PATCH 1/4] Add Meson build
+Subject: [PATCH] Add Meson build
 
 Source: https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/tree/164.3108-meson
 
@@ -21,22 +21,14 @@ If you're regenerating the patches, do
 
 and extract the result via git format-patch --stdout.
 ---
- README.meson                            |   45 +
- meson.build                             | 1051 +++++++++++++++++++++++
- meson_options.txt                       |   56 ++
- subprojects/win-nasm/.gitignore         |    2 +
- subprojects/win-nasm/download-binary.py |   76 ++
- subprojects/win-nasm/meson.build        |   41 +
- subprojects/win-nasm/patch_nasm.py      |   15 +
- version.py                              |  102 +++
- 8 files changed, 1388 insertions(+)
+ README.meson      |   45 ++
+ meson.build       | 1159 +++++++++++++++++++++++++++++++++++++++++++++
+ meson_options.txt |   56 +++
+ version.py        |  102 ++++
+ 4 files changed, 1362 insertions(+)
  create mode 100644 README.meson
  create mode 100644 meson.build
  create mode 100644 meson_options.txt
- create mode 100644 subprojects/win-nasm/.gitignore
- create mode 100755 subprojects/win-nasm/download-binary.py
- create mode 100644 subprojects/win-nasm/meson.build
- create mode 100755 subprojects/win-nasm/patch_nasm.py
  create mode 100755 version.py
 
 diff --git a/README.meson b/README.meson
@@ -92,20 +84,20 @@ index 00000000..75d547cc
 +Known to build on Debian, Windows (with MSVC) and MacOS High Sierra.
 diff --git a/meson.build b/meson.build
 new file mode 100644
-index 00000000..400846da
+index 00000000..1f3d3611
 --- /dev/null
 +++ b/meson.build
-@@ -0,0 +1,1051 @@
+@@ -0,0 +1,1159 @@
 +project('x264', 'c',
-+  version: run_command(find_program('version.py', native: true), '--package-version', check: true).stdout().strip(),
++  version: run_command(find_program('version.py'), '--package-version', check: true).stdout().strip(),
 +  default_options: ['optimization=2', 'c_std=c11'],
-+  meson_version: '>= 0.52'
++  meson_version: '>= 1.6.0'
 +)
 +
 +x264_ver = meson.project_version()
 +x264_rev = meson.project_version().split('.')[2]
 +x264_build = meson.project_version().split('.')[1]
-+x264_commit = run_command(find_program('version.py', native: true), '--commit-hash', check: true).stdout().strip()
++x264_commit = run_command(find_program('version.py'), '--commit-hash', check: true).stdout().strip()
 +
 +message('build: ' + x264_build)
 +message('commit: ' + x264_commit)
@@ -151,6 +143,20 @@ index 00000000..400846da
 +  'clock_gettime',
 +  'bitdepth8',
 +  'bitdepth10',
++  'elf_aux_info',
++  'getauxval',
++  'sysconf',
++  'sync_fetch_and_add',
++  'dotprod',
++  'i8mm',
++  'sve',
++  'sve2',
++  'riscv64',
++  'rvv',
++  'as_archext_dotprod_directive',
++  'as_archext_i8mm_directive',
++  'as_archext_sve_directive',
++  'as_archext_sve2_directive',
 +]
 +
 +cdata = configuration_data()
@@ -180,6 +186,11 @@ index 00000000..400846da
 +    cdata.set10('HAVE_POSIXTHREAD', cc.has_header_symbol('pthread.h', 'pthread_create', dependencies: threads))
 +  endif
 +endif
++
++cdata.set10('HAVE_SYNC_FETCH_AND_ADD', cc.compiles('''int main() {
++      int *val; __sync_fetch_and_add(&val, 1);
++      return *val;
++    }''', name: 'Has __sync_fetch_and_add'))
 +
 +compiler_style = 'GNU'
 +
@@ -248,6 +259,7 @@ index 00000000..400846da
 +        '-Werror=unknown-attributes',
 +        '-Werror=attributes',
 +        '-Werror=ignored-attributes',
++        '-Werror=implicit-function-declaration',
 +        '-fno-tree-vectorize',
 +        '-Wshadow',
 +        '-Wno-maybe-uninitialized',
@@ -275,14 +287,13 @@ index 00000000..400846da
 +  asflags += ['-UPREFIX']
 +endif
 +
++asm = get_option('asm').require(host_cpu != 'x86' or host_system != 'android',
++    error_message: 'causes text relocations on Android x86')
++
++asm_allowed = asm.allowed()
++
 +if ['x86', 'x86_64'].contains(host_cpu)
-+  if not get_option('asm').disabled()
-+    nasm = find_program('nasm', native: true, required: false)
-+    if not nasm.found()
-+      subproject('win-nasm')
-+      nasm = find_program('nasm', native: true, required: get_option('asm').enabled())
-+    endif
-+  endif
++  asm_allowed = add_languages('nasm', required: asm, native: false)
 +  if host_cpu == 'x86'
 +    if compiler_style == 'GNU'
 +      has_sse2_math = cc.get_define('__SSE2_MATH__') != ''
@@ -293,27 +304,9 @@ index 00000000..400846da
 +      endif
 +    endif
 +    asflags += ['-DARCH_X86_64=0']
-+    if host_system == 'windows'
-+      asflags += ['-f', 'win32']
-+    elif ['darwin', 'ios'].contains(host_system)
-+      asflags += ['-f', 'macho32']
-+    elif host_system.endswith('bsd')
-+      asflags += ['-f', 'aoutb']
-+    else
-+      asflags += ['-f', 'elf32']
-+    endif
 +  elif host_cpu == 'x86_64'
 +    asflags += ['-DARCH_X86_64=1']
 +    stack_alignment = 16
-+    if host_system == 'windows'
-+      asflags += ['-f', 'win64']
-+    elif ['darwin', 'ios'].contains(host_system)
-+      asflags += ['-f', 'macho64']
-+    elif host_system.endswith('bsd')
-+      asflags += ['-f', 'aoutb']
-+    else
-+      asflags += ['-f', 'elf64']
-+    endif
 +  endif
 +elif host_cpu.startswith('ppc')
 +  cdata.set10('altivec', true)
@@ -339,40 +332,50 @@ index 00000000..400846da
 +      asflags += ['-arch', 'arm64']
 +    endif
 +  elif host_system == 'windows'
-+    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
-+    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
++    armasm64 = find_program('armasm64', required: asm)
 +    if compiler_style == 'MS'
-+      asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
++      asflags = ['-arch', 'aarch64', '-as-type', 'armasm', '--', armasm64.full_path(), '-nologo', '-I.'] + asflags
 +    endif
 +  endif
 +elif host_cpu == 'arm'
 +  if host_system == 'windows' and compiler_style == 'MS'
-+    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
-+    armasm = find_program('armasm', native: true, required: get_option('asm'))
-+    asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
++    armasm = find_program('armasm', required: asm)
++    asflags = ['-arch', 'arm', '-as-type', 'armasm', '--', armasm.full_path(), '-nologo', '-ignore', '4509', '-I.'] + asflags
 +  elif host_system == 'windows'
 +    # FIXME once Meson exposes the compiler command line
-+    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: asm)
 +    gcc = disabler()
 +    if cc.get_id().contains('clang')
-+      gcc = find_program('clang', native: true, required: get_option('asm'))
++      gcc = find_program('clang', required: asm)
 +    else
-+      gcc = find_program('gcc', native: true, required: get_option('asm'))
++      gcc = find_program('gcc', required: asm)
 +    endif
-+    asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
++    asflags = ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc.full_path(), '-mimplicit-it=always', '-I.'] + asflags
 +  endif
++elif host_cpu == 'riscv64'
++  cdata.set10('riscv64', true)
++  stack_alignment = 16
 +endif
 +
-+if get_option('b_staticpic') and ['arm', 'x86'].contains(host_cpu)
++if get_option('b_staticpic') and host_cpu == 'x86' and asm_allowed
 +  # Text relocations are required for all 32-bit objects. We
 +  # must disable the warning to allow linking with lld. Unlike gold, ld which
 +  # will silently allow text relocations, lld support must be explicit.
 +  #
 +  # See https://crbug.com/911658#c19 for more information. See also
 +  # https://trac.ffmpeg.org/ticket/7878
++  #
++  # We cannot ignore these text relocations on Android though, so skip it there
 +  if cc.has_link_argument('-Wl,-z,notext')
 +    add_project_link_arguments('-Wl,-z,notext', language: 'c')
 +  endif
++  # resolve textrels in the x86 asm
++  add_project_link_arguments(
++    cc.get_supported_link_arguments('-Wl,-Bsymbolic'),
++    language: 'c'
++  )
 +endif
 +
 +if host_system == 'windows'
@@ -421,10 +424,9 @@ index 00000000..400846da
 +endif
 +
 +inline_asm_check = 'int main (void) { @0@ return 0; }'
++asm_arch_ext_checks = []
 +
 +if host_cpu == 'x86' or host_cpu == 'x86_64'
-+  asm_allowed = not get_option('asm').disabled()
-+
 +  cpp_cond = '''
 +#include <@0@>
 +
@@ -443,15 +445,16 @@ index 00000000..400846da
 +  # under Clang if stack realignment is used. This is probably
 +  # because the only compilers still supporting the architecture
 +  # are the Android NDK and MSYS CLANG32.
-+  # See:
++  # See:
 +  # - https://github.com/android/ndk/issues/693
 +  # - https://bugs.llvm.org/show_bug.cgi?id=37542
-+  if is_broken_android_api and host_cpu == 'x86'
++  if is_broken_android_api
 +    warning('''x86 targets prior to Android Nougat (API 24) need
 +      -mstackrealign to properly align stack for global constructors.
 +      See https://github.com/android-ndk/ndk/issues/635''')
 +    add_project_arguments('-mstackrealign', language: 'c')
-+
++  endif
++  if host_cpu == 'x86'
 +    # Disable ASM ipso facto, as there are not enough registers for
 +    # x264_predictor_clip_mmx2 and x264_predictor_roundclip_mmx2.
 +    # See: https://github.com/android/ndk/issues/690
@@ -462,31 +465,6 @@ index 00000000..400846da
 +  endif
 +
 +  if asm_allowed
-+    nasm_ok = nasm.found()
-+    nasm_version = 'no assembler'
-+
-+    if nasm_ok
-+      f = configure_file(
-+        command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format('vmovdqa32 [eax]{k1}{z}, zmm0')],
-+        input: 'configure',
-+        output: '@0@.asm'.format('conftest'),
-+        capture: true,
-+      )
-+
-+      result = run_command(nasm, asflags, '-o', meson.current_build_dir() / '@0@.o'.format('conftest'), f, check: false)
-+
-+      if result.returncode() != 0
-+        nasm_ok = false
-+        out = run_command(nasm, '-v', capture: true, check: true).stdout().strip()
-+        out = out.split()
-+        nasm_version = out[2]
-+      endif
-+    endif
-+
-+    if not nasm_ok
-+      error('Found @0@, minimum Nasm version is 2.13. If you really want to compile without asm, configure with -Dasm=disabled.'.format(nasm_version))
-+    endif
-+
 +    # Amyspark: MSVC in C mode takes '__asm__' as a forward defined function
 +    if cc.links(inline_asm_check.format('__asm__("pabsw %xmm0, %xmm0");'),
 +                   name: 'Compiler supports gcc-style inline assembly')
@@ -494,7 +472,7 @@ index 00000000..400846da
 +    endif
 +    cdata.set10('HAVE_MMX', true)
 +  endif
-+elif host_cpu == 'arm'
++elif host_cpu == 'arm' and asm_allowed
 +  cdata.set10('HAVE_ARM_INLINE_ASM', cc.links(inline_asm_check.format('__asm__("add r0, r1, r2");'), name: 'Compiler supports gcc-style inline assembly'))
 +  if compiler_style != 'MS'
 +    add_project_arguments('-mcpu=cortex-a8', '-mfpu=neon', language: 'c')
@@ -507,7 +485,9 @@ index 00000000..400846da
 +  else
 +    error('You specified a pre-ARMv6 or Thumb-1 CPU in your CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
 +  endif
-+elif host_cpu == 'aarch64'
++elif host_cpu == 'aarch64' and asm_allowed
++  # Upstream replaced this check with configure-time running of gas-preprocessor.pl.
++  # This is not admitted on Meson, so preserve the existing workaround.
 +  if compiler_style == 'MS' and (cc.get_define('_M_ARM64') != '')
 +    cdata.set10('HAVE_AARCH64', true)
 +    cdata.set10('HAVE_NEON', true)
@@ -517,34 +497,110 @@ index 00000000..400846da
 +  else
 +    error('No NEON support, try adding -mfpu=neon to CFLAGS. If you really want to run on such a CPU, configure with -Dasm=disabled.')
 +  endif
++
++  as_arch_level = 'armv8-a'
++  # Check for higher .arch levels. We only need armv8.2-a in order to
++  # enable the extensions we want below - we primarily want to control
++  # them via .arch_extension. However:
++  #
++  # Clang before version 17 (Xcode versions before 16) didn't support
++  # controlling the dotprod/i8mm extensions via .arch_extension; thus
++  # try to enable them via the .arch level as well.
++  foreach level : ['armv8.2-a', 'armv8.4-a', 'armv8.6-a']
++    f = configure_file(
++      command: [python3, '-c', 'import sys; print(sys.argv[1])', '.arch @0@'.format(level)],
++      output: '@0@.S'.format(level),
++      capture: true,
++    )
++    if cc.compiles(
++      f,
++      name: 'assembler supports @0@'.format(level)
++    )
++      as_arch_level = level
++    endif
++  endforeach
++  # Clang before version 17 (Xcode versions before 16) also had a bug
++  # (https://github.com/llvm/llvm-project/issues/32220) causing a plain
++  # ".arch <level>" to not have any effect unless it had an extra
++  # "+<feature>" included - but it was activated on the next
++  # ".arch_extension" directive. Check if we can include "+crc" as dummy
++  # feature to make the .arch directive behave as expected and take
++  # effect right away.
++  
++  f = configure_file(
++    command: [python3, '-c', 'import sys; print(sys.argv[1])', '.arch @0@+fp'.format(as_arch_level)],
++    output: 'arch_fp.S',
++    capture: true,
++  )
++  if cc.compiles(
++    f,
++    name: 'assembler supports @0@ with the FP extension'.format(as_arch_level)
++  )
++    as_arch_level = as_arch_level + '+crc'
++  endif
++
++  arch_directive = '.arch ' + as_arch_level + '\n'
++  cdata.set('AS_ARCH_LEVEL', as_arch_level)
++
++  asm_arch_ext_checks += [
++    ['dotprod', 'dotprod', 'udot v0.4s, v0.16b, v0.16b'],
++    ['i8mm', 'i8mm', 'usdot v0.4s, v0.16b, v0.16b'],
++    ['sve', 'sve', 'whilelt p0.s, x0, x1'],
++    ['sve2', 'sve2', 'sqrdmulh z0.s, z0.s, z0.s'],
++  ]
++elif host_cpu == 'riscv64' and asm_allowed
++  cdata.set('HAVE_RISCV64', true)
++  cdata.set10('HAVE_RVV', cc.links(inline_asm_check.format('__asm__(".option arch, +v\nvsetvli t0, a0, e32, m1, ta, ma");'), name: 'Compiler supports gcc-style inline assembly'))
 +endif
++
++foreach check : asm_arch_ext_checks
++  # Test if the assembler supports the .arch_extension $archext directive.
++  code = arch_directive
++  arch_extension_directive = '.arch_extension ' + check[1] + '\n'
++  code += arch_extension_directive
++  f = configure_file(
++    command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(code)],
++    output: '@0@_archext.S'.format(check[0]),
++    capture: true,
++  )
++  archext_supported = cc.compiles(
++    f,
++    name: 'arch_extension_' + check[0]
++  )
++  archextdir = check[1].replace('-', '_').to_upper()
++  cdata.set10('HAVE_AS_ARCHEXT_' + archextdir + '_DIRECTIVE', archext_supported)
++
++  # Test if we can assemble the instruction after potential .arch and
++  # .arch_extension directives.
++  code = arch_directive
++  if archext_supported
++    code += arch_extension_directive
++  endif
++  code += check[2] + '\n'
++  f = configure_file(
++    command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(code)],
++    output: '@0@.S'.format(check[0]),
++    capture: true,
++  )
++  cdata.set10('HAVE_' + check[0].to_upper(), cc.compiles(f, name: check[0]))
++endforeach
 +
 +if ['arm', 'aarch64'].contains(host_cpu)
 +  # check if the assembler supports '.func' (clang 3.5 does not)
-+  # It is possible to run compile checks on generated files, however,
-+  # Meson versions earlier than 1.2.0 do not set the lookup path
-+  # correctly, causing Python to fail opening it.
-+  # https://github.com/mesonbuild/meson/issues/11983
-+  if meson.version().version_compare('>= 1.2.0')
-+    as_func = '''.func test
-+    .endfunc'''
-+    f = configure_file(
-+      command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(as_func)],
-+      input: 'configure',
-+      output: '@0@.S'.format('conftest'),
-+      capture: true,
-+    )
-+    cdata.set('HAVE_AS_FUNC', cc.compiles(
-+      f,
-+      args: ['-x', 'assembler'],
-+      name: 'The assembler supports .func (Clang 3.5 does not)'
-+    ))
-+  else
-+    cdata.set10('HAVE_AS_FUNC', false)
-+  endif
++  as_func = '''.func test
++  .endfunc'''
++  f = configure_file(
++    command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(as_func)],
++    input: 'configure',
++    output: '@0@.S'.format('conftest'),
++    capture: true,
++  )
++  cdata.set10('HAVE_AS_FUNC', cc.compiles(f,
++    name: 'The assembler supports .func (Clang 3.5 does not)'
++  ))
 +endif
 +
-+if host_cpu.startswith('mips')
++if host_cpu.startswith('mips') and asm_allowed
 +  add_project_arguments('-mmsa', '-mfp64', '-mhard-float', language: 'c')
 +
 +  if cc.links(inline_asm_check.format('__asm__("addvi.b $w0, $w1, 1");'), name: 'MSA')
@@ -621,6 +677,8 @@ index 00000000..400846da
 +    }''', name: 'Has function attribute vector_size'))
 +endif 
 +
++asm_gen_objs = []
++
 +# the DEBUG macro is only used by RC
 +if not get_option('debug')
 +  if compiler_style == 'MS'
@@ -630,23 +688,17 @@ index 00000000..400846da
 +  endif
 +endif
 +
-+asm_gen_objs = []
-+if ['x86', 'x86_64'].contains(host_cpu) and nasm.found()
-+  outputname = '@BASENAME@.o'
-+  if host_system == 'windows'
-+    outputname = '@BASENAME@.obj'
-+  endif
-+
++if ['x86', 'x86_64'].contains(host_cpu) and asm_allowed
 +  if host_cpu == 'x86' or host_cpu == 'x86_64'
 +    if host_cpu == 'x86'
-+      asm_x = files('common/x86/dct-32.asm',
++      asm_genx_objs = files('common/x86/dct-32.asm',
 +                    'common/x86/pixel-32.asm')
 +    elif host_cpu == 'x86_64'
-+      asm_x = files('common/x86/dct-64.asm',
++      asm_genx_objs = files('common/x86/dct-64.asm',
 +                    'common/x86/trellis-64.asm')
 +    endif
 +
-+    asm_x += files('common/x86/bitstream-a.asm',
++    asm_genx_objs += files('common/x86/bitstream-a.asm',
 +                   'common/x86/const-a.asm',
 +                   'common/x86/cabac-a.asm',
 +                   'common/x86/dct-a.asm',
@@ -660,48 +712,31 @@ index 00000000..400846da
 +
 +  asflags += ['-DSTACK_ALIGNMENT=@0@'.format(stack_alignment)]
 +
-+  if get_option('b_staticpic')
-+    asflags += ['-DPIC']
-+
-+    # resolve textrels in the x86 asm
-+    add_project_link_arguments(
-+      cc.get_supported_link_arguments('-Wl,-Bsymbolic'),
-+      language: 'c'
-+    )
-+  endif
-+
 +  asm_incdir = meson.current_source_dir() / 'common' / 'x86'
++  asflags += ['-I@0@'.format(asm_incdir)]
 +
 +  foreach d : depths
-+    asm_gen = generator(nasm,
-+      output: outputname,
-+      arguments: ['-I@0@'.format(asm_incdir),
-+                  asflags,
-+                  '-o', '@OUTPUT@',
-+                  '@INPUT@',
-+                  '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
-+                  '-DBIT_DEPTH=@0@'.format(d),
-+                  '-Dprivate_prefix=x264_@0@'.format(d)])
-+    asm_genx_objs = [asm_gen.process(asm_x)]
 +    # These two are high and low bit-depth in separate files instead of in the
 +    # same file and selected with -DBIT_DEPTH
++    special_files = []
 +    if d == 8
-+      asm_genx_objs += asm_gen.process('common/x86/sad-a.asm')
++      special_files += files('common/x86/sad-a.asm')
++    elif d == 10
++      special_files += files('common/x86/sad16-a.asm')
 +    endif
-+    if d == 10
-+      asm_genx_objs += asm_gen.process('common/x86/sad16-a.asm')
-+    endif
-+    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
++    special_static_lib = static_library('@0@-static-special'.format(d),
++      asm_genx_objs + special_files,
++      nasm_args: asflags + [
++                  '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                  '-DBIT_DEPTH=@0@'.format(d),
++                  '-Dprivate_prefix=x264_@0@'.format(d)],
++      install: false,
++    )
++    set_variable('asm_gen@0@_objs'.format(d), special_static_lib.extract_all_objects(recursive: true))
 +  endforeach
 +
-+  asm_gen = generator(nasm,
-+    output: outputname,
-+    arguments: ['-I@0@'.format(asm_incdir),
-+                asflags,
-+                '-o', '@OUTPUT@',
-+                '@INPUT@'])
-+  asm_gen_objs = asm_gen.process('common/x86/cpu-a.asm')
-+elif host_cpu == 'aarch64'
++  asm_gen_objs = files('common/x86/cpu-a.asm')
++elif host_cpu == 'aarch64' and asm_allowed
 +  asm_x = files(
 +    'common/aarch64/bitstream-a.S',
 +    'common/aarch64/cabac-a.S',
@@ -712,6 +747,20 @@ index 00000000..400846da
 +    'common/aarch64/predict-a.S',
 +    'common/aarch64/quant-a.S',
 +  )
++
++  if cdata.get('HAVE_SVE', 0) == 1
++    asm_x += files(
++      'common/aarch64/dct-a-sve.S',
++      'common/aarch64/deblock-a-sve.S',
++      'common/aarch64/mc-a-sve.S',
++      'common/aarch64/pixel-a-sve.S',
++    )
++  endif
++  if cdata.get('HAVE_SVE2', 0) == 1
++    asm_x += files(
++      'common/aarch64/dct-a-sve2.S',
++    )
++  endif
 +
 +  foreach d : depths
 +    asm_genx_objs = []
@@ -725,12 +774,20 @@ index 00000000..400846da
 +                    '@INPUT@',])
 +      asm_genx_objs = asm_gen.process(asm_x)
 +    else
-+      asm_genx_objs = asm_x
++      special_static_lib = static_library('@0@-static-special'.format(d),
++        asm_x,
++        c_args: asflags + [
++                    '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                    '-DBIT_DEPTH=@0@'.format(d),
++                    '-Dprivate_prefix=x264_@0@'.format(d)],
++        install: false,
++      )
++      asm_genx_objs = special_static_lib.extract_all_objects(recursive: true)
 +    endif
 +    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
 +  endforeach
-+elif host_cpu == 'arm'
-+  asm_gen_objs += files(
++elif host_cpu == 'arm' and asm_allowed
++  asm_gen_objs = files(
 +    'common/arm/cpu-a.S'
 +  )
 +
@@ -755,15 +812,43 @@ index 00000000..400846da
 +                    '@INPUT@',])
 +      asm_genx_objs = asm_gen.process(asm_x)
 +    else
-+      asm_genx_objs = asm_x
++      special_static_lib = static_library('@0@-static-special'.format(d),
++        asm_x,
++        c_args: asflags + [
++                    '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++                    '-DBIT_DEPTH=@0@'.format(d),
++                    '-Dprivate_prefix=x264_@0@'.format(d)],
++        install: false,
++      )
++      asm_genx_objs = special_static_lib.extract_all_objects(recursive: true)
++      set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
 +    endif
++  endforeach
++elif host_cpu.startswith('loongarch') and cdata.get('HAVE_LSX', 0) == 1
++  asm_x = files(
++    'common/loongarch/dct-a.S',
++    'common/loongarch/deblock-a.S',
++    'common/loongarch/loongson_asm.S',
++    'common/loongarch/loongson_util.S',
++    'common/loongarch/mc-a.S',
++    'common/loongarch/pixel-a.S',
++    'common/loongarch/predict-a.S',
++    'common/loongarch/quant-a.S',
++    'common/loongarch/sad-a.S',
++  )
++  foreach d : depths
++    special_static_lib = static_library('loongarch-@0@'.format(d),
++      asm_x,
++      c_args: asflags + [
++        '-DHIGH_BIT_DEPTH=@0@'.format((d > 8).to_int()),
++        '-DBIT_DEPTH=@0@'.format(d),
++      ],
++      install: false,
++    )
++    asm_genx_objs = special_static_lib.extract_all_objects(recursive: true)
 +    set_variable('asm_gen@0@_objs'.format(d), asm_genx_objs)
 +  endforeach
 +endif
-+
-+config_mak='''
-+CFLAGS=-Wno-maybe-uninitialized -Wshadow -Wall -std=gnu99 -fomit-frame-pointer -fno-tree-vectorize
-+'''
 +
 +cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h') and cc.has_function('memalign'))
 +cdata.set10('HAVE_STRING_H', cc.has_header('string.h')) # getopt.c
@@ -783,6 +868,9 @@ index 00000000..400846da
 +cdata.set10('HAVE_THP', host_system == 'linux'
 +  and (host_cpu == 'x86' or host_cpu == 'x86_64')
 +  and cc.has_header_symbol('sys/mman.h', 'MADV_HUGEPAGE'))
++cdata.set10('HAVE_GETAUXVAL', cc.has_function('getauxval', prefix: '#include <sys/auxv.h>'))
++cdata.set10('HAVE_ELF_AUX_INFO', cc.has_function('elf_aux_info', prefix: '#include <sys/auxv.h>'))
++cdata.set10('HAVE_SYSCONF', cc.has_function('sysconf', prefix: '#include <unistd.h>'))
 +
 +if cc.has_function('fseeko')
 +  cdata.set('fseek', 'fseeko')
@@ -801,6 +889,8 @@ index 00000000..400846da
 +  cdata.set10('SYS_MACOSX', true)
 +elif host_system == 'sunos' or host_system == 'solaris'
 +  cdata.set10('SYS_SunOS', true)
++elif host_system == 'android'
++  cdata.set10('SYS_LINUX', true)
 +else
 +  cdata.set10('SYS_' + host_system.to_upper(), true)
 +endif
@@ -935,7 +1025,7 @@ index 00000000..400846da
 +  'encoder/lookahead.c',
 +]
 +
-+if not get_option('asm').disabled()
++if asm_allowed
 +  if ['x86', 'x86_64'].contains(host_cpu)
 +    sources_x += files(
 +      'common/x86/mc-c.c',
@@ -961,7 +1051,7 @@ index 00000000..400846da
 +      'common/ppc/predict.c',
 +      'common/ppc/quant.c',
 +    )
-+  elif host_cpu.startswith('mips') and conf.get('HAVE_MSA')
++  elif host_cpu.startswith('mips') and cdata.get('HAVE_MSA')
 +    sources_x += files(
 +      'common/mips/dct-c.c',
 +      'common/mips/deblock-c.c',
@@ -969,6 +1059,12 @@ index 00000000..400846da
 +      'common/mips/pixel-c.c',
 +      'common/mips/predict-c.c',
 +      'common/mips/quant-c.c',
++    )
++  elif host_cpu.startswith('loongarch') and cdata.get('HAVE_LSX')
++    sources_x += files(
++      'common/loongarch/mc-c.c',
++      'common/loongarch/pixel-c.c',
++      'common/loongarch/predict-c.c',
 +    )
 +  endif
 +endif
@@ -1076,23 +1172,27 @@ index 00000000..400846da
 +  sym_import_args = ['-DX264_API_IMPORTS']
 +endif
 +
-+x_libs = []
++x_objs = []
 +foreach depth : depths
 +  high_bit_depth = depth > 8 ? 1 : 0
 +  asm_genx_objs = get_variable('asm_gen@0@_objs'.format(depth), [])
-+  x_libs += static_library('x264-@0@'.format(depth), sources_x, asm_genx_objs,
++  x_lib = static_library('x264-@0@'.format(depth), sources_x,
++    link_language: 'c',
 +    c_args: ['-DHIGH_BIT_DEPTH=@0@'.format(high_bit_depth),
 +             '-DBIT_DEPTH=@0@'.format(depth)] + sym_export_args,
++    objects: asm_genx_objs,
 +    dependencies: [threads, libm],
 +    install: false)
++  x_objs += x_lib.extract_all_objects(recursive: true)
 +endforeach
 +
 +libx264 = library('x264',
 +  sources, asm_gen_objs, win_res_objs,
 +  c_args: sym_export_args,
++  nasm_args: asflags,
++  objects: x_objs,
 +  version: x264_build,
 +  dependencies: [threads, libm],
-+  link_whole: x_libs,
 +  link_args: bsymbolic_args,
 +  gnu_symbol_visibility: 'hidden',
 +  pic: get_option('b_staticpic'),
@@ -1209,166 +1309,8 @@ index 00000000..a1bd0a52
 +
 +option('lsmash', type: 'feature', value: 'disabled',
 +       description: 'cli lsmash support')
-diff --git a/subprojects/win-nasm/.gitignore b/subprojects/win-nasm/.gitignore
-new file mode 100644
-index 00000000..12f23723
---- /dev/null
-+++ b/subprojects/win-nasm/.gitignore
-@@ -0,0 +1,2 @@
-+nasm-*/
-+nasm-*.zip
-diff --git a/subprojects/win-nasm/download-binary.py b/subprojects/win-nasm/download-binary.py
-new file mode 100755
-index 00000000..047ae7bd
---- /dev/null
-+++ b/subprojects/win-nasm/download-binary.py
-@@ -0,0 +1,76 @@
-+#!/usr/bin/env python3
-+# SPDX-FileCopyrightText: 2020 Nirbheek Chauhan <nirbheek@centricular.com>
-+# SPDX-FileCopyrightText: 2023 L. E. Segovia <amy@centricular.com>
-+# SPDX-License-Ref: LGPL-2.1-or-later
-+
-+import os
-+import sys
-+import ssl
-+import zipfile
-+import hashlib
-+import urllib.request
-+import urllib.error
-+
-+# Disable certificate checking because it always fails on Windows
-+# We verify the checksum anyway.
-+ctx = ssl.create_default_context()
-+ctx.check_hostname = False
-+ctx.verify_mode = ssl.CERT_NONE
-+
-+BASENAME = 'nasm-{}-{}.zip'
-+UPSTREAM_URL = 'https://www.nasm.us/pub/nasm/releasebuilds/{}/{}/{}'
-+GSTREAMER_URL = 'https://gstreamer.freedesktop.org/src/mirror/{}'
-+
-+version = sys.argv[1]
-+if sys.argv[2] == 'darwin':
-+    arch = 'macosx'
-+elif sys.argv[2] == 'x86_64':
-+    arch = 'win64'
-+else:
-+    arch = 'win32'
-+zip_sha256 = sys.argv[3]
-+source_dir = os.path.join(os.environ['MESON_SOURCE_ROOT'], os.environ['MESON_SUBDIR'])
-+dest = BASENAME.format(version, arch)
-+dest_path = os.path.join(source_dir, dest)
-+
-+def get_sha256(zipf):
-+    hasher = hashlib.sha256()
-+    with open(zipf, 'rb') as f:
-+        hasher.update(f.read())
-+    return hasher.hexdigest()
-+
-+if os.path.isfile(dest_path):
-+    found_sha256 = get_sha256(dest_path)
-+    if found_sha256 == zip_sha256:
-+        print('{} already downloaded'.format(dest))
-+    else:
-+        os.remove(dest)
-+        print('{} checksum mismatch, redownloading'.format(dest), file=sys.stderr)
-+
-+if not os.path.isfile(dest_path):
-+    for url in (GSTREAMER_URL.format(dest), UPSTREAM_URL.format(version, arch, dest)):
-+        print('Downloading {} to {}'.format(url, dest))
-+        try:
-+            with open(dest_path, 'wb') as d:
-+                f = urllib.request.urlopen(url, context=ctx)
-+                d.write(f.read())
-+            break
-+        except BaseException as ex:
-+            print(ex, file=sys.stderr)
-+            print('Failed to download from {!r}, trying mirror...'.format(url), file=sys.stderr)
-+            continue
-+    else:
-+        curdir = os.path.dirname(sys.argv[0])
-+        print('Couldn\'t download {!r}! Try downloading it manually and '
-+            'placing it into {!r}'.format(dest, curdir), file=sys.stderr)
-+        sys.exit(1)
-+
-+found_sha256 = get_sha256(dest_path)
-+if found_sha256 != zip_sha256:
-+    print('SHA256 of downloaded file {} was {} instead of {}'
-+          ''.format(dest, found_sha256, zip_sha256), file=sys.stderr)
-+    sys.exit(1)
-+
-+print('Extracting {}'.format(dest))
-+zf = zipfile.ZipFile(dest_path, "r")
-+zf.extractall(path=source_dir)
-diff --git a/subprojects/win-nasm/meson.build b/subprojects/win-nasm/meson.build
-new file mode 100644
-index 00000000..ef796103
---- /dev/null
-+++ b/subprojects/win-nasm/meson.build
-@@ -0,0 +1,41 @@
-+project('nasm', version : '2.16.01')
-+
-+download_binary = find_program(meson.current_source_dir() / 'download-binary.py')
-+
-+arch = host_machine.system()
-+
-+if not ['windows', 'darwin'].contains(arch)
-+  warning('Can only download nasm for Windows or macOS, sorry')
-+  subdir_done()
-+endif
-+
-+message('Downloading and extracting nasm binaries for @0@...'.format(arch))
-+
-+if arch == 'windows'
-+  arch = host_machine.cpu_family()
-+  if arch == 'x86_64'
-+    zip_hash = '029eed31faf0d2c5f95783294432cbea6c15bf633430f254bb3c1f195c67ca3a'
-+  else
-+    zip_hash = 'e289fa70c88594b092c916344bb8bfcd6896b604bfab284ab57b1372997c820c'
-+  endif
-+else
-+  # macOS binaries are only identified as architecture "macosx"
-+  zip_hash = 'd53c9a1bc9cd92d22e37924d31e9c68413fa03104fd165a6e7b7faf8800a1822'
-+endif
-+
-+download = run_command(download_binary, meson.project_version(), arch, zip_hash)
-+
-+if download.returncode() != 0
-+  warning('Download failed: @0@'.format(download.stderr().strip()))
-+  subdir_done()
-+endif
-+
-+nasm_path = meson.current_source_dir() / 'nasm-@0@'.format(meson.project_version())
-+
-+if host_machine.system() != 'windows'
-+  # Fix ZIP permissions -- zipfile doesn't support this extended format
-+  patch_nasm = find_program('patch_nasm.py', required: true)
-+  run_command(patch_nasm, nasm_path, check: true)
-+endif
-+
-+meson.override_find_program('nasm', find_program(nasm_path / 'nasm'))
-diff --git a/subprojects/win-nasm/patch_nasm.py b/subprojects/win-nasm/patch_nasm.py
-new file mode 100755
-index 00000000..36689214
---- /dev/null
-+++ b/subprojects/win-nasm/patch_nasm.py
-@@ -0,0 +1,15 @@
-+#!/usr/bin/env python3
-+
-+# SPDX-FileCopyrightText: 2023 L. E. Segovia <amy@amyspark.me>
-+# SPDX-License-Identifier: BSD-3-Clause
-+
-+from pathlib import Path
-+import os
-+import stat
-+from argparse import ArgumentParser
-+
-+if __name__ == '__main__':
-+    parser = ArgumentParser(description='Make Nasm executable')
-+    parser.add_argument('dir', type=Path, help='Source directory')
-+    args = parser.parse_args()
-+    os.chmod(args.dir / "nasm", stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_IWUSR)
 diff --git a/version.py b/version.py
-new file mode 100755
+new file mode 100644
 index 00000000..e3b3d8f8
 --- /dev/null
 +++ b/version.py
@@ -1476,152 +1418,5 @@ index 00000000..e3b3d8f8
 +    # print everything
 +    print('0.{0}.{1} {2}'.format(api_version, ver, head_commit))
 -- 
-2.39.5 (Apple Git-154)
-
-
-From 90e2efb76cfd9754777896d8ef09e83bac9385d9 Mon Sep 17 00:00:00 2001
-From: "L. E. Segovia" <amy@centricular.com>
-Date: Tue, 26 Mar 2024 19:50:31 -0300
-Subject: [PATCH 2/4] meson: Remove leftovers from config.mak port
-
-Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/26>
-(cherry picked from commit 02db27ca1321ddf3a3e56f1933bd405b162ddf6b)
----
- meson.build | 4 ----
- 1 file changed, 4 deletions(-)
-
-diff --git a/meson.build b/meson.build
-index 400846da..8e6b6a51 100644
---- a/meson.build
-+++ b/meson.build
-@@ -663,10 +663,6 @@ elif host_cpu == 'arm'
-   endforeach
- endif
- 
--config_mak='''
--CFLAGS=-Wno-maybe-uninitialized -Wshadow -Wall -std=gnu99 -fomit-frame-pointer -fno-tree-vectorize
--'''
--
- cdata.set10('HAVE_MALLOC_H', cc.has_header('malloc.h') and cc.has_function('memalign'))
- cdata.set10('HAVE_STRING_H', cc.has_header('string.h')) # getopt.c
- cdata.set10('ARCH_X86_64', host_cpu == 'x86_64')
--- 
-2.39.5 (Apple Git-154)
-
-
-From 6843d7a3befd4514949f2a0996a3a871fd555f71 Mon Sep 17 00:00:00 2001
-From: "L. E. Segovia" <amy@centricular.com>
-Date: Wed, 27 Mar 2024 08:06:30 -0300
-Subject: [PATCH 3/4] meson: Fix HAVE_AS_FUNC setting with Meson < 1.2.0
-
-Fixes #11
-
-Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/27>
-(cherry picked from commit 633f97a11272cfaf8303b0f4ff73cc2cd624d204)
----
- meson.build | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/meson.build b/meson.build
-index 8e6b6a51..4cd117cd 100644
---- a/meson.build
-+++ b/meson.build
-@@ -436,7 +436,7 @@ if ['arm', 'aarch64'].contains(host_cpu)
-       output: '@0@.S'.format('conftest'),
-       capture: true,
-     )
--    cdata.set('HAVE_AS_FUNC', cc.compiles(
-+    cdata.set10('HAVE_AS_FUNC', cc.compiles(
-       f,
-       args: ['-x', 'assembler'],
-       name: 'The assembler supports .func (Clang 3.5 does not)'
--- 
-2.39.5 (Apple Git-154)
-
-
-From e480762d478ec9848050bfe89c6255fd6c51abeb Mon Sep 17 00:00:00 2001
-From: Nirbheek Chauhan <nirbheek@centricular.com>
-Date: Fri, 26 Jul 2024 06:04:16 +0530
-Subject: [PATCH 4/4] meson: Do not use native: true for find_program
-
-All these usages are incorrect. find_program(..., native: true) is
-*not* the same as executable(..., native: true), etc. It does not
-select host vs target for the output or for running the program. It
-simply selects whether to search for the program using the native-file
-or the cross-file.
-
-Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/28>
-(cherry picked from commit ecc833a37945073a779b42b1a9f20c4454a62fbb)
----
- meson.build | 22 +++++++++++-----------
- 1 file changed, 11 insertions(+), 11 deletions(-)
-
-diff --git a/meson.build b/meson.build
-index 4cd117cd..49b7c936 100644
---- a/meson.build
-+++ b/meson.build
-@@ -1,5 +1,5 @@
- project('x264', 'c',
--  version: run_command(find_program('version.py', native: true), '--package-version', check: true).stdout().strip(),
-+  version: run_command(find_program('version.py'), '--package-version', check: true).stdout().strip(),
-   default_options: ['optimization=2', 'c_std=c11'],
-   meson_version: '>= 0.52'
- )
-@@ -7,7 +7,7 @@ project('x264', 'c',
- x264_ver = meson.project_version()
- x264_rev = meson.project_version().split('.')[2]
- x264_build = meson.project_version().split('.')[1]
--x264_commit = run_command(find_program('version.py', native: true), '--commit-hash', check: true).stdout().strip()
-+x264_commit = run_command(find_program('version.py'), '--commit-hash', check: true).stdout().strip()
- 
- message('build: ' + x264_build)
- message('commit: ' + x264_commit)
-@@ -179,10 +179,10 @@ endif
- 
- if ['x86', 'x86_64'].contains(host_cpu)
-   if not get_option('asm').disabled()
--    nasm = find_program('nasm', native: true, required: false)
-+    nasm = find_program('nasm', required: false)
-     if not nasm.found()
-       subproject('win-nasm')
--      nasm = find_program('nasm', native: true, required: get_option('asm').enabled())
-+      nasm = find_program('nasm', required: get_option('asm'))
-     endif
-   endif
-   if host_cpu == 'x86'
-@@ -241,25 +241,25 @@ elif host_cpu == 'aarch64'
-       asflags += ['-arch', 'arm64']
-     endif
-   elif host_system == 'windows'
--    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
--    armasm = find_program('armasm', native: true, required: get_option('asm'))
-+    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
-+    armasm = find_program('armasm', required: get_option('asm'))
-     if compiler_style == 'MS'
-       asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
-     endif
-   endif
- elif host_cpu == 'arm'
-   if host_system == 'windows' and compiler_style == 'MS'
--    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
--    armasm = find_program('armasm', native: true, required: get_option('asm'))
-+    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
-+    armasm = find_program('armasm', required: get_option('asm'))
-     asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
-   elif host_system == 'windows'
-     # FIXME once Meson exposes the compiler command line
--    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
-+    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
-     gcc = disabler()
-     if cc.get_id().contains('clang')
--      gcc = find_program('clang', native: true, required: get_option('asm'))
-+      gcc = find_program('clang', required: get_option('asm'))
-     else
--      gcc = find_program('gcc', native: true, required: get_option('asm'))
-+      gcc = find_program('gcc', required: get_option('asm'))
-     endif
-     asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
-   endif
--- 
-2.39.5 (Apple Git-154)
+2.53.0.windows.3
 
