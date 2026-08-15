@@ -33,6 +33,7 @@ class Recipe(recipe.Recipe):
         'analytics',
         'audiofx',
         'audioparsers',
+        'audiomultimixer',
         'aws',
         'burn',
         'cdg',
@@ -165,6 +166,7 @@ class Recipe(recipe.Recipe):
             ],
             'effects': [
                 'colorlut',
+                'audiomultimixer',
                 'demucs',
                 'rsaudiofx',
                 'rsvideofx',
