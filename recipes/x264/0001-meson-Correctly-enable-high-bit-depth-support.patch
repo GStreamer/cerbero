@@ -1,0 +1,27 @@
+From 406de6c115a786d0497a4aa4d95b1732c203ffcf Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 18 Aug 2026 13:15:42 +0530
+Subject: [PATCH] meson: Correctly enable high bit-depth support
+
+This has been broken since the beginning. Only took us 2.5 years to
+notice!
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 1f3d3611..330eda65 100644
+--- a/meson.build
++++ b/meson.build
+@@ -880,7 +880,7 @@ configure_file(output : 'config.h', configuration : cdata)
+ 
+ # x264_config.h
+ x264_config = configuration_data()
+-x264_config.set('X264_BIT_DEPTH', depths[0])
++x264_config.set('X264_BIT_DEPTH', opt_bitdepth == 'all' ? '0' : opt_bitdepth)
+ x264_config.set('X264_GPL', cdata.get('HAVE_GPL'))
+ x264_config.set('X264_INTERLACED', cdata.get('HAVE_INTERLACED'))
+ x264_config.set_quoted('X264_VERSION', ' r@0@ @1@'.format(x264_rev, x264_commit))
+-- 
+2.50.1 (Apple Git-155)
+

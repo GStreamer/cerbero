@@ -25,6 +25,8 @@ class Recipe(recipe.Recipe):
         'x264/fix-textrels.patch',
         # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/32
         'x264/msvc-arm64-support.patch',
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/36
+        'x264/0001-meson-Correctly-enable-high-bit-depth-support.patch'
     ]
 
     meson_options = {}
