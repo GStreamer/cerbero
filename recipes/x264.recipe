@@ -23,6 +23,8 @@ class Recipe(recipe.Recipe):
         f'{name}/0001-Add-Meson-build.patch',
         # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/31
         f'{name}/fix-textrels.patch',
+        # https://gitlab.freedesktop.org/gstreamer/meson-ports/x264/-/merge_requests/36
+        f'{name}/0001-meson-Correctly-enable-high-bit-depth-support.patch'
     ]
 
     meson_options = {}
