@@ -664,7 +664,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('unixfd', 'effects')
 
         if self.config.target_platform == Platform.LINUX \
-            or self.config.target_subsystem == Subsystem.MACOS \
+            or self.config.target_platform == Platform.DARWIN \
             or (self.config.target_platform == Platform.WINDOWS and not self.config.variants.mingw):
             self.enable_plugin('aja', 'sys', dep='libajantv2')
 
