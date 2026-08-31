@@ -120,6 +120,7 @@ class Build(Command):
         deps_only=False,
         jobs=None,
         steps_filter=None,
+        aggressive_build_cleanup=False,
     ):
         if cookbook is None:
             cookbook = CookBook(config, offline=offline)
@@ -142,6 +143,7 @@ class Build(Command):
             deps_only=deps_only,
             jobs=jobs,
             steps_filter=steps_filter,
+            aggressive_build_cleanup=aggressive_build_cleanup,
         )
         run_until_complete(oven.start_cooking())
 

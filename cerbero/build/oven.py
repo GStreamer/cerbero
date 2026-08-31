@@ -82,6 +82,9 @@ class Oven(object):
     @type deps_only: bool
     @ivar steps_filter: only executes the steps in the list
     @type steps_filter: list
+    @ivar aggressive_build_cleanup: remove the build directory of each recipe
+                                    once it has been built
+    @type aggressive_build_cleanup: bool
     """
 
     def __init__(
@@ -95,6 +98,7 @@ class Oven(object):
         deps_only=False,
         jobs=None,
         steps_filter=None,
+        aggressive_build_cleanup=False,
     ):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
@@ -109,6 +113,7 @@ class Oven(object):
         shell.DRY_RUN = dry_run
         self.jobs = jobs or determine_num_of_cpus()
         self.steps_filter = steps_filter
+        self.aggressive_build_cleanup = aggressive_build_cleanup
         self._build_lock = asyncio.Semaphore(2)
         # Add a separate lock for Rust tasks that will
         # be required if only one concurrent job is allowed.
@@ -563,6 +568,8 @@ class Oven(object):
         return False
 
     def _cook_finish_recipe(self, recipe, count):
+        if self.aggressive_build_cleanup and not shell.DRY_RUN:
+            recipe.clean_build_dir()
         self._build_status_printer.built(count, recipe.name)
         self.cookbook.update_build_status(recipe.name, recipe.built_version())
         if recipe.library_type == LibraryType.STATIC:

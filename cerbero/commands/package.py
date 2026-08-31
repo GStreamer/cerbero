@@ -120,6 +120,15 @@ class Package(Command):
                     help=_('How many recipes to build concurrently. ' '0 = number of CPUs.'),
                 ),
                 ArgparseArgument(
+                    '--aggressive-build-cleanup',
+                    action='store_true',
+                    default=False,
+                    help=_(
+                        'Delete the build directory of each recipe after it has been built, '
+                        'to reduce disk usage. Sources are not deleted.'
+                    ),
+                ),
+                ArgparseArgument(
                     '--artifact',
                     type=str,
                     choices=['tarball', 'msi', 'pkg', 'wheel', 'inno', 'xcframework'],
@@ -142,7 +151,16 @@ class Package(Command):
             raise UsageError(_('Cannot use --exclude without --only-build-deps'))
 
         if not args.skip_deps_build:
-            self._build_deps(config, p, args.no_devel, args.exclude, args.offline, args.dry_run, args.jobs)
+            self._build_deps(
+                config,
+                p,
+                args.no_devel,
+                args.exclude,
+                args.offline,
+                args.dry_run,
+                args.jobs,
+                args.aggressive_build_cleanup,
+            )
 
         if args.only_build_deps or args.dry_run:
             return
@@ -183,7 +201,7 @@ class Package(Command):
         paths = p.post_package(paths, output_dir) or paths
         m.action(_('Package successfully created in %s') % ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package, has_devel, exclude, offline, dry_run, jobs):
+    def _build_deps(self, config, package, has_devel, exclude, offline, dry_run, jobs, aggressive_build_cleanup):
         build_command = build.Build()
         deps = set(package.recipes_dependencies(has_devel))
         if exclude:
@@ -195,6 +213,7 @@ class Package(Command):
             dry_run=dry_run,
             offline=offline,
             jobs=jobs,
+            aggressive_build_cleanup=aggressive_build_cleanup,
         )
 
 

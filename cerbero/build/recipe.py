@@ -1010,6 +1010,20 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
             except FatalError as e:
                 m.warning('Could not create {!r}: {}'.format(genlib.filename, e.msg))
 
+    def clean_build_dir(self):
+        """
+        Removes the build directory once the recipe has been built, to save
+        disk space. Only removes it when it's a separate directory inside the
+        cerbero sources dir, since in-tree builds would also remove the sources
+        """
+        build_dir = getattr(self, 'build_dir', None)
+        src_dir = getattr(self, 'src_dir', None)
+        if not build_dir or build_dir == src_dir:
+            return
+        if Path(self.config.sources) not in Path(build_dir).parents:
+            return
+        shutil.rmtree(build_dir, ignore_errors=True)
+
     def recipe_dir(self):
         """
         Gets the directory path where this recipe is stored
@@ -1172,6 +1186,10 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
                 await _async_run_step(recipe, step, arch)
         if tasks:
             await run_tasks(tasks)
+
+    def clean_build_dir(self):
+        for recipe in self._recipes.values():
+            recipe.clean_build_dir()
 
     def get_for_arch(self, arch, name):
         if arch:
