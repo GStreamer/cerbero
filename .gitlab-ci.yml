@@ -623,7 +623,7 @@ cerbero cross-android universal examples:
   variables:
     ARCH: "darwin_universal"
     CONFIG: "cross-macos-universal.cbc"
-    CERBERO_PACKAGE_ARGS: ""
+    CERBERO_PACKAGE_ARGS: "--aggressive-build-cleanup"
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
@@ -669,7 +669,7 @@ build cerbero cross-macos universal arm64-host:
     ARCH: "ios_arm64"
     CONFIG: "cross-ios-arm64.cbc"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-    CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
+    CERBERO_PACKAGE_ARGS: "--aggressive-build-cleanup --artifact=xcframework"
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
@@ -708,7 +708,7 @@ build cerbero cross-ios arm64-host:
     ARCH: "ios_simulator"
     CONFIG: "cross-ios-sim-universal.cbc"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-    CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
+    CERBERO_PACKAGE_ARGS: "--aggressive-build-cleanup --artifact=xcframework"
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
@@ -747,7 +747,7 @@ build cerbero cross-ios-sim universal arm64-host:
     ARCH: "tvos_arm64"
     CONFIG: "cross-tvos-arm64.cbc"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-    CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
+    CERBERO_PACKAGE_ARGS: "--aggressive-build-cleanup --artifact=xcframework"
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
@@ -786,7 +786,7 @@ build cerbero cross-tvos arm64-host:
     ARCH: "tvos_simulator"
     CONFIG: "cross-tvos-sim-universal.cbc"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
-    CERBERO_PACKAGE_ARGS: "--artifact=xcframework"
+    CERBERO_PACKAGE_ARGS: "--aggressive-build-cleanup --artifact=xcframework"
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
   cache: []
