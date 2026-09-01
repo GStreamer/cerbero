@@ -78,6 +78,15 @@ class Bootstrap(Command):
                 default=0,
                 help=_('How many recipes to build concurrently. ' '0 = number of CPUs.'),
             ),
+            ArgparseArgument(
+                '--aggressive-build-cleanup',
+                action='store_true',
+                default=False,
+                help=_(
+                    'Delete the build directory of each recipe after it has been built, '
+                    'to reduce disk usage. Sources are not deleted.'
+                ),
+            ),
         ]
         Command.__init__(self, args)
 
@@ -92,7 +101,13 @@ class Bootstrap(Command):
             args.build_tools = False
             m.deprecation('Replace --system-only with --build-tools=no')
         bootstrappers = Bootstrapper(
-            config, args.system, args.toolchains, args.build_tools, args.offline, args.assume_yes
+            config,
+            args.system,
+            args.toolchains,
+            args.build_tools,
+            args.offline,
+            args.assume_yes,
+            args.aggressive_build_cleanup,
         )
         tasks = []
 

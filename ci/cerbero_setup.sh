@@ -50,13 +50,15 @@ cerbero_package_and_check() {
         time rm -rf "$(pwd)/${CERBERO_HOME}/sources"
     fi
 
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package ${CERBERO_BUILD_ARGS} --offline \
+            ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     if [[ $ARCH = msvc* && $CONFIG = win* ]] || [[ $CONFIG = *macos* ]] || [[ $ARCH = *manylinux* ]]; then
         if [[ -n ${CI_GSTREAMER_PATH} ]] && [[ -n ${CI_GST_PLUGINS_RS_PATH} ]]; then
             echo "Trigger CI, skipping wheel packaging"
         else
-            ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
+            ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package ${CERBERO_BUILD_ARGS} \
+                    --offline --artifact wheel -o "$(pwd_native)" gstreamer-1.0
         fi
     # Test that generating the source bundle works
     elif [[ $CONFIG = *android-universal* ]]; then
@@ -213,7 +215,7 @@ cerbero_before_script() {
 
 cerbero_bootstrap() {
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=16
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap ${CERBERO_BUILD_ARGS} --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
 }
 
 cerbero_test() {
@@ -250,7 +252,7 @@ cerbero_script() {
     fi
     $CERBERO $CERBERO_ARGS fetch-cache --branch "${GST_UPSTREAM_BRANCH}" --project "${project}"
 
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap ${CERBERO_BUILD_ARGS} --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
     fix_build_tools
 
     cerbero_package_and_check
@@ -311,17 +313,18 @@ cerbero_deps_script() {
     $CERBERO $CERBERO_ARGS show-config
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=16
     $CERBERO $CERBERO_ARGS fetch-package --jobs=16 --deps gstreamer-1.0
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build --offline $more_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS bootstrap ${CERBERO_BUILD_ARGS} --offline --system=$CERBERO_BOOTSTRAP_SYSTEM --assume-yes
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build-deps ${CERBERO_BUILD_ARGS} --offline $build_deps
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS build ${CERBERO_BUILD_ARGS} --offline $more_deps
     # All external deps have been built, upload the cache for the cerbero CI
     # triggered by the gstreamer monorepo
     upload_cache gstreamer
 
     # Now, build everything except gst-plugins-rs and gst-android-1.0 since
     # that also pulls gst-plugins-rs in
-    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package --offline gstreamer-1.0 --only-build-deps \
-            --exclude gst-plugins-rs --exclude gst-android-1.0 --exclude gstreamer-ios-templates
+    ./ci/run_retry.sh $CERBERO $CERBERO_ARGS package ${CERBERO_BUILD_ARGS} \
+            --offline gstreamer-1.0 --only-build-deps --exclude gst-plugins-rs \
+            --exclude gst-android-1.0 --exclude gstreamer-ios-templates
 
     if ! [[ $CONFIG = *ios-sim-universal* ]] && ! [[ $CONFIG = *ios-arm64* ]] && ! [[ $CONFIG = *tvos* ]]; then
         upload_cache gst-plugins-rs

@@ -60,6 +60,15 @@ class Build(Command):
                 help=_('Runs the build command for the build tools of this config.'),
             ),
             ArgparseArgument(
+                '--aggressive-build-cleanup',
+                action='store_true',
+                default=False,
+                help=_(
+                    'Delete the build directory of each recipe after it has been built, '
+                    'to reduce disk usage. Sources are not deleted.'
+                ),
+            ),
+            ArgparseArgument(
                 '--steps',
                 '-s',
                 nargs='+',
@@ -105,6 +114,7 @@ class Build(Command):
             deps_only=self.deps_only,
             jobs=args.jobs,
             steps_filter=args.steps,
+            aggressive_build_cleanup=args.aggressive_build_cleanup,
         )
 
     def runargs(

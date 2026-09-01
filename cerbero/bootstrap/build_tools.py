@@ -39,8 +39,9 @@ class BuildTools(BootstrapperBase, Fetch):
         Platform.WINDOWS: ['nasm'],
     }
 
-    def __init__(self, config, offline):
+    def __init__(self, config, offline, aggressive_build_cleanup=False):
         BootstrapperBase.__init__(self, config, offline, None)
+        self.aggressive_build_cleanup = aggressive_build_cleanup
         self._setup_build_tools_list()
         self._setup_env()
 
@@ -167,7 +168,7 @@ class BuildTools(BootstrapperBase, Fetch):
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()
-        oven = Oven(self.recipes, self.cookbook, jobs=jobs)
+        oven = Oven(self.recipes, self.cookbook, jobs=jobs, aggressive_build_cleanup=self.aggressive_build_cleanup)
         await oven.start_cooking()
 
     async def fetch_recipes(self, jobs):

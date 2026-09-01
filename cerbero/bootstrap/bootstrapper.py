@@ -40,7 +40,7 @@ def register_toolchain_bootstrapper(distro, klass, distro_version=None):
 
 
 class Bootstrapper(object):
-    def __new__(klass, config, system, toolchains, build_tools, offline, assume_yes):
+    def __new__(klass, config, system, toolchains, build_tools, offline, assume_yes, aggressive_build_cleanup=False):
         bs = []
 
         target_distro = config.target_distro
@@ -81,7 +81,7 @@ class Bootstrapper(object):
 
         # Build the build-tools after all other bootstrappers
         if build_tools:
-            bs.append(BuildTools(config, offline))
+            bs.append(BuildTools(config, offline, aggressive_build_cleanup))
 
         return bs
 
