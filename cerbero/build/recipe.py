@@ -1023,7 +1023,14 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
             return
         if Path(self.config.sources) not in Path(build_dir).parents:
             return
-        shutil.rmtree(build_dir, ignore_errors=True)
+        for d in os.listdir(build_dir):
+            if d.startswith(('meson-logs', 'CMakeFiles')):
+                continue
+            path = os.path.join(build_dir, d)
+            if os.path.isdir(path):
+                shutil.rmtree(path, ignore_errors=True)
+            else:
+                os.remove(path)
 
     def recipe_dir(self):
         """
