@@ -394,6 +394,14 @@ cerbero deps ubuntu x86_64:
   variables:
     CONFIG: "linux.config"
     ARCH: "linux_x86_64"
+  before_script:
+    - !reference [".cerbero", "before_script"]
+    # Install latest git to avoid problems with github
+    - apt update
+    - apt -y install software-properties-common gpg-agent
+    - add-apt-repository ppa:git-core/ppa
+    - apt update
+    - apt -y install git
 
 build cerbero ubuntu x86_64:
   extends:
