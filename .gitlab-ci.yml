@@ -409,6 +409,14 @@ build cerbero ubuntu x86_64:
     - '.cerbero mr'
   variables:
     CONFIG: "linux.config"
+  before_script:
+    - !reference [".cerbero", "before_script"]
+    # Install latest git to avoid problems with github
+    - apt update
+    - apt -y install software-properties-common gpg-agent
+    - add-apt-repository ppa:git-core/ppa
+    - apt update
+    - apt -y install git
 
 #
 # Cerbero Android Universal build
