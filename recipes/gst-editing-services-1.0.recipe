@@ -4,7 +4,7 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '3d151e5097d686c5890ae76f14c57ee19538fd61c6cf637171f90b309cafd53c'
+    tarball_checksum = '6ffc0e5ccec90aad6091d3fc01ad29c796375055e13b9378aff6b8e1c22468a3'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-devtools-1.0']
 
     files_bins = ['ges-launch-1.0']

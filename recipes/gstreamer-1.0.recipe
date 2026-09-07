@@ -5,7 +5,7 @@ from cerbero.enums import Symbolication
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '62b6b9f0ad3147a6dd6420ac64a91180b14e990695bddd353b96041611d052ca'
+    tarball_checksum = '787329b2c5758e228a71d926a6dcf960bceaacca3cadd63874ba665dfcda013e'
     deps = ['glib']
     bash_completions = ['gst-inspect-1.0', 'gst-launch-1.0']
 
