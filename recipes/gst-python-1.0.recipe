@@ -3,6 +3,7 @@ from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 
 import os
+import re
 import glob
 
 class Recipe(custom.GStreamer):
@@ -43,6 +44,10 @@ class Recipe(custom.GStreamer):
         # Verify that all installed override files are declared in files_python
         pydir = self.config.get_python_prefix()
         pext = self.config.get_python_ext_suffix()
+        # The glob must instead capture the digits (in case this is a
+        # multidist build)
+        pext_pattern = re.escape(pext.replace('*', '^')).replace('\\^', r'[\d]+')
+        pext_pattern = re.compile(f".+({pext_pattern})")
 
         overrides_dir = os.path.join(self.config.prefix, pydir, 'gi', 'overrides')
 
@@ -51,9 +56,12 @@ class Recipe(custom.GStreamer):
         for pattern in ['Gst*.py', f'_gi_gst*{pext}']:
             for file_path in glob.glob(os.path.join(overrides_dir, pattern)):
                 basename = os.path.basename(file_path)
-                # Normalize pext to template variable
-                if basename.endswith(pext):
-                    basename = basename[:-len(pext)] + '%(pext)s'
+                 # Normalize *instantiated* pext to template variable
+                match = pext_pattern.match(basename)
+                if match:
+                    basename = basename.replace(match[1], '%(pext)s')
+                # This will automatically deduplicate entries from different
+                # Python versions
                 installed_basenames.add(basename)
 
         # Get basenames from files_python

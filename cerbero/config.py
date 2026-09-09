@@ -1251,7 +1251,15 @@ class Config(object):
     # config helpers for recipes with Python dependencies:
 
     def get_python_ext_suffix(self):
-        return sysconfig.get_config_vars().get('EXT_SUFFIX', '%(pext)s')
+        vars = sysconfig.get_config_vars()
+        # For Windows and other platforms where a full version is used, we need
+        # to replace it with a wildcard.
+        # https://github.com/python/cpython/blob/e757c06a61ac6d73d9d0c3c08955d86f176573a1/Include/internal/pycore_importdl.h#L157
+        soabi_pyd = vars.get('EXT_SUFFIX', vars.get('SO', '%(pext)s'))
+        version_nodot = vars['py_version_nodot']
+        if version_nodot in soabi_pyd:
+            soabi_pyd = soabi_pyd.replace(version_nodot, '*')
+        return soabi_pyd
 
     def get_python_framework(self):
         """
