@@ -425,6 +425,7 @@ Terminating.""",
             '10': DistroVersion.WINDOWS_10,
             '11': DistroVersion.WINDOWS_11,
             '2022Server': DistroVersion.WINDOWS_11,
+            '2025Server': DistroVersion.WINDOWS_11,
         }
         if win32_ver in dmap:
             distro_version = dmap[win32_ver]
