@@ -1,0 +1,35 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'ccache'
+    version = '4.14'
+    licenses = [License.GPLv3Plus]
+    stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
+    url = 'https://github.com/ccache/ccache/releases/download/v%(version)s/ccache-%(version)s.tar.xz'
+    tarball_checksum = 'b093ac5d38204cb4d9f29b0bbd570675aa5a592a78e6675b2c506dbe045234e7'
+    deps = []
+    use_msvc = True
+
+    configure_options = [
+        '-DREDIS_STORAGE_BACKEND=OFF',
+        '-DHTTP_STORAGE_BACKEND=OFF',
+        '-DENABLE_BENCHMARKS=OFF',
+        '-DENABLE_TESTING=OFF',
+        '-DENABLE_DOCUMENTATION=OFF',
+        '-DBUILD_SHARED_LIBS=OFF',
+        '-DSTATIC_LINK=ON',
+        '-DCCACHE_DEV_MODE=OFF',
+        '-DWARNINGS_AS_ERRORS=OFF',
+        # xxhash, zstd
+        '-DDEPS=DOWNLOAD',
+    ]
+
+    files_bins = ['ccache']
+
+    def prepare(self):
+        # On Windows, cmake is a system build tool that we ask for upstream.
+        # The changes to config.system_build_tools happen after recipe
+        # initialization, so the dependency must be manually dropped
+        if self.config.platform == Platform.WINDOWS and 'cmake' in self.deps:
+            self.deps.remove('cmake')

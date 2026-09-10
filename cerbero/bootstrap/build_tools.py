@@ -29,7 +29,7 @@ from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
 from cerbero.utils import shell
 from cerbero.enums import Platform, Distro, Architecture
-from cerbero.utils import messages as m
+from cerbero.utils import messages as m, split_version
 
 
 class BuildTools(BootstrapperBase, Fetch):
@@ -107,6 +107,21 @@ class BuildTools(BootstrapperBase, Fetch):
                     'nasm': ('2.13.02', '-v'),
                 }
             )
+        if self.config.platform == Platform.LINUX:
+            dn, dv = self.config.distro_version.split('_', 1)
+            dv = split_version(dv)
+            if dn == 'redhat' and dv < (9,):
+                tools.update(
+                    {
+                        # aws-lc-rs in rust needs 3.7.9 or higher because
+                        # of a GCC flag: https://github.com/ccache/ccache/issues/568
+                        # https://github.com/aws/aws-lc-rs/pull/1212
+                        'ccache': ('3.7.9', '--version')
+                    }
+                )
+        # Provided by Chocolatey -- see README and comment above
+        if self.config.platform == Platform.WINDOWS:
+            self.config.system_build_tools.append('cmake')
         for tool, (version, arg) in tools.items():
             _, _, newer = shell.check_tool_version(tool, version, env=None, version_arg=arg)
             if newer:
