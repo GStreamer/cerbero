@@ -231,8 +231,7 @@ class Recipe(recipe.Recipe):
 
         self.cargo_packages = [f'gst-plugin-{pkg}' for pkg in self.cargo_packages]
         # Build with Cerbero's latest glib version as minimum version
-        if 'gst-plugin-gtk4' in self.cargo_packages:
-            self.cargo_features += ['glib/v2_74', 'gio/v2_74']
+        self.cargo_features += ['glib/v2_82', 'gio/v2_82']
         if 'gst-plugin-rav1e' in self.cargo_packages:
             # Enable assembly optimizations via nasm
             self.cargo_features.append('gst-plugin-rav1e/asm')
@@ -240,9 +239,9 @@ class Recipe(recipe.Recipe):
         components = ('', '-app', '-audio', '-base', '-check', '-net', '-pbutils',
                       '-rtp', '-sdp', '-utils', '-video', '-webrtc')
         for each in components:
-            self.cargo_features.append(f'gst{each}/v1_22')
+            self.cargo_features.append(f'gst{each}/v1_30')
         if 'gst-plugin-tracers' in self.cargo_packages:
-            self.cargo_features.append('gst-plugin-tracers/v1_22')
+            self.cargo_features.append('gst-plugin-tracers/v1_30')
         if 'gst-plugin-webrtc' in self.cargo_packages:
             self.cargo_features.append('gst-plugin-webrtc/aws')
             self.cargo_features.append('gst-plugin-webrtc/livekit')
