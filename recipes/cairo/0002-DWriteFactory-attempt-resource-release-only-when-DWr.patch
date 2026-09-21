@@ -1,0 +1,28 @@
+From 09db71ee895ad3999905832c76bd1b37cb5cf11e Mon Sep 17 00:00:00 2001
+From: Amyspark <amy@centricular.com>
+Date: Mon, 21 Sep 2026 13:10:52 -0300
+Subject: [PATCH 2/2] DWriteFactory: attempt resource release only when DWrite
+ is enabled
+
+See https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/650/diffs#note_3672238
+---
+ src/win32/cairo-win32-system.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/win32/cairo-win32-system.c b/src/win32/cairo-win32-system.c
+index 8f24150bd..28c222270 100644
+--- a/src/win32/cairo-win32-system.c
++++ b/src/win32/cairo-win32-system.c
+@@ -248,7 +248,9 @@ cairo_win32_initialize (void)
+ static void
+ cairo_win32_finalize (void)
+ {
++#if CAIRO_HAS_DWRITE_FONT
+     cairo_win32_dwrite_finalize ();
++#endif
+     cairo_win32_thread_data_finalize ();
+     cairo_win32_mta_finalize ();
+     CAIRO_MUTEX_FINALIZE ();
+-- 
+2.53.0.windows.3
+
