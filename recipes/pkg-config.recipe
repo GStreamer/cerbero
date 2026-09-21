@@ -34,6 +34,8 @@ class Recipe(recipe.Recipe):
         'pkg-config/0001-Fix-glib-build-on-Windows.patch',
         # https://gitlab.freedesktop.org/gstreamer/cerbero/-/work_items/585
         'pkg-config/0001-Always-use-as-dir-separator-on-Windows-and-escape-sp.patch',
+        # pipe2 needs to be checked with unistd.h, not just with compiler.links
+        'pkg-config/0005-Fix-glib-build-on-macOS-27.patch',
     ]
 
     files_bins = ['pkg-config']

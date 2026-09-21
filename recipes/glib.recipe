@@ -60,6 +60,7 @@ class Recipe(recipe.Recipe):
         'glib/0012-gspawn-Replace-with-stubs-that-abort-on-tvOS-watchOS.patch',
         'glib/0013-gdbus-Disable-testing-framework-when-process-spawnin.patch',
         'glib/0014-gio-Don-t-build-gio-launch-desktop-when-process-spaw.patch',
+        'glib/0015-glib-Fix-compatibility-with-macOS-27.patch',
     ]
 
     files_libs = [

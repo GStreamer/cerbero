@@ -1,0 +1,62 @@
+From bd8e04a5693fa55272e2f2c1fea191177010a3a7 Mon Sep 17 00:00:00 2001
+From: Amyspark <amy@centricular.com>
+Date: Mon, 21 Sep 2026 14:31:58 -0300
+Subject: [PATCH 5/5] Fix glib build on macOS 27+
+
+---
+ subprojects/glib.wrap                         |  3 +-
+ ...glib-Fix-compatibility-with-macOS-27.patch | 28 +++++++++++++++++++
+ 2 files changed, 30 insertions(+), 1 deletion(-)
+ create mode 100644 subprojects/packagefiles/glib-2.74.4/0004-glib-Fix-compatibility-with-macOS-27.patch
+
+diff --git a/subprojects/glib.wrap b/subprojects/glib.wrap
+index 6e687b4..4a86701 100644
+--- a/subprojects/glib.wrap
++++ b/subprojects/glib.wrap
+@@ -10,7 +10,8 @@ wrapdb_version = 2.74.4-1
+ diff_files =
+   glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch,
+   glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch,
+-  glib-2.74.4/0001-Fix-safe_wspawnve-define.patch
++  glib-2.74.4/0001-Fix-safe_wspawnve-define.patch,
++  glib-2.74.4/0004-glib-Fix-compatibility-with-macOS-27.patch
+ 
+ [provide]
+ dependency_names = glib-2.0
+diff --git a/subprojects/packagefiles/glib-2.74.4/0004-glib-Fix-compatibility-with-macOS-27.patch b/subprojects/packagefiles/glib-2.74.4/0004-glib-Fix-compatibility-with-macOS-27.patch
+new file mode 100644
+index 0000000..a9d8775
+--- /dev/null
++++ b/subprojects/packagefiles/glib-2.74.4/0004-glib-Fix-compatibility-with-macOS-27.patch
+@@ -0,0 +1,28 @@
++From 48030bde07d635a7f3869ad436360874b8e8eb8b Mon Sep 17 00:00:00 2001
++From: Amyspark <amy@centricular.com>
++Date: Mon, 21 Sep 2026 14:26:06 -0300
++Subject: [PATCH 4/4] glib: Fix compatibility with macOS 27
++
++---
++ meson.build | 5 +++++
++ 1 file changed, 5 insertions(+)
++
++diff --git a/meson.build b/meson.build
++index d2a4185..7ffd788 100644
++--- a/meson.build
+++++ b/meson.build
++@@ -708,6 +708,11 @@ foreach f : functions
++   endif
++ endforeach
++ 
+++# Check that pipe2() is usable; must use header on macOS/iOS/iPadOS 27+
+++if host_system in ['darwin', 'ios']
+++  glib_conf.set('HAVE_PIPE2', cc.has_function('pipe2', prefix : '#include <unistd.h>'))
+++endif
+++
++ # Check that stpcpy() is usable; must use header.
++ # cc.has_function() in some cases (clang, gcc 10+) assumes that if the
++ # compiler provides a builtin of the same name that the function exists, while
++-- 
++2.53.0.windows.3
++
+-- 
+2.53.0.windows.3
+
