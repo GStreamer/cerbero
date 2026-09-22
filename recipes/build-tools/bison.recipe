@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
 
 class Recipe(recipe.Recipe):
     name = 'bison'
@@ -12,3 +11,28 @@ class Recipe(recipe.Recipe):
     override_libtool = False
 
     files_bins = ['bison', 'yacc']
+
+    def prepare(self):
+        # macOS 27 introduces pipe2(2) and C23 support. However, to fix this
+        # on this recipe, a complete run of the latest (unreleased) gnulib
+        # followed with autoreconf is needed.
+        # The best approach is to surgically patch things:
+        # - block off pipe2(2) and its "safer" patch
+        # - block off __has_c_attribute unless C23 is enabled
+        # - and, since the changes here involve tinkering with M4 files,
+        #   disable docs regeneration.
+        # The latter requires a custom Makefile target.
+        #
+        # See for the trend: https://savannah.gnu.org/bugs/?67141
+        # See for the upstream fix: https://github.com/coreutils/gnulib/commit/0b46adb38251519e5c0a3020e31b02cc31e967cc
+        if self.config.platform == Platform.DARWIN:
+            self.remove_env('CFLAGS', '-Werror=unguarded-availability-new')
+            self.remove_env('CPPFLAGS', '-Werror=unguarded-availability-new')
+            self.remove_env('CXXFLAGS', '-Werror=unguarded-availability-new')
+            self.autoreconf = True
+            self.patches = [
+                f'bison/0001-Fix-compatibility-with-macOS-27.patch'
+            ]
+            # Don't build documentation
+            self.make += ['cerbero-all']
+            self.make_install = ['make', 'install-exec-recursive', 'install-data-am']

@@ -1,0 +1,93 @@
+From 8d65416a56aa941084cf0ecd582c72346a424b39 Mon Sep 17 00:00:00 2001
+From: Amyspark <amy@centricular.com>
+Date: Mon, 21 Sep 2026 21:43:43 -0300
+Subject: [PATCH] Fix compatibility with macOS 27
+
+---
+ Makefile.am         |  3 +++
+ aclocal.m4          |  1 -
+ doc/local.mk        |  6 +++---
+ lib/gnulib.mk       | 12 ------------
+ m4/gnulib-common.m4 |  2 +-
+ 5 files changed, 7 insertions(+), 17 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 18218b2..d877732 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -147,3 +147,6 @@ codespell:
+ 	     --regex "[\\w\\-'’\`]+\+*" \
+ 	     --ignore-words-list "ba,circularly,cloneable,copyable,define'd,dout,froms,iff,ifset,od,ois" \
+ 	     $$(git ls-files data doc lib src tests)
++
++cerbero-all: $(BUILT_SOURCES)
++	$(MAKE) $(AM_MAKEFLAGS) $(bin_PROGRAMS) $(nodist_bin_SCRIPTS)
+diff --git a/aclocal.m4 b/aclocal.m4
+index 57ed9d2..e0a96cd 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -1294,7 +1294,6 @@ m4_include([m4/opendir.m4])
+ m4_include([m4/pathmax.m4])
+ m4_include([m4/perror.m4])
+ m4_include([m4/pipe.m4])
+-m4_include([m4/pipe2.m4])
+ m4_include([m4/po.m4])
+ m4_include([m4/posix_spawn.m4])
+ m4_include([m4/posix_spawn_faction_addchdir.m4])
+diff --git a/doc/local.mk b/doc/local.mk
+index a8aa208..ba7be04 100644
+--- a/doc/local.mk
++++ b/doc/local.mk
+@@ -126,10 +126,10 @@ endif ! CROSS_COMPILING
+ ## Man Pages.  ##
+ ## ----------- ##
+ 
+-dist_man_MANS = $(top_srcdir)/%D%/bison.1
++# dist_man_MANS = $(top_srcdir)/%D%/bison.1
+ 
+-EXTRA_DIST += $(dist_man_MANS:.1=.x)
+-MAINTAINERCLEANFILES += $(dist_man_MANS)
++# EXTRA_DIST += $(dist_man_MANS:.1=.x)
++# MAINTAINERCLEANFILES += $(dist_man_MANS)
+ 
+ # Differences to ignore when comparing man pages (the date).
+ remove_time_stamp = \
+diff --git a/lib/gnulib.mk b/lib/gnulib.mk
+index 34d0dde..eba09fc 100644
+--- a/lib/gnulib.mk
++++ b/lib/gnulib.mk
+@@ -2091,18 +2091,6 @@ EXTRA_lib_libbison_a_SOURCES += lib/pipe.c
+ 
+ ## end   gnulib module pipe-posix
+ 
+-## begin gnulib module pipe2
+-
+-lib_libbison_a_SOURCES += lib/pipe2.c
+-
+-## end   gnulib module pipe2
+-
+-## begin gnulib module pipe2-safer
+-
+-lib_libbison_a_SOURCES += lib/pipe2-safer.c
+-
+-## end   gnulib module pipe2-safer
+-
+ ## begin gnulib module posix_spawn
+ 
+ 
+diff --git a/m4/gnulib-common.m4 b/m4/gnulib-common.m4
+index 12b19db..b756155 100644
+--- a/m4/gnulib-common.m4
++++ b/m4/gnulib-common.m4
+@@ -103,7 +103,7 @@ AC_DEFUN([gl_COMMON_BODY], [
+ # define _GL_ATTR_warn_unused_result _GL_GNUC_PREREQ (3, 4)
+ #endif
+ 
+-#ifdef __has_c_attribute
++#if (defined __has_c_attribute && (defined __STDC_VERSION__ ? __STDC_VERSION__ : 0) >= 201710L)
+ # define _GL_HAS_C_ATTRIBUTE(attr) __has_c_attribute (__##attr##__)
+ #else
+ # define _GL_HAS_C_ATTRIBUTE(attr) 0
+-- 
+2.55.0
+
