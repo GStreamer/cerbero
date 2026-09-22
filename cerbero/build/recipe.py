@@ -22,6 +22,7 @@ import shutil
 import inspect
 import asyncio
 from functools import reduce
+import glob
 from itertools import chain
 from pathlib import Path
 import re
@@ -456,12 +457,25 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
             extensions['pydir'] = Path(self.config.prefix, 'lib', 'python3', 'dist-packages').as_posix()
         else:
             extensions['pydir'] = Path(self.config.prefix, self.config.py_macos_prefix).as_posix()
-        srcfiles = [Path(f % extensions) for f in self.files_python]
+
+        srcfiles = []
+        for f in self.files_python:
+            f = Path(f % extensions)
+            # srcfiles can be a glob if multidist extensions
+            if '*' in f.as_posix():
+                fs = glob.glob(f.as_posix(), recursive=True)
+                srcfiles.extend(Path(f) for f in fs)
+            else:
+                srcfiles.append(f)
+
+        # WARNING: self.files_python contains the *unresolved* globs
+        # In the next step, these are *unresolved* from srcfiles
+        relocated_files_python = [str(f).replace(extensions['pydir'], '%(pydir)s') for f in srcfiles]
 
         destdir = Path(self.config.prefix) / self.config.get_python_prefix()
         destdir.mkdir(parents=True, exist_ok=True)
         extensions['pydir'] = Path(self.config.prefix, self.config.get_python_prefix()).as_posix()
-        destfiles = [Path(f % extensions) for f in self.files_python]
+        destfiles = [Path(f % extensions) for f in relocated_files_python]
 
         for src, dest in zip(srcfiles, destfiles):
             if src.is_file():
