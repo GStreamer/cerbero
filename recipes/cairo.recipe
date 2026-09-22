@@ -20,7 +20,7 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://github.com/msys2/MINGW-packages/commit/305ebda98c3041d9986d6fae498b45d2b2b9f4e8
         f'{name}/0001-DWrite-Get-glyph-bitmap-with-D2D-in-selected-cases.patch',
-        # https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/650/diffs#note_3672238
+        # https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/672
         f'{name}/0002-DWriteFactory-attempt-resource-release-only-when-DWr.patch',
     ]
 
