@@ -11,7 +11,7 @@ class Recipe(custom.GStreamer):
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     library_type = LibraryType.SHARED
-    tarball_checksum = '9c23c5dddfd2c9b94bb1b4e4f5b90ebc6400d84277c77cf91b1dbdb4a8b451f9'
+    tarball_checksum = '6e0d8dd920234b9feeb86003d8f43c1996491f9d8190882329bf56f60a70206e'
     meson_options = {
         'tests': 'disabled',
     }
