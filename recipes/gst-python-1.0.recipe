@@ -46,7 +46,7 @@ class Recipe(custom.GStreamer):
         pext = self.config.get_python_ext_suffix()
         # The glob must instead capture the digits (in case this is a
         # multidist build)
-        pext_pattern = re.escape(pext.replace('*', '^')).replace('\\^', r'[\d]+')
+        pext_pattern = re.escape(pext.replace('*', '^')).replace('\\^', r'[a-z\d]+')
         pext_pattern = re.compile(f".+({pext_pattern})")
 
         overrides_dir = os.path.join(self.config.prefix, pydir, 'gi', 'overrides')
