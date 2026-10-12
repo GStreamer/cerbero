@@ -224,6 +224,22 @@ artifact types:
 The artifact to output can be controlled with the `--artifact` option. Valid
 choices are: `tarball` `msi` `pkg` `wheel`.
 
+## Inno Setup installer options
+
+Run the Windows installer (`.exe`) with `/HELP` or `/?` for standard options,
+or see the [Inno Setup command-line reference](https://jrsoftware.org/ishelp/topic_setupcmdline.htm).
+Cerbero also supports these options, which are not listed in that help dialog:
+
+* `/portable=1`: Install without uninstaller registration, GStreamer environment
+  or installation-directory registry updates, or administrative integration
+  such as Visual Studio templates and Visual C++ Redistributable installation.
+* `/WinMLLicenseAccepted=1`: Accept the Microsoft Windows ML license agreement.
+  Required for silent installation when Windows ML components are selected.
+  Installation fails without acceptance. This option does not select the components,
+  which are disabled by default. GUI installations show a license acceptance
+  page when they are selected. The parameter name is case-insensitive. The
+  value must be exactly `1`.
+
 # Enabling and Disabling Optional Features with Variants
 
 Cerbero controls optional and platform-specific features with `variants`. You
