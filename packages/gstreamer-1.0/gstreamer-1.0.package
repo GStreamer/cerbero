@@ -85,6 +85,10 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
             discard = ['gstreamer-1.0-dvd-gpl']
             self.packages = [x for x in self.packages if x[0] not in discard]
 
+        if self.config.target_platform == Platform.WINDOWS and self.config.target_arch in (
+                Architecture.X86_64, Architecture.ARM64):
+            self.packages += [('gstreamer-1.0-analytics-winml', False, False)]
+
         if self.config.target_platform == Platform.IOS:
             self.resources_postinstall = 'post_install_ios'
             #self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']

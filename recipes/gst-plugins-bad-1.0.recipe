@@ -71,6 +71,8 @@ class Recipe(custom.GStreamer):
                      'musepack': 'disabled',
                      'neon': 'disabled',
                      'nvcodec': 'disabled',
+                     'onnx': 'disabled',
+                     'onnx-winml': 'disabled',
                      'openal': 'disabled',
                      'opencv': 'disabled',
                      'qsv': 'disabled',
@@ -602,6 +604,11 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('asio', 'sys')
             self.enable_plugin('mediafoundation', 'sys')
             self.enable_plugin('wasapi2', 'sys')
+
+            # WinML supports only 64bit targets
+            if self.config.target_arch in (Architecture.X86_64, Architecture.ARM64):
+                self.enable_plugin('onnx', 'analytics_winml', dep='microsoft.windows.ai.machinelearning')
+                self.meson_options['onnx-winml'] = 'enabled'
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')

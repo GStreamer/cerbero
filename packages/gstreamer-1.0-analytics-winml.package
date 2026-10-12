@@ -1,0 +1,23 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(custom.GStreamer, package.Package):
+
+    name = 'gstreamer-1.0-analytics-winml'
+    shortdesc = 'GStreamer 1.0 ONNX inference with Microsoft Windows ML'
+    longdesc = 'GStreamer 1.0 ONNX inference with Microsoft Windows ML'
+    uuid = 'f5917fca-3f64-40c6-91a8-d4b9e158731a'
+    deps = ['gstreamer-1.0-core']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS and self.config.target_arch in (
+                Architecture.X86_64, Architecture.ARM64):
+            self.files = [
+                'gst-plugins-bad-1.0:plugins_analytics_winml',
+                'microsoft.windows.ai.machinelearning:runtime',
+            ]
+            self.files_devel = [
+                'gst-plugins-bad-1.0:plugins_analytics_winml_devel',
+                'microsoft.windows.ai.machinelearning:devel',
+            ]
