@@ -1,0 +1,75 @@
+From: Seungha Yang <seungha@centricular.com>
+Date: Mon, 12 Oct 2026 12:00:00 +0900
+Subject: [PATCH] Add Meson build
+
+---
+ meson.build | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 61 insertions(+)
+ create mode 100644 meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,61 @@
++project('microsoft.windows.ai.machinelearning', 'c', 'cpp',
++  version: '2.2.12')
++
++if host_machine.system() != 'windows'
++  error('Windows ML requires Windows')
++endif
++
++arch = host_machine.cpu_family()
++if arch == 'x86_64'
++  arch = 'x64'
++elif arch == 'aarch64'
++  arch = 'arm64'
++else
++  error('Windows ML requires x86_64 or ARM64')
++endif
++
++lib_path = meson.current_source_dir() / 'lib' / 'native' / arch
++runtime_path = 'runtimes' / ('win-' + arch) / 'native'
++
++install_subdir('include',
++  install_dir: get_option('includedir'),
++  strip_directory: true,
++)
++
++install_data(
++  lib_path / 'Microsoft.Windows.AI.MachineLearning.lib',
++  lib_path / 'onnxruntime.lib',
++  install_dir: get_option('libdir'),
++)
++
++install_data(
++  runtime_path / 'Microsoft.Windows.AI.MachineLearning.dll',
++  runtime_path / 'onnxruntime.dll',
++  runtime_path / 'DirectML.dll',
++  install_dir: get_option('bindir'),
++)
++
++cc = meson.get_compiler('c')
++
++onnx_import_lib = cc.find_library(
++  'onnxruntime',
++  dirs: lib_path,
++)
++
++winml_import_lib = cc.find_library(
++  'Microsoft.Windows.AI.MachineLearning',
++  dirs: lib_path,
++)
++
++pkgconfig = import('pkgconfig')
++pkgconfig.generate(
++  name: 'Microsoft Windows AI Machine Learning',
++  filebase: meson.project_name(),
++  description: 'Microsoft Windows AI Machine Learning',
++  version: meson.project_version(),
++  libraries: [
++    winml_import_lib,
++    onnx_import_lib,
++  ],
++  subdirs: ['.', 'winml'],
++)

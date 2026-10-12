@@ -317,6 +317,7 @@ class License:
     Libtiff = LicenseDescription('libtiff', 'libtiff License')
     MPLv1_1 = LicenseDescription('MPL-1.1', 'Mozilla Public License Version 1.1')
     MPLv2 = LicenseDescription('MPL-2.0', 'Mozilla Public License Version 2.0')
+    Microsoft_Windows_ML = LicenseDescription('LicenseRef-Microsoft-Windows-ML', 'Microsoft Windows ML Runtime License')
     MIT = LicenseDescription('MIT', 'MIT License')
     # winpthreads
     MIT_AND_BSD_Clause_Clear = LicenseDescription('MIT AND BSD-3-Clause-Clear', 'MIT and BSD 3-Clause Clear License')

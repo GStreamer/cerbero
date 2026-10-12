@@ -1,0 +1,46 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'microsoft.windows.ai.machinelearning'
+    version = '2.2.12'
+    licenses = [{
+        License.Microsoft_Windows_ML: ['license.txt'],
+        License.Misc: ['ThirdPartyNotices.txt'],
+    }]
+    btype = BuildType.MESON
+    stype = SourceType.TARBALL
+    url = 'https://www.nuget.org/api/v2/package/Microsoft.Windows.AI.MachineLearning/%(version)s'
+    tarball_name = '%(name)s-%(version)s.zip'
+    tarball_is_bomb = True
+    tarball_checksum = '9cb60543337e6e4eac2a95c2fcb9650a880697ae7190d15499d801c907849da3'
+    library_type = LibraryType.SHARED
+    can_msvc = True
+    skip_steps = [BuildSteps.DSYMUTIL]
+
+    patches = ['microsoft.windows.ai.machinelearning/0001-Add-Meson-build.patch']
+
+    files_runtime = [
+        'bin/Microsoft.Windows.AI.MachineLearning*.dll',
+        'bin/onnxruntime*.dll',
+        'bin/DirectML*.dll',
+    ]
+    files_devel = [
+        'include/WinMLAsync.h',
+        'include/WinMLEpCatalog.h',
+        'include/WinMLModelCatalog.h',
+        'include/winml',
+        '%(libdir)s/Microsoft.Windows.AI.MachineLearning.lib',
+        '%(libdir)s/onnxruntime.lib',
+        '%(libdir)s/pkgconfig/microsoft.windows.ai.machinelearning.pc',
+    ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.WINDOWS or self.config.target_arch not in (
+                Architecture.X86_64, Architecture.ARM64):
+            raise InvalidRecipeError(self, 'Windows ML requires Windows x86_64 or ARM64')
+
+        license_dir = 'share/licenses/' + self.name
+        self.files_devel.remove(license_dir)
+        self.files_runtime.append(license_dir)
+
