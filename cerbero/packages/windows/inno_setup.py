@@ -126,6 +126,10 @@ class InnoSetup(PackagerBase):
             listing['description'] = description(package_type)
         listing['types'] = feature_type(package_type)
 
+        # Require explicit selection of WinML components for separate license acceptance
+        if listing['component'].split('/')[0] == 'gstreamer_1_0_analytics_winml':
+            listing['types'] = ['custom']
+
         if package_type == PackageType.RUNTIME and required:
             listing['flags'] = ['fixed']
 
@@ -312,6 +316,21 @@ class InnoSetup(PackagerBase):
             features = []
             for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
+
+            if any(f['component'] == 'gstreamer_1_0_analytics_winml/runtime' for f in features):
+                winml_license = (
+                    Path(self.config.prefix) / 'share/licenses/microsoft.windows.ai.machinelearning/license.txt'
+                )
+                winml_license_ui = self.output_dir / 'winml-license.txt'
+                winml_license_ui.write_text(
+                    winml_license.read_text(encoding='utf-8-sig'), encoding='utf-16', newline='\n'
+                )
+                winml_license_path = winml_license_ui.as_posix()
+                if self._with_wine:
+                    winml_license_path = to_winepath(winml_license_path)
+                winml_iss = Path(self.config.data_dir) / 'inno' / 'winml.iss'
+                rules.write(f'\n#define WinMLLicenseFile "{winml_license_path}"\n')
+                rules.write(f'#include "{winml_iss.as_posix()}"\n')
 
             fixed_features = set(f['component'] for f in features if 'flags' in f and 'fixed' in f['flags'])
 
