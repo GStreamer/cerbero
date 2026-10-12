@@ -3,14 +3,14 @@ from pathlib import Path
 import shutil
 
 class Recipe(recipe.Recipe):
-    version = '1.611.0'
+    version = '1.619.5'
     name = 'directx-headers'
     licenses = [{License.MIT: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     library_type = LibraryType.STATIC
     url = 'https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v%(version)s.tar.gz'
-    tarball_checksum = 'edb8b52b1379f841df5d0d5e11dde08e0c3912508179fb3711f163382e88865c'
+    tarball_checksum = '24a0b7d8079a2dbbc90753c0d8bc812040d052acce2302e69a97c5d873b313b8'
     tarball_dirname = 'DirectX-Headers-%(version)s'
 
     files_devel = []
