@@ -9,7 +9,7 @@ import tempfile
 from zipfile import ZipFile
 
 from cerbero.config import Platform, Architecture
-from cerbero.errors import EmptyPackageError
+from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
 from cerbero.packages.ninja_syntax import Writer
@@ -338,6 +338,9 @@ class MSIWithNinjaPackager(PackagerBase):
         packagedeps = {}
         tmp_dirs = []
         for package in self.packagedeps:
+            if package.name == 'gstreamer-1.0-analytics-winml':
+                m.warning('Skipping Windows ML components because WiX does not support their license acceptance')
+                continue
             if getattr(package, 'year', None) == '2026':
                 # m.warning('VS 2026 is unsupported by WiX, skipping')
                 continue
@@ -398,6 +401,8 @@ class Packager(object):
     ARTIFACT_TYPE = 'msi'
 
     def __new__(klass, config, package, store):
+        if package.name == 'gstreamer-1.0-analytics-winml':
+            raise FatalError('Windows ML license acceptance requires the Inno Setup installer. Use --artifact=inno')
         if isinstance(package, Package):
             return MergeModuleWithNinjaPackager(config, package, store)
         else:
