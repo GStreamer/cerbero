@@ -286,6 +286,9 @@ class WheelPackager(PackagerBase):
             return result
 
         for p in packagedeps:
+            if p.name == 'gstreamer-1.0-analytics-winml':
+                m.warning('Skipping Windows ML components because wheels do not support their license acceptance')
+                continue
             m.action(f'Parsing distribution payload for {p.name}')
             debuginfo_files_list += p.debug_files_list()
             if '-gpl-restricted' in p.name:
