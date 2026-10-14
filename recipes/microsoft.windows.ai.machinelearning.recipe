@@ -18,7 +18,10 @@ class Recipe(recipe.Recipe):
     can_msvc = True
     skip_steps = [BuildSteps.DSYMUTIL]
 
-    patches = ['microsoft.windows.ai.machinelearning/0001-Add-Meson-build.patch']
+    patches = [
+        'microsoft.windows.ai.machinelearning/0001-Add-Meson-build.patch',
+        'microsoft.windows.ai.machinelearning/0002-Fix-Windows-header-case.patch',
+    ]
 
     files_runtime = [
         'bin/Microsoft.Windows.AI.MachineLearning*.dll',
