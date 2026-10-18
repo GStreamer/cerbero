@@ -53,4 +53,6 @@ class Recipe(recipe.Recipe):
             LibtoolLibrary('gioopenssl', None, None, None,
                     os.path.join(self.config.libdir, 'gio', 'modules'),
                     self.config.target_platform, deps=['ssl', 'crypto']).save()
+            shell.replace(f'{self.config.libdir}/gio/modules/pkgconfig/giolibproxy.pc', {self.config.libdir: '${libdir}'})
+            shell.replace(f'{self.config.libdir}/gio/modules/pkgconfig/gioopenssl.pc', {self.config.libdir: '${libdir}'})
         super().post_install()
