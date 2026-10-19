@@ -1,17 +1,17 @@
 From: Seungha Yang <seungha@centricular.com>
-Date: Mon, 12 Oct 2026 12:00:00 +0900
+Date: Mon, 19 Oct 2026 13:31:59 +0900
 Subject: [PATCH] Add Meson build
 
 ---
- meson.build | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 61 insertions(+)
+ meson.build | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
  create mode 100644 meson.build
 
 diff --git a/meson.build b/meson.build
 new file mode 100644
 --- /dev/null
 +++ b/meson.build
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,50 @@
 +project('microsoft.windows.ai.machinelearning', 'c', 'cpp',
 +  version: '2.2.12')
 +
@@ -49,18 +49,6 @@ new file mode 100644
 +  install_dir: get_option('bindir'),
 +)
 +
-+cc = meson.get_compiler('c')
-+
-+onnx_import_lib = cc.find_library(
-+  'onnxruntime',
-+  dirs: lib_path,
-+)
-+
-+winml_import_lib = cc.find_library(
-+  'Microsoft.Windows.AI.MachineLearning',
-+  dirs: lib_path,
-+)
-+
 +pkgconfig = import('pkgconfig')
 +pkgconfig.generate(
 +  name: 'Microsoft Windows AI Machine Learning',
@@ -68,8 +56,9 @@ new file mode 100644
 +  description: 'Microsoft Windows AI Machine Learning',
 +  version: meson.project_version(),
 +  libraries: [
-+    winml_import_lib,
-+    onnx_import_lib,
++    '-L${libdir}',
++    '-lMicrosoft.Windows.AI.MachineLearning',
++    '-lonnxruntime',
 +  ],
 +  subdirs: ['.', 'winml'],
 +)
