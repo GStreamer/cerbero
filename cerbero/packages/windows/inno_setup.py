@@ -317,6 +317,12 @@ class InnoSetup(PackagerBase):
             for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
 
+            # Generate help text (can only be done in the main script)
+            rules.write('[Messages]\n')
+            rules.write(
+                'HelpTextNote=/PORTABLE=1%nEnables portable mode, components and tasks that require Administrator rights will be disabled.'
+            )
+
             if any(f['component'] == 'gstreamer_1_0_analytics_winml/runtime' for f in features):
                 winml_license = (
                     Path(self.config.prefix) / 'share/licenses/microsoft.windows.ai.machinelearning/license.txt'
