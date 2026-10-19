@@ -317,16 +317,26 @@ class InnoSetup(PackagerBase):
             for t in [PackageType.RUNTIME, PackageType.DEVEL, PackageType.DEBUG]:
                 features += self._create_features(t, rules, force)
 
+            includes_winml = any(f['component'] == 'gstreamer_1_0_analytics_winml/runtime' for f in features)
+
             # Generate help text (can only be done in the main script)
-            rules.write('[Messages]\n')
+            rules.write('\n[Messages]\n')
             rules.write(
                 'HelpTextNote=/PORTABLE=1%nEnables portable mode, components and tasks that require Administrator rights will be disabled.'
             )
-
-            if any(f['component'] == 'gstreamer_1_0_analytics_winml/runtime' for f in features):
+            if includes_winml:
+                rules.write(
+                    '%n/WinMLLicenseAccepted=1%nAccept the Microsoft Windows ML License Agreement if the component is enabled.\n'
+                )
                 winml_license = (
                     Path(self.config.prefix) / 'share/licenses/microsoft.windows.ai.machinelearning/license.txt'
                 )
+                # RichTextEdit can handle UTF-16 text via RTFText
+                # (LoadStringFromFile), or ANSI and UTF-16 text via
+                # either RTFText or Lines.LoadFromFile.
+                # See:
+                # - https://docwiki.embarcadero.com/Libraries/Florence/en/System.Classes.TStrings.LoadFromFile
+                # - https://jrsoftware.org/ishelp/index.php?topic=isxfunc_loadstringfromfile
                 winml_license_ui = self.output_dir / 'winml-license.txt'
                 winml_license_ui.write_text(
                     winml_license.read_text(encoding='utf-8-sig'), encoding='utf-16', newline='\n'
@@ -337,6 +347,8 @@ class InnoSetup(PackagerBase):
                 winml_iss = Path(self.config.data_dir) / 'inno' / 'winml.iss'
                 rules.write(f'\n#define WinMLLicenseFile "{winml_license_path}"\n')
                 rules.write(f'#include "{winml_iss.as_posix()}"\n')
+            else:
+                rules.write('\n')
 
             fixed_features = set(f['component'] for f in features if 'flags' in f and 'fixed' in f['flags'])
 

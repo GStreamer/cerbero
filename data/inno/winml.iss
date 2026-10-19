@@ -3,12 +3,18 @@
 [Files]
 Source: "{#WinMLLicenseFile}"; DestName: "winml-license.txt"; Flags: dontcopy noencryption;
 
+[CustomMessages]
+WizardWinMLLicense=Microsoft Windows ML License Agreement
+WinMLLicenseLabel=Please read the license agreement before installing the Windows ML components.
+WinMLLicenseLabel3=These terms apply to the Microsoft Windows ML components you selected.
+
 [Code]
 const
   winml_accept_param = '/WinMLLicenseAccepted=';
 var
   winml_license_page: TOutputMsgMemoWizardPage;
-  winml_license_accept: TNewCheckBox;
+  winml_license_accept: TRadioButton;
+  winml_license_reject: TRadioButton;
 
 function gst_winml_selected: Boolean;
 begin
@@ -18,16 +24,8 @@ begin
 end;
 
 function gst_winml_command_line_accepted: Boolean;
-var
-  i: Integer;
-  param: String;
 begin
-  Result := False;
-  for i := 1 to ParamCount do begin
-    param := ParamStr(i);
-    if CompareText(Copy(param, 1, Length(winml_accept_param)), winml_accept_param) = 0 then
-      Result := Copy(param, Length(winml_accept_param) + 1, MaxInt) = '1';
-  end;
+  Result := ExpandConstant('{param:WinMLLicenseAccepted|0}') = '1';
 end;
 
 function gst_winml_license_accepted: Boolean;
@@ -37,29 +35,60 @@ begin
     Result := Result or winml_license_accept.Checked;
 end;
 
+procedure gst_winml_license_accept(sender: TObject);
+begin
+  if WizardForm.CurPageID = winml_license_page.ID then
+    WizardForm.NextButton.Enabled := winml_license_accept.Checked;
+end;
+
 <event('InitializeWizard')>
 procedure gst_winml_initialize_wizard;
 var
-  license_text: AnsiString;
+  license_path: String;
 begin
-  winml_license_page := CreateOutputMsgMemoPage(wpSelectComponents,
-    'Microsoft Windows ML License Agreement',
-    'Please read the license agreement before installing the Windows ML components.',
-    'These terms apply to the Microsoft Windows ML components you selected.', '');
+  winml_license_page := CreateOutputMsgMemoPage(wpSelectComponents, ExpandConstant('{cm:WizardWinMLLicense}'),
+    ExpandConstant('{cm:WinMLLicenseLabel}'), ExpandConstant('{cm:WinMLLicenseLabel3}'), '');
+
   ExtractTemporaryFile('winml-license.txt');
-  if not LoadStringFromFile(ExpandConstant('{tmp}\winml-license.txt'), license_text) then
-    RaiseException('Could not load the Microsoft Windows ML license agreement.');
-  winml_license_page.RichEditViewer.RTFText := license_text;
-  winml_license_page.RichEditViewer.Height :=
-    winml_license_page.RichEditViewer.Height - ScaleY(36);
-  winml_license_accept := TNewCheckBox.Create(winml_license_page);
+  license_path := ExpandConstant('{tmp}\winml-license.txt');
+  winml_license_page.RichEditViewer.UseRichEdit := False;
+  winml_license_page.RichEditViewer.Lines.LoadFromFile(license_path);
+  DeleteFile(license_path);
+  winml_license_page.RichEditViewer.Width := winml_license_page.SurfaceWidth;
+
+  winml_license_accept := TRadioButton.Create(winml_license_page);
   winml_license_accept.Parent := winml_license_page.Surface;
-  winml_license_accept.Left := 0;
-  winml_license_accept.Top := winml_license_page.SurfaceHeight - ScaleY(28);
-  winml_license_accept.Width := winml_license_page.SurfaceWidth;
-  winml_license_accept.Height := ScaleY(24);
-  winml_license_accept.Anchors := [akLeft, akRight, akBottom];
-  winml_license_accept.Caption := 'I accept the Microsoft Windows ML license agreement';
+  winml_license_accept.Caption := WizardForm.LicenseAcceptedRadio.Caption;
+  winml_license_accept.Left := WizardForm.LicenseAcceptedRadio.Left;
+  winml_license_accept.Top := WizardForm.LicenseAcceptedRadio.Top;
+  winml_license_accept.Width := WizardForm.LicenseAcceptedRadio.Width;
+  winml_license_accept.Height := WizardForm.LicenseAcceptedRadio.Height;
+  winml_license_accept.Anchors := WizardForm.LicenseAcceptedRadio.Anchors;
+  winml_license_accept.OnClick := @gst_winml_license_accept;
+  
+  winml_license_reject := TRadioButton.Create(winml_license_page);
+  winml_license_reject.Parent := winml_license_page.Surface;
+  winml_license_reject.Caption := WizardForm.LicenseNotAcceptedRadio.Caption;
+  winml_license_reject.Left := WizardForm.LicenseNotAcceptedRadio.Left;
+  winml_license_reject.Top := WizardForm.LicenseNotAcceptedRadio.Top;
+  winml_license_reject.Width := WizardForm.LicenseNotAcceptedRadio.Width;
+  winml_license_reject.Height := WizardForm.LicenseNotAcceptedRadio.Height;
+  winml_license_reject.Anchors := WizardForm.LicenseNotAcceptedRadio.Anchors;
+  winml_license_reject.OnClick := @gst_winml_license_accept;
+
+  // Measure these by hand if it needs adjustment
+  winml_license_page.RichEditViewer.Height := winml_license_page.SurfaceHeight - winml_license_reject.Height - winml_license_accept.Height - ScaleY(44);
+
+  winml_license_accept.Checked := gst_winml_command_line_accepted;
+  winml_license_reject.Checked := not gst_winml_command_line_accepted;
+end;
+
+<event('CurPageChanged')>
+procedure gst_winml_cur_page_changed(CurPageID: Integer);
+begin
+  if CurPageID = winml_license_page.ID then begin
+    WizardForm.NextButton.Enabled := winml_license_accept.Checked;
+  end;
 end;
 
 <event('ShouldSkipPage')>
