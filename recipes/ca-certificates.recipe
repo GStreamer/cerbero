@@ -3,12 +3,10 @@ import os
 import shutil
 from cerbero.utils import shell
 
-# Created with tools/certdata2pem on the Mozilla CA list
-# https://dxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt
-
 class Recipe(recipe.Recipe):
     name = 'ca-certificates'
-    version = '2016-09-22'
+    version = '2026-10-20'
+    # url = 'https://curl.se/ca/cacert-2026-10-20.pem'
     licenses = [License.MPLv2]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
@@ -16,8 +14,8 @@ class Recipe(recipe.Recipe):
     can_msvc = True
 
     files_etc = [
-            'etc/ssl/certs/ca-certificates.crt',
-            ]
+        'etc/ssl/certs/ca-certificates.crt',
+    ]
 
     async def install(self):
         dst_dir = os.path.join(self.config.prefix, 'etc', 'ssl', 'certs')
