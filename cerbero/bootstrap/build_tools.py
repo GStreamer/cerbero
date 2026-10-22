@@ -103,7 +103,7 @@ class BuildTools(BootstrapperBase, Fetch):
                     'nasm': ('2.13.02', '-v'),
                 }
             )
-        if self.config.platform == Platform.LINUX:
+        if self.config.platform == Platform.LINUX and '_' in self.config.distro_version:
             dn, dv = self.config.distro_version.split('_', 1)
             dv = split_version(dv)
             if dn == 'redhat' and dv < (9,):
