@@ -165,10 +165,18 @@ class BuildTools(BootstrapperBase, Fetch):
                 os.rmdir(scriptsdir)
         python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
         # pip == 26.0.1 as 26.1 removes support for Xcode's 3.9
-        # Required to avoid copying files to /tmp as that breaks CentOS.
-        # https://github.com/pypa/pip/issues/6265#issuecomment-524667548
+        if sys.version_info < (3, 10, 0):
+            requirements = ['pip==26.0.1']
+        else:
+            requirements = ['pip==26.2.2']
+        # gobject-introspection requires setuptools < 81.0.0.
+        # See:
+        # - https://github.com/pypa/setuptools/commit/754fcc21e6ca9de82ff6d2837841c4300aeb941f
+        # - https://gitlab.gnome.org/GNOME/gobject-introspection/-/work_items/575
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/564
         shell.new_call(
-            [python, '-m', 'pip', 'install', '-U', 'setuptools==80.10.2', 'packaging', 'pip==26.0.1'], env=python_env
+            [python, '-m', 'pip', 'install', '-U', *requirements, 'setuptools==80.10.2'],
+            env=python_env,
         )
         if self.config.platform == Platform.DARWIN and self.config.arch == Architecture.ARM64:
             # Create an x86_64 python for introspection in universal builds
