@@ -159,6 +159,8 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             if proc.returncode != 0:
                 if 'does not contain the specified architecture' in output:
                     return None
+                if 'does not contain requested slice' in output:
+                    return None
                 raise FatalError('Running {!r}, returncode {}:\n{}'.format(cmd, proc.returncode, output))
             tmplib = os.path.join(lib_tmpdir, newname)
 
