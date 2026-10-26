@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
     patches = [
         # TODO upstreaming -- https://gitlab.gnome.org/GNOME/glib/-/issues/3858
         'glib-tools/0007-glib-compile-resources-Fix-MSVC-heap-exhaustion-when.patch',
+        'glib-tools/0015-glib-Fix-compatibility-with-macOS-27.patch',
     ]
 
     # Without these, the relocator won't take effect on macOS
