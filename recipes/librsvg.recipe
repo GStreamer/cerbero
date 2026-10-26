@@ -55,6 +55,9 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, e.msg)
         self.meson_options['triplet'] = self.target_triple
 
+        if self.using_msvc():
+            self.append_env('RUSTFLAGS', '-C link-arg=/OPT:REF,ICF,LBR')
+
     async def configure(self):
         # AppleClang's nm is too old
         # This should be injected as in android.config

@@ -333,6 +333,7 @@ class Recipe(recipe.Recipe):
             if self.using_msvc():
                 # MSVC is already set up
                 self.set_env('CMAKE_GENERATOR', 'Ninja')
+                self.append_env('RUSTFLAGS', '-C link-arg=/OPT:REF,ICF,LBR')
             else:
                 # stdbool.h and sha512intrin.h
                 stdbool_include = f'-I{self.config.toolchain_prefix}/lib/gcc/x86_64-w64-mingw32/14.2.0/include'

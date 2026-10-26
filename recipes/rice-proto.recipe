@@ -56,6 +56,8 @@ class Recipe(recipe.Recipe):
             self.files_libs += ['rice-proto']
         else:
             self.files_libs += ['librice-proto']
+        if self.using_msvc():
+            self.append_env('RUSTFLAGS', '-C link-arg=/OPT:REF,ICF,LBR')
 
     async def install(self):
         await super(recipe.Recipe, self).install()
