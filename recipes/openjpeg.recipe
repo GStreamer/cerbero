@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/uclouvain/openjpeg/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = 'a695fbe19c0165f295a8531b1e4e855cd94d0875d2f88ec4b61080677e27188a'
     configure_options = [
-        '-DBUILD_CODEC:bool=off'
+        '-DBUILD_CODEC=OFF',
+        '-DCMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP=ON',
     ]
 
     patches = [
