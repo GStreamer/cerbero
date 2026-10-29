@@ -14,7 +14,8 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/uclouvain/openjpeg/archive/refs/tags/v%(version)s.tar.gz'
     tarball_checksum = '368fe0468228e767433c9ebdea82ad9d801a3ad1e4234421f352c8b06e7aa707'
     configure_options = [
-        '-DBUILD_CODEC:bool=off'
+        '-DBUILD_CODEC=OFF',
+        '-DCMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP=ON',
     ]
 
     files_libs = ['libopenjp2']
