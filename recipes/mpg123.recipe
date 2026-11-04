@@ -1,32 +1,73 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.enums import Symbolication
 from cerbero.tools.libtool import LibtoolLibrary
 
+from pathlib import Path
+import shutil
 
-class Recipe(recipe.Recipe):
-    name = 'mpg123'
-    version = '1.32.7'
+
+class Mpg123Base:
+    version = '1.33.7'
     stype = SourceType.TARBALL
-    btype = BuildType.MESON
-    url = 'sf://.tar.bz2'
-    tarball_checksum = '3c8919243707951cac0e3c39bbf28653bcaffc43c98ff16801a27350db8f0f21'
-    licenses = [License.LGPLv2_1Plus]
-    # https://gitlab.freedesktop.org/gstreamer/meson-ports/libmpg123/
-    patches = [
-        f'{name}/0001-Add-Meson-build.patch',
+    btype = BuildType.CMAKE
+    url = 'https://www.mpg123.de/download/mpg123-%(version)s.tar.bz2'
+    tarball_checksum = '31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee'
+    tarball_dirname = 'mpg123-%(version)s'
+    library_type = LibraryType.STATIC
+    can_msvc = True
+
+    configure_options = [
+        '-DUSE_MODULES=OFF',
+        '-DBUILD_PROGRAMS=OFF',
+        '-DBUILD_LIBOUT123=OFF',
+        '-DCMAKE_DISABLE_FIND_PACKAGE_ALSA=ON',
+        '-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON',
     ]
 
-    # Optimizations are supported by GNU assembler only
-    # TODO: see if gas-preprocessor.pl works on it
-    can_msvc = False
+    def prepare(self):
+        self.config_src_dir = os.path.join(self.src_dir, 'ports', 'cmake')
+        if self.config.target_platform == Platform.WINDOWS:
+            # WIN32 is not set under Ninja and is used to enable exports
+            self.append_env('CFLAGS', '-DWIN32=1')
+        if self.config.target_arch == Architecture.X86 and self.config.variants.mingw:
+                    self.append_env('ASMFLAGS', '-m32')
 
-    meson_options = {
-        'libout123': 'disabled',
-        'libsyn123': 'disabled',
-        'programs': 'disabled',
-    }
+
+class Mpg123StaticRecipe(Mpg123Base, recipe.Recipe):
+    name = 'mpg123-static'
+    files_libs = ['libmpg123']
+
+    def prepare(self):
+        super().prepare()
+
+    async def install(self):
+        for lib in self.files_libs:
+            name = f"{lib.removeprefix('lib')}.lib" if self.using_msvc() else f'{lib}.a'
+            src = Path(self.build_dir) / 'src' / 'libmpg123' / name
+            dest = Path(self.config.libdir) / f'{lib}.a'
+            shutil.copy(src, dest)
+
+
+class Mpg123Recipe(Mpg123Base, recipe.Recipe):
+    name = 'mpg123'
+    # CMake will ignore the BUILD_STATIC_LIBS bit, which has been completed
+    # by the recipe above
+    library_type = LibraryType.BOTH
+    # Complete the licenses with the BOTH recipe
+    licenses = [{License.LGPLv2_1Plus: ['COPYING']}]
+    deps = ['mpg123-static']
 
     files_libs = ['libmpg123']
     files_devel = ['include/mpg123.h', 'include/fmt123.h', '%(libdir)s/pkgconfig/libmpg123.pc']
+
+    def prepare(self):
+        super().prepare()
+        if self.using_msvc():
+            self.symbolication_patterns = {
+                Symbolication.SKIP: [],
+                Symbolication.MANUAL: ['mpg123']
+            }
+
 
     def post_install(self):
         libtool_la = LibtoolLibrary('mpg123', None, None, None, self.config.libdir,

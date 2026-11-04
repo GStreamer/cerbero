@@ -161,6 +161,7 @@ class MSYS2Bootstrapper(BootstrapperBase):
         'perl',
         # Need a ninja that understands '\'
         'mingw-w64-ucrt-x86_64-ninja',
+        'mingw-w64-ucrt-x86_64-yasm',
     ]
 
     def __init__(self, config, offline, assume_yes):
