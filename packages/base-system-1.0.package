@@ -18,7 +18,7 @@ class Package(custom.GStreamer, package.Package):
              'pcre2:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['proxy-libintl:libs:lang', 'mingw-runtime'],
+        Platform.WINDOWS: ['proxy-libintl:libs:lang'],
         Platform.DARWIN: ['proxy-libintl:libs:lang'],
         Platform.LINUX: [],
         Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang'],
@@ -32,3 +32,6 @@ class Package(custom.GStreamer, package.Package):
 
         if self.config.variants.rust:
             self.files += ['librsvg:libs', 'dav1d:libs']
+
+        if self.config.target_platform == Platform.WINDOWS and self.config.variants.mingw:
+            self.platform_files[Platform.WINDOWS].append('mingw-runtime')
