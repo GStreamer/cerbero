@@ -447,7 +447,7 @@ class UploadCache(BaseCache):
             # Setup tempory private key from env
             ssh_opt = ['-o', 'StrictHostKeyChecking=no']
             if private_key:
-                with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
+                with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w', newline='\n') as f:
                     f.write(private_key)
                     f.write('\n')
                     f.close()
