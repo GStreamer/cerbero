@@ -18,6 +18,10 @@ class Recipe(recipe.Recipe):
         'enable_tests': 'false',
     }
 
+    patches = [
+        f'{name}/0001-compat-Fix-building-with-newer-versions-of-MSVC.patch',
+    ]
+
     files_libs = ['libdav1d']
     files_devel = ['include/dav1d', '%(libdir)s/pkgconfig/dav1d.pc']
 
