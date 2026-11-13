@@ -1,0 +1,55 @@
+From 10633ab67840a0428e92358e7157a518d14d76de Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Fri, 13 Nov 2026 19:06:21 +0900
+Subject: [PATCH 2/2] pangowin32: Fix IDWriteFont leaks
+
+Add missing IDWriteFont::Release() calls
+---
+ pango/pangowin32-dwrite-fontmap.cpp | 7 +++++--
+ pango/pangowin32-fontmap.c          | 8 +++++++-
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/pango/pangowin32-dwrite-fontmap.cpp b/pango/pangowin32-dwrite-fontmap.cpp
+index 55d5fe0d..92852e4e 100644
+--- a/pango/pangowin32-dwrite-fontmap.cpp
++++ b/pango/pangowin32-dwrite-fontmap.cpp
+@@ -273,8 +273,11 @@ pango_win32_dwrite_font_map_populate_with_collection (PangoWin32FontMap     *map
+               if (SUCCEEDED (hr))
+                 pango_win32_insert_font (map, &lfw, font, FALSE);
+               else
+-                g_warning ("GDIInterop::ConvertFontToLOGFONT failed with error code %x\n",
+-                           (unsigned)hr);
++                {
++                  g_warning ("GDIInterop::ConvertFontToLOGFONT failed with error code %x\n",
++                             (unsigned)hr);
++                  font->Release ();
++                }
+             }
+           else
+             {
+diff --git a/pango/pangowin32-fontmap.c b/pango/pangowin32-fontmap.c
+index c3b25e5b..88354c3b 100644
+--- a/pango/pangowin32-fontmap.c
++++ b/pango/pangowin32-fontmap.c
+@@ -1711,11 +1711,17 @@ pango_win32_insert_font (PangoWin32FontMap *win32fontmap,
+    * each PostScript glyph name to Unicode character. Oh well.
+    */
+   if (lfp->lfCharSet == SYMBOL_CHARSET)
+-    return;
++    {
++      if (dwrite_font != NULL)
++        pango_win32_dwrite_font_release (dwrite_font);
++      return;
++    }
+ 
+   if (g_hash_table_lookup (win32fontmap->fonts, lfp))
+     {
+       PING (("already have it"));
++      if (dwrite_font != NULL)
++        pango_win32_dwrite_font_release (dwrite_font);
+       return;
+     }
+ 
+-- 
+2.44.0.windows.1
+

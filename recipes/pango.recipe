@@ -19,6 +19,10 @@ class Recipe(recipe.Recipe):
     }
     patches = [
         'pango/0001-meson-Use-subsystem-names-when-building-for-Apple-pl.patch',
+        # Backport a fix released in 1.56.4
+        'pango/0002-win32-Fix-a-few-memleaks-in-error-paths.patch',
+        # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/945
+        'pango/0003-pangowin32-Fix-IDWriteFont-leaks.patch',
     ]
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
