@@ -27,6 +27,9 @@ class Recipe(recipe.Recipe):
                 # Setting SYSTEM_NAME sets CMAKE_CROSSCOMPILING and the
                 # binutils such as ar and ranlib are prefixed correctly
                 self.configure_tpl.append('--DCMAKE_SYSTEM_NAME="Windows"')
+        elif self.config.target_platform == Platform.DARWIN:
+            if self.config.osx_target_sdk_version is not None:
+                self.configure_tpl.append(f' -- -DCMAKE_OSX_SYSROOT={self.config.isysroot} -DCMAKE_OSX_DEPLOYMENT_TARGET={self.config.min_osx_sdk_version}')
         self.configure_tpl.append(f'--parallel={self.num_of_cpus()}')
 
     async def configure(self):

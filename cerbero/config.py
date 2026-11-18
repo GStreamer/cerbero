@@ -751,6 +751,7 @@ class Config(object):
         self.set_property('override_bootstrap_packages', {})
         self.set_property('bash_completions', set())
         self.set_property('use_ccache', True)
+        self.set_property('osx_target_sdk_version', None)
         # Increase open-files limits
         set_nofile_ulimit()
 
@@ -896,6 +897,7 @@ class Config(object):
         # We want build tools to use the VS specified by the user manually
         self.build_tools_config.vs_install_path = self.vs_install_path
         self.build_tools_config.vs_install_version = self.vs_install_version
+        self.build_tools_config.osx_target_sdk_version = self.osx_target_sdk_version
         self.build_tools_config.load()
 
         self.build_tools_config.prefix = self.build_tools_prefix
