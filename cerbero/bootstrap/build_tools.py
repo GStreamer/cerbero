@@ -141,6 +141,18 @@ class BuildTools(BootstrapperBase, Fetch):
         python_glob = os.path.join(self.config.build_tools_prefix, 'bin', 'python*')
         for f in glob.glob(python_glob):
             os.remove(f)
+        # Wipe any existing pip installation before venv.create() runs ensurepip.
+        # pip's self-downgrade doesn't cleanly remove its own files (it leaves
+        # orphaned package dirs like build_env/ that shadow the new version's
+        # module files, causing ImportErrors). Removing pip first ensures a
+        # clean install regardless of what version was previously installed.
+        for sp_pattern in [
+            os.path.join(self.config.build_tools_prefix, 'lib', 'python*', 'site-packages'),
+            os.path.join(self.config.build_tools_prefix, 'Lib', 'site-packages'),
+        ]:
+            for sp in glob.glob(sp_pattern):
+                for item in glob.glob(os.path.join(sp, 'pip')) + glob.glob(os.path.join(sp, 'pip-*.dist-info')):
+                    shutil.rmtree(item, ignore_errors=True)
         m.action(f'Creating virtual env for Python {sys.version}')
         # Python relies on symlinks to work on macOS. See e.g.
         # https://github.com/python-poetry/install.python-poetry.org/issues/24#issuecomment-1226504499
