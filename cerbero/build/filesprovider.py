@@ -72,7 +72,13 @@ def get_implib_dllname(config, path):
 
 def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     implibdir = 'lib'
-    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname), libname + '.dll.a']
+    implibs = [
+        'lib{}.dll.a'.format(libname),
+        libname + '.lib',
+        'lib{}.lib'.format(libname),
+        libname + '.dll.a',
+        libname + '.dll.lib',
+    ]
     implib_notfound = []
     for implib in implibs:
         path = Path(prefix, implibdir, implib).as_posix()
@@ -626,7 +632,10 @@ class FilesProvider(object):
     @staticmethod
     def _get_msvc_dll(f):
         f = Path(f)
-        return str(f.with_name(f.name[3:]))
+        if f.name.startswith('lib'):
+            return str(f.with_name(f.name[3:]))
+        else:
+            return str(f)
 
     @staticmethod
     def _get_plugin_pc(f):

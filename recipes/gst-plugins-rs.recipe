@@ -10,6 +10,7 @@ from cerbero.utils.rust import Prelink
 import os
 from pathlib import Path
 import re
+import shutil
 
 
 class Recipe(recipe.Recipe):
@@ -323,6 +324,18 @@ class Recipe(recipe.Recipe):
             self.skip_pdb_files = ['%(libdir)s/libgstrsworkspace.a']
 
         if self.config.target_platform == Platform.WINDOWS:
+            # Add shared linking
+            if self.config.platform == Platform.WINDOWS:
+                host = self.config.rust_triple(self.config.arch, self.config.platform, None, True)
+            else:
+                host = self.config.rust_build_triple
+            target = self.config.rust_build_triple
+            stdlib_path = Path(self.config.rustup_home, f'toolchains/stable-{host}/lib/rustlib/{target}/lib')
+            for f in stdlib_path.glob('std-*.[dp]??'):
+                if f.name.endswith('.dll'):
+                    self.files_libs.append(f"lib{f.stem.removeprefix('lib')}")
+            self.append_env('RUSTFLAGS', '-C prefer-dynamic')
+
             if self.config.platform == Platform.WINDOWS:
                 # For bindgen if it's needed
                 self.set_env('LIBCLANG_PATH', os.path.join(self.config.build_tools_prefix, 'bin', 'libclang.dll'))
@@ -349,8 +362,9 @@ class Recipe(recipe.Recipe):
                     # # stdarg.h valist etc.
                     f'-I{self.config.toolchain_prefix}/x86_64-w64-mingw32/sysroot/usr/{self.config.target}/include'
                 ]
-                # raise RuntimeError(bindgen_args)
                 self.set_env('BINDGEN_EXTRA_CLANG_ARGS', ' '.join(bindgen_args))
+                # https://github.com/aws/aws-lc/issues/3828
+                self.append_env('RUSTFLAGS', '-C link-arg=-lpthread')
         elif self.config.target_platform == Platform.ANDROID:
             # For aws-lc-rs
             self.set_env('ANDROID_NDK_ROOT', self.config.env['ANDROID_NDK_HOME'])
@@ -362,6 +376,21 @@ class Recipe(recipe.Recipe):
         elif Subsystem.is_apple_simulator(self.config.target_subsystem):
             self.set_env('AWS_LC_SYS_EXTERNAL_BINDGEN', '1')
             self.set_env('BINDGEN_EXTRA_CLANG_ARGS', f'--sysroot={self.config.sysroot}')
+        elif self.config.target_platform == Platform.DARWIN and \
+            self.config.target_subsystem == Subsystem.MACOS and \
+            not self.config.universal_prefix:
+            # Add shared linking here too
+            # On macOS etc. shared libs' hashes will differ, so they cannot be
+            # lipo'd.
+            host = self.config.rust_build_triple
+            target = self.config.rust_build_triple
+            stdlib_path = Path(self.config.rustup_home, f'toolchains/stable-{host}/lib/rustlib/{target}/lib')
+            for f in stdlib_path.glob('libstd-*.dylib'):
+                if f.name.endswith('.dylib'):
+                    self.files_libs.append(f.stem)
+                    self.symbolication_patterns[Symbolication.SKIP].append(f.stem)
+            self.append_env('RUSTFLAGS', '-C prefer-dynamic')
+
         # for openssl-sys to be able to find openssl
         self.set_env('OPENSSL_DIR', self.config.prefix)
         self.set_env('OPENSSL_NO_VENDOR', '1')
@@ -439,6 +468,8 @@ class Recipe(recipe.Recipe):
                 for f in self.dist_files_list(only_existing=False):
                     if not f.endswith('.dll'):
                         continue
+                    if 'gstreamer-1.0' not in f:
+                        continue
                     name = os.path.basename(f)
                     d = os.path.dirname(f)
                     src = os.path.join(self.config.prefix, d, f'{name[3:]}')
@@ -475,7 +506,7 @@ class Recipe(recipe.Recipe):
 
             self.workspace_lib.unlink(missing_ok=True)
 
-            files = [f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False) if f.endswith('.a') and 'gstrsworkspace' not in f]
+            files = [f for f in self.files_list_by_category(self.DEVEL_CAT, only_existing=False) if f.endswith('.a') and 'gstrsworkspace' not in f and 'gstreamer-1.0' in f]
 
             dragonfire = os.path.join(self.config.build_tools_prefix, 'bin', 'dragonfire')
 
@@ -498,7 +529,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN and \
             self.config.target_subsystem == Subsystem.MACOS:
             libraries = [f for f in self.devel_files_list(only_existing=False)
-                         if f.endswith('.a')]
+                         if f.endswith('.a') and 'gstreamer-1.0' in f]
             prelinker = Prelink(self.config, self.env, self.logfile)
             for f in libraries:
                 prelinker.prelink(f, '_gst_plugin_*')
