@@ -195,13 +195,17 @@ class RustBootstrapper(BootstrapperBase):
         # Then maybe also rust-std for the existing + new targets
         installed_targets = self.manifest.get('targets', set())
         required_targets = self.target_triples.union(installed_targets)
+        # rust-mingw is only shipped for MinGW targets that still have host
+        # tools. For example, Rust 1.100 demoted i686-pc-windows-gnu to
+        # std-only, so there is no rust-mingw package for it anymore.
+        mingw_targets = channel_data['pkg']['rust-mingw']['target']
         for triple in required_targets:
             if triple != self.build_triple:
                 entry = channel_data['pkg']['rust-std']['target'][triple]
                 urls += list(get_entry_urls(entry))
-            # And rust-mingw for any MinGW targets
-            if 'windows-gnu' in triple:
-                entry = channel_data['pkg']['rust-mingw']['target'][triple]
+            # And rust-mingw for any MinGW targets that ship it
+            if 'windows-gnu' in triple and triple in mingw_targets:
+                entry = mingw_targets[triple]
                 urls += list(get_entry_urls(entry))
 
         return (urls, self.install_toolchain_for_cargoc_fetch)
